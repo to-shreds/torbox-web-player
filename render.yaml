@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: torbox-web-player
+    runtime: node
+    region: ohio
+    plan: free
+    buildCommand: npm ci --ignore-scripts --no-audit --no-fund && npm run check && npm test
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: '24'
+      - key: HOUSEHOLD_PASSWORD_HASH
+        sync: false
+      - key: TORBOX_API_KEY
+        sync: false
+# No database, persistent disk, media proxy or paid instance is provisioned here.
