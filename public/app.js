@@ -95,7 +95,7 @@ async function startPlayback(file, startOver = false) {
   retryFile = file;
   await detachPlayback();
   if (generation !== playGeneration) return;
-  $('playing-title').textContent = file.title; text('player-message', 'Requesting a fresh playback link…'); $('video-slot').replaceChildren();
+  $('playing-title').textContent = file.title; text('player-message', 'Opening a secure stream…'); $('video-slot').replaceChildren();
   if (!$('player').open) $('player').showModal();
   $('renew').disabled = true; $('start-over').disabled = true;
   try {
@@ -112,16 +112,16 @@ async function startPlayback(file, startOver = false) {
       text('player-message', position > 0 ? `Resuming at ${Math.floor(position / 60)}:${String(Math.floor(position % 60)).padStart(2, '0')}.` : 'Ready. Press play if the browser does not start automatically.');
       video.play().catch(() => { if (active === context) text('player-message', 'Press play to begin. Your browser requires a tap.'); });
     });
-    video.addEventListener('playing', () => { if (active === context) { context.started = true; text('player-message', 'Playing directly from TorBox. Progress is temporary in this preview.'); } });
+    video.addEventListener('playing', () => { if (active === context) { context.started = true; text('player-message', 'Playing through the private relay. Progress is temporary in this preview.'); } });
     video.addEventListener('pause', () => { if (active === context) saveProgress(context); });
     video.addEventListener('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });
     video.addEventListener('ended', () => { if (active === context) { saveProgress(context); text('player-message', 'Finished. Close the player to choose another file. Automatic next is not connected yet.'); } });
-    video.addEventListener('error', () => { if (active === context) text('player-message', 'This file could not play in this browser. Its codecs may be incompatible, or the link may have expired. Try New playback link once. Conversion is not connected yet.', true); });
+    video.addEventListener('error', () => { if (active === context) text('player-message', 'This file could not play in this browser. Its codecs may be incompatible, or the stream may need renewal. Try New playback link once. Conversion is not connected yet.', true); });
     context.timer = setInterval(() => { if (active === context && !video.paused) saveProgress(context); }, 10000);
-    video.src = result.url;
+    video.src = result.mediaUrl;
     $('renew').disabled = false; $('start-over').disabled = false;
   } catch (error) {
-    if (generation === playGeneration) { text('player-message', error.message, true); $('renew').disabled = false;  }
+    if (generation === playGeneration) { text('player-message', error.message, true); $('renew').disabled = false; }
   }
 }
 $('renew').addEventListener('click', () => { if (retryFile) startPlayback(retryFile); });
@@ -138,7 +138,7 @@ $('owner-form').addEventListener('submit', async event => {
   try {
     await api('/api/owner/unlock', { method: 'POST', data: { password } }); $('revoke').hidden = false;
     const result = await api('/api/owner/diagnostics', { method: 'POST', data: {} });
-    text('owner-message', 'TorBox accepted the key. Playback, account limits, and conversion still require live tests.');
+    text('owner-message', 'TorBox accepted the key. The secure relay is enabled; actual browser compatibility still depends on the file codecs.');
     $('diagnostics').textContent = JSON.stringify(result, null, 2);
   } catch (error) { text('owner-message', error.message, true); }
   finally { button.disabled = false; }
