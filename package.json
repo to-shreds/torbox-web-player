@@ -5,8 +5,8 @@
   "type": "module",
   "engines": { "node": ">=22 <25" },
   "scripts": {
-    "start": "node server.mjs",
+    "start": "node entry.mjs",
     "test": "node --test test/*.test.mjs",
-    "check": "node --check server.mjs && node --check public/app.js && node --check public/password.js && node --check lib/auth.mjs && node --check lib/torbox.mjs && node --check lib/progress.mjs"
+    "check": "node --check entry.mjs && node --check server.mjs && node --check public/app.js && node --check public/password.js && node --check lib/auth.mjs && node --check lib/torbox.mjs && node --check lib/progress.mjs && node --check lib/startup-probe.mjs"
   }
 }
