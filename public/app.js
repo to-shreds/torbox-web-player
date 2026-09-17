@@ -1,8 +1,23 @@
+import { diagnosePlaybackFailure, matchesFormat } from './playback-errors.js';
 const $ = id => document.getElementById(id);
 let csrf = '', files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, retryFile = null, libraryAbort = null, searchTimer;
 let viewer = 'viewer-1';
 try { const saved = sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
 $('viewer').value = viewer;
+const formatLabel = document.createElement('label');
+formatLabel.htmlFor = 'format'; formatLabel.textContent = 'File format';
+const format = document.createElement('select'); format.id = 'format';
+for (const [value, label] of [['all', 'All formats'], ['mp4', 'MP4 files']]) {
+  const option = document.createElement('option'); option.value = value; option.textContent = label; format.append(option);
+}
+formatLabel.append(format); $('refresh').before(formatLabel);
+const formatNote = document.createElement('p'); formatNote.className = 'muted'; formatNote.hidden = true;
+$('files').before(formatNote);
+const showMp4 = document.createElement('button'); showMp4.textContent = 'Show MP4 files'; showMp4.hidden = true;
+$('renew').after(showMp4);
+format.addEventListener('change', renderFiles);
+showMp4.addEventListener('click', () => { format.value = 'mp4'; renderFiles(); $('player').close(); $('search').focus(); });
+
 function text(id, value, error = false) { $(id).textContent = value; $(id).classList.toggle('error', error); }
 function show(section) { for (const id of ['loading', 'setup-needed', 'login', 'workspace']) $(id).hidden = id !== section; }
 async function api(path, { method = 'GET', data, signal, keepalive = false } = {}) {
@@ -40,7 +55,9 @@ $('logout').addEventListener('click', async () => {
 });
 function renderFiles() {
   const query = $('search').value.trim().toLocaleLowerCase();
-  const list = files.filter(file => `${file.title} ${file.collection}`.toLocaleLowerCase().includes(query));
+  const list = files.filter(file => matchesFormat(file, format.value) && `${file.title} ${file.collection}`.toLocaleLowerCase().includes(query));
+  formatNote.hidden = format.value !== 'mp4';
+  formatNote.textContent = `${list.length} matching MP4 files in the loaded library. MP4 files still need video and audio that your browser supports.`;
   const fragment = document.createDocumentFragment();
   for (const file of list) {
     const card = document.createElement('article'); card.className = 'file';
@@ -53,7 +70,7 @@ function renderFiles() {
     if (file.state === 'Ready to watch') { const button = document.createElement('button'); button.className = 'primary'; button.textContent = 'Play'; button.setAttribute('aria-label', `Play ${file.title}`); button.addEventListener('click', () => startPlayback(file)); card.append(button); }
     fragment.append(card);
   }
-  if (!list.length) { const empty = document.createElement('p'); empty.className = 'panel'; empty.textContent = query ? 'No matching videos in the files loaded so far. Clear the search or load another page.' : 'No video files in this page of this library section. Other sections or pages may contain videos.'; fragment.append(empty); }
+  if (!list.length) { const empty = document.createElement('p'); empty.className = 'panel'; empty.textContent = format.value === 'mp4' ? 'No matching MP4 files among the loaded files. Clear the search, choose All formats, or load another page.' : query ? 'No matching videos in the files loaded so far. Clear the search or load another page.' : 'No video files in this page of this library section. Other sections or pages may contain videos.'; fragment.append(empty); }
   $('files').replaceChildren(fragment); $('more').hidden = nextOffset === null;
 }
 async function loadLibrary({ more = false, refresh = false } = {}) {
@@ -95,6 +112,7 @@ async function startPlayback(file, startOver = false) {
   retryFile = file;
   await detachPlayback();
   if (generation !== playGeneration) return;
+  showMp4.hidden = true;
   $('playing-title').textContent = file.title; text('player-message', 'Opening a secure stream…'); $('video-slot').replaceChildren();
   if (!$('player').open) $('player').showModal();
   $('renew').disabled = true; $('start-over').disabled = true;
@@ -102,7 +120,7 @@ async function startPlayback(file, startOver = false) {
     const result = await api('/api/playback', { method: 'POST', data: { viewer: selectedViewer, videoId: file.id, startOver } });
     if (generation !== playGeneration || !$('player').open || selectedViewer !== viewer) return;
     const video = document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata';
-    const context = { file, viewer: selectedViewer, leaseId: result.leaseId, seq: 0, video, ready: false, started: false, timer: null };
+    const context = { file, viewer: selectedViewer, leaseId: result.leaseId, seq: 0, video, mediaUrl: result.mediaUrl, diagnosing: false, ready: false, started: false, timer: null };
     active = context; $('video-slot').replaceChildren(video);
     video.addEventListener('loadedmetadata', () => {
       if (active !== context) return;
@@ -110,13 +128,22 @@ async function startPlayback(file, startOver = false) {
       if (Number.isFinite(video.duration) && position > 0) video.currentTime = Math.min(position, Math.max(0, video.duration - .25));
       context.ready = true;
       text('player-message', position > 0 ? `Resuming at ${Math.floor(position / 60)}:${String(Math.floor(position % 60)).padStart(2, '0')}.` : 'Ready. Press play if the browser does not start automatically.');
-      video.play().catch(() => { if (active === context) text('player-message', 'Press play to begin. Your browser requires a tap.'); });
+      video.play().catch(error => { if (active === context && !context.diagnosing && error.name === 'NotAllowedError') text('player-message', 'Press play to begin. Your browser requires a tap.'); });
     });
     video.addEventListener('playing', () => { if (active === context) { context.started = true; text('player-message', 'Playing through the private relay. Progress is temporary in this preview.'); } });
     video.addEventListener('pause', () => { if (active === context) saveProgress(context); });
     video.addEventListener('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });
     video.addEventListener('ended', () => { if (active === context) { saveProgress(context); text('player-message', 'Finished. Close the player to choose another file. Automatic next is not connected yet.'); } });
-    video.addEventListener('error', () => { if (active === context) text('player-message', 'This file could not play in this browser. Its codecs may be incompatible, or the stream may need renewal. Try New playback link once. Conversion is not connected yet.', true); });
+    video.addEventListener('error', async () => {
+      if (active !== context || context.diagnosing) return;
+      context.diagnosing = true;
+      text('player-message', 'Playback failed. Checking whether the stream is reachable…');
+      const diagnosis = await diagnosePlaybackFailure(context.mediaUrl, video.error?.code);
+      if (active !== context || generation !== playGeneration) return;
+      text('player-message', diagnosis.message, true);
+      $('renew').disabled = !diagnosis.retry;
+      showMp4.hidden = diagnosis.kind !== 'codec';
+    });
     context.timer = setInterval(() => { if (active === context && !video.paused) saveProgress(context); }, 10000);
     video.src = result.mediaUrl;
     $('renew').disabled = false; $('start-over').disabled = false;
