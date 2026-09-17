@@ -12,8 +12,13 @@ services:
         value: production
       - key: NODE_VERSION
         value: '24'
+      - key: MEDIA_HOST_SUFFIXES
+        value: torbox.app,tb-cdn.cx,tb-cdn.io,tb-cdn.pw,tb-cdn.sh,tb-cdn.st,tb-cdn.to,tb-cdn.earth
+      - key: TORBOX_VERIFY_ON_START
+        value: '0'
       - key: HOUSEHOLD_PASSWORD_HASH
         sync: false
       - key: TORBOX_API_KEY
         sync: false
-# No database, persistent disk, media proxy or paid instance is provisioned here.
+# No database, persistent disk, transcoder or arbitrary-URL proxy is provisioned here.
+# The application does use a narrowly scoped authenticated media relay to keep the TorBox master key server-side.

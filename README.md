@@ -1,43 +1,42 @@
 # TorBox Web Player
 
-Private household browser player. **Version 0.1.0 is an integration checkpoint, not the finished streaming product.** It exists to test a real TorBox account through a Render-hosted website before building broader discovery and the durable library experience. It is independent of CarStream and the TorBox Android app.
+Private household browser player. **Version 0.2.0 is a secure-relay integration checkpoint, not the finished streaming product.** It is independent of CarStream and the TorBox Android app.
 
 ## What this checkpoint contains
 
-A same-origin Node server and responsive browser interface, household login, owner password re-entry, two independent viewer slots, paginated TorBox file browsing, fresh direct playback links, native browser playback controls, and guarded temporary resume positions. Library, playback and progress APIs require authentication. Provider failures are distinct from empty results. The server never relays video bytes and has no source-addition or arbitrary-URL proxy endpoint.
+The app has one same-origin Node service and a responsive browser interface, household login, owner password re-entry, two fixed viewer slots, paginated TorBox file browsing, loaded-file search, native browser playback controls, temporary resume positions, and a narrowly scoped authenticated media relay. Library, playback, progress and media requests require a valid household session. There is no public registration, source-addition endpoint, or arbitrary-URL proxy.
 
-**Sessions, profiles, cache and progress are currently held in memory. A deployment, restart or free-service sleep loses them.** The website displays this limitation. The two viewer slots are fixed, not editable profiles. Search covers loaded account files, not a broader movie catalog. Codec conversion, metadata/posters, automatic next, watchlists, reliable title/episode matching, durable Postgres storage and source preparation are not implemented.
+The relay exists because live TorBox testing showed that the generated CDN URL contains the TorBox master API key in its `token` query parameter. Removing that parameter caused the CDN request to fail. Returning that URL directly to a browser would therefore violate the project's server-side credential requirement. The browser now receives only an opaque same-origin `/media/<ticket>` URL. The corresponding TorBox URL stays in server memory, is bound to the same session, expires, and is never serialized to the client.
 
-The initial dependency-free Node and browser implementation deliberately keeps the integration proof small. It does not replace the full specification. Preserve the adapters and verified behavior when adding the durable application. No React/TypeScript migration or database migration is claimed here.
+**Sessions, media tickets, cache and progress are currently held in memory. A deployment, restart or free-service sleep loses them.** The website displays this limitation. The two viewer slots are fixed, not editable profiles. Search covers loaded account files, not a broader movie catalog. Codec conversion, metadata/posters, automatic next, watchlists, reliable title/episode matching, durable Postgres storage and broader source discovery remain unimplemented.
 
 ## Secure setup
 
-1. Deploy this repository as one Render Node web service. Use the free instance only for the integration checkpoint. Build: `npm ci --ignore-scripts --no-audit --no-fund && npm run check && npm test`. Start: `npm start`. Node 24 is selected by `.node-version`; Node 22 also runs the local test suite.
-2. Open the deployed site's `/setup` page. Choose a unique household password of at least 14 characters. The page generates a salted PBKDF2-SHA256 hash locally using browser WebCrypto. It does not send that password or hash to this server.
-3. In this service's Render Environment settings, add `HOUSEHOLD_PASSWORD_HASH` with the complete generated hash and `TORBOX_API_KEY` with the key obtained directly from TorBox. Save and deploy. Never put either real value in GitHub, chat, a source archive, or frontend configuration. The helper page itself cannot change server settings.
-4. Open the site, sign in with the original password, and choose a viewer. Owner tools require the password again and show redacted connection information. Test a ready account file before treating playback as working.
+1. Deploy this repository as one Render Node web service. Build: `npm ci --ignore-scripts --no-audit --no-fund && npm run check && npm test`. Start: `npm start`.
+2. Generate a household password hash at `/setup` or with an equivalent PBKDF2-SHA256 process. Put the hash in `HOUSEHOLD_PASSWORD_HASH` in Render.
+3. Put the TorBox API key in `TORBOX_API_KEY` in Render. Never put the real key or password hash in GitHub, browser code, logs, screenshots, or source archives.
+4. Sign in with the original household password and test a ready file on a target browser.
 
-Render supplies `RENDER_EXTERNAL_URL`. The server uses it for exact-origin checks. Set `PUBLIC_ORIGIN` only for a deliberate custom HTTPS origin, without a trailing slash. Set `NODE_ENV=production` in Render. The `/healthz` endpoint is available; set it as the dashboard health-check path when configuring the service. `render.yaml` also declares this path for Blueprint deployments.
+Render supplies `RENDER_EXTERNAL_URL`. The server uses it for exact-origin checks. `/healthz` is available. `TORBOX_VERIFY_ON_START` is a diagnostic flag and should be `0` during normal use.
 
-## Test and run locally
+## Verified provider behavior on the current hosted integration
 
-```
-npm ci --ignore-scripts --no-audit --no-fund
-npm run check
-npm test
-NODE_ENV=development PORT=10000 npm start
-```
+On September 17, 2026, the configured Render service successfully authenticated to the TorBox account. The first torrent-library page normalized 912 video files, all 912 of those files reporting ready. Web-download and Usenet pages returned no videos in that check. This count is the number of normalized video files in the first requested provider page, not a claim that the account contains exactly 912 videos in total.
 
-This package has no runtime or development dependencies. `.env.example` contains names and placeholders only; the application does not automatically load `.env` files. Tests use explicitly artificial account responses and passwords. `test/serve-fixture.mjs` is a local fixture harness, never the production start command.
+For a real ready MKV file, TorBox returned `store-034.wnam.tb-cdn.io`, a TorBox-published CDN domain. A one-byte request to the original server-side URL returned HTTP 206 with byte ranges. The same URL without its master-key `token` parameter returned HTTP 400. That result is why v0.2.0 uses the relay rather than direct browser delivery.
+
+The build now has 41 passing automated tests, including authentication, secret non-disclosure, session-bound media tickets, range forwarding, rejection of multipart ranges, one-time renewal of expired upstream links, two-viewer progress isolation and provider failure handling. The hosted startup probe separately verified current TorBox authentication and a real byte-range response. A physical Android/desktop browser still needs to establish actual picture, sound, seeking and resume before the first playback milestone is complete.
 
 ## Delivery and cost
 
-The intended request path is browser to Render for authenticated control calls, then browser directly to the validated TorBox HTTPS media URL. The returned temporary video URL is necessarily visible to the authenticated viewer. The TorBox master key stays server-side. No video proxy or transcoder has been provisioned.
+The media path is TorBox CDN to Render to the authenticated browser. Render does not store complete video files and streams with backpressure instead of buffering a whole file. The TorBox master key and upstream CDN URL stay server-side.
 
-The selected integration service uses free base compute and no database. Render's free hours are shared across the workspace, and free services sleep after inactivity. Free-tier selection is not a promise of zero total account charges: bandwidth/build overages and other existing services can affect billing. Review current official pricing before selecting a paid web tier or database. No paid tier is authorized by this checkpoint. See `docs/INTEGRATION.md` for verified references and unresolved integration questions.
+This relay means video bytes sent from Render to the viewer count as Render outbound bandwidth. Render currently lists 5 GB of included monthly outbound bandwidth for a Hobby workspace and $0.15 per additional GB. A fully watched 2 GB file therefore represents roughly 2 GB of Render-to-viewer outbound traffic, with actual usage affected by seeking, retries and rebuffering. The included allowance is shared across the workspace. Confirm current Render pricing before relying on this architecture for regular high-volume streaming.
+
+The service currently uses free base compute and no database. Free services can sleep after inactivity and ordinary process memory is not durable. No paid resource was provisioned by this checkpoint.
 
 ## Recovery and continuity
 
-Rotate the TorBox key or household password hash through Render and save/deploy. Restarting revokes this version's memory-only sessions. Owner tools can revoke all sessions without changing the password. Already issued third-party media links remain sensitive and are subject to TorBox's rules; logout does not prove those links were revoked. There is no durable state to back up in this version. Postgres migrations, backup/restore and restart durability must be added and tested before the household-player milestone is complete.
+Rotate the TorBox key or household password hash through Render and redeploy. Restarting revokes this version's memory-only sessions and media tickets. Owner tools can revoke all current sessions. No TorBox media URL is persisted. Postgres migrations, backup/restore and restart durability remain required before the durable household-player milestone is complete.
 
-Application source in this repository controls implementation. Readiness, blockers and the next action are tracked separately in `to-shreds/ProjectStatus`, at `projects/torbox-web-player/STATUS.md`. Read `docs/VERIFICATION.md` before making playback or device-support claims.
+Application source in this repository controls implementation. Readiness, blockers and the next action are tracked separately in `to-shreds/ProjectStatus`, at `projects/torbox-web-player/STATUS.md`. Read `docs/INTEGRATION.md` and `docs/VERIFICATION.md` before making playback or device-support claims.

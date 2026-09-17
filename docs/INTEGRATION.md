@@ -1,44 +1,43 @@
-# Integration checkpoint and unresolved questions
+# Integration findings and architecture
 
-Checked September 17, 2026. These are documentation findings and implementation decisions, not account-specific proof.
+Checked September 17, 2026. This document records what the current hosted integration actually established and what remains open.
 
 ## Authoritative references
 
-- TorBox's published OpenAPI schema: https://api.torbox.app/openapi.json
-- Official SDK endpoint documentation: https://github.com/TorBox-App/torbox-sdk-js/blob/main/documentation/services/TorrentsService.md
-- Official SDK library models: https://github.com/TorBox-App/torbox-sdk-js/blob/main/documentation/models/GetTorrentListOkResponse.md
+- TorBox OpenAPI schema: https://api.torbox.app/openapi.json
+- TorBox official SDK endpoint documentation: https://github.com/TorBox-App/torbox-sdk-js/blob/main/documentation/services/TorrentsService.md
+- TorBox official library models: https://github.com/TorBox-App/torbox-sdk-js/blob/main/documentation/models/GetTorrentListOkResponse.md
 - TorBox web streaming guidance: https://support.torbox.app/en/articles/12662996-torbox-web-streaming
 - Render free-tier limits: https://render.com/docs/free
-- Render environment configuration: https://render.com/docs/configure-environment-variables
 - Render outbound bandwidth: https://render.com/docs/outbound-bandwidth
-- Current Node release support: https://nodejs.org/en/about/previous-releases
+- Render pricing: https://render.com/pricing
 
-## Adapter contract
+## Real-account findings
 
-The adapter uses the fixed `https://api.torbox.app/v1/api/` origin. Account and library calls use Bearer authorization. Download-link generation sends the token only in a server-to-server query, requests JSON rather than a redirect, and never returns that API request URL to the browser. Current request schemas were checked separately from older SDK examples. Response normalization still needs validation against an actual account.
+The Render service authenticated successfully to the configured TorBox account on September 17, 2026. TorBox reported plan code `1`. The first requested torrent-library page normalized 912 video files and every one of those 912 reported ready. The web-download and Usenet requests normalized no video files. Because the adapter pages provider items and then expands their nested files, 912 is a verified first-page file count, not necessarily the complete account total.
 
-The optional `user_ip` parameter is documented for download links. Its existence does not establish IP binding or successful cross-IP playback. This checkpoint first tests an ordinary server-created link without relying on client-supplied forwarding headers. No cross-IP behavior, CORS behavior, CDN redirect chain, byte-range seeking, expiry or account concurrency limit has been verified live.
+A fresh download-link request for a real ready file returned an HTTPS URL on `store-034.wnam.tb-cdn.io`. TorBox's published allowlist includes `*.tb-cdn.io` and its other `tb-cdn.*` domains. A one-byte request to that URL returned HTTP 206, `Accept-Ranges: bytes`, and a valid `Content-Range`. The tested source identified itself as `video/x-matroska` and was 1,974,660,908 bytes.
 
-The older SDK description gives inconsistent one-hour and three-hour link windows. The implementation deliberately does not assume a precise lifetime. It creates a fresh link for each play or explicit renewal and never stores a media URL in progress records.
+The generated CDN URL also contained the account's master API key as the `token` query value. Removing that query parameter and repeating the one-byte request returned HTTP 400. TorBox's published download-link documentation describes the `token` parameter as the API key. Therefore direct browser playback cannot satisfy this project's requirement that the master key remain server-side.
 
-Only HTTPS URLs on TorBox-owned media host suffixes are accepted by default. The TorBox API host and links containing the master key are rejected. An unexpected CDN hostname is a verification task, not a reason to permit every host. No Render media proxy is present. Direct CDN redirects and media response headers still need live inspection.
+## Secure relay decision
 
-TorBox documents streaming-related endpoints and different streaming capabilities for account tiers. A documented endpoint does not establish that this account can convert arbitrary codecs through this application. No HLS/conversion fallback has been implemented or verified.
+Version 0.2.0 uses a narrowly scoped authenticated relay through the existing Render web service. The browser never supplies an upstream URL. `/api/playback` revalidates a known TorBox video ID, obtains a current server-side CDN URL, creates a random opaque media ticket bound to the current household session, and returns only `/media/<ticket>` to the browser.
 
-## First live test
+The `/media/<ticket>` route accepts authenticated GET or HEAD requests only. It validates a single byte-range request, looks up the server-side ticket, and streams the upstream response without buffering the complete file. Only a small header allowlist is copied to the browser. Redirects are blocked. A 400, 401 or 403 from the upstream URL causes one fresh TorBox resolution and one retry, with no retry loop. Tickets expire and are invalid for other household sessions. Logout and owner revoke-all invalidate their associated tickets.
 
-After the two secrets are configured directly in Render, authenticate to the website and check the owner connection status. Confirm a real library page and its readiness fields, then choose a known ready browser-compatible file. Inspect the viewer's browser requests to establish that video goes to TorBox rather than Render and that no request exposes the master key.
+The Content Security Policy now restricts media to the same origin. No arbitrary-URL proxy exists. The upstream TorBox URL and master key are not present in the playback JSON response.
 
-On desktop Chrome and an actual Android Chrome device, confirm visible video and audible sound, seek near the beginning, middle and end, pause, reopen the file, and verify the same viewer's position. Use New playback link and verify position retention. Switch viewers and check independence. Temporary progress can survive page reloads only while the same server process remains alive; it is not durable or guaranteed after free-service sleep.
+## Cost consequence
 
-Record response headers, codecs, browser versions and outcomes without saving credentials or private URLs. Exercise an invalid key, removed file, provider error and a network interruption. Record any unsupported file instead of claiming conversion works. Do not introduce a video proxy before a demonstrated need and a verified cost analysis.
+The relay solves the demonstrated credential problem but changes bandwidth economics. Render currently gives a Hobby workspace 5 GB of outbound bandwidth per month and charges $0.15 per additional public-internet GB. The included bandwidth is workspace-wide. Media bytes sent from Render to a viewer count as outbound traffic. A full 2 GB viewing therefore consumes roughly 2 GB of Render outbound bandwidth, plus small protocol overhead; seeking, retrying or replaying sections can increase usage.
 
-## Broader discovery
+The TorBox-to-Render response is inbound to Render. Render's current documentation states that inbound bandwidth is free, while traffic sent from Render is outbound. The relay's material billed component is therefore the video sent from Render to the browser, not a second charge for the inbound video response. Monitor the service and workspace bandwidth metrics before treating the free tier as a regular streaming plan.
 
-Metadata search, source search, account membership and playback readiness remain separate requirements. No metadata provider has been selected or connected. TMDB is a candidate, not a dependency. No broader TorBox source-search integration has been verified for this account. A failed attempt to retrieve source-search documentation is not proof that a source API is unavailable. Source entitlements, credentials, attribution, cost, current endpoint contract and actual results must be established before adding Discover or Prepare actions.
+## What remains unverified
 
-## Hosting decision
+The live provider check established authentication, library normalization, a real TorBox CDN host and byte-range delivery to Render. Automated HTTP tests established the relay's authentication, range handling, secret non-disclosure and one-time URL renewal behavior with fixtures. This environment still cannot operate an actual Chrome session against the hosted site, so picture, audible sound, browser seeking, resume behavior against the hosted relay and physical Android behavior remain user-device acceptance checks.
 
-The integration checkpoint uses one free web service, no database and no media relay. Render free web services sleep after 15 idle minutes and share a monthly free-instance-hour allowance across a workspace. Ordinary process memory is not durable. Existing workspace services also consume that allowance. Bandwidth and build-minute overages can affect account billing under the current plan.
+The first tested real file is MKV. HTTP range support does not establish that Chrome can decode its video and audio codecs. No TorBox conversion/HLS fallback has been implemented or verified. Account concurrency limits also remain unverified.
 
-Do not use expiring free Postgres as the final household-state database. Document the then-current recurring web and database costs before paid provisioning. Durable profiles, progress, migrations, backup/restore and restart tests belong to the next application milestone after real playback proof.
+Metadata search, broader source discovery, preparation, title/episode matching, automatic next, editable profiles, watchlists and durable Postgres state remain separate later milestones. No discovery provider has been selected solely from assumptions about TorBox.

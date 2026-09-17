@@ -1,8 +1,8 @@
 import { createApp } from './server.mjs';
-import { TorBox } from './lib/torbox.mjs';
+import { TorBox, TORBOX_MEDIA_HOSTS } from './lib/torbox.mjs';
 import { runStartupProbe } from './lib/startup-probe.mjs';
 
-const mediaHosts = (process.env.MEDIA_HOST_SUFFIXES || 'torbox.app')
+const mediaHosts = (process.env.MEDIA_HOST_SUFFIXES || TORBOX_MEDIA_HOSTS.join(','))
   .split(',')
   .map(value => value.trim().toLowerCase())
   .filter(Boolean);
@@ -10,7 +10,7 @@ const mediaHosts = (process.env.MEDIA_HOST_SUFFIXES || 'torbox.app')
 const { server } = createApp();
 
 server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => {
-  console.log(JSON.stringify({ event: 'listening', version: '0.1.0' }));
+  console.log(JSON.stringify({ event: 'listening', version: '0.2.0' }));
 
   if (process.env.TORBOX_VERIFY_ON_START === '1') {
     const provider = new TorBox({ key: process.env.TORBOX_API_KEY || '', mediaHosts });
