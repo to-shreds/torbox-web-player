@@ -1,42 +1,53 @@
 # TorBox Web Player
 
-Private household browser player. **Version 0.2.0 is a secure-relay integration checkpoint, not the finished streaming product.** It is independent of CarStream and the TorBox Android app.
+Private household, catalog-first browser player. **Version 0.3.0 adds the missing broad catalog and torrent-preparation workflow. It is still a preview, not a fully verified replacement for Stremio.** CarStream and unrelated projects are unchanged.
 
-## What this checkpoint contains
+## Current experience
 
-The app has one same-origin Node service and a responsive browser interface, household login, owner password re-entry, two fixed viewer slots, paginated TorBox file browsing, loaded-file search, native browser playback controls, temporary resume positions, and a narrowly scoped authenticated media relay. Library, playback, progress and media requests require a valid household session. There is no public registration, source-addition endpoint, or arbitrary-URL proxy.
+Sign in to Discover, browse movie or show posters, search Cinemeta's broader catalog, and open a title. Shows have a season selector and numerically ordered episodes, including a separate Specials season where supplied. Search text stays in place when switching to the secondary My TorBox files tab. Titles do not have to be in the TorBox account to appear in Discover.
 
-The relay exists because live TorBox testing showed that the generated CDN URL contains the TorBox master API key in its `token` query parameter. Removing that parameter caused the CDN request to fail. Returning that URL directly to a browser would therefore violate the project's server-side credential requirement. The browser now receives only an opaque same-origin `/media/<ticket>` URL. The corresponding TorBox URL stays in server memory, is bound to the same session, expires, and is never serialized to the client.
+For a selected movie or episode, the browser requests public torrent-source metadata from Torrentio using its Stremio stream protocol. The server then checks those hashes against TorBox's cache. Choose Play for a cached candidate or Prepare for another candidate. Other versions remain available. Merely searching, browsing, opening a title, or checking source availability does not add a torrent.
 
-**Sessions, media tickets, cache and progress are currently held in memory. A deployment, restart or free-service sleep loses them.** The website displays this limitation. The two viewer slots are fixed, not editable profiles. Search covers loaded account files, not a broader movie catalog. Codec conversion, metadata/posters, automatic next, watchlists, reliable title/episode matching, durable Postgres storage and broader source discovery remain unimplemented.
+Preparation first checks for an existing account torrent by hash. Concurrent requests for the same hash share one operation. An interrupted creation response does not cause an automatic duplicate submission. Preparation status comes from TorBox, not fabricated percentages. When files are available, the app checks the torrent identity and selects the matching episode or asks for an explicit file choice when ambiguous. Source file indexes are never mistaken for TorBox file IDs.
 
-## Secure setup
+The selected file opens in the existing authenticated player. The TorBox master key stays server-side, and video is relayed through a session-bound opaque media URL. A reachable stream can still contain unsupported browser codecs. **This version does not transcode or convert files.**
 
-1. Deploy this repository as one Render Node web service. Build: `npm ci --ignore-scripts --no-audit --no-fund && npm run check && npm test`. Start: `npm start`.
-2. Generate a household password hash at `/setup` or with an equivalent PBKDF2-SHA256 process. Put the hash in `HOUSEHOLD_PASSWORD_HASH` in Render.
-3. Put the TorBox API key in `TORBOX_API_KEY` in Render. Never put the real key or password hash in GitHub, browser code, logs, screenshots, or source archives.
-4. Sign in with the original household password and test a ready file on a target browser.
+## Provider contracts and privacy
 
-Render supplies `RENDER_EXTERNAL_URL`. The server uses it for exact-origin checks. `/healthz` is available. `TORBOX_VERIFY_ON_START` is a diagnostic flag and should be `0` during normal use.
+Cinemeta provides catalog metadata, not proof of video availability. Its official manifest is https://v3-cinemeta.strem.io/manifest.json. The integration does not require an additional metadata API key. Poster requests are restricted to expected HTTPS image hosts. The footer identifies the providers.
 
-## Verified provider behavior on the current hosted integration
+Torrentio's raw stream endpoint is requested directly by the browser with ordinary CORS, no cookies, and no TorBox credentials. Its primary implementation enables CORS: https://github.com/TheBeastLT/torrentio-scraper/blob/master/addon/serverless.js. The public source lookup exposes the selected title/episode identifier and the viewer's network address to that provider. It does not expose the household session or TorBox master key.
 
-On September 17, 2026, the configured Render service successfully authenticated to the TorBox account. The first torrent-library page normalized 912 video files, all 912 of those files reporting ready. Web-download and Usenet pages returned no videos in that check. This count is the number of normalized video files in the first requested provider page, not a claim that the account contains exactly 912 videos in total.
+A Render-hosted Torrentio request returned HTTP 403 in the integration probe. The implementation does not spoof an address, use a proxy to evade that response, or send the TorBox key to an add-on. It uses the normal browser-client API path, which still needs verification from the actual viewing browser. A source-provider failure is displayed as an error, not as a successful empty result. The catalog and My TorBox files remain independent of that provider.
 
-For a real ready MKV file, TorBox returned `store-034.wnam.tb-cdn.io`, a TorBox-published CDN domain. A one-byte request to the original server-side URL returned HTTP 206 with byte ranges. The same URL without its master-key `token` parameter returned HTTP 400. That result is why v0.2.0 uses the relay rather than direct browser delivery.
+TorBox account, cache, creation, and playback calls remain server-side. The current contract is https://api.torbox.app/openapi.json. The separate TorBox search API did not complete successfully in the probe and is not silently treated as a working fallback. The previously observed plan restriction on TorBox conversion does not establish a restriction on all other API operations.
 
-The build now has 41 passing automated tests, including authentication, secret non-disclosure, session-bound media tickets, range forwarding, rejection of multipart ranges, one-time renewal of expired upstream links, two-viewer progress isolation and provider failure handling. The hosted startup probe separately verified current TorBox authentication and a real byte-range response. A physical Android/desktop browser still needs to establish actual picture, sound, seeking and resume before the first playback milestone is complete.
+## Verification
 
-## Delivery and cost
+Read `docs/CATALOG-0.3.0.md` for the measured results and limits. Forty-three new local unit/HTTP tests passed. The existing 57 regression tests are preserved. Render's feature build passed all 100 normal tests, plus the enabled public-sample observation, with zero failures; the separate provider-contract observation was skipped in that build. Both optional observations are disabled during normal builds.
 
-The media path is TorBox CDN to Render to the authenticated browser. Render does not store complete video files and streams with backpressure instead of buffering a whole file. The TorBox master key and upstream CDN URL stay server-side.
+A live Render-hosted check used WebTorrent's freely licensed Big Buck Bunny sample, which was not previously in the account. Real catalog lookup, TorBox cache checking, cached-only source addition, correct-file selection, same-origin playback-link creation, a 1,024-byte HTTP 206 media response, and saved/returned progress all succeeded. The test used an isolated application instance, not a household viewer's real progress store. It added that one cached sample and did not delete or alter existing account files.
 
-This relay means video bytes sent from Render to the viewer count as Render outbound bandwidth. Render currently lists 5 GB of included monthly outbound bandwidth for a Hobby workspace and $0.15 per additional GB. A fully watched 2 GB file therefore represents roughly 2 GB of Render-to-viewer outbound traffic, with actual usage affected by seeking, retries and rebuffering. The included allowance is shared across the workspace. Confirm current Render pricing before relying on this architecture for regular high-volume streaming.
+That check used WebTorrent's official sample torrent as its source. It does not establish that Torrentio returned a real source list in a household browser. It also does not establish visible picture, audible sound, browser seeking, cross-device resume, or successful codec conversion. Offline Chromium component checks exercised the UI and four viewport sizes with synthetic network/media data, not real TorBox decoding.
 
-The service currently uses free base compute and no database. Free services can sleep after inactivity and ordinary process memory is not durable. No paid resource was provisioned by this checkpoint.
+## Setup, deployment and credentials
 
-## Recovery and continuity
+Existing deployment credentials do not need to be changed for v0.3.0. For a new deployment, configure only the salted household password hash and TorBox key in Render: `HOUSEHOLD_PASSWORD_HASH` and `TORBOX_API_KEY`. The `/setup` page can generate the hash locally. Never commit real keys, passwords, hashes, session cookies or private media URLs. The browser does not submit authenticated TorBox API requests.
 
-Rotate the TorBox key or household password hash through Render and redeploy. Restarting revokes this version's memory-only sessions and media tickets. Owner tools can revoke all current sessions. No TorBox media URL is persisted. Postgres migrations, backup/restore and restart durability remain required before the durable household-player milestone is complete.
+Build: `npm ci --ignore-scripts --no-audit --no-fund && npm run check && npm test`.
 
-Application source in this repository controls implementation. Readiness, blockers and the next action are tracked separately in `to-shreds/ProjectStatus`, at `projects/torbox-web-player/STATUS.md`. Read `docs/INTEGRATION.md` and `docs/VERIFICATION.md` before making playback or device-support claims.
+Start: `npm start`.
+
+The service serves the frontend and API from the same origin. Node 24 is selected by `.node-version`. `/healthz` reports v0.3.0. Normal configuration must keep `TORBOX_VERIFY_ON_START`, `CATALOG_CONTRACT_CHECK`, and `CATALOG_LIVE_CHECK` set to `0`. The last flag authorizes a deliberately bounded integration check that may add only the official cached public sample.
+
+The package remains dependency-free. There is no need to install Stremio or obtain another API key to use this preview. External provider availability and browser codec compatibility remain conditions of successful playback.
+
+## Storage, cost and remaining scope
+
+Sessions, source tickets, pending-operation guards, media tickets, caches and progress are in process memory. They are not durable across deployments, restarts or service sleep. Reopening a selected source reconciles against TorBox's account list to reuse existing additions, but uncertain operations are not protected by a durable database transaction. Do not claim persistent exactly-once preparation or durable cross-device progress.
+
+Video travels TorBox CDN -> Render -> browser because the observed TorBox CDN link embeds the master key. Video bytes count toward Render outbound bandwidth. No new paid service, database, persistent disk or subscription upgrade was provisioned. Previous numeric pricing estimates are historical; consult current Render billing information before regular high-volume use.
+
+Still required for the full specification: actual target-device source lookup and playback verification, compatible conversion fallback, persistent profiles/preferences/watchlists/progress, title-mapping corrections, Continue Watching, automatic next episode, database migrations and backup/restore. The current source preference uses filename/codec hints, not a media probe or guarantee.
+
+Implementation source in this repository is authoritative. Readiness and next steps are tracked at `to-shreds/ProjectStatus`, `projects/torbox-web-player/STATUS.md`. Earlier v0.1/v0.2 reports are retained as history; they do not describe the current catalog-first interface.
