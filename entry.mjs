@@ -10,7 +10,7 @@ const mediaHosts = (process.env.MEDIA_HOST_SUFFIXES || TORBOX_MEDIA_HOSTS.join('
 const { server } = createApp();
 
 server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => {
-  console.log(JSON.stringify({ event: 'listening', version: '0.2.0' }));
+  console.log(JSON.stringify({ event: 'listening', version: '0.3.0' }));
 
   if (process.env.TORBOX_VERIFY_ON_START === '1') {
     const provider = new TorBox({ key: process.env.TORBOX_API_KEY || '', mediaHosts });

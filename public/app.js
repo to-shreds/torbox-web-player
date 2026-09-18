@@ -1,6 +1,8 @@
+import { createDiscoveryUI } from './discover.js';
 import { diagnosePlaybackFailure, matchesFormat } from './playback-errors.js';
 const $ = id => document.getElementById(id);
 let csrf = '', files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, retryFile = null, libraryAbort = null, searchTimer;
+let discoveryUI;
 let viewer = 'viewer-1';
 try { const saved = sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
 $('viewer').value = viewer;
@@ -16,10 +18,10 @@ $('files').before(formatNote);
 const showMp4 = document.createElement('button'); showMp4.textContent = 'Show MP4 files'; showMp4.hidden = true;
 $('renew').after(showMp4);
 format.addEventListener('change', renderFiles);
-showMp4.addEventListener('click', () => { format.value = 'mp4'; renderFiles(); $('player').close(); $('search').focus(); });
+showMp4.addEventListener('click', () => { format.value = 'mp4'; renderFiles(); $('player').close(); discoveryUI.openLibrary(); $('search').focus(); });
 
 function text(id, value, error = false) { $(id).textContent = value; $(id).classList.toggle('error', error); }
-function show(section) { for (const id of ['loading', 'setup-needed', 'login', 'workspace']) $(id).hidden = id !== section; }
+function show(section) { if (section !== 'workspace') discoveryUI?.suspend(); for (const id of ['loading', 'setup-needed', 'login', 'workspace']) $(id).hidden = id !== section; }
 async function api(path, { method = 'GET', data, signal, keepalive = false } = {}) {
   const headers = {}; if (data !== undefined) headers['Content-Type'] = 'application/json';
   if (method !== 'GET') headers['X-CSRF-Token'] = csrf;
@@ -38,7 +40,7 @@ async function bootstrap() {
     const session = await api('/api/session');
     if (session.setupRequired) return show('setup-needed');
     if (!session.authenticated) return show('login');
-    csrf = session.csrf; show('workspace'); await loadLibrary();
+    csrf = session.csrf; show('workspace'); await discoveryUI.activate();
   } catch (error) { show('loading'); $('loading').querySelector('p').textContent = error.message; }
 }
 $('login-form').addEventListener('submit', async event => {
@@ -175,4 +177,5 @@ $('revoke').addEventListener('click', async () => {
   try { await api('/api/owner/revoke', { method: 'POST', data: {} }); location.reload(); }
   catch (error) { text('owner-message', error.message, true); }
 });
+discoveryUI = createDiscoveryUI({ api, play: startPlayback, loadLibrary });
 bootstrap();

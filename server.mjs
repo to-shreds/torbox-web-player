@@ -1,3 +1,4 @@
+import { Discovery, discoveryBody } from './lib/discovery.mjs';
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +13,9 @@ const publicFiles = new Map([
   ['/setup', ['setup.html', 'text/html; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
   ['/playback-errors.js', ['playback-errors.js', 'text/javascript; charset=utf-8']],
+  ['/discover.js', ['discover.js', 'text/javascript; charset=utf-8']],
+  ['/source-client.js', ['source-client.js', 'text/javascript; charset=utf-8']],
+  ['/discover.css', ['discover.css', 'text/css; charset=utf-8']],
   ['/password.js', ['password.js', 'text/javascript; charset=utf-8']],
   ['/style.css', ['style.css', 'text/css; charset=utf-8']]
 ]);
@@ -31,7 +35,7 @@ async function body(request) {
   try { const data = JSON.parse(Buffer.concat(chunks).toString('utf8')); if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error(); return data; }
   catch { throw new AppError('INVALID_JSON', 'This request could not be read.', 400); }
 }
-export function createApp({ env = process.env, provider, mediaFetch = fetch, now = Date.now } = {}) {
+export function createApp({ env = process.env, provider, mediaFetch = fetch, discoveryFetch = fetch, discoveryService, now = Date.now } = {}) {
   const production = env.NODE_ENV === 'production';
   const origin = env.PUBLIC_ORIGIN || env.RENDER_EXTERNAL_URL || `http://localhost:${env.PORT || 10000}`;
   const passwordHash = env.HOUSEHOLD_PASSWORD_HASH || '';
@@ -40,6 +44,8 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, now
   let activeLogins = 0;
   const mediaHosts = (env.MEDIA_HOST_SUFFIXES || TORBOX_MEDIA_HOSTS.join(',')).split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
   const torbox = provider || new TorBox({ key: env.TORBOX_API_KEY || '', mediaHosts });
+  const discovery = discoveryService || new Discovery({ provider: torbox, fetchFn: discoveryFetch, now });
+  const catalogRate = new Limiter(90, 60000, now), preparationRate = new Limiter(8, 60000, now);
   const configured = validHash(passwordHash);
   const setCookie = (response, value, maxAge = 30 * 86400) => response.setHeader('Set-Cookie', `tw_session=${value}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${production ? '; Secure' : ''}`);
   const server = http.createServer(async (request, response) => {
@@ -50,11 +56,11 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, now
     response.setHeader('X-Frame-Options', 'DENY');
     response.setHeader('X-Robots-Tag', 'noindex, nofollow');
     response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; media-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://images.metahub.space https://image.tmdb.org https://m.media-amazon.com; media-src 'self'; connect-src 'self' https://torrentio.strem.fun; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
     if (production) response.setHeader('Strict-Transport-Security', 'max-age=31536000');
     try {
       const url = new URL(request.url || '/', origin), path = url.pathname, method = request.method;
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.2.0', stage: 'secure-relay-checkpoint' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.3.0', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
@@ -81,12 +87,12 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, now
         if (!ok) throw new AppError('WRONG_PASSWORD', 'That household password did not match.', 401);
         const created = sessions.create();
         if (!created) throw new AppError('SESSION_LIMIT', 'The session limit was reached. Restart the service to revoke old sessions.', 429);
-        if (session) { mediaTickets.revokeSession(session.id); sessions.revoke(session.id); }
+        if (session) { discovery.revoke(session.id); mediaTickets.revokeSession(session.id); sessions.revoke(session.id); }
         setCookie(response, created.id); return json(response, 200, { ok: true, csrf: created.row.csrf });
       }
       if (!session) throw new AppError('LOGIN_REQUIRED', 'Sign in to your household first.', 401);
       if (!['GET', 'HEAD'].includes(method) && request.headers['x-csrf-token'] !== session.csrf) throw new AppError('BAD_CSRF', 'Reload the page and try again.', 403);
-      if (path === '/api/logout' && method === 'POST') { mediaTickets.revokeSession(session.id); sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
+      if (path === '/api/logout' && method === 'POST') { discovery.revoke(session.id); mediaTickets.revokeSession(session.id); sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
       if (path === '/api/owner/unlock' && method === 'POST') {
         if (!loginRate.allow('household') || activeLogins >= 2) throw new AppError('LOGIN_RATE_LIMITED', 'Too many password checks. Try again in 15 minutes.', 429);
         const data = await body(request); activeLogins++;
@@ -96,12 +102,29 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, now
       }
       if (path.startsWith('/api/owner/')) {
         if (session.ownerUntil <= now()) throw new AppError('OWNER_REAUTH_REQUIRED', 'Re-enter the household password to open owner tools.', 403);
-        if (path === '/api/owner/revoke' && method === 'POST') { mediaTickets.revokeAll(); sessions.revokeAll(); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
+        if (path === '/api/owner/revoke' && method === 'POST') { discovery.revokeAll(); mediaTickets.revokeAll(); sessions.revokeAll(); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
         if (path === '/api/owner/diagnostics' && method === 'POST') {
           if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before checking again.', 429);
           const account = await torbox.account();
-          return json(response, 200, { account, directMedia: false, proxyEnabled: true, fallbackVerified: false, credentialProtection: 'TorBox media links remain server-side', discoveryConfigured: false, progressStorage: 'temporary server memory', automaticNextEnabled: false });
+          return json(response, 200, { account, directMedia: false, proxyEnabled: true, fallbackVerified: false, credentialProtection: 'TorBox media links remain server-side', discoveryConfigured: true, catalogProvider: 'Cinemeta', sourceProvider: 'Torrentio (browser client)', progressStorage: 'temporary server memory', automaticNextEnabled: false });
         }
+      }
+      if (path.startsWith('/api/discover/')) {
+        if (!catalogRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Please pause before checking more titles.', 429);
+        let result;
+        if (path === '/api/discover/catalog' && method === 'GET') result = await discovery.catalog.search({ type: url.searchParams.get('type') || 'movie', q: url.searchParams.get('q') || '', skip: Number(url.searchParams.get('skip') || 0), genre: url.searchParams.get('genre') || '' });
+        else if (path === '/api/discover/meta' && method === 'GET') result = { meta: await discovery.catalog.meta(url.searchParams.get('type'), url.searchParams.get('id')) };
+        else if (path === '/api/discover/sources' && method === 'POST') result = await discovery.register(await discoveryBody(request), session.id);
+        else if (path === '/api/discover/prepare' && method === 'POST') {
+          if (!preparationRate.allow('household')) throw new AppError('SLOW_DOWN', 'Too many preparation requests. Check existing preparations before adding another.', 429);
+          const data = await discoveryBody(request);
+          result = await discovery.prepare(data.source, session.id, data.onlyCached === true);
+        } else if (path === '/api/discover/status' && method === 'GET') {
+          const selected = url.searchParams.get('file'); if (selected) parseVideoId(selected);
+          result = await discovery.status(url.searchParams.get('source'), session.id, selected);
+        } else throw new AppError('NOT_FOUND', 'This catalog action is not available.', 404);
+        if (!sessions.read(cookieId(request))) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
+        return json(response, 200, result);
       }
       if (path === '/api/library' && method === 'GET') {
         if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before refreshing again.', 429);
@@ -135,10 +158,10 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, now
     }
   });
   server.requestTimeout = 25000; server.headersTimeout = 15000; server.keepAliveTimeout = 5000;
-  return { server, sessions, progress, mediaTickets };
+  return { server, sessions, progress, mediaTickets, discovery };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.2.0' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.3.0' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }
