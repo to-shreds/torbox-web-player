@@ -9,7 +9,7 @@ test('opt-in Zilean source availability', { skip: process.env.SOURCE_ACCESS_CHEC
   const results = await Promise.all(checks.map(async ([label, query]) => {
     const out = { label }; const started = Date.now(); let response;
     try {
-      response = await fetch('https://zilean.elfhosted.com/dmm/filtered?' + query, {
+      response = await fetch('https://zileanfortheweebs.midnightignite.me/dmm/filtered?' + query, {
         headers: { Accept: 'application/json' }, redirect: 'manual', signal: AbortSignal.timeout(30000)
       });
       out.status = response.status;
