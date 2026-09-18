@@ -1,7 +1,8 @@
 import { createDiscoveryUI } from './discover.js';
 import { diagnosePlaybackFailure, matchesFormat } from './playback-errors.js';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js';
 const $ = id => document.getElementById(id);
-let csrf = '', files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, retryFile = null, libraryAbort = null, searchTimer;
+let csrf = '', sessionToken = getSessionToken(), files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, retryFile = null, libraryAbort = null, searchTimer;
 let discoveryUI;
 let viewer = 'viewer-1';
 try { const saved = sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
@@ -24,13 +25,14 @@ function text(id, value, error = false) { $(id).textContent = value; $(id).class
 function show(section) { if (section !== 'workspace') discoveryUI?.suspend(); for (const id of ['loading', 'setup-needed', 'login', 'workspace']) $(id).hidden = id !== section; }
 async function api(path, { method = 'GET', data, signal, keepalive = false } = {}) {
   const headers = {}; if (data !== undefined) headers['Content-Type'] = 'application/json';
+  if (sessionToken) headers.Authorization = `Bearer ${sessionToken}`;
   if (method !== 'GET') headers['X-CSRF-Token'] = csrf;
   let response;
-  try { response = await fetch(path, { method, headers, body: data === undefined ? undefined : JSON.stringify(data), credentials: 'same-origin', cache: 'no-store', signal: signal || AbortSignal.timeout(22000), keepalive }); }
+  try { response = await fetch(apiUrl(path), { method, mode: apiMode(), headers, body: data === undefined ? undefined : JSON.stringify(data), credentials: credentialsMode(), cache: 'no-store', signal: signal || AbortSignal.timeout(22000), keepalive }); }
   catch (error) { if (error.name === 'AbortError') throw error; throw new Error('The connection was interrupted or timed out. Please try again.'); }
   let result; try { result = await response.json(); } catch { throw new Error('The service is starting or could not answer. Reload the page and try again.'); }
   if (!response.ok) {
-    if (result.error === 'LOGIN_REQUIRED') { stopPlayback(); if ($('player').open) $('player').close(); files = []; $('files').replaceChildren(); show('login'); }
+    if (result.error === 'LOGIN_REQUIRED') { clearSessionToken(); sessionToken = ''; csrf = ''; stopPlayback(); if ($('player').open) $('player').close(); files = []; $('files').replaceChildren(); show('login'); }
     const error = new Error(result.message || 'The request failed.'); error.code = result.error; throw error;
   }
   return result;
@@ -39,20 +41,20 @@ async function bootstrap() {
   try {
     const session = await api('/api/session');
     if (session.setupRequired) return show('setup-needed');
-    if (!session.authenticated) return show('login');
+    if (!session.authenticated) { clearSessionToken(); sessionToken = ''; csrf = ''; return show('login'); }
     csrf = session.csrf; show('workspace'); await discoveryUI.activate();
   } catch (error) { show('loading'); $('loading').querySelector('p').textContent = error.message; }
 }
 $('login-form').addEventListener('submit', async event => {
   event.preventDefault(); const button = event.submitter; button.disabled = true; text('login-message', 'Signing in…');
   const password = $('password').value; $('password').value = '';
-  try { const result = await api('/api/login', { method: 'POST', data: { password } }); csrf = result.csrf; text('login-message', ''); await bootstrap(); }
+  try { const result = await api('/api/login', { method: 'POST', data: { password } }); sessionToken = result.sessionToken || ''; if (!sessionToken || !setSessionToken(sessionToken)) throw new Error('The browser could not save the private session.'); csrf = result.csrf; text('login-message', ''); await bootstrap(); }
   catch (error) { text('login-message', error.message, true); }
   finally { button.disabled = false; }
 });
 $('logout').addEventListener('click', async () => {
   await stopPlayback();
-  try { await api('/api/logout', { method: 'POST', data: {} }); csrf = ''; files = []; $('files').replaceChildren(); $('diagnostics').textContent = ''; $('owner-password').value = ''; try { sessionStorage.removeItem('tw-viewer'); } catch {} show('login'); }
+  try { await api('/api/logout', { method: 'POST', data: {} }); clearSessionToken(); sessionToken = ''; csrf = ''; files = []; $('files').replaceChildren(); $('diagnostics').textContent = ''; $('owner-password').value = ''; try { sessionStorage.removeItem('tw-viewer'); } catch {} show('login'); }
   catch (error) { text('library-message', error.message, true); }
 });
 function renderFiles() {
@@ -122,7 +124,7 @@ async function startPlayback(file, startOver = false) {
     const result = await api('/api/playback', { method: 'POST', data: { viewer: selectedViewer, videoId: file.id, startOver } });
     if (generation !== playGeneration || !$('player').open || selectedViewer !== viewer) return;
     const video = document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata';
-    const context = { file, viewer: selectedViewer, leaseId: result.leaseId, seq: 0, video, mediaUrl: result.mediaUrl, diagnosing: false, ready: false, started: false, timer: null };
+    const context = { file, viewer: selectedViewer, leaseId: result.leaseId, seq: 0, video, mediaUrl: mediaUrl(result.mediaUrl), diagnosing: false, ready: false, started: false, timer: null };
     active = context; $('video-slot').replaceChildren(video);
     video.addEventListener('loadedmetadata', () => {
       if (active !== context) return;
@@ -147,7 +149,7 @@ async function startPlayback(file, startOver = false) {
       showMp4.hidden = diagnosis.kind !== 'codec';
     });
     context.timer = setInterval(() => { if (active === context && !video.paused) saveProgress(context); }, 10000);
-    video.src = result.mediaUrl;
+    video.src = context.mediaUrl;
     $('renew').disabled = false; $('start-over').disabled = false;
   } catch (error) {
     if (generation === playGeneration) { text('player-message', error.message, true); $('renew').disabled = false; }

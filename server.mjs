@@ -12,7 +12,9 @@ const root = dirname(fileURLToPath(import.meta.url));
 const publicFiles = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
   ['/setup', ['setup.html', 'text/html; charset=utf-8']],
+  ['/setup.html', ['setup.html', 'text/html; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
+  ['/runtime.js', ['runtime.js', 'text/javascript; charset=utf-8']],
   ['/playback-errors.js', ['playback-errors.js', 'text/javascript; charset=utf-8']],
   ['/discover.js', ['discover.js', 'text/javascript; charset=utf-8']],
   ['/source-client.js', ['source-client.js', 'text/javascript; charset=utf-8']],
@@ -24,6 +26,10 @@ function json(response, status, data) { response.writeHead(status, { 'Content-Ty
 function cookieId(request) {
   const item = (request.headers.cookie || '').split(';').map(x => x.trim()).find(x => x.startsWith('tw_session='));
   return item ? item.slice('tw_session='.length) : '';
+}
+function bearerId(request) {
+  const match = /^Bearer ([A-Za-z0-9_-]{43})$/.exec(request.headers.authorization || '');
+  return match ? match[1] : '';
 }
 async function body(request) {
   if (request.headers['content-type']?.split(';')[0] !== 'application/json') throw new AppError('JSON_REQUIRED', 'Send a JSON request.', 415);
@@ -40,6 +46,19 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
   const production = env.NODE_ENV === 'production';
   const origin = env.PUBLIC_ORIGIN || env.RENDER_EXTERNAL_URL || `http://localhost:${env.PORT || 10000}`;
   const passwordHash = env.HOUSEHOLD_PASSWORD_HASH || '';
+  const frontendOrigins = new Set((env.FRONTEND_ORIGINS || '').split(',').map(value => value.trim()).filter(Boolean));
+  frontendOrigins.add(origin);
+  const trustedOrigin = value => typeof value === 'string' && frontendOrigins.has(value);
+  const applyCors = (request, response) => {
+    const value = request.headers.origin;
+    if (!trustedOrigin(value)) return false;
+    response.setHeader('Access-Control-Allow-Origin', value);
+    response.setHeader('Vary', 'Origin');
+    response.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, OPTIONS');
+    response.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-CSRF-Token, Range');
+    response.setHeader('Access-Control-Expose-Headers', 'Content-Type, Content-Length, Content-Range, Accept-Ranges, ETag, Last-Modified');
+    return true;
+  };
   const sessions = new Sessions(now), progress = new ProgressStore(), mediaTickets = new MediaTickets(now);
   const loginRate = new Limiter(15, 15 * 60000, now), operationRate = new Limiter(30, 60000, now), progressRate = new Limiter(120, 60000, now);
   let activeLogins = 0;
@@ -62,24 +81,34 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
     if (production) response.setHeader('Strict-Transport-Security', 'max-age=31536000');
     try {
       const url = new URL(request.url || '/', origin), path = url.pathname, method = request.method;
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.3.1', stage: 'catalog-first-preview' });
+      const corsAllowed = applyCors(request, response);
+      if (method === 'OPTIONS') {
+        if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
+        response.statusCode = 204; response.end(); return;
+      }
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.4.0', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
         response.setHeader('Content-Type', type); return response.end(await readFile(join(root, 'public', filename)));
       }
 
-      const session = configured ? sessions.read(cookieId(request)) : null;
+      const bearer = bearerId(request), cookie = cookieId(request), sessionToken = bearer || cookie;
+      const session = configured ? sessions.read(sessionToken) : null;
+      const bearerSession = !!bearer && !!session;
       if (path.startsWith('/media/')) {
-        if (!session) throw new AppError('LOGIN_REQUIRED', 'Sign in to your household first.', 401);
         if (!['GET', 'HEAD'].includes(method)) throw new AppError('METHOD_NOT_ALLOWED', 'This media request method is not allowed.', 405);
-        const ticket = mediaTickets.read(path.slice('/media/'.length), session.id);
-        if (!ticket) throw new AppError('MEDIA_NOT_FOUND', 'This playback session is no longer available. Reopen the video.', 404);
+        const mediaId = path.slice('/media/'.length);
+        const ticket = session ? mediaTickets.read(mediaId, session.id) : mediaTickets.readAny(mediaId);
+        if (!ticket) {
+          if (!session) throw new AppError('LOGIN_REQUIRED', 'This playback ticket is no longer available. Reopen the video.', 401);
+          throw new AppError('MEDIA_NOT_FOUND', 'This playback session is no longer available. Reopen the video.', 404);
+        }
         return await relayMedia({ request, response, ticket, provider: torbox, fetchFn: mediaFetch });
       }
 
       if (!path.startsWith('/api/')) throw new AppError('NOT_FOUND', 'Page not found.', 404);
-      if (!['GET', 'HEAD'].includes(method) && request.headers.origin !== origin) throw new AppError('BAD_ORIGIN', 'Reload the website before trying again.', 403);
+      if (!['GET', 'HEAD'].includes(method) && !trustedOrigin(request.headers.origin)) throw new AppError('BAD_ORIGIN', 'Reload the website before trying again.', 403);
       if (path === '/api/session' && method === 'GET') return json(response, 200, { authenticated: !!session, setupRequired: !configured, ...(session ? { csrf: session.csrf, viewers: VIEWERS, durable: false, keyConfigured: !!(env.TORBOX_API_KEY || provider) } : {}) });
       if (path === '/api/login' && method === 'POST') {
         if (!configured) throw new AppError('SETUP_REQUIRED', 'Complete the secure Render setup first.', 503);
@@ -90,10 +119,10 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
         const created = sessions.create();
         if (!created) throw new AppError('SESSION_LIMIT', 'The session limit was reached. Restart the service to revoke old sessions.', 429);
         if (session) { discovery.revoke(session.id); mediaTickets.revokeSession(session.id); sessions.revoke(session.id); }
-        setCookie(response, created.id); return json(response, 200, { ok: true, csrf: created.row.csrf });
+        setCookie(response, created.id); return json(response, 200, { ok: true, csrf: created.row.csrf, sessionToken: created.id });
       }
       if (!session) throw new AppError('LOGIN_REQUIRED', 'Sign in to your household first.', 401);
-      if (!['GET', 'HEAD'].includes(method) && request.headers['x-csrf-token'] !== session.csrf) throw new AppError('BAD_CSRF', 'Reload the page and try again.', 403);
+      if (!['GET', 'HEAD'].includes(method) && !bearerSession && request.headers['x-csrf-token'] !== session.csrf) throw new AppError('BAD_CSRF', 'Reload the page and try again.', 403);
       if (path === '/api/logout' && method === 'POST') { discovery.revoke(session.id); mediaTickets.revokeSession(session.id); sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
       if (path === '/api/owner/unlock' && method === 'POST') {
         if (!loginRate.allow('household') || activeLogins >= 2) throw new AppError('LOGIN_RATE_LIMITED', 'Too many password checks. Try again in 15 minutes.', 429);
@@ -132,7 +161,7 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
           const selected = url.searchParams.get('file'); if (selected) parseVideoId(selected);
           result = await discovery.status(url.searchParams.get('source'), session.id, selected);
         } else throw new AppError('NOT_FOUND', 'This catalog action is not available.', 404);
-        if (!sessions.read(cookieId(request))) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
+        if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
         return json(response, 200, result);
       }
       if (path === '/api/library' && method === 'GET') {
@@ -147,7 +176,7 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
         const intent = progress.beginIntent(data.viewer);
         const stream = await torbox.resolveForRelay(data.videoId);
         if (!progress.isCurrent(data.viewer, intent)) throw new AppError('PLAYBACK_SUPERSEDED', 'A newer playback request replaced this one.', 409);
-        if (!sessions.read(cookieId(request))) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
+        if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
         const lease = progress.start(data.viewer, data.videoId, { reset: data.startOver === true, sessionId: session.id });
         const mediaToken = mediaTickets.create(session.id, data.videoId, stream.upstreamUrl);
         return json(response, 200, { file: stream.file, mediaUrl: `/media/${mediaToken}`, delivery: 'relay', conversion: false, ...lease });
@@ -171,6 +200,6 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.3.1' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.4.0' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }

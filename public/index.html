@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>TorBox Web Player</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/discover.css"><script type="module" src="/app.js"></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="api-origin" content="https://torbox-web-player.onrender.com"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://images.metahub.space https://image.tmdb.org https://m.media-amazon.com; connect-src https://torbox-web-player.onrender.com; media-src https://torbox-web-player.onrender.com; object-src 'none'; base-uri 'none'; form-action 'self'"><title>TorBox Web Player</title><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./discover.css"><script type="module" src="./app.js"></script></head>
 <body>
-<header class="top"><a class="brand" href="/">TorBox <span>Web Player</span></a><span class="tag">CATALOG PREVIEW</span></header>
+<header class="top"><a class="brand" href="./">TorBox <span>Web Player</span></a><span class="tag">CATALOG PREVIEW</span></header>
 <main>
 <section id="loading" class="panel narrow"><h1>Opening your player</h1><p>Checking the household session.</p></section>
-<section id="setup-needed" class="panel narrow" hidden><p class="eyebrow">FIRST VISIT</p><h1>Connect your household</h1><p>Set a private household password and add your TorBox key in Render. The key never belongs in this website or GitHub.</p><a class="button primary" href="/setup">Open secure setup</a></section>
+<section id="setup-needed" class="panel narrow" hidden><p class="eyebrow">FIRST VISIT</p><h1>Connect your household</h1><p>Set a private household password and add your TorBox key in Render. The key never belongs in this website or GitHub.</p><a class="button primary" href="./setup.html">Open secure setup</a></section>
 <section id="login" class="panel narrow" hidden><p class="eyebrow">YOUR HOUSEHOLD</p><h1>Welcome back.</h1><p>Sign in to find something to watch.</p><form id="login-form"><label for="password">Household password</label><input id="password" type="password" autocapitalize="none" spellcheck="false" autocomplete="current-password" maxlength="256" required><button class="primary" type="submit">Sign in</button></form><p id="login-message" role="status"></p></section>
 <section id="workspace" hidden>
 <div class="heading"><div><p class="eyebrow">PRIVATE VIEWING</p><h1 id="page-title">What are we watching?</h1></div><div class="actions"><label for="viewer">Watching as</label><select id="viewer"><option value="viewer-1">Viewer 1</option><option value="viewer-2">Viewer 2</option></select><button id="logout">Sign out</button></div></div>

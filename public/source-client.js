@@ -1,4 +1,5 @@
-// Shared source normalization and authenticated same-origin lookup. No provider keys here.
+// Shared source normalization and authenticated backend lookup. No provider keys here.
+import { apiUrl, apiMode, getSessionToken, credentialsMode } from './runtime.js';
 export const SOURCE_PATH = '/api/discover/lookup';
 export const MAX_SOURCES = 40;
 export function targetOf(input) {
@@ -43,8 +44,10 @@ export async function loadPublicSources(input, { signal, fetchFn = fetch } = {})
   if (target.type === 'series') { params.set('season', target.season); params.set('episode', target.episode); }
   let response;
   try {
-    response = await fetchFn(`${SOURCE_PATH}?${params}`, {
-      method: 'GET', mode: 'same-origin', credentials: 'same-origin', cache: 'no-store', redirect: 'error',
+    const token = getSessionToken();
+    response = await fetchFn(apiUrl(`${SOURCE_PATH}?${params}`), {
+      method: 'GET', mode: apiMode(), credentials: credentialsMode(), cache: 'no-store', redirect: 'error',
+      ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
       signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(40000)]) : AbortSignal.timeout(40000)
     });
   } catch (error) {

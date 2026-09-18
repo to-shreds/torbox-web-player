@@ -1,18 +1,21 @@
-// Browser-side checks use only the session-bound same-origin media ticket.
+// Browser-side checks use only the opaque backend media ticket.
 // Never accept or inspect a TorBox URL, API key, or provider response here.
+import { API_ORIGIN, apiMode, credentialsMode } from './runtime.js';
 export function matchesFormat(file, format = 'all') {
   return format !== 'mp4' || /\.mp4$/i.test(file.title || '');
 }
 export async function diagnosePlaybackFailure(mediaUrl, browserCode, fetchFn = fetch) {
   const result = (kind, message, retry = true) => ({ kind, message, retry });
-  if (!/^\/media\/[A-Za-z0-9_-]{43}$/.test(mediaUrl || '')) {
+  let parsed;
+  try { parsed = new URL(mediaUrl || '', API_ORIGIN); } catch {}
+  if (!parsed || parsed.origin !== API_ORIGIN || !/^\/media\/[A-Za-z0-9_-]{43}$/.test(parsed.pathname) || parsed.search || parsed.hash) {
     return result('session', 'This playback session is no longer available. Close and reopen the file.');
   }
   if (browserCode === 1) return result('cancelled', 'Playback was cancelled. Close and reopen the file to try again.');
   let response;
   try {
     response = await fetchFn(mediaUrl, {
-      method: 'GET', headers: { Range: 'bytes=0-0' }, credentials: 'same-origin',
+      method: 'GET', mode: apiMode(), headers: { Range: 'bytes=0-0' }, credentials: credentialsMode(),
       cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(6000)
     });
     if (response.status === 401) return result('session', 'Your household session has expired. Sign in again, then reopen this file.');
