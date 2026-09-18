@@ -1,5 +1,5 @@
-// Stremio's public torrent-source protocol. This module never sees a TorBox key.
-export const SOURCE_ORIGIN = 'https://torrentio.strem.fun';
+// Shared source normalization and authenticated same-origin lookup. No provider keys here.
+export const SOURCE_PATH = '/api/discover/lookup';
 export const MAX_SOURCES = 40;
 export function targetOf(input) {
   if (!input || !['movie', 'series'].includes(input.type) || !/^tt[0-9]{5,12}$/.test(input.id || '')) throw new Error('Choose a valid movie or show.');
@@ -39,27 +39,29 @@ export function normalizeSources(raw) {
 }
 export async function loadPublicSources(input, { signal, fetchFn = fetch } = {}) {
   const target = targetOf(input);
-  const video = target.type === 'series' ? `${target.id}:${target.season}:${target.episode}` : target.id;
+  const params = new URLSearchParams({ type: target.type, id: target.id });
+  if (target.type === 'series') { params.set('season', target.season); params.set('episode', target.episode); }
   let response;
   try {
-    response = await fetchFn(`${SOURCE_ORIGIN}/stream/${target.type}/${video}.json`, {
-      method: 'GET', mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer', redirect: 'error',
-      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000)
+    response = await fetchFn(`${SOURCE_PATH}?${params}`, {
+      method: 'GET', mode: 'same-origin', credentials: 'same-origin', cache: 'no-store', redirect: 'error',
+      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(40000)]) : AbortSignal.timeout(40000)
     });
   } catch (error) {
     if (signal?.aborted) throw error;
-    throw new Error('Unable to reach the torrent-source provider from this browser. The catalog still works. No torrent has been added.');
+    throw new Error('The website could not complete the source request. Check your connection and try again. No torrent has been added.');
   }
   try {
-    if (!response.ok) throw new Error(response.status === 429 ? 'The source provider is rate limiting requests. Try again later; no torrent has been added.' : `The source provider rejected the request (HTTP ${response.status}). This is not a “no sources” result.`);
+    if (response.status === 401) throw new Error('Your household sign-in expired. Refresh the page and sign in again.');
     const reader = response.body.getReader(); const chunks = []; let size = 0;
     try {
       for (;;) { const { done, value } = await reader.read(); if (done) break; size += value.length; if (size > 2 * 1024 * 1024) throw new Error('The source response was too large.'); chunks.push(value); }
     } finally { await reader.cancel().catch(() => {}); }
     const bytes = new Uint8Array(size); let offset = 0; for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
-    let data; try { data = JSON.parse(new TextDecoder().decode(bytes)); } catch { throw new Error('The source provider returned an unreadable response.'); }
-    const sources = normalizeSources(data?.streams);
-    if (!sources.length && data.streams.length) throw new Error('The provider returned no supported torrent hashes for this title. No download was started.');
+    let data; try { data = JSON.parse(new TextDecoder().decode(bytes)); } catch { throw new Error(`The website returned an unreadable source response (HTTP ${response.status}).`); }
+    if (!response.ok) throw new Error(cleanText(data?.message, 500) || `Source lookup failed (HTTP ${response.status}). No torrent has been added.`);
+    const sources = normalizeSources(data?.sources);
+    if (!sources.length && data.sources.length) throw new Error('The provider returned no supported torrent hashes for this title. No download was started.');
     return sources;
   } finally { try { if (!response.bodyUsed) await response.body?.cancel(); } catch {} }
 }

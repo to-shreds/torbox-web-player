@@ -1,6 +1,6 @@
 {
   "name": "torbox-web-player",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
   "engines": {
@@ -9,6 +9,6 @@
   "scripts": {
     "start": "node entry.mjs",
     "test": "node --test test/*.test.mjs",
-    "check": "node --check entry.mjs && node --check server.mjs && node --check public/app.js && node --check public/password.js && node --check public/playback-errors.js && node --check public/discover.js && node --check public/source-client.js && node --check lib/auth.mjs && node --check lib/torbox.mjs && node --check lib/progress.mjs && node --check lib/media.mjs && node --check lib/startup-probe.mjs && node --check lib/catalog.mjs && node --check lib/discovery.mjs"
+    "check": "node --check entry.mjs && node --check server.mjs && node --check public/app.js && node --check public/password.js && node --check public/playback-errors.js && node --check public/discover.js && node --check public/source-client.js && node --check lib/auth.mjs && node --check lib/torbox.mjs && node --check lib/progress.mjs && node --check lib/media.mjs && node --check lib/startup-probe.mjs && node --check lib/catalog.mjs && node --check lib/discovery.mjs && node --check lib/source-lookup.mjs"
   }
 }

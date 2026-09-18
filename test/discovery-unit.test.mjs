@@ -94,18 +94,18 @@ test('source hints do not promise conversion or universal browser compatibility'
   assert.equal(sourceHints({ filename: 'Test.H264.AAC.mp4' }).hint, 'MP4 candidate');
   assert.equal(sourceHints({ filename: 'Test.HEVC.DTS.mkv' }).hint, 'May require conversion');
 });
-test('raw source lookup uses normal CORS and no cookies or TorBox credentials', async () => {
+test('source lookup uses the authenticated same-origin website and no TorBox credentials', async () => {
   const result = await loadPublicSources({ type: 'series', id: ID, season: 2, episode: 10 }, { fetchFn: async (url, opts) => {
-    assert.equal(url, `https://torrentio.strem.fun/stream/series/${ID}:2:10.json`);
-    assert.equal(opts.credentials, 'omit'); assert.equal(opts.mode, 'cors'); assert.equal(opts.headers, undefined);
-    assert.equal(opts.redirect, 'error'); return response({ streams: [source] });
+    assert.equal(url, `/api/discover/lookup?type=series&id=${ID}&season=2&episode=10`);
+    assert.equal(opts.credentials, 'same-origin'); assert.equal(opts.mode, 'same-origin'); assert.equal(opts.headers, undefined);
+    assert.equal(opts.redirect, 'error'); return response({ sources: [source] });
   } });
   assert.equal(result.length, 1);
 });
 test('source lookup treats provider denial as an error, never no sources', async () => {
   await assert.rejects(loadPublicSources(target, { fetchFn: async () => response({}, 403) }), /403/);
-  await assert.rejects(loadPublicSources(target, { fetchFn: async () => response({ streams: [{}] }) }), /no supported/);
-  assert.deepEqual(await loadPublicSources(target, { fetchFn: async () => response({ streams: [] }) }), []);
+  await assert.rejects(loadPublicSources(target, { fetchFn: async () => response({ sources: [{}] }) }), /no supported/);
+  assert.deepEqual(await loadPublicSources(target, { fetchFn: async () => response({ sources: [] }) }), []);
 });
 test('cache calls go only to TorBox and preserve hash query repetitions', async () => {
   const g = new TorrentGateway({ provider: { key: 'synthetic-secret' }, fetchFn: async (url, opts) => {

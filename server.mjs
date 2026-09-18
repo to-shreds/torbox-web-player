@@ -1,3 +1,4 @@
+import { SourceLookup, SourceLookupError } from './lib/source-lookup.mjs';
 import { Discovery, discoveryBody } from './lib/discovery.mjs';
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -35,7 +36,7 @@ async function body(request) {
   try { const data = JSON.parse(Buffer.concat(chunks).toString('utf8')); if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error(); return data; }
   catch { throw new AppError('INVALID_JSON', 'This request could not be read.', 400); }
 }
-export function createApp({ env = process.env, provider, mediaFetch = fetch, discoveryFetch = fetch, discoveryService, now = Date.now } = {}) {
+export function createApp({ env = process.env, provider, mediaFetch = fetch, discoveryFetch = fetch, discoveryService, sourceLookupService, now = Date.now } = {}) {
   const production = env.NODE_ENV === 'production';
   const origin = env.PUBLIC_ORIGIN || env.RENDER_EXTERNAL_URL || `http://localhost:${env.PORT || 10000}`;
   const passwordHash = env.HOUSEHOLD_PASSWORD_HASH || '';
@@ -45,6 +46,7 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
   const mediaHosts = (env.MEDIA_HOST_SUFFIXES || TORBOX_MEDIA_HOSTS.join(',')).split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
   const torbox = provider || new TorBox({ key: env.TORBOX_API_KEY || '', mediaHosts });
   const discovery = discoveryService || new Discovery({ provider: torbox, fetchFn: discoveryFetch, now });
+  const sourceLookup = sourceLookupService || new SourceLookup({ fetchFn: discoveryFetch, now, provider: env.SOURCE_PROVIDER || 'zilean' });
   const catalogRate = new Limiter(90, 60000, now), preparationRate = new Limiter(8, 60000, now);
   const configured = validHash(passwordHash);
   const setCookie = (response, value, maxAge = 30 * 86400) => response.setHeader('Set-Cookie', `tw_session=${value}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${production ? '; Secure' : ''}`);
@@ -56,11 +58,11 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
     response.setHeader('X-Frame-Options', 'DENY');
     response.setHeader('X-Robots-Tag', 'noindex, nofollow');
     response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://images.metahub.space https://image.tmdb.org https://m.media-amazon.com; media-src 'self'; connect-src 'self' https://torrentio.strem.fun; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://images.metahub.space https://image.tmdb.org https://m.media-amazon.com; media-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
     if (production) response.setHeader('Strict-Transport-Security', 'max-age=31536000');
     try {
       const url = new URL(request.url || '/', origin), path = url.pathname, method = request.method;
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.3.0', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.3.1', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
@@ -106,7 +108,7 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
         if (path === '/api/owner/diagnostics' && method === 'POST') {
           if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before checking again.', 429);
           const account = await torbox.account();
-          return json(response, 200, { account, directMedia: false, proxyEnabled: true, fallbackVerified: false, credentialProtection: 'TorBox media links remain server-side', discoveryConfigured: true, catalogProvider: 'Cinemeta', sourceProvider: 'Torrentio (browser client)', progressStorage: 'temporary server memory', automaticNextEnabled: false });
+          return json(response, 200, { account, directMedia: false, proxyEnabled: true, fallbackVerified: false, credentialProtection: 'TorBox media links remain server-side', discoveryConfigured: true, catalogProvider: 'Cinemeta', sourceProvider: 'Zilean (server-side)', progressStorage: 'temporary server memory', automaticNextEnabled: false });
         }
       }
       if (path.startsWith('/api/discover/')) {
@@ -114,6 +116,13 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
         let result;
         if (path === '/api/discover/catalog' && method === 'GET') result = await discovery.catalog.search({ type: url.searchParams.get('type') || 'movie', q: url.searchParams.get('q') || '', skip: Number(url.searchParams.get('skip') || 0), genre: url.searchParams.get('genre') || '' });
         else if (path === '/api/discover/meta' && method === 'GET') result = { meta: await discovery.catalog.meta(url.searchParams.get('type'), url.searchParams.get('id')) };
+        else if (path === '/api/discover/lookup' && method === 'GET') {
+          const type = url.searchParams.get('type');
+          result = await sourceLookup.lookup({ type, id: url.searchParams.get('id'), ...(type === 'series' ? {
+            season: url.searchParams.has('season') ? Number(url.searchParams.get('season')) : undefined,
+            episode: url.searchParams.has('episode') ? Number(url.searchParams.get('episode')) : undefined
+          } : {}) });
+        }
         else if (path === '/api/discover/sources' && method === 'POST') result = await discovery.register(await discoveryBody(request), session.id);
         else if (path === '/api/discover/prepare' && method === 'POST') {
           if (!preparationRate.allow('household')) throw new AppError('SLOW_DOWN', 'Too many preparation requests. Check existing preparations before adding another.', 429);
@@ -152,16 +161,16 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
       throw new AppError('NOT_FOUND', 'This action is not available in the secure-relay checkpoint.', 404);
     } catch (error) {
       if (response.headersSent) return response.end();
-      if (error instanceof AppError) return json(response, error.status, { error: error.code, message: error.message });
+      if (error instanceof AppError || error instanceof SourceLookupError) return json(response, error.status, { error: error.code, message: error.message });
       console.error(JSON.stringify({ event: 'request_failed', code: 'INTERNAL_ERROR' }));
       json(response, 500, { error: 'INTERNAL_ERROR', message: 'The server could not complete this request. Please try again.' });
     }
   });
   server.requestTimeout = 25000; server.headersTimeout = 15000; server.keepAliveTimeout = 5000;
-  return { server, sessions, progress, mediaTickets, discovery };
+  return { server, sessions, progress, mediaTickets, discovery, sourceLookup };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.3.0' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.3.1' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }
