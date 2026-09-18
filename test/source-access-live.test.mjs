@@ -34,6 +34,12 @@ async function observe(label, url, authenticated = false) {
       summary.magnets = torrents.filter(t => typeof t.magnet === 'string' && t.magnet.startsWith('magnet:')).length;
       summary.fileFields = fields(torrents[0]?.files?.[0]);
     }
+    if (Array.isArray(data?.streams)) {
+      summary.streamCount = data.streams.length; summary.streamFields = fields(data.streams[0]);
+      summary.hashStreams = data.streams.filter(s => /^[a-f0-9]{40}$/i.test(s.infoHash || '')).length;
+      summary.hintFields = fields(data.streams[0]?.behaviorHints);
+    }
+    if (data?.behaviorHints) summary.configurationRequired = data.behaviorHints.configurationRequired === true;
     if (data?.paths) summary.searchPaths = Object.keys(data.paths).filter(p => /torrent|search/.test(p)).slice(0, 30);
   } catch (e) {
     const code = e?.cause?.code || e?.code || e?.name;
@@ -46,9 +52,9 @@ async function observe(label, url, authenticated = false) {
 }
 test('opt-in TorBox source-access observations', { skip: process.env.SOURCE_ACCESS_CHECK !== '1', timeout: 70000 }, async () => {
   const results = await Promise.all([
-    observe('search_schema', 'https://search-api.torbox.app/openapi.json'),
-    observe('movie_sources', 'https://search-api.torbox.app/torrents/imdb:tt1254207', true),
-    observe('episode_sources', 'https://search-api.torbox.app/torrents/imdb:tt4549142?season=1&episode=1', true)
+    observe('mediafusion_manifest', 'https://mediafusion.elfhosted.com/manifest.json'),
+    observe('mediafusion_movie', 'https://mediafusion.elfhosted.com/stream/movie/tt1254207.json'),
+    observe('mediafusion_episode', 'https://mediafusion.elfhosted.com/stream/series/tt4549142:1:1.json')
   ]);
   console.log(JSON.stringify({ event: 'source_access_check', results }));
 });
