@@ -203,7 +203,7 @@ $('logout').addEventListener('click', async () => {
     }
     try { sessionStorage.removeItem('tw-viewer'); } catch {}
     autoLoginTried = true; show('login');
-  } catch (error) { text('library-message', error.message, true); }
+  } catch (error) { text('login-message', error.message, true); }
 });
 $('viewer').addEventListener('change', () => { stopPlayback(); if ($('player').open) $('player').close(); viewer = $('viewer').value; try { sessionStorage.setItem('tw-viewer', viewer); } catch {} });
 async function saveProgress(context = active, keepalive = false) {
