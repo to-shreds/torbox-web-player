@@ -40,6 +40,12 @@ function driveFetch_(url, options) {
   }
   return text ? JSON.parse(text) : {};
 }
+function authorizeDriveBridge() {
+  // Run this once from the Apps Script editor to authorize Drive/API/trigger scopes.
+  driveFetch_('https://www.googleapis.com/drive/v3/files?pageSize=1&fields=files(id)');
+  ScriptApp.getProjectTriggers();
+  return 'Drive bridge authorized';
+}
 function ping_() {
   driveFetch_('https://www.googleapis.com/drive/v3/files?pageSize=1&fields=files(id)');
   return json_({ ok: true, bridge: 'TorBox Drive Share Bridge', driveScope: 'drive.file' });

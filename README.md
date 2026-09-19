@@ -2,7 +2,7 @@
 
 This branch is the **browser-key clone** of the household TorBox web player. The original player on `main` remains separate.
 
-Current version: **0.9.1-key-clone**
+Current version: **0.10.0-key-clone**
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/key/`
 
@@ -108,3 +108,18 @@ Guest playback now uses TorBox's redirect mode server-side. Render sends the aut
 Render still does not proxy or relay the movie. It performs one small redirect-resolution request; the guest browser then streams directly from the validated TorBox CDN destination.
 
 The existing fail-closed behavior remains: if TorBox does not return a redirect, points outside the approved TorBox CDN hosts, or the redirect target still contains the master key, guest playback is blocked instead of exposing the credential.
+
+
+## Google Drive temporary-share test
+
+Version 0.10 replaces the broken owner-key guest playback path in the visible Share workflow with a Google Drive export test. The selected movie/episode is resolved through TorBox, TorBox uploads that exact file directly to Google Drive, and the UI measures both TorBox-to-Drive upload time and the additional time until Drive exposes video processing metadata.
+
+A small owner-deployed Google Apps Script bridge supplies TorBox with a short-lived `drive.file` OAuth token, applies an anyone-with-link reader permission, optionally disables download/print/copy for readers, and schedules permanent Drive-file deletion. The bridge stores deletion records and time triggers on Google's side, so an already-scheduled deletion does not depend on the Render process staying alive.
+
+The default Share test is watch-only and deletes the exported Drive copy after 10 minutes. The owner can instead choose 1, 2, 6, 12 or 24 hours and can delete immediately from the test dialog. See `drive-bridge/README.md` for the one-time bridge setup.
+
+The video bytes remain outside Render:
+
+`TorBox -> Google Drive -> viewer`
+
+The old direct TorBox guest-link backend remains isolated for compatibility/testing but its broken title-level Share control is hidden; visible movie/episode Share buttons now start the Drive workflow.
