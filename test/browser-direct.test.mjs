@@ -44,15 +44,15 @@ test('browser-direct CSP permits direct sources plus redundant Render and Cloudf
   ]) assert.ok(html.includes(host), host);
   const csp = /http-equiv="Content-Security-Policy" content="([^"]+)"/.exec(html)?.[1] || '';
   assert.ok(csp.includes('https://torbox-web-player-key.onrender.com'));
-  assert.ok(csp.includes('https://*.workers.dev'));
+  assert.ok(csp.includes('https://torbox-web-player-relay.jonathanjablon.workers.dev'));
   assert.ok(csp.includes('https://api.torbox.app'));
 });
 
 test('Render-only optional surfaces are hidden in browser-direct experiment', async () => {
   const html = await read('../public/index.html');
-  assert.match(html, /id="sync-settings-group"[^>]*hidden/);
+  assert.match(html, /id="portable-settings-group"/);
   assert.match(html, /id="drive-settings-group"[^>]*hidden/);
-  assert.match(html, /Browser-local experiment/);
+  assert.match(html, /Browser-local player/);
 });
 
 test('redundant relay client and Cloudflare Worker share the allowlisted bridge contract', async () => {

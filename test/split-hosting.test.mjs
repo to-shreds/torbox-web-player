@@ -47,7 +47,7 @@ test('published direct HTML uses project-relative assets and permits only the Re
   assert.ok(html.includes('name="runtime-mode" content="direct"'));
   assert.ok(!html.includes('name="api-origin"'));
   assert.ok(html.includes('https://torbox-web-player-key.onrender.com'));
-  assert.ok(html.includes('https://*.workers.dev'));
+  assert.ok(html.includes('https://torbox-web-player-relay.jonathanjablon.workers.dev'));
   assert.ok(html.includes('href="./style.css"')); assert.ok(html.includes('src="./app.js"'));
   assert.ok(!html.includes('src="/app.js"')); assert.ok(!html.includes('href="/style.css"'));
 });

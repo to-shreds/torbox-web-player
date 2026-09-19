@@ -1,7 +1,7 @@
 import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js';
 import { isTrustedDirectMediaUrl } from './runtime.js';
 
-export const DIRECT_BUILD = 'browser-direct-0.4';
+export const DIRECT_BUILD = 'browser-local-2.0.0';
 
 const CATALOG_ORIGINS = new Set(['v3-cinemeta.strem.io', 'cinemeta-catalogs.strem.io']);
 const SOURCE_ENDPOINTS = Object.freeze({
@@ -370,7 +370,7 @@ async function sourceZilean(target) {
 
 async function sourceStremthru(target, origin, label, op) {
   const resourceId = target.type === 'series' ? target.id + ':' + target.season + ':' + target.episode : target.id;
-  const url = new URL('/stream/' + target.type + '/' + resourceId + '.json', origin);
+  const url = new URL(origin.replace(/\/+$/, '') + '/stream/' + target.type + '/' + resourceId + '.json');
   const response = await fetchDirect(op, url, { headers: { Accept: 'application/json' }, redirect: 'follow' }, 30000);
   if (!response.ok) throw directError('SOURCE_HTTP', label + ' returned HTTP ' + response.status, response.status);
   return normalizeStremio(await readJson(response, 8 * 1024 * 1024), target, label);
@@ -449,8 +449,8 @@ async function relayConfig(){
   relayConfigCache=value;relayConfigAt=Date.now();return value;
 }
 function bridgeRetryable(status){return status===408||status===429||status>=500}
-async function bridgeOne(origin,route,{params={},method='GET',json,timeoutMs=2000,label='torbox_bridge'}={}){
-  const key=requireKey(),url=new URL('/relay/torbox/'+route,origin);
+async function bridgeOne(origin,route,{params={},method='GET',json,timeoutMs=2000,label='torbox_bridge',apiKey}={}){
+  const key=apiKey||requireKey(),url=new URL('/relay/torbox/'+route,origin);
   for(const [name,value] of Object.entries(params)){if(Array.isArray(value)){for(const item of value)url.searchParams.append(name,String(item));}else if(value!==undefined&&value!==null)url.searchParams.set(name,String(value));}
   const started=performance.now();
   try{
@@ -470,9 +470,9 @@ async function bridgeRequest(route,options={}){
   let last;
   for(let i=0;i<order.length;i++){
     try{
-      const result=await bridgeOne(order[i],route,options);
+      const result=await bridgeOne(order[i],route,{...options,timeoutMs:options.timeoutMs??(mutation?25000:order[i]===cfg.primary?2000:15000)});
       if(result.response.ok)return result;
-      if(!bridgeRetryable(result.response.status)||i===order.length-1)return result;
+      if(!bridgeRetryable(result.response.status)||i===order.length-1||(result.response.status===429&&result.response.headers.get('x-torbox-bridge')))return result;
       if(order[i]===cfg.primary)primaryCooldownUntil=Date.now()+120000;
       if(mutation&&result.response.status!==429){
         const error=directError('BRIDGE_MUTATION_UNCERTAIN','The primary TorBox bridge failed after a write may have been sent.',503);
@@ -1003,4 +1003,16 @@ export function diagnosticText(report = lastDiagnostic) {
 
 export function recentDirectTrace() {
   return traces.slice();
+}
+
+// Used only after a local import confirmation. Validation does not replace the
+// active credential or put any transfer payload on a server.
+export function exportActiveCredential(){return credential;}
+export async function validateImportedCredential(apiKey){
+  if(typeof apiKey!=='string'||apiKey.length<8||apiKey.length>512||/[\u0000-\u001f\u007f]/.test(apiKey))throw directError('BAD_API_KEY','The imported key is invalid.',400);
+  const {response}=await bridgeRequest('user/me',{params:{settings:false},apiKey,label:'torbox_import_validate'});
+  if(!response.ok)throw directError('IMPORT_KEY_REJECTED','Could not validate the imported TorBox connection. Your existing setup has not changed.',response.status);
+  const payload=await readJson(response,1024*1024);
+  if(payload?.success!==true||!payload.data||typeof payload.data!=='object')throw directError('IMPORT_KEY_REJECTED','TorBox did not confirm the imported connection.',401);
+  return true;
 }
