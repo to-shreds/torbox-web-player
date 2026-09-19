@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { recommendSource, filterSourcesByResolution, episodeQueue, sourceMatchesResolution } from '../public/discover.js';
+import { recommendSource, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder } from '../public/discover.js';
 import { parseSizeBytes } from '../public/source-client.js';
 import { normalizeIndexRows } from '../lib/source-lookup.mjs';
 
@@ -35,4 +35,9 @@ test('source size parser handles provider string sizes',()=>{
 test('Zilean release metadata exposes size/quality while absent seeders stay unknown',()=>{
   const [row]=normalizeIndexRows([{info_hash:'a'.repeat(40),imdb_id:'tt1160419',raw_title:'Fixture.720p.WEB-DL',resolution:'720p',quality:'WEB-DL',codec:'H264',audio:['AAC'],size:'850 MB'}],{type:'movie',id:'tt1160419'});
   assert.equal(row.size,850000000); assert.equal(row.releaseQuality,'WEB-DL'); assert.equal(row.seeders,null);
+});
+test('playback recovery walks strictly down the resolution ladder',()=>{
+  assert.deepEqual(lowerResolutionOrder('2160p','auto'),['1080p','720p','480p']);
+  assert.deepEqual(lowerResolutionOrder('1080p','auto'),['720p','480p']);
+  assert.deepEqual(lowerResolutionOrder('720p','auto'),['480p']);
 });

@@ -2,8 +2,9 @@ import { createDiscoveryUI } from './discover.js';
 import { diagnosePlaybackFailure, matchesFormat } from './playback-errors.js';
 import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js';
 import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js';
+import { listRecent, recordRecent, clearRecent, recentForContext, resumePosition, formatResumeTime } from './history.js';
 const $ = id => document.getElementById(id);
-let csrf = '', sessionToken = getSessionToken(), files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, libraryAbort = null, searchTimer;
+let csrf = '', sessionToken = getSessionToken(), files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, libraryAbort = null, searchTimer, recentRenderTimer;
 let discoveryUI;
 let viewer = 'viewer-1';
 try { const saved = sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
@@ -18,6 +19,27 @@ formatLabel.append(format); $('refresh').before(formatLabel);
 const formatNote = document.createElement('p'); formatNote.className = 'muted'; formatNote.hidden = true;
 $('files').before(formatNote);
 function text(id, value, error = false) { $(id).textContent = value; $(id).classList.toggle('error', error); }
+function recentLabel(item) {
+  const episode = item.type === 'series' ? `S${item.season}E${item.episode}${item.episodeName ? ' · ' + item.episodeName : ''}` : 'Movie';
+  const time = item.completed ? 'Finished' : item.position > 0 ? `Resume ${formatResumeTime(item.position)}` : 'Start';
+  return `${episode} · ${time}`;
+}
+function renderRecent() {
+  const rows = listRecent().slice(0, 6), section = $('recent-section'), list = $('recent-list');
+  section.hidden = !rows.length || $('discover-panel').hidden;
+  const fragment = document.createDocumentFragment();
+  for (const item of rows) {
+    const card = document.createElement('button'); card.type = 'button'; card.className = 'recent-card';
+    if (item.poster) { const img = document.createElement('img'); img.className = 'recent-thumb'; img.src = item.poster; img.alt = ''; img.referrerPolicy = 'no-referrer'; card.append(img); }
+    const copy = document.createElement('span'); copy.className = 'recent-copy';
+    const title = document.createElement('strong'); title.className = 'recent-title'; title.textContent = item.title;
+    const meta = document.createElement('span'); meta.className = 'recent-meta'; meta.textContent = recentLabel(item); copy.append(title, meta);
+    if (item.duration > 0 && !item.completed) { const track=document.createElement('span');track.className='recent-progress';const fill=document.createElement('span');fill.style.width=`${Math.min(100,Math.max(0,item.position/item.duration*100))}%`;track.append(fill);copy.append(track); }
+    card.append(copy); card.addEventListener('click', () => discoveryUI.resumeRecent(item)); fragment.append(card);
+  }
+  list.replaceChildren(fragment);
+}
+function scheduleRecentRender() { clearTimeout(recentRenderTimer); recentRenderTimer = setTimeout(renderRecent, 250); }
 function show(section) { if (section !== 'workspace') discoveryUI?.suspend(); for (const id of ['loading', 'setup-needed', 'login', 'workspace']) $(id).hidden = id !== section; }
 async function api(path, { method = 'GET', data, signal, keepalive = false } = {}) {
   const headers = {}; if (data !== undefined) headers['Content-Type'] = 'application/json';
@@ -58,7 +80,7 @@ async function bootstrap() {
       }
       return show('login');
     }
-    csrf = session.csrf; show('workspace'); await discoveryUI.activate();
+    csrf = session.csrf; show('workspace'); renderRecent(); await discoveryUI.activate();
   } catch (error) { show('loading'); $('loading').querySelector('p').textContent = error.message; }
 }
 $('login-form').addEventListener('submit', async event => {
@@ -71,6 +93,7 @@ $('login-form').addEventListener('submit', async event => {
 $('forget-key').addEventListener('click', async () => {
   await forgetApiKey(); $('remember-key').checked = false; text('login-message', 'Saved key removed from this device.');
 });
+$('clear-recent').addEventListener('click', () => { clearRecent(); renderRecent(); });
 $('logout').addEventListener('click', async () => {
   await stopPlayback();
   try { await api('/api/logout', { method: 'POST', data: {} }); clearSessionToken(); sessionToken = ''; csrf = ''; files = []; $('files').replaceChildren(); $('diagnostics').textContent = ''; $('owner-password').value = ''; try { sessionStorage.removeItem('tw-viewer'); } catch {} autoLoginTried = true; show('login'); }
@@ -118,12 +141,15 @@ $('more').addEventListener('click', () => loadLibrary({ more: true }));
 $('search').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(renderFiles, 150); });
 $('viewer').addEventListener('change', () => { stopPlayback(); if ($('player').open) $('player').close(); viewer = $('viewer').value; try { sessionStorage.setItem('tw-viewer', viewer); } catch {} });
 async function saveProgress(context = active, keepalive = false) {
-  if (!context || !context.ready || !context.started || !Number.isFinite(context.video.duration) || !context.video.duration) return;
+  if (!context || !context.ready || !Number.isFinite(context.video.duration) || !context.video.duration) return;
+  const position = Number.isFinite(context.video.currentTime) ? context.video.currentTime : 0, duration = context.video.duration;
+  if (context.playbackContext) { recordRecent(context.playbackContext, position, duration); scheduleRecentRender(); }
+  if (!context.started) return;
   const seq = ++context.seq;
   try {
-    const result = await api('/api/progress', { method: 'PUT', keepalive, data: { viewer: context.viewer, videoId: context.file.id, leaseId: context.leaseId, seq, position: context.video.currentTime, duration: context.video.duration } });
-    if (!result.saved && active === context) text('player-message', 'Progress was not saved. Another playback may have replaced this session; reopen this file to continue saving.', true);
-  } catch { if (active === context) text('player-message', 'Playback may continue, but the latest progress could not be saved. Check your connection.', true); }
+    const result = await api('/api/progress', { method: 'PUT', keepalive, data: { viewer: context.viewer, videoId: context.file.id, leaseId: context.leaseId, seq, position, duration } });
+    if (!result.saved && active === context) text('player-message', 'Local resume is saved, but the temporary server progress lease was replaced.', true);
+  } catch { if (active === context) text('player-message', 'Playback continues. Resume is saved on this device.', false); }
 }
 async function detachPlayback() {
   const old = active; active = null;
@@ -139,36 +165,57 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
     const result = await api('/api/playback', { method: 'POST', data: { viewer: selectedViewer, videoId: file.id } });
     if (generation !== playGeneration || !$('player').open || selectedViewer !== viewer) return false;
     const video = document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata';
-    const context = { file, viewer: selectedViewer, leaseId: result.leaseId, seq: 0, video, mediaUrl: mediaUrl(result.mediaUrl), playbackContext, retryCount, diagnosing: false, ready: false, started: false, timer: null };
+    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, retryCount, diagnosing:false, recovering:false, ready:false, started:false, timer:null, bufferTimer:null, lastTime:0 };
     active = context; $('video-slot').replaceChildren(video);
+    const clearBuffer = () => { clearTimeout(context.bufferTimer); context.bufferTimer = null; };
+    const recover = async reason => {
+      if (active !== context || context.recovering || !context.started || video.paused || video.ended) return;
+      context.recovering = true; clearBuffer(); await saveProgress(context); video.pause();
+      text('player-message', reason === 'buffer' ? 'Buffering · switching to a lower resolution…' : 'Stream failed · finding a lower-resolution source…');
+      const moved = playbackContext ? await discoveryUI.recoverPlayback(playbackContext) : false;
+      if (moved) return;
+      if (active !== context) return;
+      if (retryCount < 1) { text('player-message', 'Refreshing the TorBox link…'); await startPlayback(file, playbackContext, retryCount + 1); return; }
+      context.recovering = false; text('player-message', 'Playback could not recover automatically. Close the player and choose another source.', true);
+    };
+    const armBuffer = () => {
+      if (!context.started || video.paused || video.ended || context.recovering) return;
+      clearBuffer(); context.bufferTimer = setTimeout(() => recover('buffer'), 12000);
+    };
     video.addEventListener('loadedmetadata', () => {
       if (active !== context) return;
-      const position = result.progress.position || 0;
+      const local = playbackContext ? recentForContext(playbackContext) : null;
+      const position = Math.max(result.progress.position || 0, resumePosition(local));
       if (Number.isFinite(video.duration) && position > 0) video.currentTime = Math.min(position, Math.max(0, video.duration - .25));
-      context.ready = true; text('player-message', position > 0 ? `Resuming at ${Math.floor(position / 60)}:${String(Math.floor(position % 60)).padStart(2, '0')}` : '');
+      context.ready = true;
+      if (playbackContext) { recordRecent(playbackContext, position, video.duration || 0); scheduleRecentRender(); }
+      text('player-message', position > 0 ? `Resuming ${formatResumeTime(position)}` : '');
       video.play().catch(error => { if (active === context && error.name === 'NotAllowedError') text('player-message', 'Tap play'); });
     });
-    video.addEventListener('playing', () => { if (active === context) { context.started = true; text('player-message', ''); } });
-    video.addEventListener('pause', () => { if (active === context) saveProgress(context); });
+    video.addEventListener('playing', () => { if (active === context) { context.started = true; context.recovering = false; clearBuffer(); text('player-message', ''); } });
+    video.addEventListener('canplay', clearBuffer);
+    video.addEventListener('timeupdate', () => { if (active !== context && !context.ready) return; if (Math.abs(video.currentTime - context.lastTime) > .2) { context.lastTime = video.currentTime; clearBuffer(); } });
+    video.addEventListener('waiting', armBuffer); video.addEventListener('stalled', armBuffer);
+    video.addEventListener('pause', () => { if (active === context && !context.recovering) saveProgress(context); });
     video.addEventListener('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });
     video.addEventListener('ended', async () => {
-      if (active !== context) return; await saveProgress(context);
-      if (context.playbackContext?.queue?.length) {
-        const next = context.playbackContext.queue[0]; text('player-message', `Next · S${next.season}E${next.episode} ${next.name || ''}`);
-        const moved = await discoveryUI.playNext(context.playbackContext);
-        if (!moved && active === context) text('player-message', 'Next episode could not be prepared automatically. Close and choose it manually.', true);
-      } else text('player-message', 'Finished');
+      if (active !== context) return; clearBuffer(); await saveProgress(context);
+      if (playbackContext) { recordRecent(playbackContext, video.duration || video.currentTime, video.duration || 0, { completed:true }); scheduleRecentRender(); }
+      if (playbackContext?.queue?.length) {
+        const next=playbackContext.queue[0]; text('player-message', `Next · S${next.season}E${next.episode} ${next.name || ''}`);
+        const moved=await discoveryUI.playNext(playbackContext); if(!moved&&active===context)text('player-message','Next episode could not be selected automatically.',true);
+      } else text('player-message','Finished');
     });
     video.addEventListener('error', async () => {
-      if (active !== context || context.diagnosing) return; context.diagnosing = true;
+      if (active !== context || context.diagnosing) return; context.diagnosing = true; clearBuffer();
       const diagnosis = await diagnosePlaybackFailure(context.mediaUrl, video.error?.code);
       if (active !== context || generation !== playGeneration) return;
-      if (diagnosis.retry && retryCount < 1) { text('player-message', 'Refreshing TorBox link…'); await startPlayback(file, playbackContext, retryCount + 1); return; }
+      if (diagnosis.kind !== 'cancelled') { await recover('error'); return; }
       text('player-message', diagnosis.message, true);
     });
-    context.timer = setInterval(() => { if (active === context && !video.paused) saveProgress(context); }, 10000);
-    video.src = context.mediaUrl; return true;
-  } catch (error) { if (generation === playGeneration) text('player-message', error.message, true); return false; }
+    context.timer=setInterval(()=>{if(active===context&&!video.paused)saveProgress(context);},10000);
+    video.src=context.mediaUrl; return true;
+  } catch (error) { if (generation===playGeneration) text('player-message',error.message,true); return false; }
 }
 $('close-player').addEventListener('click', () => $('player').close());
 $('player').addEventListener('close', () => stopPlayback());
