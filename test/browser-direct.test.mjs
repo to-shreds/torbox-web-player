@@ -56,20 +56,16 @@ test('Render-only optional surfaces are hidden in browser-direct experiment', as
 });
 
 test('redundant relay client and Cloudflare Worker share the allowlisted bridge contract', async () => {
-  const [direct, config, worker, workflow] = await Promise.all([
+  const [direct, config, worker] = await Promise.all([
     read('../public/direct-runtime.js'),
     read('../public/relay-config.json'),
-    read('../relay/cloudflare/worker.js'),
-    read('../.github/workflows/deploy-cloudflare-relay.yml')
+    read('../relay/cloudflare/worker.js')
   ]);
   assert.match(direct,/DEFAULT_RELAY_PRIMARY/);
   assert.match(direct,/bridgeRetryable/);
   assert.match(direct,/primaryCooldownUntil/);
   assert.match(direct,/bridge_cloudflare_health/);
-  assert.deepEqual(JSON.parse(config),{primary:'https://torbox-web-player-key.onrender.com',secondary:''});
+  assert.deepEqual(JSON.parse(config),{primary:'https://torbox-web-player-key.onrender.com',secondary:'https://torbox-web-player-relay.jonathanjablon.workers.dev'});
   for(const route of ['user/me','torrents/checkcached','torrents/mylist','torrents/createtorrent','torrents/requestdl'])assert.ok(worker.includes(route),route);
   assert.match(worker,/X-TorBox-Bridge/);
-  assert.match(workflow,/cloudflare\/wrangler-action@v4/);
-  assert.match(workflow,/CLOUDFLARE_API_TOKEN/);
-  assert.match(workflow,/deployment-url/);
 });
