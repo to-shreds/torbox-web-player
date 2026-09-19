@@ -466,18 +466,24 @@ async function bridgeOne(origin,route,{params={},method='GET',json,timeoutMs=700
 async function bridgeRequest(route,options={}){
   const cfg=await relayConfig(),preferBackup=cfg.secondary&&Date.now()<primaryCooldownUntil;
   const order=preferBackup?[cfg.secondary,cfg.primary]:[cfg.primary,cfg.secondary].filter(Boolean);
+  const mutation=(options.method||'GET')!=='GET';
   let last;
   for(let i=0;i<order.length;i++){
     try{
       const result=await bridgeOne(order[i],route,options);
       if(result.response.ok)return result;
       if(!bridgeRetryable(result.response.status)||i===order.length-1)return result;
-      last=result;
       if(order[i]===cfg.primary)primaryCooldownUntil=Date.now()+120000;
+      if(mutation&&result.response.status!==429){
+        const error=directError('BRIDGE_MUTATION_UNCERTAIN','The primary TorBox bridge failed after a write may have been sent.',503);
+        error.ambiguous=true;throw error;
+      }
+      last=result;
     }catch(error){
       last=error;
-      if(i===order.length-1)throw error;
       if(order[i]===cfg.primary)primaryCooldownUntil=Date.now()+120000;
+      if(mutation&&error?.ambiguous)throw error;
+      if(i===order.length-1)throw error;
     }
   }
   if(last?.response)return last;throw last||directError('BRIDGE_UNAVAILABLE','No TorBox bridge is configured.',503);
