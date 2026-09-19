@@ -1,32 +1,19 @@
 import { createDiscoveryUI } from './discover.js';
-import { diagnosePlaybackFailure, matchesFormat } from './playback-errors.js';
+import { diagnosePlaybackFailure } from './playback-errors.js';
 import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js';
 import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js';
 import { listRecent, recordRecent, clearRecent, recentForContext, resumePosition, formatResumeTime } from './history.js';
 const $ = id => document.getElementById(id);
-let csrf = '', sessionToken = getSessionToken(), files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, libraryAbort = null, searchTimer, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false;
+let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '';
 let discoveryUI;
 let viewer = 'viewer-1';
 try { const saved = sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
 $('viewer').value = viewer;
-const formatLabel = document.createElement('label');
-formatLabel.htmlFor = 'format'; formatLabel.textContent = 'File format';
-const format = document.createElement('select'); format.id = 'format';
-for (const [value, label] of [['all', 'All formats'], ['mp4', 'MP4 files']]) {
-  const option = document.createElement('option'); option.value = value; option.textContent = label; format.append(option);
-}
-formatLabel.append(format); $('refresh').before(formatLabel);
-const formatNote = document.createElement('p'); formatNote.className = 'muted'; formatNote.hidden = true;
-$('files').before(formatNote);
 function text(id, value, error = false) { $(id).textContent = value; $(id).classList.toggle('error', error); }
 function formatDriveSize(bytes) { return Number.isFinite(bytes) && bytes > 0 ? (bytes / 1024 ** 3).toFixed(2) + ' GB' : 'size unknown'; }
 function formatDriveElapsed(ms) {
   const seconds = Math.max(0, Math.round((ms || 0) / 1000));
   return seconds < 60 ? seconds + 's' : Math.floor(seconds / 60) + 'm ' + String(seconds % 60).padStart(2, '0') + 's';
-}
-function randomBridgeSecret() {
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
-  return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
 }
 async function openDriveTest(file, context = {}) {
   if (guestMode || !file?.id) return;
@@ -38,7 +25,9 @@ async function openDriveTest(file, context = {}) {
   try {
     const config = await api('/api/drive/config');
     driveConfigured = config.configured === true;
-  } catch { driveConfigured = false; }
+    driveOauthUrl = config.oauthUrl || 'https://api.torbox.app/v1/api/integration/oauth/google';
+    $('drive-connected-until').textContent = config.expiresAt ? 'Connected until ' + new Date(config.expiresAt).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) + '.' : '';
+  } catch { driveConfigured = false; driveOauthUrl = 'https://api.torbox.app/v1/api/integration/oauth/google'; $('drive-connected-until').textContent = ''; }
   $('drive-setup').hidden = driveConfigured;
   $('drive-test-controls').hidden = !driveConfigured;
 }
@@ -64,19 +53,20 @@ function updateDriveStatus(result) {
   $('drive-timing').textContent = timing.join(' · ');
   if (result.previewUrl) {
     $('drive-open').href = result.previewUrl; $('drive-ready-actions').hidden = false;
-    $('drive-delete-note').textContent = (result.downloadRestricted ? 'Viewer download/copy is disabled. ' : '') + (result.deleteAt ? 'Permanent deletion scheduled for ' + new Date(result.deleteAt).toLocaleString() + '.' : '');
+    $('drive-delete-note').textContent = (result.downloadRestricted ? 'Viewer download/copy is disabled. ' : '') + (result.deleteAt ? 'Deletion scheduled for ' + new Date(result.deleteAt).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) + '. Keep this test open until it deletes; this easy OAuth test is not yet restart-proof.' : '');
   }
+  if (result.deleteError) $('drive-delete-note').textContent += ' Cleanup warning: ' + result.deleteError;
 }
 async function pollDriveTest() {
   if (!driveRunId) return;
   try {
     const result = await api('/api/drive/test/status?id=' + encodeURIComponent(driveRunId));
     updateDriveStatus(result);
-    if (['ready', 'failed', 'deleted'].includes(result.status)) { stopDrivePolling(); return; }
-    scheduleDrivePoll(result.status === 'drive_processing' ? 3000 : 1800);
+    if (['failed', 'deleted'].includes(result.status)) { stopDrivePolling(); return; }
+    scheduleDrivePoll(result.status === 'drive_processing' || result.status === 'ready' ? 3000 : 1800);
   } catch (error) {
     text('drive-status', error.message, true);
-    scheduleDrivePoll(5000);
+    if (error.code !== 'DRIVE_AUTH_EXPIRED') scheduleDrivePoll(5000);
   }
 }
 
@@ -111,7 +101,7 @@ async function api(path, { method = 'GET', data, signal, keepalive = false } = {
   catch (error) { if (error.name === 'AbortError') throw error; throw new Error('The connection was interrupted or timed out. Please try again.'); }
   let result; try { result = await response.json(); } catch { throw new Error('The service is starting or could not answer. Reload the page and try again.'); }
   if (!response.ok) {
-    if (result.error === 'LOGIN_REQUIRED') { clearSessionToken(); sessionToken = ''; csrf = ''; stopPlayback(); if ($('player').open) $('player').close(); files = []; $('files').replaceChildren(); show('login'); }
+    if (result.error === 'LOGIN_REQUIRED') { clearSessionToken(); sessionToken = ''; csrf = ''; stopPlayback(); if ($('player').open) $('player').close(); show('login'); }
     const error = new Error(result.message || 'The request failed.'); error.code = result.error; throw error;
   }
   return result;
@@ -203,7 +193,7 @@ $('logout').addEventListener('click', async () => {
   await stopPlayback();
   try {
     await api('/api/logout', { method: 'POST', data: {} });
-    clearSessionToken(); sessionToken = ''; csrf = ''; files = []; $('files').replaceChildren(); $('diagnostics').textContent = ''; $('owner-password').value = '';
+    clearSessionToken(); sessionToken = ''; csrf = ''; $('diagnostics').textContent = ''; $('owner-password').value = '';
     if (guestMode) {
       let backup = ''; try { backup = sessionStorage.getItem('torbox-owner-session-backup') || ''; sessionStorage.removeItem('torbox-owner-session-backup'); } catch {}
       leaveGuestUi();
@@ -215,46 +205,6 @@ $('logout').addEventListener('click', async () => {
     autoLoginTried = true; show('login');
   } catch (error) { text('library-message', error.message, true); }
 });
-function renderFiles() {
-  const query = $('search').value.trim().toLocaleLowerCase();
-  const list = files.filter(file => matchesFormat(file, format.value) && `${file.title} ${file.collection}`.toLocaleLowerCase().includes(query));
-  formatNote.hidden = format.value !== 'mp4';
-  formatNote.textContent = `${list.length} matching MP4 files in the loaded library. MP4 files still need video and audio that your browser supports.`;
-  const fragment = document.createDocumentFragment();
-  for (const file of list) {
-    const card = document.createElement('article'); card.className = 'file';
-    const copy = document.createElement('div'); copy.className = 'file-copy';
-    const title = document.createElement('h2'); title.textContent = file.title;
-    const collection = document.createElement('p'); collection.textContent = file.collection;
-    const state = document.createElement('span'); state.className = 'state'; state.textContent = file.state;
-    const meta = document.createElement('p'); meta.textContent = `${file.size === null ? 'Size unknown' : `${(file.size / 1024 ** 3).toFixed(2)} GB`} · ${file.mime || 'Codec not verified'}`;
-    copy.append(title, collection, state, meta); card.append(copy);
-    if (file.state === 'Ready to watch') { const button = document.createElement('button'); button.className = 'primary'; button.textContent = 'Play'; button.setAttribute('aria-label', `Play ${file.title}`); button.addEventListener('click', () => startPlayback(file)); card.append(button); }
-    fragment.append(card);
-  }
-  if (!list.length) { const empty = document.createElement('p'); empty.className = 'panel'; empty.textContent = format.value === 'mp4' ? 'No matching MP4 files among the loaded files. Clear the search, choose All formats, or load another page.' : query ? 'No matching videos in the files loaded so far. Clear the search or load another page.' : 'No video files in this page of this library section. Other sections or pages may contain videos.'; fragment.append(empty); }
-  $('files').replaceChildren(fragment); $('more').hidden = nextOffset === null;
-}
-async function loadLibrary({ more = false, refresh = false } = {}) {
-  const generation = ++loadGeneration;
-  libraryAbort?.abort(); libraryAbort = new AbortController();
-  const timer = setTimeout(() => libraryAbort?.abort(), 22000);
-  const offset = more ? nextOffset : 0; if (more && offset === null) { clearTimeout(timer); return; }
-  $('refresh').disabled = true; $('more').disabled = true; text('library-message', 'Loading TorBox files…');
-  try {
-    const data = await api(`/api/library?kind=${encodeURIComponent($('kind').value)}&offset=${offset}&refresh=${refresh ? 1 : 0}`, { signal: libraryAbort.signal });
-    if (generation !== loadGeneration) return;
-    files = more ? [...new Map([...files, ...data.files].map(file => [file.id, file])).values()] : data.files;
-    files.sort((a, b) => a.collection.localeCompare(b.collection, undefined, { numeric: true }) || a.title.localeCompare(b.title, undefined, { numeric: true }));
-    nextOffset = data.nextOffset; renderFiles();
-    text('library-message', data.stale ? `Showing the earlier library snapshot. ${data.warning}` : `${files.length} video files loaded.${nextOffset !== null ? ' More pages are available below.' : ''} Browser compatibility still needs a playback test.`, data.stale);
-  } catch (error) { if (generation === loadGeneration) text('library-message', error.name === 'AbortError' ? 'The library request timed out. Please retry.' : error.message, true); }
-  finally { clearTimeout(timer); if (generation === loadGeneration) { $('refresh').disabled = false; $('more').disabled = false; } }
-}
-$('kind').addEventListener('change', () => { files = []; nextOffset = null; $('files').replaceChildren(); $('more').hidden = true; loadLibrary(); });
-$('refresh').addEventListener('click', () => loadLibrary({ refresh: true }));
-$('more').addEventListener('click', () => loadLibrary({ more: true }));
-$('search').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(renderFiles, 150); });
 $('viewer').addEventListener('change', () => { stopPlayback(); if ($('player').open) $('player').close(); viewer = $('viewer').value; try { sessionStorage.setItem('tw-viewer', viewer); } catch {} });
 async function saveProgress(context = active, keepalive = false) {
   if (!context || !context.ready || !Number.isFinite(context.video.duration) || !context.video.duration) return;
@@ -337,14 +287,26 @@ $('close-player').addEventListener('click', () => $('player').close());
 $('player').addEventListener('close', () => stopPlayback());
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveProgress(active, true); });
 window.addEventListener('pagehide', () => { saveProgress(active, true); });
-$('generate-drive-secret').addEventListener('click', () => { $('drive-secret').value = randomBridgeSecret(); $('drive-secret').type = 'text'; $('drive-secret').select(); });
-$('connect-drive').addEventListener('click', async () => {
-  const button = $('connect-drive'); button.disabled = true; text('drive-connect-message', 'Checking the Apps Script bridge…');
+$('open-drive-oauth').addEventListener('click', () => {
+  const url = driveOauthUrl || 'https://api.torbox.app/v1/api/integration/oauth/google';
+  window.open(url, '_blank', 'noopener,noreferrer');
+  text('drive-connect-message', 'Authorize Google Drive in the new tab. When TorBox says it succeeded, copy that page address, come back here, paste it below, and tap Finish connection.');
+});
+$('finish-drive-connect').addEventListener('click', async () => {
+  const button = $('finish-drive-connect'); button.disabled = true; text('drive-connect-message', 'Checking Google Drive…');
+  const successUrl = $('drive-success-url').value.trim();
+  $('drive-success-url').value = '';
   try {
-    await api('/api/drive/configure', { method: 'POST', data: { url: $('drive-url').value.trim(), secret: $('drive-secret').value.trim() } });
-    driveConfigured = true; $('drive-setup').hidden = true; $('drive-test-controls').hidden = false; $('drive-secret').value = ''; text('drive-connect-message', '');
+    const result = await api('/api/drive/connect', { method: 'POST', data: { successUrl } });
+    driveConfigured = true; driveOauthUrl = result.oauthUrl || driveOauthUrl;
+    $('drive-setup').hidden = true; $('drive-test-controls').hidden = false;
+    $('drive-connected-until').textContent = result.expiresAt ? 'Connected until ' + new Date(result.expiresAt).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) + '.' : '';
+    text('drive-connect-message', '');
   } catch (error) { text('drive-connect-message', error.message, true); }
   finally { button.disabled = false; }
+});
+$('reconnect-drive').addEventListener('click', () => {
+  driveConfigured = false; $('drive-setup').hidden = false; $('drive-test-controls').hidden = true; $('drive-connected-until').textContent = '';
 });
 $('start-drive-test').addEventListener('click', async () => {
   if (!driveSelected?.file?.id) return;
@@ -385,5 +347,5 @@ $('revoke').addEventListener('click', async () => {
   try { await api('/api/owner/revoke', { method: 'POST', data: {} }); location.reload(); }
   catch (error) { text('owner-message', error.message, true); }
 });
-discoveryUI = createDiscoveryUI({ api, play: startPlayback, loadLibrary, driveTest: openDriveTest });
+discoveryUI = createDiscoveryUI({ api, play: startPlayback, driveTest: openDriveTest });
 bootstrap();
