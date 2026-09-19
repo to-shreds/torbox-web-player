@@ -1,6 +1,6 @@
 # TorBox Web Player
 
-Private household, catalog-first browser player. **Version 0.4.0 splits the visible frontend onto GitHub Pages while Render remains the private API, TorBox integration, progress store and media relay.** It remains a preview, not a fully verified replacement for Stremio. CarStream and unrelated projects are unchanged.
+Private household, catalog-first browser player. **Version 0.4.1 keeps the GitHub Pages / Render split and now strongly prefers browser-friendly H.264 + AAC sources to avoid silent audio in Chrome.** It remains a preview, not a fully verified replacement for Stremio. CarStream and unrelated projects are unchanged.
 
 ## Hosting split
 
@@ -8,7 +8,7 @@ The files in `public/` are the complete static frontend. GitHub Pages publishes 
 
 Cross-host API login uses a 256-bit opaque session bearer kept in browser `sessionStorage`; Render's existing SameSite cookie remains a fallback for the Render-hosted copy. GitHub Pages does not depend on third-party cookies. API mutations from bearer sessions still require the approved frontend Origin. The video element uses an opaque, revocable media ticket so the TorBox CDN URL and master key remain server-side.
 
-The expected GitHub Pages URL is `https://to-shreds.github.io/torbox-web-player/`. The Pages workflow is committed at `.github/workflows/pages.yml`, but GitHub requires Pages to be enabled for the repository before the workflow can deploy. GitHub's Pages setting is administrative and is not exposed by the connected GitHub App. Until that one repository setting is enabled, the Render-hosted frontend remains available and uses the same v0.4.0 code.
+The GitHub Pages site is live at `https://to-shreds.github.io/torbox-web-player/`. The workflow at `.github/workflows/pages.yml` publishes only `public/`; the Render-hosted frontend remains available as a fallback.
 
 ## Current experience
 
@@ -18,7 +18,7 @@ The browser requests sources from the authenticated `/api/discover/lookup` route
 
 Preparation checks the account by hash before creation, coalesces concurrent same-hash requests and stops automatic retries after an uncertain response. The returned torrent identity and episode are checked. Ambiguous files require explicit selection; an index release title is not assumed to be a filename or TorBox file ID. The existing authenticated player receives an opaque same-origin media ticket, not the TorBox master key.
 
-**This version does not transcode or convert files.** Source lookup and successful transfer do not guarantee that a particular file's audio/video codecs work in Chrome.
+**This version does not transcode or convert files.** Source ranking now gives H.264 + AAC releases a large priority boost, treats Dolby Digital / E-AC-3 / DTS / TrueHD as possible silent-audio risks in Chrome, and does not auto-start a release flagged with those audio formats. The UI warns before a risky source and offers Play anyway. This substantially improves the default choice but still does not guarantee that every release's metadata matches its actual tracks.
 
 ## Provider contracts and privacy
 
@@ -46,7 +46,7 @@ Existing credentials require no changes. For a new service, configure `HOUSEHOLD
 
 Build: `npm ci --ignore-scripts --no-audit --no-fund && npm run check && npm test`.
 
-Start: `npm start`. Node 24 is selected by `.node-version`. `/healthz` reports v0.4.0. The package remains dependency-free.
+Start: `npm start`. Node 24 is selected by `.node-version`. `/healthz` reports v0.4.1. The package remains dependency-free.
 
 Set `FRONTEND_ORIGINS=https://to-shreds.github.io` in Render for the GitHub Pages project site. The value is an origin only, not the repository path. The public frontend's API destination is deliberately non-secret and stored in an `api-origin` meta tag.
 
