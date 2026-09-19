@@ -3,7 +3,7 @@ import { diagnosePlaybackFailure, matchesFormat } from './playback-errors.js';
 import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js';
 import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js';
 const $ = id => document.getElementById(id);
-let csrf = '', sessionToken = getSessionToken(), files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, retryFile = null, libraryAbort = null, searchTimer;
+let csrf = '', sessionToken = getSessionToken(), files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, libraryAbort = null, searchTimer;
 let discoveryUI;
 let viewer = 'viewer-1';
 try { const saved = sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
@@ -17,11 +17,6 @@ for (const [value, label] of [['all', 'All formats'], ['mp4', 'MP4 files']]) {
 formatLabel.append(format); $('refresh').before(formatLabel);
 const formatNote = document.createElement('p'); formatNote.className = 'muted'; formatNote.hidden = true;
 $('files').before(formatNote);
-const showMp4 = document.createElement('button'); showMp4.textContent = 'Show MP4 files'; showMp4.hidden = true;
-$('renew').after(showMp4);
-format.addEventListener('change', renderFiles);
-showMp4.addEventListener('click', () => { format.value = 'mp4'; renderFiles(); $('player').close(); discoveryUI.openLibrary(); $('search').focus(); });
-
 function text(id, value, error = false) { $(id).textContent = value; $(id).classList.toggle('error', error); }
 function show(section) { if (section !== 'workspace') discoveryUI?.suspend(); for (const id of ['loading', 'setup-needed', 'login', 'workspace']) $(id).hidden = id !== section; }
 async function api(path, { method = 'GET', data, signal, keepalive = false } = {}) {
@@ -134,55 +129,47 @@ async function detachPlayback() {
   const old = active; active = null;
   if (old) { clearInterval(old.timer); const saving = saveProgress(old, true); old.video.pause(); old.video.removeAttribute('src'); old.video.load(); old.video.remove(); await saving; }
 }
-async function stopPlayback() { playGeneration++; retryFile = null; await detachPlayback(); }
-async function startPlayback(file, startOver = false) {
+async function stopPlayback() { playGeneration++; await detachPlayback(); }
+async function startPlayback(file, playbackContext = null, retryCount = 0) {
   const generation = ++playGeneration, selectedViewer = viewer;
-  retryFile = file;
-  await detachPlayback();
-  if (generation !== playGeneration) return;
-  showMp4.hidden = true;
-  $('playing-title').textContent = file.title; text('player-message', 'Opening a secure stream…'); $('video-slot').replaceChildren();
+  await detachPlayback(); if (generation !== playGeneration) return false;
+  $('playing-title').textContent = file.title; text('player-message', 'Opening…'); $('video-slot').replaceChildren();
   if (!$('player').open) $('player').showModal();
-  $('renew').disabled = true; $('start-over').disabled = true;
   try {
-    const result = await api('/api/playback', { method: 'POST', data: { viewer: selectedViewer, videoId: file.id, startOver } });
-    if (generation !== playGeneration || !$('player').open || selectedViewer !== viewer) return;
+    const result = await api('/api/playback', { method: 'POST', data: { viewer: selectedViewer, videoId: file.id } });
+    if (generation !== playGeneration || !$('player').open || selectedViewer !== viewer) return false;
     const video = document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata';
-    const context = { file, viewer: selectedViewer, leaseId: result.leaseId, seq: 0, video, mediaUrl: mediaUrl(result.mediaUrl), delivery: result.delivery, diagnosing: false, ready: false, started: false, timer: null };
+    const context = { file, viewer: selectedViewer, leaseId: result.leaseId, seq: 0, video, mediaUrl: mediaUrl(result.mediaUrl), playbackContext, retryCount, diagnosing: false, ready: false, started: false, timer: null };
     active = context; $('video-slot').replaceChildren(video);
     video.addEventListener('loadedmetadata', () => {
       if (active !== context) return;
       const position = result.progress.position || 0;
       if (Number.isFinite(video.duration) && position > 0) video.currentTime = Math.min(position, Math.max(0, video.duration - .25));
-      context.ready = true;
-      text('player-message', position > 0 ? `Resuming at ${Math.floor(position / 60)}:${String(Math.floor(position % 60)).padStart(2, '0')}.` : 'Ready. Press play if the browser does not start automatically.');
-      video.play().catch(error => { if (active === context && !context.diagnosing && error.name === 'NotAllowedError') text('player-message', 'Press play to begin. Your browser requires a tap.'); });
+      context.ready = true; text('player-message', position > 0 ? `Resuming at ${Math.floor(position / 60)}:${String(Math.floor(position % 60)).padStart(2, '0')}` : '');
+      video.play().catch(error => { if (active === context && error.name === 'NotAllowedError') text('player-message', 'Tap play'); });
     });
-    video.addEventListener('playing', () => { if (active === context) { context.started = true; text('player-message', 'Playing directly from TorBox. Render is not carrying the video bytes.'); } });
+    video.addEventListener('playing', () => { if (active === context) { context.started = true; text('player-message', ''); } });
     video.addEventListener('pause', () => { if (active === context) saveProgress(context); });
     video.addEventListener('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });
-    video.addEventListener('ended', () => { if (active === context) { saveProgress(context); text('player-message', 'Finished. Close the player to choose another file. Automatic next is not connected yet.'); } });
+    video.addEventListener('ended', async () => {
+      if (active !== context) return; await saveProgress(context);
+      if (context.playbackContext?.queue?.length) {
+        const next = context.playbackContext.queue[0]; text('player-message', `Next · S${next.season}E${next.episode} ${next.name || ''}`);
+        const moved = await discoveryUI.playNext(context.playbackContext);
+        if (!moved && active === context) text('player-message', 'Next episode could not be prepared automatically. Close and choose it manually.', true);
+      } else text('player-message', 'Finished');
+    });
     video.addEventListener('error', async () => {
-      if (active !== context || context.diagnosing) return;
-      context.diagnosing = true;
-      text('player-message', 'Direct TorBox playback failed. Checking the browser error…');
+      if (active !== context || context.diagnosing) return; context.diagnosing = true;
       const diagnosis = await diagnosePlaybackFailure(context.mediaUrl, video.error?.code);
       if (active !== context || generation !== playGeneration) return;
+      if (diagnosis.retry && retryCount < 1) { text('player-message', 'Refreshing TorBox link…'); await startPlayback(file, playbackContext, retryCount + 1); return; }
       text('player-message', diagnosis.message, true);
-      $('renew').disabled = !diagnosis.retry;
-      showMp4.hidden = diagnosis.kind !== 'codec';
     });
     context.timer = setInterval(() => { if (active === context && !video.paused) saveProgress(context); }, 10000);
-    video.src = context.mediaUrl;
-    $('renew').disabled = false; $('start-over').disabled = false;
-  } catch (error) {
-    if (generation === playGeneration) { text('player-message', error.message, true); $('renew').disabled = false; }
-  }
+    video.src = context.mediaUrl; return true;
+  } catch (error) { if (generation === playGeneration) text('player-message', error.message, true); return false; }
 }
-$('renew').addEventListener('click', () => { if (retryFile) startPlayback(retryFile); });
-$('start-over').addEventListener('click', () => { if (active) startPlayback(active.file, true); });
-$('back-ten').addEventListener('click', () => { if (active?.ready) active.video.currentTime = Math.max(0, active.video.currentTime - 10); });
-$('forward-ten').addEventListener('click', () => { if (active?.ready && Number.isFinite(active.video.duration)) active.video.currentTime = Math.min(active.video.duration, active.video.currentTime + 10); });
 $('close-player').addEventListener('click', () => $('player').close());
 $('player').addEventListener('close', () => stopPlayback());
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveProgress(active, true); });

@@ -12,6 +12,17 @@ export function targetOf(input) {
   return target;
 }
 export const cleanText = (s, max = 300) => typeof s === 'string' ? s.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, max) : '';
+export function parseSizeBytes(value) {
+  if (Number.isSafeInteger(value) && value > 0) return value;
+  if (typeof value !== 'string') return null;
+  const text = value.trim().replace(/,/g, '');
+  if (/^[0-9]+$/.test(text)) { const n = Number(text); return Number.isSafeInteger(n) && n > 0 ? n : null; }
+  const m = /^([0-9]+(?:\.[0-9]+)?)\s*(B|KB|MB|GB|TB|KIB|MIB|GIB|TIB)$/i.exec(text);
+  if (!m) return null;
+  const units = { B: 1, KB: 1000, MB: 1000 ** 2, GB: 1000 ** 3, TB: 1000 ** 4, KIB: 1024, MIB: 1024 ** 2, GIB: 1024 ** 3, TIB: 1024 ** 4 };
+  const bytes = Number(m[1]) * units[m[2].toUpperCase()];
+  return Number.isSafeInteger(Math.round(bytes)) && bytes > 0 ? Math.round(bytes) : null;
+}
 export function sourceHints(source) {
   const structuredAudio = Array.isArray(source.audioCodecs) ? source.audioCodecs.join(' ') : '';
   const name = `${source.filename || ''} ${source.title || ''} ${source.label || ''} ${source.videoCodec || ''} ${structuredAudio} ${source.resolution || ''}`;
@@ -52,7 +63,10 @@ export function normalizeSources(raw) {
     const videoCodec = cleanText(item.videoCodec, 40);
     const audioCodecs = (Array.isArray(item.audioCodecs) ? item.audioCodecs : []).filter(v => typeof v === 'string').slice(0, 6).map(v => cleanText(v, 40));
     const resolution = cleanText(item.resolution, 20);
-    const source = { hash, filename, title, label: cleanText(item.name || item.label, 80), fileIdx, size: Number.isSafeInteger(sizeValue) && sizeValue > 0 ? sizeValue : null, videoCodec, audioCodecs, resolution };
+    const releaseQuality = cleanText(item.releaseQuality, 40);
+    const container = cleanText(item.container, 24);
+    const seeders = Number.isSafeInteger(item.seeders) && item.seeders >= 0 ? item.seeders : null;
+    const source = { hash, filename, title, label: cleanText(item.name || item.label, 80), fileIdx, size: parseSizeBytes(sizeValue), seeders, videoCodec, audioCodecs, resolution, releaseQuality, container };
     // Source file indexes are not TorBox file IDs. Never treat them as interchangeable.
     const key = `${hash}:${filename}:${fileIdx}`;
     if (!map.has(key)) map.set(key, { ...source, ...sourceHints(source) });
