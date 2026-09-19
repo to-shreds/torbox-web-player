@@ -26,8 +26,9 @@ test('episode filters reject other seasons and episodes', () => {
 test('series packs retain identity and defer individual file choice to existing selector', () => {
   assert.equal(normalizeIndexRows([{ ...row, imdb_id: episode.id, seasons: [1], episodes: [] }], episode).length, 1);
 });
-test('unknown size is not converted into a fake byte estimate', () => {
-  for (const size of ['1.5 GB', null, -1]) assert.equal(normalizeIndexRows([{ ...row, size }], movie)[0].size, null);
+test('known size strings are parsed while unknown sizes stay unknown', () => {
+  assert.equal(normalizeIndexRows([{ ...row, size: '1.5 GB' }], movie)[0].size, 1500000000);
+  for (const size of [null, -1, 'not-a-size']) assert.equal(normalizeIndexRows([{ ...row, size }], movie)[0].size, null);
 });
 test('real empty result remains distinct from a malformed or mismatched result', () => {
   assert.deepEqual(normalizeIndexRows([], movie), []);
