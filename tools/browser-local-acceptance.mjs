@@ -12,8 +12,8 @@ await fs.mkdir('.release-results',{recursive:true});
 const results=[];
 async function context(browser){const ctx=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'}),requests=[],errors=[];
  await ctx.route('**/*',async route=>{const req=route.request(),url=new URL(req.url());if(url.origin===origin)return route.continue();requests.push({host:url.hostname,path:url.pathname,method:req.method()});
- const headers={'access-control-allow-origin':'*','access-control-allow-headers':'Authorization,Content-Type','access-control-allow-methods':'GET,POST,OPTIONS','access-control-expose-headers':'X-TorBox-Bridge','content-type':'application/json'};
- if(url.hostname.includes('onrender.com'))return route.abort('failed'); // Exercise real client failover, not a mocked bridge function.
+ const headers={'access-control-allow-origin':'*','access-control-allow-headers':'Authorization,Content-Type,Range','access-control-allow-methods':'GET,POST,OPTIONS,HEAD','access-control-expose-headers':'X-TorBox-Bridge,Content-Length,Content-Range,Accept-Ranges','content-type':'application/json'};
+ if(url.hostname.includes('onrender.com'))return route.abort('failed');
  if(req.method()==='OPTIONS')return route.fulfill({status:204,headers,body:''});
  if(url.hostname.endsWith('workers.dev')){headers['x-torbox-bridge']='cloudflare';let data;
    if(url.pathname.endsWith('/user/me'))data={plan:2};
@@ -28,7 +28,14 @@ async function context(browser){const ctx=await browser.newContext({viewport:{wi
  if(url.hostname.startsWith('stremthru.')){assert.ok(url.pathname.includes('/stremio/torz/')&&url.pathname.includes('/stream/'),'Configured StremThru prefix must be preserved');return route.fulfill({headers,body:JSON.stringify({streams:[{infoHash:hash,title:'Fixture.Movie.720p.h264.aac.mp4',behaviorHints:{filename:'Fixture.Movie.720p.h264.aac.mp4',videoSize:50000000},videoCodec:'h264',audioCodecs:['aac']}]})});}
  if(url.hostname.startsWith('zilean'))return route.fulfill({headers,body:'[]'});
  if(url.hostname==='mediafusion.elfhosted.com')return route.fulfill({headers:{...headers,'content-type':'application/xml'},body:'<rss><channel></channel></rss>'});
- if(url.hostname==='store.tb-cdn.io')return route.fulfill({status:200,headers:{'content-type':'video/mp4','accept-ranges':'bytes'},body:video});
+ if(url.hostname==='store.tb-cdn.io'){
+   const range=/^bytes=(\d+)-(\d*)$/.exec(req.headers().range||'');
+   const start=range?Number(range[1]):0,end=range&&range[2]?Math.min(Number(range[2]),video.length-1):video.length-1;
+   if(start>=video.length||end<start)return route.fulfill({status:416,headers:{'content-range':'bytes */'+video.length},body:''});
+   const part=video.subarray(start,end+1),h={...headers,'content-type':'video/mp4','accept-ranges':'bytes','content-length':String(part.length)};
+   if(range)h['content-range']=`bytes ${start}-${end}/${video.length}`;
+   return route.fulfill({status:range?206:200,headers:h,body:req.method()==='HEAD'?'':part});
+ }
  errors.push('Unexpected network host '+url.hostname);return route.abort();
  });
  ctx.on('page',p=>p.on('pageerror',error=>errors.push(error.message)));
@@ -43,14 +50,17 @@ try{for(const [name,engine] of Object.entries({chromium,firefox,webkit})){
  const link=await page.evaluate(()=>{const c=document.getElementById('portable-qr'),d=c.getContext('2d').getImageData(0,0,c.width,c.height);return jsQR(d.data,d.width,d.height).data;});assert.ok(link.includes('#setup=tw2.'));
  const b=await context(browser),receiver=await b.ctx.newPage();await receiver.goto(link);await receiver.locator('#portable-preview').waitFor({state:'visible'});assert.equal(new URL(receiver.url()).hash,'');assert.equal(b.requests.filter(r=>r.path.endsWith('/user/me')).length,0,'No connection sent before confirmation');await receiver.locator('#portable-import-confirm').click();await receiver.locator('#workspace').waitFor({state:'visible'});await receiver.waitForFunction(()=>JSON.parse(localStorage.getItem('torbox-recent-v1')||'[]')[0]?.title==='Fixture Movie');
  const state=await receiver.evaluate(()=>({recent:JSON.parse(localStorage.getItem('torbox-recent-v1')),lists:JSON.parse(localStorage.getItem('torbox-watchlist-v1')),parent:localStorage.getItem('torbox-parental-controls-v1')}));assert.equal(state.recent[0].position,125);assert.equal(state.lists['viewer-1'][0].id,'tt0111161');assert.equal(state.parent,null);
- // Password-protected file path with an explicit wrong-password rejection.
  await page.locator('#portable-password').fill('fixture-transfer-password');const downloadEvent=page.waitForEvent('download');await page.locator('#portable-export-file').click();const download=await downloadEvent,file='.release-results/'+name+'.twsetup';await download.saveAs(file);
  await receiver.locator('#open-settings').click();await receiver.locator('#portable-open-receive').click();await receiver.locator('#portable-file').setInputFiles(file);await receiver.locator('#portable-unlock').waitFor({state:'visible'});await receiver.locator('#portable-unlock-password').fill('wrong-password');await receiver.locator('#portable-unlock-button').click();await receiver.locator('#portable-message.error').waitFor();assert.equal(await receiver.locator('#portable-preview').isVisible(),false);await receiver.locator('#portable-unlock-password').fill('fixture-transfer-password');await receiver.locator('#portable-unlock-button').click();await receiver.locator('#portable-preview').waitFor({state:'visible'});await receiver.locator('#portable-import-confirm').click();await receiver.locator('#portable-dialog').waitFor({state:'hidden'});
- // Old bookmarks converge on the main player without altering browser storage.
  await receiver.goto(base+'direct/');await receiver.waitForURL(base);await receiver.locator('#workspace').waitFor({state:'visible'});assert.equal(await receiver.evaluate(()=>JSON.parse(localStorage.getItem('torbox-recent-v1'))[0].position),125);
  await receiver.screenshot({path:'.release-results/'+name+'-home.png',fullPage:true});
  assert.equal(await receiver.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'No mobile horizontal overflow');
- await receiver.locator('#catalog-grid button').first().click();await receiver.locator('#title-dialog').waitFor({state:'visible'});await receiver.getByRole('button',{name:'Play',exact:true}).first().click();await receiver.locator('#video-slot video').waitFor({state:'attached',timeout:30000});await receiver.waitForFunction(()=>{const v=document.querySelector('#video-slot video');return v&&v.currentTime>0.1;},{},{timeout:20000});
+ await receiver.locator('#catalog-grid button').first().click();await receiver.locator('#title-dialog').waitFor({state:'visible'});await receiver.getByRole('button',{name:'Play',exact:true}).first().click();await receiver.locator('#video-slot video').waitFor({state:'attached',timeout:30000});
+ try{await receiver.waitForFunction(()=>{const v=document.querySelector('#video-slot video');return v&&v.currentTime>0.1;},{},{timeout:12000});}
+ catch(error){
+   const observation=await receiver.evaluate(async()=>{const v=document.querySelector('#video-slot video');const runtime=await import('./direct-runtime.js');return{video:v?{time:v.currentTime,duration:v.duration,readyState:v.readyState,networkState:v.networkState,error:v.error?.code,message:v.error?.message,paused:v.paused,ended:v.ended,src:v.currentSrc,canPlay:v.canPlayType('video/mp4; codecs="avc1.42E01E,mp4a.40.2"')}:null,playerMessage:document.getElementById('player-message').textContent,trace:runtime.recentDirectTrace()};});
+   console.error('FIXTURE_PLAYBACK_FAILURE',JSON.stringify({engine:name,observation,errors:b.errors,requests:b.requests},null,2));await receiver.screenshot({path:'.release-results/'+name+'-playback-failure.png',fullPage:true});throw error;
+ }
  assert.ok(b.requests.some(r=>r.host==='store.tb-cdn.io'));assert.ok(b.requests.some(r=>r.host.startsWith('stremthru.')&&r.path.includes('/stremio/torz/')));
  assert.deepEqual(a.errors,[]);assert.deepEqual(b.errors,[]);results.push({engine:name,passed:true,checks:['simple onboarding','automatic Render failure fallback','search keyboard blur','actual QR read/import','password-protected file import','metadata hydration','old bookmark redirect','state preservation','mobile layout','source lookup prefix','synthetic H264/AAC playback']});console.log(name+': all browser acceptance checks passed');
  await a.ctx.close();await b.ctx.close();
