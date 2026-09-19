@@ -54,7 +54,7 @@ function createResolutionSelect(value = getResolution()) {
   select.value = value; select.addEventListener('change',()=>setResolution(select.value)); return select;
 }
 
-export function createDiscoveryUI({ api, play, loadLibrary }) {
+export function createDiscoveryUI({ api, play, loadLibrary, driveTest }) {
   let view='discover', active=false, guestMode=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0;
   let catalogAbort,titleAbort,sourceAbort,searchTimer,pollTimer,metas=[],nextSkip=null,currentMeta;
 
@@ -137,13 +137,31 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
     finally{if(trigger&&trigger.isConnected){trigger.disabled=false;trigger.textContent=original;}}
   }
 
+  async function quickDriveShare(meta,target,episodeName='',trigger){
+    if(typeof driveTest!=='function')return false;
+    const original=trigger?.textContent;if(trigger){trigger.disabled=true;trigger.textContent='Preparing…';}
+    message('detail-message','Finding the recommended source for Drive…');
+    try{
+      const resolution=getResolution(),registered=await registeredSources(target,AbortSignal.timeout(45000));
+      const best=recommendSource(registered.sources,target.type,resolution)||recommendSource(registered.sources,target.type,'auto');
+      if(!best)throw new Error('No source matches this resolution.');
+      message('detail-message',best.cached?'Preparing Drive export…':'Preparing the recommended source in TorBox…');
+      const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
+      const context=buildContext(meta,target,episodeName,resolution,best);
+      if($('source-dialog').open)$('source-dialog').close();
+      if($('title-dialog').open)$('title-dialog').close();
+      await driveTest(result.file,context);return true;
+    }catch(e){message('detail-message',e.message,true);return false;}
+    finally{if(trigger&&trigger.isConnected){trigger.disabled=false;trigger.textContent=original;}}
+  }
+
   function titleResolutionControl(){
     const label=element('label','Quality','compact-select');const select=createResolutionSelect();label.append(select);return label;
   }
 
   async function showTitle(meta){
     cancelTitle();currentMeta=null;const generation=titleGeneration;titleAbort=new AbortController();$('title-content').replaceChildren();$('episode-area').replaceChildren();
-    $('detail-title').textContent=meta.name;$('share-title').hidden=guestMode;message('detail-message','Loading…');if(!$('title-dialog').open)$('title-dialog').showModal();
+    $('detail-title').textContent=meta.name;$('share-title').hidden=true;message('detail-message','Loading…');if(!$('title-dialog').open)$('title-dialog').showModal();
     try{
       const data=await api(`/api/discover/meta?type=${meta.type}&id=${meta.id}`,{signal:AbortSignal.any([titleAbort.signal,AbortSignal.timeout(20000)])});
       if(generation!==titleGeneration||!$('title-dialog').open||!active)return;currentMeta=data.meta;
@@ -156,8 +174,10 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
 
   function renderMovieActions(meta){
     const bar=element('div','','movie-action-bar');bar.append(titleResolutionControl());
-    const actions=element('div','','row-actions');const playButton=button('Play',()=>quickPlay(meta,{type:'movie',id:meta.id},'',playButton),true);
-    actions.append(playButton,button('More options',()=>openOptions(meta,{type:'movie',id:meta.id})));bar.append(actions);$('episode-area').replaceChildren(bar);
+    const target={type:'movie',id:meta.id},actions=element('div','','row-actions');
+    const playButton=button('Play',()=>quickPlay(meta,target,'',playButton),true);
+    const shareButton=button('Share',()=>quickDriveShare(meta,target,'',shareButton));
+    actions.append(playButton,shareButton,button('Options',()=>openOptions(meta,target)));bar.append(actions);$('episode-area').replaceChildren(bar);
   }
 
   function renderEpisodes(meta){
@@ -171,9 +191,11 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
         const row=element('article','','episode-row');const number=element('strong',String(episode.episode).padStart(2,'0'),'episode-number');
         const info=element('div','','episode-info');info.append(element('strong',episode.name));if(episode.description)info.append(element('span',episode.description,'episode-overview'));
         const actions=element('div','','episode-actions');const target={type:'series',id:meta.id,season:episode.season,episode:episode.episode};
-        const playButton=button('Play',()=>quickPlay(meta,target,episode.name,playButton),true);const more=button('Options',()=>openOptions(meta,target,episode.name));more.setAttribute('aria-label',`More options for ${episode.name}`);
-        actions.append(playButton,more);row.append(number,info,actions);
-        if(episode.released&&Date.parse(episode.released)>Date.now()){playButton.disabled=true;more.disabled=true;row.classList.add('future');}
+        const playButton=button('Play',()=>quickPlay(meta,target,episode.name,playButton),true);
+        const shareButton=button('Share',()=>quickDriveShare(meta,target,episode.name,shareButton));
+        const more=button('Options',()=>openOptions(meta,target,episode.name));more.setAttribute('aria-label',`More options for ${episode.name}`);
+        actions.append(playButton,shareButton,more);row.append(number,info,actions);
+        if(episode.released&&Date.parse(episode.released)>Date.now()){playButton.disabled=true;shareButton.disabled=true;more.disabled=true;row.classList.add('future');}
         list.append(row);
       }
     };
@@ -199,7 +221,12 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
     if(best){
       const box=element('section','','recommended'),copy=element('div','','recommended-copy');
       copy.append(element('div','Recommended','recommended-kicker'),element('div',best.title,'recommended-title'),element('p',[best.cached?'Cached':'Not cached',qualityText(best),formatBytes(best.size),Number.isSafeInteger(best.seeders)?best.seeders+' seeders':''].filter(Boolean).join(' · '),'recommended-meta'));
-      box.append(copy,button(best.cached?'Play':'Prepare',async()=>{try{const result=await readyFile(best,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();closeTitleForPlayback();await play(result.file,context);}catch(e){status.textContent=e.message;status.classList.add('error');}},true));area.append(box);
+      const recommendedActions=element('div','','recommended-actions');
+      recommendedActions.append(
+        button(best.cached?'Play':'Prepare',async()=>{try{const result=await readyFile(best,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();closeTitleForPlayback();await play(result.file,context);}catch(e){status.textContent=e.message;status.classList.add('error');}},true),
+        button('Share',async()=>{try{const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});$('source-dialog').close();if($('title-dialog').open)$('title-dialog').close();await driveTest(result.file,context);}catch(e){status.textContent=e.message;status.classList.add('error');}})
+      );
+      box.append(copy,recommendedActions);area.append(box);
     }
 
     const alternates=visible.filter(source=>source.id!==best?.id);
