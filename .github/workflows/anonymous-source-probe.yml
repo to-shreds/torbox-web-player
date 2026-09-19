@@ -22,7 +22,10 @@ jobs:
             ['comet','https://comet.elfhosted.com'],
             ['mediafusion','https://mediafusion.elfhosted.com'],
             ['knightcrawler','https://knightcrawler.elfhosted.com'],
-            ['stremthru-torz','https://stremthru.elfhosted.com/stremio/torz/eyJzdG9yZXMiOlt7ImMiOiJwMnAiLCJ0IjoiIn1dfQ==']
+            ['jackettio','https://jackettio.elfhosted.com'],
+            ['aiostreams','https://aiostreams.elfhosted.com'],
+            ['stremthru-main','https://stremthru.13377001.xyz/stremio/torz/eyJzdG9yZXMiOlt7ImMiOiJwMnAiLCJ0IjoiIn1dfQ=='],
+            ['stremthru-elfhosted','https://stremthru.elfhosted.com/stremio/torz/eyJzdG9yZXMiOlt7ImMiOiJwMnAiLCJ0IjoiIn1dfQ==']
           ];
           const targets = [
             ['movie','tt1160419'],
