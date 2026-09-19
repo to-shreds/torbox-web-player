@@ -113,3 +113,24 @@ main{max-width:1160px;padding:1rem clamp(.8rem,3vw,2rem) 3rem}.workspace-bar{dis
 .still-watching-card strong{font-size:1.05rem}
 .still-watching-card span{font-size:.76rem;line-height:1.45;color:#a8bbc9}
 .still-watching-card button{justify-self:center;min-width:150px}
+
+
+/* v0.14 Kid Mode */
+.kid-mode .advanced-only{display:none!important}
+.kid-mode-badge{display:inline-flex;align-items:center;min-height:24px;padding:.2rem .5rem;border:1px solid #41625d;border-radius:999px;background:#16312f;color:#d7f7f1;font-size:.64rem;font-weight:750}
+.kid-mode-badge[hidden]{display:none}
+.settings-group input[type=number]{width:100%;margin-top:.2rem}
+.kid-time-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(105px,.7fr);gap:.35rem;margin-top:.2rem}
+.kid-time-row input,.kid-time-row select{margin-top:0}
+.kid-usage-summary{grid-column:1/-1;margin:0;padding:.55rem .65rem;border:1px solid #2d414d;border-radius:9px;background:#0e1822;color:#c7d8e3;font-size:.72rem;line-height:1.4}
+.kid-limit-dialog{width:min(92vw,460px);text-align:center;padding:1.1rem}
+.kid-limit-dialog h2{margin:.1rem 0 .5rem}
+.kid-limit-dialog>p{margin:.35rem 0 .8rem}
+#kid-limit-pin-form{display:grid;gap:.55rem;margin-top:.75rem;text-align:left}
+#kid-limit-pin-form[hidden]{display:none}
+.kid-parent-actions{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-top:.8rem}
+.kid-parent-actions[hidden]{display:none}
+.kid-parent-actions button{min-height:42px}
+#parent-pin-form,#parent-pin-change-form{display:grid;gap:.6rem}
+#parent-pin-form input,#parent-pin-change-form input,#kid-limit-pin-form input{width:100%;margin-top:.2rem}
+@media(max-width:620px){.kid-time-row{grid-template-columns:1fr 110px}.kid-parent-actions{grid-template-columns:1fr}}
