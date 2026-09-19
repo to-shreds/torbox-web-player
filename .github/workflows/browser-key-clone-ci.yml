@@ -21,5 +21,7 @@ jobs:
         with:
           node-version: '24'
       - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Temporary live Cinemeta browse check
+        run: node --input-type=module -e "import {Catalog} from './lib/catalog.mjs'; const c=new Catalog(); for (const type of ['movie','series']) { for (const feed of ['popular','featured','new']) { const r=await c.search({type,feed}); console.log('LIVE_BROWSE',type,feed,r.metas.length,r.metas[0]?.id,r.metas[0]?.name); if(!r.metas.length) process.exitCode=1; } }"
       - run: npm run check
       - run: npm test
