@@ -24,32 +24,13 @@ jobs:
         shell: bash
         run: |
           set -x
-          for u in \
-            'https://v3-cinemeta.strem.io/catalog/movie/top.json' \
-            'https://v3-cinemeta.strem.io/catalog/movie/top/genre=Action.json' \
-            'https://v3-cinemeta.strem.io/catalog/movie/imdbRating.json' \
-            'https://v3-cinemeta.strem.io/catalog/movie/year/genre=2026.json'; do
-            code=$(curl -L -sS -o /tmp/out -w '%{http_code}' "$u" || true)
-            echo "PROBE $code $u bytes=$(wc -c </tmp/out 2>/dev/null || echo 0) head=$(head -c 120 /tmp/out | tr '\n' ' ')"
-          done
           code=$(curl -L -sS -o /tmp/torbox-success -w '%{http_code}' 'https://torbox.app/google/success' || true)
           echo "TORBOX_SUCCESS $code bytes=$(wc -c </tmp/torbox-success 2>/dev/null || echo 0)"
-          cat /tmp/torbox-success
-          echo
           bundle=$(grep -Eo 'src="/assets/index-[^"]+\.js"' /tmp/torbox-success | head -n1 | cut -d'"' -f2)
           echo "TORBOX_BUNDLE=$bundle"
           curl -L -sS "https://torbox.app$bundle" -o /tmp/torbox-bundle
           echo "TORBOX_BUNDLE_BYTES=$(wc -c </tmp/torbox-bundle)"
-          python - <<'PY'
-import re
-text=open('/tmp/torbox-bundle','r',encoding='utf-8',errors='ignore').read()
-for needle in ['google/success','postMessage','window.opener','opener','expires_at','expires_in']:
-    print('NEEDLE',needle,'COUNT',text.count(needle))
-    for m in list(re.finditer(re.escape(needle),text))[:5]:
-        a=max(0,m.start()-500);b=min(len(text),m.end()+1200)
-        print(text[a:b])
-        print('\n---\n')
-PY
+          python -c "import re; t=open('/tmp/torbox-bundle','r',encoding='utf-8',errors='ignore').read(); ns=['google/success','postMessage','window.opener','opener','expires_at','expires_in']; [print('NEEDLE',n,'COUNT',t.count(n), *[t[max(0,m.start()-350):min(len(t),m.end()+900)] for m in list(re.finditer(re.escape(n),t))[:3]], sep='\\n---\\n') for n in ns]"
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run check
       - run: npm test
