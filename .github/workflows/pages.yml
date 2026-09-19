@@ -6,6 +6,7 @@ on:
       - 'public/**'
       - '.github/workflows/pages.yml'
       - '.github/clone-revision'
+      - '.github/direct-revision'
   workflow_dispatch:
 permissions:
   contents: read
@@ -31,12 +32,18 @@ jobs:
         with:
           ref: browser-key-clone
           path: clone-src
+      - name: Checkout browser-direct experiment
+        uses: actions/checkout@v6
+        with:
+          ref: browser-direct-experiment
+          path: direct-src
       - name: Assemble Pages site
         shell: bash
         run: |
-          mkdir -p site/key
+          mkdir -p site/key site/direct
           cp -a main-src/public/. site/
           cp -a clone-src/public/. site/key/
+          cp -a direct-src/public/. site/direct/
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload combined frontend
