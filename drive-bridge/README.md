@@ -23,6 +23,8 @@ When a share is published, the bridge records the Drive file ID and deletion tim
 
 If a deletion attempt fails, the bridge keeps the pending record and schedules another attempt five minutes later.
 
+As a second safety net, `authorizeDriveBridge` installs an hourly cleanup trigger. Because this is a dedicated `drive.file` app, it permanently deletes any bridge-created Drive file older than 25 hours. That prevents an exported test file from being stranded indefinitely if the browser or Render disappears before the normal per-file timer is established.
+
 ## Download behavior
 
 By default, the bridge sets an "anyone with the link" reader permission and applies Google's reader download/copy restriction. The guest can use Drive's browser player, but Drive's download/print/copy controls are disabled for readers. This is not DRM and cannot prevent screen recording.

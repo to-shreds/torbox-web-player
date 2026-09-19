@@ -38,4 +38,5 @@ test('Drive test exposes timing, watch-only control, and permanent-delete contro
   assert.ok(bridge.includes("method: 'delete'"));
   assert.ok(bridge.includes("itemDownloadRestriction"));
   assert.ok(bridge.includes("cleanupExpiredShares"));
+  assert.ok(bridge.includes("cleanupBridgeOrphans"));
 });

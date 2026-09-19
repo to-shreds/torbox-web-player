@@ -43,8 +43,9 @@ function driveFetch_(url, options) {
 function authorizeDriveBridge() {
   // Run this once from the Apps Script editor to authorize Drive/API/trigger scopes.
   driveFetch_('https://www.googleapis.com/drive/v3/files?pageSize=1&fields=files(id)');
-  ScriptApp.getProjectTriggers();
-  return 'Drive bridge authorized';
+  ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'cleanupBridgeOrphans').forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('cleanupBridgeOrphans').timeBased().everyHours(1).create();
+  return 'Drive bridge authorized; hourly orphan cleanup installed';
 }
 function ping_() {
   driveFetch_('https://www.googleapis.com/drive/v3/files?pageSize=1&fields=files(id)');
@@ -147,4 +148,28 @@ function cleanupExpiredShares() {
   } else {
     scheduleNextCleanup_();
   }
+}
+
+function cleanupBridgeOrphans() {
+  // Safety net for a browser/Render failure before a per-file delete trigger could be scheduled.
+  // This dedicated bridge uses drive.file, so its visible files are files created/opened by this app.
+  const cutoff = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
+  const q = "trashed = false and createdTime < '" + cutoff + "'";
+  let pageToken = '';
+  do {
+    const url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) +
+      '&pageSize=100&fields=nextPageToken,files(id,name,createdTime)' +
+      (pageToken ? '&pageToken=' + encodeURIComponent(pageToken) : '');
+    const data = driveFetch_(url);
+    (data.files || []).forEach(file => {
+      try {
+        const response = UrlFetchApp.fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(file.id) + '?supportsAllDrives=true', {
+          method: 'delete', muteHttpExceptions: true, headers: authHeaders_()
+        });
+        const code = response.getResponseCode();
+        if (code !== 204 && code !== 404) console.warn('Orphan delete failed for ' + file.id + ': HTTP ' + code);
+      } catch (err) { console.warn('Orphan delete failed for ' + file.id + ': ' + err); }
+    });
+    pageToken = data.nextPageToken || '';
+  } while (pageToken);
 }
