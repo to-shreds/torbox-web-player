@@ -6,14 +6,18 @@ import { listRecent, recordRecent, removeRecent, recentForContext, resumePositio
 import { getSettings, saveSettings, resetSettings } from './settings.js';
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js';
 import { clearSearchHistory } from './search-history.js';
+import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js';
 const $ = id => document.getElementById(id);
-let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false;
+let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '';
 let discoveryUI;
 let viewer = 'viewer-1';
-try { const saved = sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
+try { const saved = localStorage.getItem('tw-viewer') || sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
 $('viewer').value = viewer;
+function kidEnabled(){return !guestMode&&getKidProfile(viewer).enabled===true;}
 function applyInterfaceMode(){
-  const full=getSettings().interfaceMode==='full';document.body.classList.toggle('mode-full',full);document.body.classList.toggle('mode-simple',!full);
+  const kid=kidEnabled(),full=!kid&&getSettings().interfaceMode==='full';
+  document.body.classList.toggle('mode-full',full);document.body.classList.toggle('mode-simple',!full);document.body.classList.toggle('kid-mode',kid);
+  const badge=$('kid-mode-badge');if(badge){badge.hidden=!kid;badge.title=kid?formatKidUsage(getKidProfile(viewer)):'';}
 }
 applyInterfaceMode();
 function setPlaybackHealth(state,detail=''){
@@ -26,6 +30,24 @@ function setHealthSource(context=active){
   for(const id of ['health-sound-good','health-sound-bad','health-source-bad'])$(id).disabled=!source;
 }
 function text(id, value, error = false) { $(id).textContent = value; $(id).classList.toggle('error', error); }
+function requestParentPin(message,onSuccess){
+  if(!hasParentPin()){if(typeof onSuccess==='function')onSuccess();return;}
+  parentPinCallback=onSuccess;$('parent-pin-prompt').textContent=message||'Enter the Parent PIN.';
+  $('parent-pin-input').value='';text('parent-pin-message','');
+  if(!$('parent-pin-dialog').open)$('parent-pin-dialog').showModal();
+  setTimeout(()=>$('parent-pin-input').focus(),0);
+}
+$('close-parent-pin').addEventListener('click',()=>{parentPinCallback=null;$('parent-pin-dialog').close();});
+$('parent-pin-form').addEventListener('submit',async event=>{
+  event.preventDefault();const button=event.submitter;button.disabled=true;text('parent-pin-message','Checking…');
+  try{
+    const ok=await verifyParentPin($('parent-pin-input').value);$('parent-pin-input').value='';
+    if(!ok){text('parent-pin-message','Incorrect PIN.',true);return;}
+    const callback=parentPinCallback;parentPinCallback=null;$('parent-pin-dialog').close();text('parent-pin-message','');
+    if(typeof callback==='function')await callback();
+  }catch(error){text('parent-pin-message',error.message,true);}
+  finally{button.disabled=false;}
+});
 function formatDriveSize(bytes) { return Number.isFinite(bytes) && bytes > 0 ? (bytes / 1024 ** 3).toFixed(2) + ' GB' : 'size unknown'; }
 function formatDriveElapsed(ms) {
   const seconds = Math.max(0, Math.round((ms || 0) / 1000));
@@ -238,7 +260,7 @@ $('login-form').addEventListener('submit', async event => {
 $('forget-key').addEventListener('click', async () => {
   await forgetApiKey(); $('remember-key').checked = false; text('login-message', 'Saved key removed from this device.');
 });
-$('logout').addEventListener('click', async () => {
+async function performLogout(){
   await stopPlayback();
   try {
     await api('/api/logout', { method: 'POST', data: {} });
@@ -250,11 +272,21 @@ $('logout').addEventListener('click', async () => {
       autoLoginTried = true; show('login'); text('login-message', 'Temporary access ended.');
       return;
     }
-    try { sessionStorage.removeItem('tw-viewer'); } catch {}
     autoLoginTried = true; show('login');
   } catch (error) { text('login-message', error.message, true); }
+}
+$('logout').addEventListener('click',()=>{if(kidEnabled()&&hasParentPin())requestParentPin('Enter the Parent PIN to sign out.',performLogout);else performLogout();});
+async function switchViewer(next){
+  if(!['viewer-1','viewer-2'].includes(next)||next===viewer)return;
+  await stopPlayback();if($('player').open)$('player').close();viewer=next;$('viewer').value=viewer;
+  try{localStorage.setItem('tw-viewer',viewer);sessionStorage.setItem('tw-viewer',viewer);}catch{}
+  applyInterfaceMode();renderRecent();discoveryUI?.settingsChanged();
+}
+$('viewer').addEventListener('change',()=>{
+  const target=$('viewer').value;$('viewer').value=viewer;
+  const change=()=>switchViewer(target);
+  if(kidEnabled()&&hasParentPin())requestParentPin('Enter the Parent PIN to change viewers.',change);else change();
 });
-$('viewer').addEventListener('change', () => { stopPlayback(); if ($('player').open) $('player').close(); viewer = $('viewer').value; try { sessionStorage.setItem('tw-viewer', viewer); } catch {} });
 function hidePauseCard(){ $('pause-card').hidden=true; }
 function updatePauseCard(context=active){
   if(!context||!getSettings().pauseOverlay||!context.video?.paused||context.video.ended||!context.started){hidePauseCard();return;}
@@ -329,12 +361,55 @@ function scheduleNextEpisode(context){
   let remaining=delay;$('up-next-title').textContent=`Next · S${next.season}E${next.episode} ${next.name||''}`;clearNextCountdown();$('up-next-card').hidden=false;$('up-next-time').textContent=`Playing in ${remaining}s`;
   nextCountdownTimer=setInterval(async()=>{if(active!==context){clearNextCountdown();return;}remaining-=1;if(remaining>0){$('up-next-time').textContent=`Playing in ${remaining}s`;return;}clearNextCountdown();text('player-message','Opening next episode…');const moved=await discoveryUI.playNext(playbackContext);if(!moved&&active===context)text('player-message','Next episode could not be selected automatically.',true);},1000);
 }
+function updateKidLimitDialog(reason=kidLimitReason){
+  const profile=getKidProfile(viewer),titles={time:'Watching time is finished',episodes:'Episode limit reached',movies:'Movie limit reached'};
+  $('kid-limit-title').textContent=titles[reason]||'Watching limit reached';
+  $('kid-limit-message').textContent='Ask a parent to continue.';
+  $('kid-limit-summary').textContent=formatKidUsage(profile);
+}
+function showKidLimit(block,retry=null){
+  kidLimitReason=block?.reason||'limit';pendingKidPlayback=retry;
+  updateKidLimitDialog();$('kid-parent-actions').hidden=true;$('kid-limit-pin-form').hidden=true;$('kid-limit-pin').value='';text('kid-limit-pin-message','');
+  if(!$('kid-limit-dialog').open)$('kid-limit-dialog').showModal();
+  if(active?.video&&!active.video.paused)active.video.pause();
+  releaseWakeLock();
+}
+function tickKidUsage(context,force=false){
+  if(!context||guestMode||!context.playbackContext)return;
+  const now=Date.now(),video=context.video,position=Number.isFinite(video.currentTime)?video.currentTime:0;
+  if(!context.kidLastAt){context.kidLastAt=now;context.kidLastPosition=position;return;}
+  const wall=Math.max(0,(now-context.kidLastAt)/1000),media=position-context.kidLastPosition,rate=Math.max(.25,Number(video.playbackRate)||1);
+  context.kidLastAt=now;context.kidLastPosition=position;
+  if((!force&&(video.paused||video.ended))||wall<=0||media<=.05)return;
+  if(media>Math.max(15,wall*rate*3+5))return;
+  const seconds=Math.min(wall,media/rate*1.15);if(seconds<=.05)return;
+  const result=consumeKidPlayback(context.viewer,context.playbackContext,seconds,Number.isFinite(video.duration)?video.duration:0);
+  const badge=$('kid-mode-badge');if(badge&&!badge.hidden)badge.title=formatKidUsage(result.profile);
+  if(result.timeBlocked&&active===context&&!$('kid-limit-dialog').open)showKidLimit({reason:'time'});
+}
+async function resumeAfterKidParentAction(){
+  updateKidLimitDialog();applyInterfaceMode();
+  const retry=pendingKidPlayback;pendingKidPlayback=null;kidLimitReason='';
+  if($('kid-limit-dialog').open)$('kid-limit-dialog').close();
+  if(retry)return startPlayback(retry.file,retry.playbackContext,retry.retryCount||0);
+  if(active?.video?.paused){
+    const block=canStartKidPlayback(viewer,active.playbackContext);
+    if(!block.allowed){showKidLimit(block);return false;}
+    active.video.play().catch(()=>text('player-message','Tap play to continue.'));
+  }
+  return true;
+}
+
 async function detachPlayback() {
-  const old = active; active = null; hidePauseCard();clearNextCountdown();await releaseWakeLock();
-  if (old) { clearInterval(old.timer);clearTimeout(old.bufferTimer);clearTimeout(old.sleepTimer);clearTimeout(old.healthyTimer); const saving = saveProgress(old, true); old.video.pause(); old.video.removeAttribute('src'); old.video.load(); old.video.remove(); await saving; }
+  const old = active;if(old)tickKidUsage(old,true); active = null; hidePauseCard();clearNextCountdown();await releaseWakeLock();
+  if (old) { clearInterval(old.timer);clearInterval(old.kidTimer);clearTimeout(old.bufferTimer);clearTimeout(old.sleepTimer);clearTimeout(old.healthyTimer); const saving = saveProgress(old, true); old.video.pause(); old.video.removeAttribute('src'); old.video.load(); old.video.remove(); await saving; }
 }
 async function stopPlayback() { playGeneration++; clearStillWatchingTimer(); hideStillWatchingPrompt(); await detachPlayback(); }
 async function startPlayback(file, playbackContext = null, retryCount = 0) {
+  if(!guestMode){
+    const block=canStartKidPlayback(viewer,playbackContext);
+    if(!block.allowed){showKidLimit(block,{file,playbackContext,retryCount});return false;}
+  }
   const generation = ++playGeneration, selectedViewer = viewer;
   await detachPlayback(); if (generation !== playGeneration) return false;
   $('playing-title').textContent = file.title; text('player-message', 'Opening…'); setPlaybackHealth('Opening','Requesting a fresh TorBox link…'); $('video-slot').replaceChildren();
@@ -343,7 +418,7 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
     const result = await api('/api/playback', { method: 'POST', data: { viewer: selectedViewer, videoId: file.id, startOver: playbackContext?.forceStartOver===true } });
     if (generation !== playGeneration || !$('player').open || selectedViewer !== viewer) return false;
     const video = document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.playbackRate=getSettings().playbackRate;
-    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, retryCount, diagnosing:false, recovering:false, ready:false, started:false, timer:null, bufferTimer:null, sleepTimer:null, healthyTimer:null, sourceLearned:false, lastTime:0 };
+    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, retryCount, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, sourceLearned:false, lastTime:0 };
     active = context; $('video-slot').replaceChildren(video);setHealthSource(context);
     const clearBuffer = () => { clearTimeout(context.bufferTimer); context.bufferTimer = null; };
     const recover = async reason => {
@@ -375,16 +450,16 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
       video.play().catch(error => { if (active === context && error.name === 'NotAllowedError') text('player-message', 'Tap play'); });
     });
     video.addEventListener('playing', () => { if (active === context) {
-      context.started = true; context.recovering = false; clearBuffer(); hidePauseCard(); clearNextCountdown(); acquireWakeLock(); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); setPlaybackHealth('Playing','Stream is advancing normally.'); text('player-message', '');
+      context.started = true; context.recovering = false; clearBuffer(); hidePauseCard(); clearNextCountdown(); acquireWakeLock(); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); context.kidLastAt=Date.now();context.kidLastPosition=Number.isFinite(video.currentTime)?video.currentTime:0;if(!context.kidTimer)context.kidTimer=setInterval(()=>tickKidUsage(context),5000); setPlaybackHealth('Playing','Stream is advancing normally.'); text('player-message', '');
       clearTimeout(context.healthyTimer);if(getSettings().autoLearnSources&&playbackContext?.sourceInfo&&!context.sourceLearned)context.healthyTimer=setTimeout(()=>{if(active===context&&!video.paused&&video.currentTime>5){rememberSourceSuccess(playbackContext.current,playbackContext.sourceInfo);context.sourceLearned=true;setHealthSource(context);}},15000);
     } });
     video.addEventListener('canplay',()=>{clearBuffer();if(active===context&&context.started&&!video.paused)setPlaybackHealth('Playing','Stream is ready.');});
     video.addEventListener('timeupdate', () => { if (active !== context || !context.ready) return; if (Math.abs(video.currentTime - context.lastTime) > .2) { context.lastTime = video.currentTime; clearBuffer(); } if(video.paused)updatePauseCard(context); });
     video.addEventListener('waiting', armBuffer); video.addEventListener('stalled',()=>{setPlaybackHealth('Stalled','The browser reports that data stopped arriving.');armBuffer();});
-    video.addEventListener('pause', () => { if (active === context && !context.recovering) { clearTimeout(context.healthyTimer);releaseWakeLock(); if(!stillWatchingPromptActive&&!video.ended)clearStillWatchingTimer(); saveProgress(context); if(stillWatchingPromptActive){hidePauseCard();setPlaybackHealth('Still watching?','Tap Keep watching to continue.');}else{setPlaybackHealth('Paused','Playback is paused.');updatePauseCard(context);} } });
+    video.addEventListener('pause', () => { if(active===context)tickKidUsage(context,true); if (active === context && !context.recovering) { clearTimeout(context.healthyTimer);releaseWakeLock(); if(!stillWatchingPromptActive&&!video.ended)clearStillWatchingTimer(); saveProgress(context); if(stillWatchingPromptActive){hidePauseCard();setPlaybackHealth('Still watching?','Tap Keep watching to continue.');}else if(!$('kid-limit-dialog').open){setPlaybackHealth('Paused','Playback is paused.');updatePauseCard(context);} } });
     video.addEventListener('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });
     video.addEventListener('ended', async () => {
-      if (active !== context) return; clearBuffer(); hidePauseCard(); await saveProgress(context);
+      if (active !== context) return; tickKidUsage(context,true); clearBuffer(); hidePauseCard(); await saveProgress(context);
       if (playbackContext) { recordRecent(playbackContext, video.duration || video.currentTime, video.duration || 0, { completed:true }); scheduleRecentRender(true); }
       clearTimeout(context.healthyTimer);setPlaybackHealth('Finished','Playback completed.');await releaseWakeLock();scheduleNextEpisode(context);
     });
@@ -412,15 +487,36 @@ $('health-sound-bad').addEventListener('click',()=>rejectCurrentSource('audio'))
 $('health-source-bad').addEventListener('click',()=>rejectCurrentSource('source'));
 $('keep-watching').addEventListener('click',()=>{
   if(!active)return;
+  const block=canStartKidPlayback(viewer,active.playbackContext);if(!block.allowed){hideStillWatchingPrompt();showKidLimit(block);return;}
   clearStillWatchingTimer();hideStillWatchingPrompt();text('player-message','');
   active.video.play().catch(()=>text('player-message','Tap play to continue.'));
 });
+$('kid-limit-dialog').addEventListener('cancel',event=>event.preventDefault());
+$('kid-parent-options').addEventListener('click',()=>{
+  $('kid-limit-pin-form').hidden=false;$('kid-limit-pin').value='';text('kid-limit-pin-message','');
+  setTimeout(()=>$('kid-limit-pin').focus(),0);
+});
+$('kid-limit-pin-form').addEventListener('submit',async event=>{
+  event.preventDefault();const button=event.submitter;button.disabled=true;text('kid-limit-pin-message','Checking…');
+  try{
+    const ok=await verifyParentPin($('kid-limit-pin').value);$('kid-limit-pin').value='';
+    if(!ok){text('kid-limit-pin-message','Incorrect PIN.',true);return;}
+    $('kid-limit-pin-form').hidden=true;$('kid-parent-actions').hidden=false;text('kid-limit-pin-message','');
+  }catch(error){text('kid-limit-pin-message',error.message,true);}
+  finally{button.disabled=false;}
+});
+$('kid-add-15').addEventListener('click',()=>{grantKidExtension(viewer,{minutes:15});resumeAfterKidParentAction();});
+$('kid-add-30').addEventListener('click',()=>{grantKidExtension(viewer,{minutes:30});resumeAfterKidParentAction();});
+$('kid-add-episode').addEventListener('click',()=>{grantKidExtension(viewer,{episodes:1});resumeAfterKidParentAction();});
+$('kid-add-movie').addEventListener('click',()=>{grantKidExtension(viewer,{movies:1});resumeAfterKidParentAction();});
+$('kid-reset-limit').addEventListener('click',()=>{resetKidAllowance(viewer);resumeAfterKidParentAction();});
+$('kid-turn-off').addEventListener('click',()=>{updateKidProfile(viewer,{enabled:false});resumeAfterKidParentAction();});
 $('player').addEventListener('pointerdown',()=>{
   if(active&&!stillWatchingPromptActive&&!active.video.paused)resetStillWatchingTimer();
 });
 $('close-player').addEventListener('click', () => $('player').close());
 $('player').addEventListener('close', () => stopPlayback());
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { saveProgress(active, true); releaseWakeLock(); } else if(active&&!active.video.paused) acquireWakeLock(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { tickKidUsage(active,true);saveProgress(active, true); releaseWakeLock(); } else if(active&&!active.video.paused){active.kidLastAt=Date.now();active.kidLastPosition=Number.isFinite(active.video.currentTime)?active.video.currentTime:0;acquireWakeLock();} });
 document.addEventListener('keydown',event=>{
   if(!$('player').open||!active||!getSettings().keyboardShortcuts||event.altKey||event.ctrlKey||event.metaKey)return;
   const tag=event.target?.tagName;if(['INPUT','TEXTAREA','SELECT','BUTTON'].includes(tag))return;
@@ -428,7 +524,7 @@ document.addEventListener('keydown',event=>{
   if(key==='j'||key==='arrowleft'){event.preventDefault();resetStillWatchingTimer();active.video.currentTime=Math.max(0,active.video.currentTime-step);}
   else if(key==='l'||key==='arrowright'){event.preventDefault();resetStillWatchingTimer();const end=Number.isFinite(active.video.duration)?active.video.duration:active.video.currentTime+step;active.video.currentTime=Math.min(end,active.video.currentTime+step);}
 });
-window.addEventListener('pagehide', () => { saveProgress(active, true); });
+window.addEventListener('pagehide', () => { tickKidUsage(active,true);saveProgress(active, true); });
 $('open-drive-oauth').addEventListener('click', () => {
   const url = driveOauthUrl || 'https://api.torbox.app/v1/api/integration/oauth/google';
   window.open(url, '_blank', 'noopener,noreferrer');
@@ -483,8 +579,18 @@ function updateInstallButton(){
 }
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstallPrompt=event;updateInstallButton();});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;updateInstallButton();text('settings-message','Installed.');});
+function loadKidSettings(){
+  const profile=getKidProfile(viewer),label=$('viewer').selectedOptions?.[0]?.textContent||viewer;
+  $('kid-viewer-label').textContent=label;$('setting-kid-mode').checked=profile.enabled;
+  const useHours=profile.timeLimitMinutes>=60&&profile.timeLimitMinutes%60===0;
+  $('setting-kid-time-unit').value=useHours?'hours':'minutes';
+  $('setting-kid-time').value=String(useHours?profile.timeLimitMinutes/60:profile.timeLimitMinutes);
+  $('setting-kid-episodes').value=String(profile.episodeLimit);$('setting-kid-movies').value=String(profile.movieLimit);$('setting-kid-reset').value=profile.resetMode;
+  $('kid-usage-summary').textContent=formatKidUsage(profile);
+  $('parent-pin-change').textContent=hasParentPin()?'Change Parent PIN':'Set Parent PIN';
+}
 function loadSettingsForm(){
-  const settings=getSettings();
+  const settings=getSettings();loadKidSettings();
   $('setting-interface-mode').value=settings.interfaceMode;
   $('setting-resolution').value=settings.resolution;
   $('setting-rewind').value=String(settings.resumeRewindSeconds);
@@ -518,10 +624,20 @@ function loadSettingsForm(){
   $('setting-auto-learn-sources').checked=settings.autoLearnSources;
   updateInstallButton();text('settings-message','');
 }
-$('open-settings').addEventListener('click',()=>{loadSettingsForm();if(!$('settings-dialog').open)$('settings-dialog').showModal();});
+function openSettingsDialog(){loadSettingsForm();if(!$('settings-dialog').open)$('settings-dialog').showModal();}
+$('open-settings').addEventListener('click',()=>{if(kidEnabled()&&hasParentPin())requestParentPin('Enter the Parent PIN to open Settings.',openSettingsDialog);else openSettingsDialog();});
 $('close-settings').addEventListener('click',()=>$('settings-dialog').close());
 $('settings-form').addEventListener('submit',event=>{
   event.preventDefault();
+  const enableKid=$('setting-kid-mode').checked;
+  if(enableKid&&!hasParentPin()){text('settings-message','Set a Parent PIN before enabling Kid Mode.',true);return;}
+  const timeValue=Math.max(0,Number($('setting-kid-time').value)||0),timeMinutes=$('setting-kid-time-unit').value==='hours'?Math.round(timeValue*60):Math.round(timeValue);
+  updateKidProfile(viewer,{
+    enabled:enableKid,timeLimitMinutes:timeMinutes,
+    episodeLimit:Math.max(0,Math.round(Number($('setting-kid-episodes').value)||0)),
+    movieLimit:Math.max(0,Math.round(Number($('setting-kid-movies').value)||0)),
+    resetMode:$('setting-kid-reset').value
+  });
   saveSettings({
     interfaceMode:$('setting-interface-mode').value,
     resolution:$('setting-resolution').value,
@@ -556,9 +672,29 @@ $('settings-form').addEventListener('submit',event=>{
     autoLearnSources:$('setting-auto-learn-sources').checked
   });
   try{sessionStorage.setItem('tw-source-resolution',$('setting-resolution').value)}catch{}
-  applyInterfaceMode();renderRecent();discoveryUI.settingsChanged();resetStillWatchingTimer();if(active?.video){active.video.playbackRate=getSettings().playbackRate;if(active.video.paused)updatePauseCard(active);else hidePauseCard();setHealthSource(active);setPlaybackHealth(active.video.paused?'Paused':'Playing','Settings updated.');} text('settings-message','Saved.');
+  applyInterfaceMode();loadKidSettings();renderRecent();discoveryUI.settingsChanged();resetStillWatchingTimer();if(active?.video){active.video.playbackRate=getSettings().playbackRate;if(active.video.paused)updatePauseCard(active);else hidePauseCard();setHealthSource(active);setPlaybackHealth(active.video.paused?'Paused':'Playing','Settings updated.');} text('settings-message','Saved.');
 });
 $('reset-settings').addEventListener('click',()=>{resetSettings();try{sessionStorage.removeItem('tw-source-resolution')}catch{}applyInterfaceMode();loadSettingsForm();renderRecent();discoveryUI.settingsChanged();resetStillWatchingTimer();});
+$('kid-reset-allowance').addEventListener('click',()=>{resetKidAllowance(viewer);loadKidSettings();applyInterfaceMode();text('settings-message','Kid allowance reset.');});
+function openParentPinChange(){
+  const existing=hasParentPin();$('parent-pin-change-title').textContent=existing?'Change Parent PIN':'Set Parent PIN';
+  $('parent-pin-current-wrap').hidden=!existing;$('parent-pin-current').required=existing;
+  $('parent-pin-current').value='';$('parent-pin-new').value='';$('parent-pin-confirm').value='';text('parent-pin-change-message','');
+  if(!$('parent-pin-change-dialog').open)$('parent-pin-change-dialog').showModal();
+}
+$('parent-pin-change').addEventListener('click',openParentPinChange);
+$('close-parent-pin-change').addEventListener('click',()=>$('parent-pin-change-dialog').close());
+$('parent-pin-change-form').addEventListener('submit',async event=>{
+  event.preventDefault();const button=event.submitter;button.disabled=true;text('parent-pin-change-message','Saving…');
+  try{
+    const existing=hasParentPin(),current=$('parent-pin-current').value,next=$('parent-pin-new').value,confirm=$('parent-pin-confirm').value;
+    if(existing&&!(await verifyParentPin(current))){text('parent-pin-change-message','Current PIN is incorrect.',true);return;}
+    if(!/^\d{4,8}$/.test(next)){text('parent-pin-change-message','Use a 4 to 8 digit PIN.',true);return;}
+    if(next!==confirm){text('parent-pin-change-message','The new PIN entries do not match.',true);return;}
+    await setParentPin(next);$('parent-pin-change-dialog').close();loadKidSettings();text('settings-message',existing?'Parent PIN changed.':'Parent PIN set.');
+  }catch(error){text('parent-pin-change-message',error.message,true);}
+  finally{button.disabled=false;}
+});
 $('settings-clear-learning').addEventListener('click',()=>{if(confirm('Clear learned source preferences, audio feedback, bad-source blocks, and per-title quality choices on this device?')){clearSourceMemory();text('settings-message','Source learning cleared.');}});
 $('settings-clear-searches').addEventListener('click',()=>{if(confirm('Clear search history for this viewer on this device?')){clearSearchHistory(viewer);discoveryUI.settingsChanged();text('settings-message','Search history cleared.');}});
 $('settings-install-app').addEventListener('click',async()=>{if(!deferredInstallPrompt){text('settings-message',window.matchMedia?.('(display-mode: standalone)').matches?'The app is already installed.':'Use Chrome’s Add to Home screen / Install app command if the install prompt is not available.');return;}const prompt=deferredInstallPrompt;deferredInstallPrompt=null;await prompt.prompt();await prompt.userChoice.catch(()=>{});updateInstallButton();});

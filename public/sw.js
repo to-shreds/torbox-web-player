@@ -1,5 +1,5 @@
-const CACHE='torbox-player-v0.13';
-const SHELL=['./','./index.html','./style.css','./discover.css','./app.js','./runtime.js','./history.js','./settings.js','./watchlist.js','./search-history.js','./source-memory.js','./playback-errors.js','./discover.js','./source-client.js','./manifest.webmanifest','./icon.svg'];
+const CACHE='torbox-player-v0.14';
+const SHELL=['./','./index.html','./style.css','./discover.css','./app.js','./runtime.js','./history.js','./settings.js','./watchlist.js','./search-history.js','./source-memory.js','./parental-controls.js','./playback-errors.js','./discover.js','./source-client.js','./manifest.webmanifest','./icon.svg'];
 const shellUrls=new Set(SHELL.map(path=>new URL(path,self.registration.scope).href));
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});

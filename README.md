@@ -2,7 +2,7 @@
 
 This branch is the browser-key clone of the household TorBox web player. The original player on `main` remains separate and is not modified by this branch.
 
-Current version: **0.13.1-key-clone**
+Current version: **0.14.0-key-clone**
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/key/`
 
@@ -83,6 +83,27 @@ Settings are browser-local. Current groups include:
 - Episodes and history: rewind, Continue Watching count, auto-next and countdown, Next Up, watched/resume labels, completed-episode cleanup.
 - Discover, My list, and search: My list size, search-history size, remembered browse filters.
 - Drive sharing and app: Drive defaults, TorBox status check, app install, source-learning reset, search-history reset.
+
+## Kid Mode and parental allowances
+
+Kid Mode is a browser-local parental-control layer for each viewer. A device-level Parent PIN is stored only as a PBKDF2-derived verifier with a random salt; the PIN itself is never stored.
+
+A parent can combine any of these limits:
+
+- Custom playback time in minutes or hours.
+- Number of episodes.
+- Number of movies.
+- Daily automatic reset or manual-only reset.
+
+Actual advancing playback time is counted, not paused or stalled time. Seeking forward does not create watched time. Episode/movie counters persist by canonical title or episode identity across reloads, source changes, and resume.
+
+An episode becomes charged after 5 actual watched minutes or 20% of its runtime, whichever occurs first. A movie becomes charged after 10 actual watched minutes. Hitting an episode/movie count does not interrupt the already charged item; it blocks starting a different item after the allowance has been used. A time allowance pauses immediately when its time is exhausted.
+
+When a limit blocks playback, the child sees a non-dismissible limit screen. Parent PIN access can grant 15 or 30 more minutes, one more episode, one more movie, reset the allowance, or turn Kid Mode off.
+
+Kid Mode forces the Simple interface. Opening Settings, switching away from a restricted viewer, and signing out require the Parent PIN. The selected viewer is persisted in local storage so closing and reopening Chrome does not silently fall back to another viewer.
+
+This is application-level parental control, not an Android device-management system. Clearing site data or otherwise tampering with browser storage can defeat local controls.
 
 ## Installable app
 
