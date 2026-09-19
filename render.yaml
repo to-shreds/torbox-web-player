@@ -23,4 +23,4 @@ services:
       - key: TORBOX_API_KEY
         sync: false
 # No database, persistent disk, transcoder or arbitrary-URL proxy is provisioned here.
-# The application does use a narrowly scoped authenticated media relay to keep the TorBox master key server-side.
+# Video is never relayed through Render. Authenticated playback returns the temporary TorBox CDN URL directly to the browser.

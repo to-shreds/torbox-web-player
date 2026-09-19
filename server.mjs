@@ -6,7 +6,6 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { Sessions, Limiter, verifyPassword, validHash } from './lib/auth.mjs';
 import { ProgressStore, VIEWERS, validViewer } from './lib/progress.mjs';
-import { MediaTickets, relayMedia } from './lib/media.mjs';
 import { TorBox, AppError, parseVideoId, TORBOX_MEDIA_HOSTS } from './lib/torbox.mjs';
 const root = dirname(fileURLToPath(import.meta.url));
 const publicFiles = new Map([
@@ -42,7 +41,7 @@ async function body(request) {
   try { const data = JSON.parse(Buffer.concat(chunks).toString('utf8')); if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error(); return data; }
   catch { throw new AppError('INVALID_JSON', 'This request could not be read.', 400); }
 }
-export function createApp({ env = process.env, provider, mediaFetch = fetch, discoveryFetch = fetch, discoveryService, sourceLookupService, now = Date.now } = {}) {
+export function createApp({ env = process.env, provider, discoveryFetch = fetch, discoveryService, sourceLookupService, now = Date.now } = {}) {
   const production = env.NODE_ENV === 'production';
   const origin = env.PUBLIC_ORIGIN || env.RENDER_EXTERNAL_URL || `http://localhost:${env.PORT || 10000}`;
   const passwordHash = env.HOUSEHOLD_PASSWORD_HASH || '';
@@ -59,7 +58,7 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
     response.setHeader('Access-Control-Expose-Headers', 'Content-Type, Content-Length, Content-Range, Accept-Ranges, ETag, Last-Modified');
     return true;
   };
-  const sessions = new Sessions(now), progress = new ProgressStore(), mediaTickets = new MediaTickets(now);
+  const sessions = new Sessions(now), progress = new ProgressStore();
   const loginRate = new Limiter(15, 15 * 60000, now), operationRate = new Limiter(30, 60000, now), progressRate = new Limiter(120, 60000, now);
   let activeLogins = 0;
   const mediaHosts = (env.MEDIA_HOST_SUFFIXES || TORBOX_MEDIA_HOSTS.join(',')).split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
@@ -77,7 +76,7 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
     response.setHeader('X-Frame-Options', 'DENY');
     response.setHeader('X-Robots-Tag', 'noindex, nofollow');
     response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://images.metahub.space https://image.tmdb.org https://m.media-amazon.com; media-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://images.metahub.space https://image.tmdb.org https://m.media-amazon.com; media-src https://torbox.app https://*.torbox.app https://*.tb-cdn.cx https://*.tb-cdn.io https://*.tb-cdn.pw https://*.tb-cdn.sh https://*.tb-cdn.st https://*.tb-cdn.to https://*.tb-cdn.earth; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
     if (production) response.setHeader('Strict-Transport-Security', 'max-age=31536000');
     try {
       const url = new URL(request.url || '/', origin), path = url.pathname, method = request.method;
@@ -86,7 +85,7 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.4.1', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.4.2', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
@@ -96,17 +95,6 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
       const bearer = bearerId(request), cookie = cookieId(request), sessionToken = bearer || cookie;
       const session = configured ? sessions.read(sessionToken) : null;
       const bearerSession = !!bearer && !!session;
-      if (path.startsWith('/media/')) {
-        if (!['GET', 'HEAD'].includes(method)) throw new AppError('METHOD_NOT_ALLOWED', 'This media request method is not allowed.', 405);
-        const mediaId = path.slice('/media/'.length);
-        const ticket = session ? mediaTickets.read(mediaId, session.id) : mediaTickets.readAny(mediaId);
-        if (!ticket) {
-          if (!session) throw new AppError('LOGIN_REQUIRED', 'This playback ticket is no longer available. Reopen the video.', 401);
-          throw new AppError('MEDIA_NOT_FOUND', 'This playback session is no longer available. Reopen the video.', 404);
-        }
-        return await relayMedia({ request, response, ticket, provider: torbox, fetchFn: mediaFetch });
-      }
-
       if (!path.startsWith('/api/')) throw new AppError('NOT_FOUND', 'Page not found.', 404);
       if (!['GET', 'HEAD'].includes(method) && !trustedOrigin(request.headers.origin)) throw new AppError('BAD_ORIGIN', 'Reload the website before trying again.', 403);
       if (path === '/api/session' && method === 'GET') return json(response, 200, { authenticated: !!session, setupRequired: !configured, ...(session ? { csrf: session.csrf, viewers: VIEWERS, durable: false, keyConfigured: !!(env.TORBOX_API_KEY || provider) } : {}) });
@@ -118,12 +106,12 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
         if (!ok) throw new AppError('WRONG_PASSWORD', 'That household password did not match.', 401);
         const created = sessions.create();
         if (!created) throw new AppError('SESSION_LIMIT', 'The session limit was reached. Restart the service to revoke old sessions.', 429);
-        if (session) { discovery.revoke(session.id); mediaTickets.revokeSession(session.id); sessions.revoke(session.id); }
+        if (session) { discovery.revoke(session.id); sessions.revoke(session.id); }
         setCookie(response, created.id); return json(response, 200, { ok: true, csrf: created.row.csrf, sessionToken: created.id });
       }
       if (!session) throw new AppError('LOGIN_REQUIRED', 'Sign in to your household first.', 401);
       if (!['GET', 'HEAD'].includes(method) && !bearerSession && request.headers['x-csrf-token'] !== session.csrf) throw new AppError('BAD_CSRF', 'Reload the page and try again.', 403);
-      if (path === '/api/logout' && method === 'POST') { discovery.revoke(session.id); mediaTickets.revokeSession(session.id); sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
+      if (path === '/api/logout' && method === 'POST') { discovery.revoke(session.id); sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
       if (path === '/api/owner/unlock' && method === 'POST') {
         if (!loginRate.allow('household') || activeLogins >= 2) throw new AppError('LOGIN_RATE_LIMITED', 'Too many password checks. Try again in 15 minutes.', 429);
         const data = await body(request); activeLogins++;
@@ -133,11 +121,11 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
       }
       if (path.startsWith('/api/owner/')) {
         if (session.ownerUntil <= now()) throw new AppError('OWNER_REAUTH_REQUIRED', 'Re-enter the household password to open owner tools.', 403);
-        if (path === '/api/owner/revoke' && method === 'POST') { discovery.revokeAll(); mediaTickets.revokeAll(); sessions.revokeAll(); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
+        if (path === '/api/owner/revoke' && method === 'POST') { discovery.revokeAll(); sessions.revokeAll(); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
         if (path === '/api/owner/diagnostics' && method === 'POST') {
           if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before checking again.', 429);
           const account = await torbox.account();
-          return json(response, 200, { account, directMedia: false, proxyEnabled: true, fallbackVerified: false, credentialProtection: 'TorBox media links remain server-side', discoveryConfigured: true, catalogProvider: 'Cinemeta', sourceProvider: 'Zilean (server-side)', progressStorage: 'temporary server memory', automaticNextEnabled: false });
+          return json(response, 200, { account, directMedia: true, proxyEnabled: false, mediaRelayEnabled: false, credentialProtection: 'The signed-in browser intentionally receives the temporary TorBox media URL/token.', discoveryConfigured: true, catalogProvider: 'Cinemeta', sourceProvider: 'Zilean (server-side)', progressStorage: 'temporary server memory', automaticNextEnabled: false });
         }
       }
       if (path.startsWith('/api/discover/')) {
@@ -178,8 +166,7 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
         if (!progress.isCurrent(data.viewer, intent)) throw new AppError('PLAYBACK_SUPERSEDED', 'A newer playback request replaced this one.', 409);
         if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
         const lease = progress.start(data.viewer, data.videoId, { reset: data.startOver === true, sessionId: session.id });
-        const mediaToken = mediaTickets.create(session.id, data.videoId, stream.upstreamUrl);
-        return json(response, 200, { file: stream.file, mediaUrl: `/media/${mediaToken}`, delivery: 'relay', conversion: false, ...lease });
+        return json(response, 200, { file: stream.file, mediaUrl: stream.upstreamUrl, delivery: 'direct', conversion: false, exposesTorBoxToken: true, ...lease });
       }
       if (path === '/api/progress' && method === 'PUT') {
         if (!progressRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Progress is being saved too frequently.', 429);
@@ -187,7 +174,7 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
         if (!validViewer(data.viewer)) throw new AppError('BAD_VIEWER', 'Choose a viewer first.', 400);
         return json(response, 200, { saved: progress.write(data.viewer, data, session.id) });
       }
-      throw new AppError('NOT_FOUND', 'This action is not available in the secure-relay checkpoint.', 404);
+      throw new AppError('NOT_FOUND', 'This action is not available in this player.', 404);
     } catch (error) {
       if (response.headersSent) return response.end();
       if (error instanceof AppError || error instanceof SourceLookupError) return json(response, error.status, { error: error.code, message: error.message });
@@ -196,10 +183,10 @@ export function createApp({ env = process.env, provider, mediaFetch = fetch, dis
     }
   });
   server.requestTimeout = 25000; server.headersTimeout = 15000; server.keepAliveTimeout = 5000;
-  return { server, sessions, progress, mediaTickets, discovery, sourceLookup };
+  return { server, sessions, progress, discovery, sourceLookup };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.4.1' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.4.2' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }

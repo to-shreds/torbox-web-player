@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { hashPassword, verifyPassword, validHash, Sessions, Limiter } from '../lib/auth.mjs';
 import { ProgressStore } from '../lib/progress.mjs';
-import { MediaTickets, validatedRange } from '../lib/media.mjs';
 import { TorBox, AppError, normalizeItem, availability, parseVideoId, safePlaybackUrl, validatedPlaybackUrl } from '../lib/torbox.mjs';
 const ready = { id: 1, name: 'Fixture Show', download_finished: true, download_present: true, files: [{ id: 0, short_name: 'Fixture.Show.S01E02.mp4', name: 'Fixture.Show.S01E02.mp4', size: 1000, mimetype: 'video/mp4' }] };
 const reply = data => new Response(JSON.stringify({ success: true, data }), { headers: { 'content-type': 'application/json' } });
@@ -41,17 +40,9 @@ test('URL checks block master-key leaks and unverified destinations', () => {
   assert.equal(safePlaybackUrl('https://cdn.torbox.app/video?token=temporary', 'master-key'), 'https://cdn.torbox.app/video?token=temporary');
   for (const url of ['http://cdn.torbox.app/file', 'https://evil.test/file', 'https://torbox.app.evil.test/file', 'https://user:pass@cdn.torbox.app/file', 'https://cdn.torbox.app:8443/file', 'https://api.torbox.app/v1?token=master-key', 'https://cdn.torbox.app/file?x=master-key', 'https://cdn.torbox.app/file?x=master%2Dkey']) assert.throws(() => safePlaybackUrl(url, 'master-key'));
 });
-test('server relay validation accepts TorBox CDN key-bearing URLs but not unrelated hosts', () => {
+test('direct browser URL validation accepts TorBox CDN key-bearing URLs but not unrelated hosts', () => {
   assert.equal(validatedPlaybackUrl('https://store-034.wnam.tb-cdn.io/file?token=master-key'), 'https://store-034.wnam.tb-cdn.io/file?token=master-key');
   assert.throws(() => validatedPlaybackUrl('https://example.test/file?token=master-key'));
-});
-test('media tickets are session-bound, expiring and revocable', () => {
-  let now = 0; const tickets = new MediaTickets(() => now, { ttlMs: 10 }); const token = tickets.create('session-a', 'torrents:1:0', 'https://store.tb-cdn.io/file?token=secret');
-  assert.ok(tickets.read(token, 'session-a')); assert.equal(tickets.read(token, 'session-b'), null); assert.equal(tickets.read('bad', 'session-a'), null); now = 11; assert.equal(tickets.read(token, 'session-a'), null);
-});
-test('media range parser accepts one byte range and rejects multipart or malformed ranges', () => {
-  assert.equal(validatedRange(undefined), null); assert.equal(validatedRange('bytes=0-99'), 'bytes=0-99'); assert.equal(validatedRange('bytes=-500'), 'bytes=-500');
-  for (const value of ['bytes=0-1,4-5', 'items=0-1', 'bytes=a-b']) assert.throws(() => validatedRange(value), error => error.code === 'BAD_RANGE');
 });
 test('TorBox account output is whitelist-only', async () => {
   const api = new TorBox({ key: 'fixture-secret', fetchFn: async () => reply({ plan: 2, api_token: 'fixture-secret', email: 'private@example.test' }) });
@@ -82,7 +73,7 @@ test('resolve revalidates the account and requests a server-only fresh link', as
   const calls = []; const api = new TorBox({ key: 'fixture-secret', fetchFn: async (url, options) => { calls.push({ url, options }); return reply(url.pathname.endsWith('mylist') ? ready : 'https://cdn.torbox.app/file?token=temporary'); } });
   const result = await api.resolve('torrents:1:0'); assert.equal(calls.length, 2); assert.equal(calls[0].url.searchParams.get('bypass_cache'), 'true'); assert.equal(calls[1].url.searchParams.get('file_id'), '0'); assert.equal(calls[1].url.searchParams.get('token'), 'fixture-secret'); assert.equal(calls[1].options.redirect, 'error'); assert.equal(result.delivery, 'direct'); assert.ok(!JSON.stringify(result).includes('fixture-secret'));
 });
-test('relay resolver may retain the master token only in its server-only upstream URL', async () => {
+test('browser resolver intentionally retains the master token in the returned TorBox URL', async () => {
   const api = new TorBox({ key: 'fixture-secret', fetchFn: async url => reply(url.pathname.endsWith('mylist') ? ready : 'https://store.tb-cdn.io/file?token=fixture-secret') });
   const result = await api.resolveForRelay('torrents:1:0'); assert.equal(result.file.id, 'torrents:1:0'); assert.ok(result.upstreamUrl.includes('fixture-secret'));
 });

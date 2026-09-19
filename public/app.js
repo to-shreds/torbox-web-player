@@ -124,7 +124,7 @@ async function startPlayback(file, startOver = false) {
     const result = await api('/api/playback', { method: 'POST', data: { viewer: selectedViewer, videoId: file.id, startOver } });
     if (generation !== playGeneration || !$('player').open || selectedViewer !== viewer) return;
     const video = document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata';
-    const context = { file, viewer: selectedViewer, leaseId: result.leaseId, seq: 0, video, mediaUrl: mediaUrl(result.mediaUrl), diagnosing: false, ready: false, started: false, timer: null };
+    const context = { file, viewer: selectedViewer, leaseId: result.leaseId, seq: 0, video, mediaUrl: mediaUrl(result.mediaUrl), delivery: result.delivery, diagnosing: false, ready: false, started: false, timer: null };
     active = context; $('video-slot').replaceChildren(video);
     video.addEventListener('loadedmetadata', () => {
       if (active !== context) return;
@@ -134,14 +134,14 @@ async function startPlayback(file, startOver = false) {
       text('player-message', position > 0 ? `Resuming at ${Math.floor(position / 60)}:${String(Math.floor(position % 60)).padStart(2, '0')}.` : 'Ready. Press play if the browser does not start automatically.');
       video.play().catch(error => { if (active === context && !context.diagnosing && error.name === 'NotAllowedError') text('player-message', 'Press play to begin. Your browser requires a tap.'); });
     });
-    video.addEventListener('playing', () => { if (active === context) { context.started = true; text('player-message', 'Playing through the private relay. Progress is temporary in this preview.'); } });
+    video.addEventListener('playing', () => { if (active === context) { context.started = true; text('player-message', 'Playing directly from TorBox. Render is not carrying the video bytes.'); } });
     video.addEventListener('pause', () => { if (active === context) saveProgress(context); });
     video.addEventListener('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });
     video.addEventListener('ended', () => { if (active === context) { saveProgress(context); text('player-message', 'Finished. Close the player to choose another file. Automatic next is not connected yet.'); } });
     video.addEventListener('error', async () => {
       if (active !== context || context.diagnosing) return;
       context.diagnosing = true;
-      text('player-message', 'Playback failed. Checking whether the stream is reachable…');
+      text('player-message', 'Direct TorBox playback failed. Checking the browser error…');
       const diagnosis = await diagnosePlaybackFailure(context.mediaUrl, video.error?.code);
       if (active !== context || generation !== playGeneration) return;
       text('player-message', diagnosis.message, true);
@@ -169,7 +169,7 @@ $('owner-form').addEventListener('submit', async event => {
   try {
     await api('/api/owner/unlock', { method: 'POST', data: { password } }); $('revoke').hidden = false;
     const result = await api('/api/owner/diagnostics', { method: 'POST', data: {} });
-    text('owner-message', 'TorBox accepted the key. The secure relay is enabled; actual browser compatibility still depends on the file codecs.');
+    text('owner-message', 'TorBox accepted the key. Video is direct from TorBox; Render handles only control/API requests.');
     $('diagnostics').textContent = JSON.stringify(result, null, 2);
   } catch (error) { text('owner-message', error.message, true); }
   finally { button.disabled = false; }

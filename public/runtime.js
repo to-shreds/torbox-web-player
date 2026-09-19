@@ -19,3 +19,13 @@ export function clearSessionToken() {
   if (typeof sessionStorage === 'undefined') return;
   try { sessionStorage.removeItem(SESSION_KEY); } catch {}
 }
+
+export const TORBOX_MEDIA_SUFFIXES = Object.freeze(['torbox.app','tb-cdn.cx','tb-cdn.io','tb-cdn.pw','tb-cdn.sh','tb-cdn.st','tb-cdn.to','tb-cdn.earth']);
+export function isTrustedDirectMediaUrl(value) {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase();
+    return url.protocol === 'https:' && !url.username && !url.password && (!url.port || url.port === '443')
+      && TORBOX_MEDIA_SUFFIXES.some(suffix => host === suffix || host.endsWith('.' + suffix));
+  } catch { return false; }
+}
