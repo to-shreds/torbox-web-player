@@ -491,6 +491,26 @@ $('keep-watching').addEventListener('click',()=>{
   clearStillWatchingTimer();hideStillWatchingPrompt();text('player-message','');
   active.video.play().catch(()=>text('player-message','Tap play to continue.'));
 });
+$('kid-limit-dialog').addEventListener('cancel',event=>event.preventDefault());
+$('kid-parent-options').addEventListener('click',()=>{
+  $('kid-limit-pin-form').hidden=false;$('kid-limit-pin').value='';text('kid-limit-pin-message','');
+  setTimeout(()=>$('kid-limit-pin').focus(),0);
+});
+$('kid-limit-pin-form').addEventListener('submit',async event=>{
+  event.preventDefault();const button=event.submitter;button.disabled=true;text('kid-limit-pin-message','Checking…');
+  try{
+    const ok=await verifyParentPin($('kid-limit-pin').value);$('kid-limit-pin').value='';
+    if(!ok){text('kid-limit-pin-message','Incorrect PIN.',true);return;}
+    $('kid-limit-pin-form').hidden=true;$('kid-parent-actions').hidden=false;text('kid-limit-pin-message','');
+  }catch(error){text('kid-limit-pin-message',error.message,true);}
+  finally{button.disabled=false;}
+});
+$('kid-add-15').addEventListener('click',()=>{grantKidExtension(viewer,{minutes:15});resumeAfterKidParentAction();});
+$('kid-add-30').addEventListener('click',()=>{grantKidExtension(viewer,{minutes:30});resumeAfterKidParentAction();});
+$('kid-add-episode').addEventListener('click',()=>{grantKidExtension(viewer,{episodes:1});resumeAfterKidParentAction();});
+$('kid-add-movie').addEventListener('click',()=>{grantKidExtension(viewer,{movies:1});resumeAfterKidParentAction();});
+$('kid-reset-limit').addEventListener('click',()=>{resetKidAllowance(viewer);resumeAfterKidParentAction();});
+$('kid-turn-off').addEventListener('click',()=>{updateKidProfile(viewer,{enabled:false});resumeAfterKidParentAction();});
 $('player').addEventListener('pointerdown',()=>{
   if(active&&!stillWatchingPromptActive&&!active.video.paused)resetStillWatchingTimer();
 });
@@ -559,8 +579,18 @@ function updateInstallButton(){
 }
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstallPrompt=event;updateInstallButton();});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;updateInstallButton();text('settings-message','Installed.');});
+function loadKidSettings(){
+  const profile=getKidProfile(viewer),label=$('viewer').selectedOptions?.[0]?.textContent||viewer;
+  $('kid-viewer-label').textContent=label;$('setting-kid-mode').checked=profile.enabled;
+  const useHours=profile.timeLimitMinutes>=60&&profile.timeLimitMinutes%60===0;
+  $('setting-kid-time-unit').value=useHours?'hours':'minutes';
+  $('setting-kid-time').value=String(useHours?profile.timeLimitMinutes/60:profile.timeLimitMinutes);
+  $('setting-kid-episodes').value=String(profile.episodeLimit);$('setting-kid-movies').value=String(profile.movieLimit);$('setting-kid-reset').value=profile.resetMode;
+  $('kid-usage-summary').textContent=formatKidUsage(profile);
+  $('parent-pin-change').textContent=hasParentPin()?'Change Parent PIN':'Set Parent PIN';
+}
 function loadSettingsForm(){
-  const settings=getSettings();
+  const settings=getSettings();loadKidSettings();
   $('setting-interface-mode').value=settings.interfaceMode;
   $('setting-resolution').value=settings.resolution;
   $('setting-rewind').value=String(settings.resumeRewindSeconds);
@@ -594,10 +624,20 @@ function loadSettingsForm(){
   $('setting-auto-learn-sources').checked=settings.autoLearnSources;
   updateInstallButton();text('settings-message','');
 }
-$('open-settings').addEventListener('click',()=>{loadSettingsForm();if(!$('settings-dialog').open)$('settings-dialog').showModal();});
+function openSettingsDialog(){loadSettingsForm();if(!$('settings-dialog').open)$('settings-dialog').showModal();}
+$('open-settings').addEventListener('click',()=>{if(kidEnabled()&&hasParentPin())requestParentPin('Enter the Parent PIN to open Settings.',openSettingsDialog);else openSettingsDialog();});
 $('close-settings').addEventListener('click',()=>$('settings-dialog').close());
 $('settings-form').addEventListener('submit',event=>{
   event.preventDefault();
+  const enableKid=$('setting-kid-mode').checked;
+  if(enableKid&&!hasParentPin()){text('settings-message','Set a Parent PIN before enabling Kid Mode.',true);return;}
+  const timeValue=Math.max(0,Number($('setting-kid-time').value)||0),timeMinutes=$('setting-kid-time-unit').value==='hours'?Math.round(timeValue*60):Math.round(timeValue);
+  updateKidProfile(viewer,{
+    enabled:enableKid,timeLimitMinutes:timeMinutes,
+    episodeLimit:Math.max(0,Math.round(Number($('setting-kid-episodes').value)||0)),
+    movieLimit:Math.max(0,Math.round(Number($('setting-kid-movies').value)||0)),
+    resetMode:$('setting-kid-reset').value
+  });
   saveSettings({
     interfaceMode:$('setting-interface-mode').value,
     resolution:$('setting-resolution').value,
@@ -632,9 +672,29 @@ $('settings-form').addEventListener('submit',event=>{
     autoLearnSources:$('setting-auto-learn-sources').checked
   });
   try{sessionStorage.setItem('tw-source-resolution',$('setting-resolution').value)}catch{}
-  applyInterfaceMode();renderRecent();discoveryUI.settingsChanged();resetStillWatchingTimer();if(active?.video){active.video.playbackRate=getSettings().playbackRate;if(active.video.paused)updatePauseCard(active);else hidePauseCard();setHealthSource(active);setPlaybackHealth(active.video.paused?'Paused':'Playing','Settings updated.');} text('settings-message','Saved.');
+  applyInterfaceMode();loadKidSettings();renderRecent();discoveryUI.settingsChanged();resetStillWatchingTimer();if(active?.video){active.video.playbackRate=getSettings().playbackRate;if(active.video.paused)updatePauseCard(active);else hidePauseCard();setHealthSource(active);setPlaybackHealth(active.video.paused?'Paused':'Playing','Settings updated.');} text('settings-message','Saved.');
 });
 $('reset-settings').addEventListener('click',()=>{resetSettings();try{sessionStorage.removeItem('tw-source-resolution')}catch{}applyInterfaceMode();loadSettingsForm();renderRecent();discoveryUI.settingsChanged();resetStillWatchingTimer();});
+$('kid-reset-allowance').addEventListener('click',()=>{resetKidAllowance(viewer);loadKidSettings();applyInterfaceMode();text('settings-message','Kid allowance reset.');});
+function openParentPinChange(){
+  const existing=hasParentPin();$('parent-pin-change-title').textContent=existing?'Change Parent PIN':'Set Parent PIN';
+  $('parent-pin-current-wrap').hidden=!existing;$('parent-pin-current').required=existing;
+  $('parent-pin-current').value='';$('parent-pin-new').value='';$('parent-pin-confirm').value='';text('parent-pin-change-message','');
+  if(!$('parent-pin-change-dialog').open)$('parent-pin-change-dialog').showModal();
+}
+$('parent-pin-change').addEventListener('click',openParentPinChange);
+$('close-parent-pin-change').addEventListener('click',()=>$('parent-pin-change-dialog').close());
+$('parent-pin-change-form').addEventListener('submit',async event=>{
+  event.preventDefault();const button=event.submitter;button.disabled=true;text('parent-pin-change-message','Saving…');
+  try{
+    const existing=hasParentPin(),current=$('parent-pin-current').value,next=$('parent-pin-new').value,confirm=$('parent-pin-confirm').value;
+    if(existing&&!(await verifyParentPin(current))){text('parent-pin-change-message','Current PIN is incorrect.',true);return;}
+    if(!/^\d{4,8}$/.test(next)){text('parent-pin-change-message','Use a 4 to 8 digit PIN.',true);return;}
+    if(next!==confirm){text('parent-pin-change-message','The new PIN entries do not match.',true);return;}
+    await setParentPin(next);$('parent-pin-change-dialog').close();loadKidSettings();text('settings-message',existing?'Parent PIN changed.':'Parent PIN set.');
+  }catch(error){text('parent-pin-change-message',error.message,true);}
+  finally{button.disabled=false;}
+});
 $('settings-clear-learning').addEventListener('click',()=>{if(confirm('Clear learned source preferences, audio feedback, bad-source blocks, and per-title quality choices on this device?')){clearSourceMemory();text('settings-message','Source learning cleared.');}});
 $('settings-clear-searches').addEventListener('click',()=>{if(confirm('Clear search history for this viewer on this device?')){clearSearchHistory(viewer);discoveryUI.settingsChanged();text('settings-message','Search history cleared.');}});
 $('settings-install-app').addEventListener('click',async()=>{if(!deferredInstallPrompt){text('settings-message',window.matchMedia?.('(display-mode: standalone)').matches?'The app is already installed.':'Use Chrome’s Add to Home screen / Install app command if the install prompt is not available.');return;}const prompt=deferredInstallPrompt;deferredInstallPrompt=null;await prompt.prompt();await prompt.userChoice.catch(()=>{});updateInstallButton();});
