@@ -4,7 +4,7 @@ import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessi
 import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js';
 import { listRecent, recordRecent, clearRecent, recentForContext, resumePosition, formatResumeTime } from './history.js';
 const $ = id => document.getElementById(id);
-let csrf = '', sessionToken = getSessionToken(), files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, libraryAbort = null, searchTimer, recentRenderTimer;
+let csrf = '', sessionToken = getSessionToken(), files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, libraryAbort = null, searchTimer, recentRenderTimer, guestMode = false;
 let discoveryUI;
 let viewer = 'viewer-1';
 try { const saved = sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
@@ -55,6 +55,41 @@ async function api(path, { method = 'GET', data, signal, keepalive = false } = {
   }
   return result;
 }
+function guestTokenFromHash() {
+  try {
+    const match = /^#guest=([A-Za-z0-9_-]{43})$/.exec(location.hash || '');
+    return match ? match[1] : '';
+  } catch { return ''; }
+}
+async function acceptGuestInvite(token) {
+  if (sessionToken && !guestMode) {
+    try { sessionStorage.setItem('torbox-owner-session-backup', sessionToken); } catch {}
+  }
+  const previous = sessionToken;
+  sessionToken = ''; csrf = '';
+  try {
+    const result = await api('/api/guest/accept', { method: 'POST', data: { token } });
+    sessionToken = result.sessionToken || '';
+    if (!sessionToken || !setSessionToken(sessionToken)) throw new Error('This browser could not save the temporary session.');
+    csrf = result.csrf; guestMode = true;
+    try { history.replaceState(null, '', location.pathname + location.search); } catch {}
+    return result;
+  } catch (error) {
+    sessionToken = previous;
+    if (previous) setSessionToken(previous);
+    throw error;
+  }
+}
+function enterGuestUi() {
+  guestMode = true;
+  document.body.classList.add('guest-mode');
+  $('logout').textContent = 'Leave';
+}
+function leaveGuestUi() {
+  guestMode = false;
+  document.body.classList.remove('guest-mode');
+  $('logout').textContent = 'Sign out';
+}
 let autoLoginTried = false;
 async function connectWithKey(apiKey, remember = false) {
   const result = await api('/api/login', { method: 'POST', data: { apiKey } });
@@ -66,10 +101,12 @@ async function connectWithKey(apiKey, remember = false) {
 }
 async function bootstrap() {
   try {
+    const invite = guestTokenFromHash();
+    if (invite && !guestMode) { await acceptGuestInvite(invite); return await bootstrap(); }
     const session = await api('/api/session');
     if (session.setupRequired) return show('setup-needed');
     if (!session.authenticated) {
-      clearSessionToken(); sessionToken = ''; csrf = '';
+      clearSessionToken(); sessionToken = ''; csrf = ''; leaveGuestUi();
       if (!autoLoginTried) {
         autoLoginTried = true;
         const remembered = await loadRememberedApiKey();
@@ -80,7 +117,14 @@ async function bootstrap() {
       }
       return show('login');
     }
-    csrf = session.csrf; show('workspace'); renderRecent(); await discoveryUI.activate();
+    csrf = session.csrf; show('workspace');
+    if (session.guest) {
+      enterGuestUi();
+      $('recent-section').hidden = true;
+      await discoveryUI.activateGuest(session.scope);
+      return;
+    }
+    leaveGuestUi(); renderRecent(); await discoveryUI.activate();
   } catch (error) { show('loading'); $('loading').querySelector('p').textContent = error.message; }
 }
 $('login-form').addEventListener('submit', async event => {
@@ -96,8 +140,19 @@ $('forget-key').addEventListener('click', async () => {
 $('clear-recent').addEventListener('click', () => { clearRecent(); renderRecent(); });
 $('logout').addEventListener('click', async () => {
   await stopPlayback();
-  try { await api('/api/logout', { method: 'POST', data: {} }); clearSessionToken(); sessionToken = ''; csrf = ''; files = []; $('files').replaceChildren(); $('diagnostics').textContent = ''; $('owner-password').value = ''; try { sessionStorage.removeItem('tw-viewer'); } catch {} autoLoginTried = true; show('login'); }
-  catch (error) { text('library-message', error.message, true); }
+  try {
+    await api('/api/logout', { method: 'POST', data: {} });
+    clearSessionToken(); sessionToken = ''; csrf = ''; files = []; $('files').replaceChildren(); $('diagnostics').textContent = ''; $('owner-password').value = '';
+    if (guestMode) {
+      let backup = ''; try { backup = sessionStorage.getItem('torbox-owner-session-backup') || ''; sessionStorage.removeItem('torbox-owner-session-backup'); } catch {}
+      leaveGuestUi();
+      if (/^[A-Za-z0-9_-]{43}$/.test(backup)) { sessionToken = backup; setSessionToken(backup); return await bootstrap(); }
+      autoLoginTried = true; show('login'); text('login-message', 'Temporary access ended.');
+      return;
+    }
+    try { sessionStorage.removeItem('tw-viewer'); } catch {}
+    autoLoginTried = true; show('login');
+  } catch (error) { text('library-message', error.message, true); }
 });
 function renderFiles() {
   const query = $('search').value.trim().toLocaleLowerCase();
