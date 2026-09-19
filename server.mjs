@@ -14,6 +14,7 @@ const publicFiles = new Map([
   ['/setup.html', ['setup.html', 'text/html; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
   ['/runtime.js', ['runtime.js', 'text/javascript; charset=utf-8']],
+  ['/history.js', ['history.js', 'text/javascript; charset=utf-8']],
   ['/playback-errors.js', ['playback-errors.js', 'text/javascript; charset=utf-8']],
   ['/discover.js', ['discover.js', 'text/javascript; charset=utf-8']],
   ['/source-client.js', ['source-client.js', 'text/javascript; charset=utf-8']],
