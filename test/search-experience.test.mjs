@@ -41,6 +41,6 @@ test('stable release metadata is 1.1.0',async()=>{
   assert.equal(JSON.parse(pkg).version,'1.1.0');
   assert.match(entry,/version: '1\.1\.0'/);
   assert.match(server,/version: '1\.1\.0'/);
-  assert.match(sw,/torbox-player-v1\.1/);
+  assert.match(sw,/torbox-player-direct-0\.1/);
   assert.match(readme,/Current version: \*\*1\.1\.0\*\*/);
 });
