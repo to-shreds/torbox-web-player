@@ -52,7 +52,7 @@ test('Render-only optional surfaces are hidden in browser-direct experiment', as
   const html = await read('../public/index.html');
   assert.match(html, /id="sync-settings-group"[^>]*hidden/);
   assert.match(html, /id="drive-settings-group"[^>]*hidden/);
-  assert.match(html, /Browser-direct experiment/);
+  assert.match(html, /Browser-local experiment/);
 });
 
 test('redundant relay client and Cloudflare Worker share the allowlisted bridge contract', async () => {
