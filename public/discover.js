@@ -54,31 +54,24 @@ function createResolutionSelect(value = getResolution()) {
   select.value = value; select.addEventListener('change',()=>setResolution(select.value)); return select;
 }
 
-export function createDiscoveryUI({ api, play, loadLibrary, driveTest }) {
-  let view='discover', active=false, guestMode=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0;
+export function createDiscoveryUI({ api, play, driveTest }) {
+  let active=false, guestMode=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0;
   let catalogAbort,titleAbort,sourceAbort,searchTimer,pollTimer,metas=[],nextSkip=null,currentMeta;
 
   function cancelSource(){++preparationGeneration;++sourceGeneration;sourceAbort?.abort();clearTimeout(pollTimer);}
   function cancelTitle(){++titleGeneration;titleAbort?.abort();cancelSource();}
   function message(id,text,error=false){$(id).textContent=text;$(id).classList.toggle('error',error);}
-  function displayTab(next){
-    view=next;$('discover-panel').hidden=next!=='discover';$('library-panel').hidden=next!=='library';
-    $('discover-tab').setAttribute('aria-selected',String(next==='discover'));$('library-tab').setAttribute('aria-selected',String(next==='library'));
-    $('page-title').textContent=next==='discover'?'Discover':'My files';$('search').placeholder=next==='discover'?'Search movies and shows':'Search TorBox files';
-    $('recent-section').hidden = next !== 'discover' || !$('recent-list').children.length;
-  }
-  async function openLibrary(){displayTab('library');++catalogGeneration;catalogAbort?.abort();await loadLibrary();}
-  async function openDiscover(){displayTab('discover');await browse();}
+  async function openDiscover(){guestMode=false;$('page-title').textContent='Discover';$('search').placeholder='Search movies and shows';await browse();}
 
   async function browse(more=false){
-    if(!active||view!=='discover')return;const offset=more?nextSkip:0;if(offset===null)return;
+    if(!active||guestMode)return;const offset=more?nextSkip:0;if(offset===null)return;
     const generation=++catalogGeneration;catalogAbort?.abort();catalogAbort=new AbortController();$('catalog-more').disabled=true;$('catalog-retry').hidden=true;
     if(!more){metas=[];nextSkip=null;$('catalog-grid').replaceChildren();$('catalog-more').hidden=true;}
     const query=$('search').value.trim();message('catalog-message',query?'Searching…':'Loading browse…');
     try{
       const params=new URLSearchParams({type:$('catalog-type').value,q:query,skip:String(offset),genre:$('catalog-genre').value,feed:$('catalog-feed').value});
       const data=await api('/api/discover/catalog?'+params,{signal:AbortSignal.any([catalogAbort.signal,AbortSignal.timeout(20000)])});
-      if(generation!==catalogGeneration||!active||view!=='discover')return;
+      if(generation!==catalogGeneration||!active||guestMode)return;
       metas=more?[...new Map([...metas,...data.metas].map(m=>[m.id,m])).values()]:data.metas;nextSkip=data.nextSkip;
       const fragment=document.createDocumentFragment();
       for(const meta of metas){
@@ -90,7 +83,7 @@ export function createDiscoveryUI({ api, play, loadLibrary, driveTest }) {
       if(query)message('catalog-message',metas.length?`${metas.length} results`:'No matches. Try a shorter title or IMDb ID.');
       else {const shown=feedNames[data.feed]||'Browse';message('catalog-message',data.fallback?`${feedNames[data.requestedFeed]||'Browse'} unavailable · showing ${shown}`:metas.length?shown:'No titles in this browse view.');}
     }catch(e){
-      if(generation===catalogGeneration&&active&&view==='discover'){message('catalog-message',query?(e.name==='TimeoutError'?'Search timed out.':e.message):'Browse is temporarily unavailable. Search still works.',true);$('catalog-retry').hidden=false;}
+      if(generation===catalogGeneration&&active&&!guestMode){message('catalog-message',query?(e.name==='TimeoutError'?'Search timed out.':e.message):'Browse is temporarily unavailable. Search still works.',true);$('catalog-retry').hidden=false;}
     }finally{if(generation===catalogGeneration)$('catalog-more').disabled=false;}
   }
 
@@ -161,7 +154,7 @@ export function createDiscoveryUI({ api, play, loadLibrary, driveTest }) {
 
   async function showTitle(meta){
     cancelTitle();currentMeta=null;const generation=titleGeneration;titleAbort=new AbortController();$('title-content').replaceChildren();$('episode-area').replaceChildren();
-    $('detail-title').textContent=meta.name;$('share-title').hidden=true;message('detail-message','Loading…');if(!$('title-dialog').open)$('title-dialog').showModal();
+    $('detail-title').textContent=meta.name;message('detail-message','Loading…');if(!$('title-dialog').open)$('title-dialog').showModal();
     try{
       const data=await api(`/api/discover/meta?type=${meta.type}&id=${meta.id}`,{signal:AbortSignal.any([titleAbort.signal,AbortSignal.timeout(20000)])});
       if(generation!==titleGeneration||!$('title-dialog').open||!active)return;currentMeta=data.meta;
@@ -296,45 +289,19 @@ export function createDiscoveryUI({ api, play, loadLibrary, driveTest }) {
     }catch(e){message('catalog-message',e.message,true);return false;}
   }
 
-  async function openShare(){
-    if(guestMode||!currentMeta)return;
-    $('share-title-name').textContent=currentMeta.type==='series'?`Share all released episodes of ${currentMeta.name}`:`Share ${currentMeta.name}`;
-    $('share-result').hidden=true;$('share-link').value='';$('share-expiry').textContent='';
-    if(!$('share-dialog').open)$('share-dialog').showModal();
-  }
-  async function createShare(){
-    if(guestMode||!currentMeta)return;
-    const buttonEl=$('create-share');buttonEl.disabled=true;buttonEl.textContent='Creating…';
-    try{
-      const result=await api('/api/share/create',{method:'POST',data:{type:currentMeta.type,id:currentMeta.id,hours:Number($('share-duration').value)}});
-      const link=`${location.origin}${location.pathname}#guest=${result.token}`;
-      $('share-link').value=link;$('share-result').hidden=false;$('share-expiry').textContent=`Expires ${new Date(result.expiresAt).toLocaleString()}`;
-      $('native-share').hidden=typeof navigator.share!=='function';
-    }catch(e){$('share-expiry').textContent=e.message;$('share-result').hidden=false;}
-    finally{buttonEl.disabled=false;buttonEl.textContent='Create link';}
-  }
-  $('share-title').addEventListener('click',openShare);
-  $('close-share').addEventListener('click',()=>$('share-dialog').close());
-  $('create-share').addEventListener('click',createShare);
-  $('copy-share').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('share-link').value);$('share-expiry').textContent='Copied.';}catch{$('share-link').select();}});
-  $('native-share').addEventListener('click',async()=>{try{await navigator.share({title:currentMeta?.name||'Temporary access',url:$('share-link').value});}catch{}});
-  $('title-dialog').addEventListener('cancel',event=>{if(guestMode)event.preventDefault();});
-
-  $('discover-tab').addEventListener('click',openDiscover);$('library-tab').addEventListener('click',openLibrary);
   for(const id of ['catalog-type','catalog-feed','catalog-genre'])$(id).addEventListener('change',()=>browse());
   $('catalog-more').addEventListener('click',()=>browse(true));$('catalog-retry').addEventListener('click',()=>browse());
-  $('search').addEventListener('input',()=>{clearTimeout(searchTimer);if(view!=='discover')return;++catalogGeneration;catalogAbort?.abort();searchTimer=setTimeout(()=>browse(),350);});
+  $('search').addEventListener('input',()=>{clearTimeout(searchTimer);if(guestMode)return;++catalogGeneration;catalogAbort?.abort();searchTimer=setTimeout(()=>browse(),350);});
   $('close-title').addEventListener('click',()=>$('title-dialog').close());$('title-dialog').addEventListener('close',()=>{++titleGeneration;titleAbort?.abort();});
   $('close-source').addEventListener('click',()=>$('source-dialog').close());$('source-dialog').addEventListener('close',cancelSource);
   $('viewer').addEventListener('change',()=>{cancelTitle();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();});
   return {
     async activate(){guestMode=false;active=true;await openDiscover();},
     async activateGuest(scope){
-      guestMode=true;active=true;view='guest';
-      $('share-title').hidden=true;
+      guestMode=true;active=true;
       await showTitle({type:scope.type,id:scope.id,name:scope.name||'Shared title',poster:scope.poster||''});
     },
-    openLibrary,playNext,recoverPlayback,resumeRecent,
-    suspend(){active=false;guestMode=false;++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();if($('share-dialog').open)$('share-dialog').close();}
+    playNext,recoverPlayback,resumeRecent,
+    suspend(){active=false;guestMode=false;++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
   };
 }
