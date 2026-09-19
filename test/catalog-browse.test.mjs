@@ -22,3 +22,21 @@ test('browse accepts current Cinemeta imdb_id catalog rows',async()=>{
   assert.equal(result.metas[0].id,ID);
   assert.equal(result.metas[0].name,'Fixture');
 });
+
+test('browse follows only the trusted Cinemeta catalogs redirect used by no-query feeds',async()=>{
+  const seen=[];
+  const c=new Catalog({fetchFn:async(url,opts)=>{
+    seen.push({url:String(url),redirect:opts.redirect});
+    if(String(url)==='https://v3-cinemeta.strem.io/catalog/movie/top.json') return new Response(null,{status:307,headers:{location:'https://cinemeta-catalogs.strem.io/top/catalog/movie/top.json'}});
+    if(String(url)==='https://cinemeta-catalogs.strem.io/top/catalog/movie/top.json') return ok({metas:[{imdb_id:ID,type:'movie',name:'Fixture'}]});
+    throw new Error('unexpected '+url);
+  }});
+  const result=await c.search({type:'movie',feed:'popular'});
+  assert.equal(result.metas[0].id,ID);
+  assert.equal(seen.length,2);
+  assert.ok(seen.every(x=>x.redirect==='manual'));
+});
+test('browse rejects redirects outside the Cinemeta allowlist',async()=>{
+  const c=new Catalog({fetchFn:async()=>new Response(null,{status:307,headers:{location:'https://evil.test/catalog.json'}})});
+  await assert.rejects(c.search({type:'movie',feed:'popular'}),e=>e.code==='CATALOG_UNAVAILABLE');
+});
