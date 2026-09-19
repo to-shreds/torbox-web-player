@@ -13,13 +13,31 @@ export function targetOf(input) {
 }
 export const cleanText = (s, max = 300) => typeof s === 'string' ? s.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, max) : '';
 export function sourceHints(source) {
-  const name = `${source.filename || ''} ${source.title || ''} ${source.label || ''}`;
-  const mp4 = /\.mp4\b/i.test(name), modern = /\b(hevc|h[ ._-]?265|x265|av1)\b/i.test(name);
-  const difficultAudio = /\b(dts|truehd|e[ ._-]?ac[ ._-]?3|ac[ ._-]?3|ddp|dd\+)/i.test(name);
-  const h264 = /\b(h[ ._-]?264|x264|avc)\b/i.test(name), aac = /\baac\b/i.test(name);
-  const quality = /\b(2160p|1080p|720p|480p|4k)\b/i.exec(name)?.[1].toUpperCase() || '';
-  const score = (mp4 ? 35 : 0) + (h264 ? 10 : 0) + (aac ? 10 : 0) - (modern ? 25 : 0) - (difficultAudio ? 20 : 0) + (['1080P', '720P'].includes(quality) ? 8 : 0) - (['2160P', '4K'].includes(quality) ? 10 : 0);
-  return { quality, score, hint: modern || difficultAudio ? 'May require conversion' : mp4 ? 'MP4 candidate' : h264 && aac ? 'H.264 / AAC indicated' : 'Codecs not confirmed' };
+  const structuredAudio = Array.isArray(source.audioCodecs) ? source.audioCodecs.join(' ') : '';
+  const name = `${source.filename || ''} ${source.title || ''} ${source.label || ''} ${source.videoCodec || ''} ${structuredAudio} ${source.resolution || ''}`;
+  const mp4 = /\.mp4\b/i.test(name);
+  const h264 = /\b(h[ ._-]?264|x264|avc)\b/i.test(name);
+  const hevc = /\b(hevc|h[ ._-]?265|x265)\b/i.test(name);
+  const av1 = /\bav1\b/i.test(name);
+  const aac = /\baac\b/i.test(name);
+  const mp3 = /\b(mp3|mpeg[ ._-]?audio)\b/i.test(name);
+  const opus = /\bopus\b/i.test(name);
+  const difficultAudio = /\b(dts(?:[ ._-]?hd)?|truehd|e[ ._-]?ac[ ._-]?3|ac[ ._-]?3|ddp|dd\+|dolby[ ._-]?digital(?:[ ._-]?plus)?|dolby[ ._-]?atmos)\b/i.test(name);
+  const quality = cleanText(source.resolution, 20).toUpperCase() || /\b(2160p|1080p|720p|480p|4k)\b/i.exec(name)?.[1].toUpperCase() || '';
+  const browserFriendly = h264 && (aac || mp3) && !difficultAudio;
+  const audioRisk = difficultAudio;
+  const videoRisk = hevc || av1;
+  const score = (browserFriendly ? 120 : 0) + (h264 ? 35 : 0) + (aac ? 45 : 0) + (mp3 ? 25 : 0) + (opus ? 15 : 0) + (mp4 ? 20 : 0)
+    - (audioRisk ? 90 : 0) - (hevc ? 55 : 0) - (av1 ? 20 : 0)
+    + (['1080P', '720P'].includes(quality) ? 10 : 0) - (['2160P', '4K'].includes(quality) ? 8 : 0);
+  let hint = 'Codecs not confirmed';
+  if (browserFriendly) hint = 'Best browser bet · H.264 / AAC';
+  else if (audioRisk) hint = 'Dolby/DTS audio may be silent in Chrome';
+  else if (hevc) hint = 'HEVC/H.265 may not play in Chrome';
+  else if (av1) hint = 'AV1 compatibility varies by device';
+  else if (aac) hint = 'AAC audio indicated';
+  else if (mp4) hint = 'MP4 container · audio codec unconfirmed';
+  return { quality, score, hint, browserFriendly, audioRisk, videoRisk };
 }
 export function normalizeSources(raw) {
   if (!Array.isArray(raw)) throw new Error('The source provider did not return a source list.');
@@ -31,7 +49,10 @@ export function normalizeSources(raw) {
     const title = cleanText(item.description || item.title, 450) || filename || 'Torrent source';
     const fileIdx = Number.isSafeInteger(item.fileIdx) && item.fileIdx >= 0 && item.fileIdx <= 100000 ? item.fileIdx : null;
     const sizeValue = item.behaviorHints?.videoSize ?? item.size;
-    const source = { hash, filename, title, label: cleanText(item.name || item.label, 80), fileIdx, size: Number.isSafeInteger(sizeValue) && sizeValue > 0 ? sizeValue : null };
+    const videoCodec = cleanText(item.videoCodec, 40);
+    const audioCodecs = (Array.isArray(item.audioCodecs) ? item.audioCodecs : []).filter(v => typeof v === 'string').slice(0, 6).map(v => cleanText(v, 40));
+    const resolution = cleanText(item.resolution, 20);
+    const source = { hash, filename, title, label: cleanText(item.name || item.label, 80), fileIdx, size: Number.isSafeInteger(sizeValue) && sizeValue > 0 ? sizeValue : null, videoCodec, audioCodecs, resolution };
     // Source file indexes are not TorBox file IDs. Never treat them as interchangeable.
     const key = `${hash}:${filename}:${fileIdx}`;
     if (!map.has(key)) map.set(key, { ...source, ...sourceHints(source) });

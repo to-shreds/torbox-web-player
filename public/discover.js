@@ -4,6 +4,7 @@ const element = (tag, text, className) => { const el = document.createElement(ta
 const button = (label, fn, primary = false) => { const b = element('button', label, primary ? 'primary' : ''); b.type = 'button'; b.addEventListener('click', fn); return b; };
 const image = (url, label, className) => { const i = element('img', '', className); i.alt = label; i.loading = 'lazy'; i.referrerPolicy = 'no-referrer'; i.src = url; i.addEventListener('error', () => { i.hidden = true; }); return i; };
 const sourceLabel = s => [s.quality, s.cached === true ? 'Cached in TorBox' : s.cached === false ? 'Needs preparation' : 'Availability unknown', s.hint].filter(Boolean).join(' · ');
+export const preferredSource = list => list.find(s => s.browserFriendly && s.cached === true) || list.find(s => s.browserFriendly) || list.find(s => s.cached === true && !s.audioRisk) || list[0];
 export function createDiscoveryUI({ api, play, loadLibrary }) {
   let view = 'discover', active = false, catalogGeneration = 0, titleGeneration = 0, sourceGeneration = 0, preparationGeneration = 0;
   let catalogAbort, titleAbort, sourceAbort, searchTimer, pollTimer, metas = [], nextSkip = null, currentMeta;
@@ -113,9 +114,11 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
       status.textContent = result.warning || 'Choose Play or Prepare. Searching and opening titles never adds torrents.';
       const list = result.sources;
       if (!list.length) { status.textContent = 'No supported source was found.'; return; }
-      const best = list[0];
-      const primary = button(best.cached ? 'Play selected version' : 'Prepare selected version', () => prepare(best, generation, area), true);
-      area.append(element('p', sourceLabel(best), 'muted'), primary);
+      const best = preferredSource(list);
+      const primary = button(best.cached ? 'Play browser-friendly version' : 'Prepare browser-friendly version', () => prepare(best, generation, area), true);
+      const bestCopy = element('p', sourceLabel(best), 'muted');
+      if (!best.browserFriendly) bestCopy.textContent += ' · No confirmed H.264/AAC source was found; sound may still depend on the selected release.';
+      area.append(bestCopy, primary);
       const details = element('details', '', 'versions'); details.append(element('summary', `Other versions (${list.length})`));
       for (const source of list) {
         const row = element('article', '', 'source-row');
@@ -152,8 +155,15 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
       status.textContent = result.message || result.state;
       controls.replaceChildren();
       if (result.state === 'ready') {
+        const file = result.file;
+        if (result.compatibility?.audioRisk) {
+          status.textContent = result.message;
+          controls.append(button('Play anyway', () => { $('title-dialog').close(); play(file); }));
+          resetButtons();
+          return;
+        }
         // Reuse the existing authenticated player and progress protections.
-        const file = result.file; $('title-dialog').close(); play(file); return;
+        $('title-dialog').close(); play(file); return;
       }
       if (result.state === 'choose_file') {
         for (const f of result.files) controls.append(button(f.title, () => check(f.id)));
