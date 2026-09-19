@@ -65,8 +65,15 @@ export function normalizeSources(raw) {
     const resolution = cleanText(item.resolution, 20);
     const releaseQuality = cleanText(item.releaseQuality, 40);
     const container = cleanText(item.container, 24);
-    const seeders = Number.isSafeInteger(item.seeders) && item.seeders >= 0 ? item.seeders : null;
-    const source = { hash, filename, title, label: cleanText(item.name || item.label, 80), fileIdx, size: parseSizeBytes(sizeValue), seeders, videoCodec, audioCodecs, resolution, releaseQuality, container };
+    let seeders = Number.isSafeInteger(item.seeders) && item.seeders >= 0 ? item.seeders : null;
+    if (seeders === null) {
+      const text = [item.description, item.title, item.name, item.label].filter(v => typeof v === 'string').join(' ');
+      const m = /(?:👤|\bseed(?:er)?s?\b\s*[:=]?)\s*([0-9][0-9,]*)/i.exec(text);
+      if (m) { const value = Number(m[1].replace(/,/g, '')); if (Number.isSafeInteger(value) && value >= 0) seeders = value; }
+    }
+    const provider = cleanText(item.provider, 60);
+    const providers = [...new Set([...(Array.isArray(item.providers) ? item.providers : []), provider].filter(v => typeof v === 'string').map(v => cleanText(v, 60)).filter(Boolean))].slice(0, 6);
+    const source = { hash, filename, title, label: cleanText(item.name || item.label, 80), provider, providers, fileIdx, size: parseSizeBytes(sizeValue), seeders, videoCodec, audioCodecs, resolution, releaseQuality, container };
     // Source file indexes are not TorBox file IDs. Never treat them as interchangeable.
     const key = `${hash}:${filename}:${fileIdx}`;
     if (!map.has(key)) map.set(key, { ...source, ...sourceHints(source) });
