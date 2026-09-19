@@ -1,3 +1,4 @@
+import { getSettings } from './settings.js';
 const STORAGE_KEY = 'torbox-recent-v1';
 const MAX_ITEMS = 20;
 const clean = (value, max = 240) => typeof value === 'string' ? value.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, max) : '';
@@ -49,7 +50,11 @@ export function recordRecent(context, position = 0, duration = 0, { completed = 
     resolution: context.resolution || 'auto', position, duration, completed, updatedAt: Date.now()
   });
   if (!row) return null;
-  const rest = listRecent(store).filter(item => item.key !== key);
+  let rest = listRecent(store).filter(item => item.key !== key);
+  if(row.type==='series'&&position>0&&getSettings(store).cleanupCompletedEpisodes){
+    const order=item=>Number(item.season||0)*10000+Number(item.episode||0),currentOrder=order(row);
+    rest=rest.filter(item=>!(item.type==='series'&&item.id===row.id&&item.completed&&order(item)<currentOrder));
+  }
   const rows = [row, ...rest].slice(0,MAX_ITEMS);
   try { store.setItem(STORAGE_KEY, JSON.stringify(rows)); } catch {}
   return row;

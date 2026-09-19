@@ -1,5 +1,6 @@
 const KEY='torbox-settings-v1';
 export const DEFAULT_SETTINGS=Object.freeze({
+  interfaceMode:'simple',
   resolution:'auto',
   resumeRewindSeconds:10,
   autoNext:true,
@@ -10,6 +11,7 @@ export const DEFAULT_SETTINGS=Object.freeze({
   driveDeleteMinutes:10,
   recentLimit:6,
   showCompletedRecent:false,
+  cleanupCompletedEpisodes:true,
   pauseOverlay:true,
   playbackRate:1,
   sleepTimerMinutes:0,
@@ -23,8 +25,16 @@ export const DEFAULT_SETTINGS=Object.freeze({
   catalogGenre:'',
   sourceSizeProfile:'balanced',
   showWatchlist:true,
-  watchlistLimit:12
+  watchlistLimit:12,
+  showNextUp:true,
+  nextUpLimit:6,
+  showSearchHistory:true,
+  searchHistoryLimit:6,
+  longPressShortcuts:true,
+  showPlaybackHealth:true,
+  autoLearnSources:true
 });
+const interfaceModes=new Set(['simple','full']);
 const resolutions=new Set(['auto','480p','720p','1080p','2160p']);
 const rewind=new Set([0,5,10,15,30]);
 const buffer=new Set([8,12,20,30]);
@@ -35,6 +45,8 @@ const sleep=new Set([0,15,30,45,60,90]);
 const seeks=new Set([5,10,15,30]);
 const driveDelete=new Set([10,20,30,45]);
 const watchlistLimit=new Set([6,12,18,24]);
+const nextUpLimit=new Set([3,6,9,12]);
+const searchHistoryLimit=new Set([3,6,9,12]);
 const catalogTypes=new Set(['movie','series']);
 const catalogFeeds=new Set(['popular','featured','new']);
 const sizeProfiles=new Set(['data','balanced','quality']);
@@ -43,6 +55,7 @@ function store(){try{return localStorage}catch{return null}}
 export function normalizeSettings(raw){
   const s=raw&&typeof raw==='object'?raw:{};
   return {
+    interfaceMode:interfaceModes.has(s.interfaceMode)?s.interfaceMode:DEFAULT_SETTINGS.interfaceMode,
     resolution:resolutions.has(s.resolution)?s.resolution:DEFAULT_SETTINGS.resolution,
     resumeRewindSeconds:rewind.has(Number(s.resumeRewindSeconds))?Number(s.resumeRewindSeconds):DEFAULT_SETTINGS.resumeRewindSeconds,
     autoNext:s.autoNext!==false,
@@ -53,6 +66,7 @@ export function normalizeSettings(raw){
     driveDeleteMinutes:driveDelete.has(Number(s.driveDeleteMinutes))?Number(s.driveDeleteMinutes):DEFAULT_SETTINGS.driveDeleteMinutes,
     recentLimit:recent.has(Number(s.recentLimit))?Number(s.recentLimit):DEFAULT_SETTINGS.recentLimit,
     showCompletedRecent:s.showCompletedRecent===true,
+    cleanupCompletedEpisodes:s.cleanupCompletedEpisodes!==false,
     pauseOverlay:s.pauseOverlay!==false,
     playbackRate:rates.has(Number(s.playbackRate))?Number(s.playbackRate):DEFAULT_SETTINGS.playbackRate,
     sleepTimerMinutes:sleep.has(Number(s.sleepTimerMinutes))?Number(s.sleepTimerMinutes):DEFAULT_SETTINGS.sleepTimerMinutes,
@@ -66,7 +80,14 @@ export function normalizeSettings(raw){
     catalogGenre:genres.has(s.catalogGenre)?s.catalogGenre:DEFAULT_SETTINGS.catalogGenre,
     sourceSizeProfile:sizeProfiles.has(s.sourceSizeProfile)?s.sourceSizeProfile:DEFAULT_SETTINGS.sourceSizeProfile,
     showWatchlist:s.showWatchlist!==false,
-    watchlistLimit:watchlistLimit.has(Number(s.watchlistLimit))?Number(s.watchlistLimit):DEFAULT_SETTINGS.watchlistLimit
+    watchlistLimit:watchlistLimit.has(Number(s.watchlistLimit))?Number(s.watchlistLimit):DEFAULT_SETTINGS.watchlistLimit,
+    showNextUp:s.showNextUp!==false,
+    nextUpLimit:nextUpLimit.has(Number(s.nextUpLimit))?Number(s.nextUpLimit):DEFAULT_SETTINGS.nextUpLimit,
+    showSearchHistory:s.showSearchHistory!==false,
+    searchHistoryLimit:searchHistoryLimit.has(Number(s.searchHistoryLimit))?Number(s.searchHistoryLimit):DEFAULT_SETTINGS.searchHistoryLimit,
+    longPressShortcuts:s.longPressShortcuts!==false,
+    showPlaybackHealth:s.showPlaybackHealth!==false,
+    autoLearnSources:s.autoLearnSources!==false
   };
 }
 export function getSettings(storage=store()){
