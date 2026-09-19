@@ -38,9 +38,9 @@ test('stable release metadata is 1.1.0',async()=>{
   const [pkg,entry,server,sw,readme]=await Promise.all([
     read('../package.json'),read('../entry.mjs'),read('../server.mjs'),read('../public/sw.js'),read('../README.md')
   ]);
-  assert.equal(JSON.parse(pkg).version,'1.0.0');
-  assert.match(entry,/version: '1\.0\.0'/);
-  assert.match(server,/version: '1\.0\.0'/);
-  assert.match(sw,/torbox-player-v1\.0/);
-  assert.match(readme,/Current version: \*\*1\.0\.0\*\*/);
+  assert.equal(JSON.parse(pkg).version,'1.1.0');
+  assert.match(entry,/version: '1\.1\.0'/);
+  assert.match(server,/version: '1\.1\.0'/);
+  assert.match(sw,/torbox-player-v1\.1/);
+  assert.match(readme,/Current version: \*\*1\.1\.0\*\*/);
 });
