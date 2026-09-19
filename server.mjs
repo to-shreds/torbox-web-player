@@ -24,6 +24,7 @@ const publicFiles = new Map([
   ['/source-memory.js', ['source-memory.js', 'text/javascript; charset=utf-8']],
   ['/parental-controls.js', ['parental-controls.js', 'text/javascript; charset=utf-8']],
   ['/device-transfer.js', ['device-transfer.js', 'text/javascript; charset=utf-8']],
+  ['/direct-runtime.js', ['direct-runtime.js', 'text/javascript; charset=utf-8']],
   ['/sw.js', ['sw.js', 'text/javascript; charset=utf-8']],
   ['/manifest.webmanifest', ['manifest.webmanifest', 'application/manifest+json; charset=utf-8']],
   ['/icon.svg', ['icon.svg', 'image/svg+xml; charset=utf-8']],
