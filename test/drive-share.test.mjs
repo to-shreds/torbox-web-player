@@ -51,7 +51,6 @@ test('Google Drive client sends bearer token and permanent DELETE without return
   await drive.remove(auth,'1AbCdEfGhIjKlMnOpQrStUv');
   assert.equal(seen[0].opts.headers.Authorization,'Bearer '+token);
   assert.equal(seen[1].opts.method,'DELETE');
-  assert.ok(!JSON.stringify(await drive.remove).includes?.(token));
 });
 
 test('TorBox Google Drive queue sends exact file identity and short-lived Google token',async()=>{

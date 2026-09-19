@@ -2,7 +2,7 @@
 
 This branch is the **browser-key clone** of the household TorBox web player. The original player on `main` remains separate.
 
-Current version: **0.10.0-key-clone**
+Current version: **0.11.0-key-clone**
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/key/`
 
@@ -123,3 +123,22 @@ The video bytes remain outside Render:
 `TorBox -> Google Drive -> viewer`
 
 The old direct TorBox guest-link backend remains isolated for compatibility/testing but its broken title-level Share control is hidden; visible movie/episode Share buttons now start the Drive workflow.
+
+
+## v0.11 browse fix, discovery-only UI, and easier Drive connection
+
+The browser-key clone is now deliberately discovery-only. The **My files** / TorBox-library view has been removed from the published interface because it does not contribute to the catalog-first use case. TorBox account files remain an internal implementation detail for source preparation and playback, not a user-facing library in this clone.
+
+The browse failure was traced to a concrete Cinemeta response-shape mismatch. Current Cinemeta catalog rows identify titles with `imdb_id`, while the browse normalizer had required `id`. Search continued to work because it followed a different path. Browse normalization now accepts either `id` or `imdb_id`, with an automated regression test for the current response shape.
+
+The Drive timing test no longer requires Apps Script or a Google Cloud project. **Connect Google Drive** opens TorBox's own Google OAuth integration, which requests the narrow `drive.file` scope. TorBox's OAuth callback is fixed to TorBox and ignores attempted custom return-URL parameters, so the GitHub page cannot receive the resulting Google access token automatically. For this zero-setup timing test, after Google/TorBox reports success the owner copies that TorBox success-page address back into the Drive dialog once. The app extracts the short-lived token server-side and clears the pasted URL from the browser input immediately.
+
+This easy OAuth mode is intentionally a short timing test, currently 10, 20, 30, or 45 minutes. It measures TorBox-to-Drive upload time and Drive processing time, applies an optional watch-only reader restriction, and permanently deletes the exported Drive copy while the test remains active. It is not yet the durable multi-hour sharing architecture because the TorBox-issued Google credential is short-lived and the zero-setup flow cannot refresh it after a Render restart.
+
+The media paths remain:
+
+Owner playback: `TorBox CDN -> owner browser`
+
+Drive timing test: `TorBox -> Google Drive -> viewer`
+
+Render still handles only control/API traffic and does not relay video bytes.

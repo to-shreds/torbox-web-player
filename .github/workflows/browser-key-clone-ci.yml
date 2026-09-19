@@ -20,27 +20,6 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
-      - name: Temporary public-contract probe
-        shell: bash
-        run: |
-          set -x
-          code=$(curl -L -sS -o /tmp/torbox-success -w '%{http_code}' 'https://torbox.app/google/success' || true)
-          echo "TORBOX_SUCCESS $code bytes=$(wc -c </tmp/torbox-success 2>/dev/null || echo 0)"
-          bundle=$(grep -Eo 'src="/assets/index-[^"]+\.js"' /tmp/torbox-success | head -n1 | cut -d'"' -f2)
-          echo "TORBOX_BUNDLE=$bundle"
-          curl -L -sS "https://torbox.app$bundle" -o /tmp/torbox-bundle
-          echo "TORBOX_BUNDLE_BYTES=$(wc -c </tmp/torbox-bundle)"
-          for u in \
-            'https://api.torbox.app/v1/api/integration/oauth/google' \
-            'https://api.torbox.app/v1/api/integration/oauth/google?redirect_uri=https%3A%2F%2Fto-shreds.github.io%2Ftorbox-web-player%2Fkey%2F' \
-            'https://api.torbox.app/v1/api/integration/oauth/google?redirect_url=https%3A%2F%2Fto-shreds.github.io%2Ftorbox-web-player%2Fkey%2F' \
-            'https://api.torbox.app/v1/api/integration/oauth/google?return_url=https%3A%2F%2Fto-shreds.github.io%2Ftorbox-web-player%2Fkey%2F'; do
-            curl -sS -D /tmp/oauth-h -o /tmp/oauth-b --max-redirs 0 "$u" || true
-            echo "OAUTH_PROBE $u"
-            head -n 20 /tmp/oauth-h | tr '\r' ' '
-            head -c 300 /tmp/oauth-b; echo
-          done
-          python -c "import re; t=open('/tmp/torbox-bundle','r',encoding='utf-8',errors='ignore').read(); ns=['google/success','postMessage','window.opener','opener','expires_at','expires_in']; [print('NEEDLE',n,'COUNT',t.count(n), *[t[max(0,m.start()-350):min(len(t),m.end()+900)] for m in list(re.finditer(re.escape(n),t))[:3]], sep='\\n---\\n') for n in ns]"
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run check
       - run: npm test
