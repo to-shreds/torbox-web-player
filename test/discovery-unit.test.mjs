@@ -90,9 +90,11 @@ test('source normalization deduplicates and bounds results', () => {
   const rows = Array.from({ length: 100 }, (_, n) => ({ infoHash: n.toString(16).padStart(40, '0') }));
   assert.equal(normalizeSources(rows).length, 40);
 });
-test('source hints do not promise conversion or universal browser compatibility', () => {
-  assert.equal(sourceHints({ filename: 'Test.H264.AAC.mp4' }).hint, 'MP4 candidate');
-  assert.equal(sourceHints({ filename: 'Test.HEVC.DTS.mkv' }).hint, 'May require conversion');
+test('source hints identify likely browser-friendly audio without promising universal compatibility', () => {
+  const friendly = sourceHints({ filename: 'Test.H264.AAC.mp4' });
+  const risky = sourceHints({ filename: 'Test.HEVC.DTS.mkv' });
+  assert.equal(friendly.browserFriendly, true); assert.ok(/browser/i.test(friendly.hint));
+  assert.equal(risky.browserFriendly, false); assert.equal(risky.audioRisk, true); assert.ok(/silent/i.test(risky.hint));
 });
 test('source lookup uses the authenticated same-origin website and no TorBox credentials', async () => {
   const result = await loadPublicSources({ type: 'series', id: ID, season: 2, episode: 10 }, { fetchFn: async (url, opts) => {
