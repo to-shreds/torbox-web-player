@@ -2,6 +2,8 @@ import { loadPublicSources } from './source-client.js';
 import { getSettings, updateSettings } from './settings.js';
 import { listRecent, formatResumeTime } from './history.js';
 import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
@@ -17,7 +19,7 @@ export function sourceMatchesResolution(source, resolution = 'auto') {
 }
 export const filterSourcesByResolution = (list, resolution = 'auto') => list.filter(s => sourceMatchesResolution(s, resolution));
 export function recommendSource(list, type = 'movie', resolution = 'auto', sizeProfile = getSettings().sourceSizeProfile) {
-  const visible = filterSourcesByResolution(list, resolution); if (!visible.length) return null;
+  const visible = filterSourcesByResolution(list, resolution).filter(source=>source.memoryBad!==true&&source.memoryAudio!=='bad'); if (!visible.length) return null;
   const cachedFriendly = visible.filter(s => s.cached === true && s.browserFriendly && !s.audioRisk && !s.videoRisk);
   const cachedSafe = visible.filter(s => s.cached === true && !s.audioRisk && !s.videoRisk);
   const browserSafe = visible.filter(s => s.browserFriendly && !s.audioRisk);
@@ -29,7 +31,7 @@ export function recommendSource(list, type = 'movie', resolution = 'auto', sizeP
   const rank = s => {
     const r = resolutionOf(s), sizeScore = s.size == null ? 15 : s.size <= limit ? 110 : -Math.min(140, (s.size / limit - 1) * 90);
     const seedScore = Number.isSafeInteger(s.seeders) ? Math.min(35, Math.log2(s.seeders + 1) * 5) : 0;
-    return (s.score || 0) + (s.cached === true ? 260 : 0) + (s.browserFriendly ? 100 : 0) - (s.audioRisk ? 180 : 0) - (s.videoRisk ? 100 : 0)
+    return (s.score || 0) + (s.memoryBonus || 0) + (s.cached === true ? 260 : 0) + (s.browserFriendly ? 100 : 0) - (s.audioRisk ? 180 : 0) - (s.videoRisk ? 100 : 0)
       + (r.includes('720') ? 135 : r.includes('1080') ? 55 : 0) + sizeScore + seedScore;
   };
   return [...pool].sort((a,b)=>rank(b)-rank(a)||(a.size??Infinity)-(b.size??Infinity))[0];
@@ -51,7 +53,7 @@ export function lowerResolutionOrder(current, selected = 'auto') {
 const formatBytes = value => Number.isFinite(value) && value > 0 ? (value >= GB ? `${(value / GB).toFixed(value >= 10*GB ? 1 : 2)} GB` : `${Math.max(1,Math.round(value/1024**2))} MB`) : '—';
 const qualityText = s => [s.resolution || s.quality, s.releaseQuality, s.videoCodec, ...(s.audioCodecs || []).slice(0,2), s.container].filter(Boolean).join(' · ') || 'Unknown';
 const feedNames = { popular:'Popular', featured:'Featured', new:'New' };
-const getResolution = () => getSettings().resolution;
+const getResolution = target => getTitleQuality(target) || getSettings().resolution;
 const setResolution = value => updateSettings({ resolution: value });
 function createResolutionSelect(value = getResolution()) {
   const select = element('select');
@@ -60,7 +62,7 @@ function createResolutionSelect(value = getResolution()) {
 }
 
 export function createDiscoveryUI({ api, play, driveTest, guard }) {
-  let active=false, guestMode=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0;
+  let active=false, guestMode=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0, nextUpGeneration=0;
   let catalogAbort,titleAbort,sourceAbort,searchTimer,pollTimer,metas=[],nextSkip=null,currentMeta;
 
   function cancelSource(){++preparationGeneration;++sourceGeneration;sourceAbort?.abort();clearTimeout(pollTimer);}
@@ -74,6 +76,73 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     if(!getSettings().rememberBrowse)return;
     updateSettings({catalogType:$('catalog-type').value,catalogFeed:$('catalog-feed').value,catalogGenre:$('catalog-genre').value});
   }
+  function renderSearchHistory(){
+    const section=$('search-history-section'),list=$('search-history-list'),settings=getSettings(),query=$('search').value.trim();
+    if(!section||!list||guestMode||!settings.showSearchHistory||query){if(section)section.hidden=true;return;}
+    const rows=listSearchHistory($('viewer').value).slice(0,settings.searchHistoryLimit);section.hidden=!rows.length;
+    const fragment=document.createDocumentFragment();
+    for(const row of rows){
+      const chip=element('span','','search-history-chip'),open=button(row.query,()=>{$('search').value=row.query;section.hidden=true;browse();}),remove=button('×',event=>{event.stopPropagation();removeSearch($('viewer').value,row.query);renderSearchHistory();});
+      remove.className='search-history-remove';remove.setAttribute('aria-label',`Remove search ${row.query}`);chip.append(open,remove);fragment.append(chip);
+    }
+    list.replaceChildren(fragment);
+  }
+  async function renderNextUp(){
+    const generation=++nextUpGeneration,section=$('next-up-section'),list=$('next-up-list'),settings=getSettings();
+    if(!section||!list||guestMode||!settings.showNextUp){if(section)section.hidden=true;return;}
+    const latest=new Map();
+    for(const item of listRecent())if(item.type==='series'&&!latest.has(item.id))latest.set(item.id,item);
+    const candidates=[...latest.values()].filter(item=>item.completed).slice(0,Math.max(settings.nextUpLimit,3));
+    if(!candidates.length){section.hidden=true;list.replaceChildren();return;}
+    section.hidden=false;list.replaceChildren(element('span','Finding next episodes…','muted'));
+    const cards=[];
+    for(const item of candidates){
+      if(generation!==nextUpGeneration||!active||guestMode)return;
+      try{
+        const data=await api(`/api/discover/meta?type=series&id=${item.id}`,{signal:AbortSignal.timeout(12000)}),meta=data.meta;
+        const next=episodeQueue(meta,{type:'series',id:item.id,season:item.season,episode:item.episode})[0];if(!next)continue;
+        const episode=meta.episodes.find(e=>e.season===next.season&&e.episode===next.episode),card=element('article','','next-up-card');
+        if(meta.poster)card.append(image(meta.poster,'','next-up-thumb'));
+        const copy=element('div','','next-up-copy');copy.append(element('strong',meta.name),element('span',`S${next.season}E${next.episode} · ${episode?.name||next.name||'Next episode'}`,'muted'));
+        const playButton=button('Play',()=>quickPlay(meta,next,episode?.name||next.name||'',playButton),true);card.append(copy,playButton);cards.push(card);
+        if(cards.length>=settings.nextUpLimit)break;
+      }catch{}
+    }
+    if(generation!==nextUpGeneration)return;
+    if(!cards.length){section.hidden=true;list.replaceChildren();return;}section.hidden=false;list.replaceChildren(...cards);
+  }
+  async function resolveQuickTarget(meta){
+    const data=meta?.episodes?{meta}:await api(`/api/discover/meta?type=${meta.type}&id=${meta.id}`,{signal:AbortSignal.timeout(15000)}),full=data.meta;
+    if(full.type==='movie')return{meta:full,target:{type:'movie',id:full.id},episodeName:''};
+    const history=listRecent().filter(item=>item.type==='series'&&item.id===full.id),latest=history[0];
+    if(latest&&!latest.completed)return{meta:full,target:{type:'series',id:full.id,season:latest.season,episode:latest.episode},episodeName:full.episodes.find(e=>e.season===latest.season&&e.episode===latest.episode)?.name||latest.episodeName||''};
+    if(latest?.completed){
+      const next=episodeQueue(full,{type:'series',id:full.id,season:latest.season,episode:latest.episode})[0];
+      if(next)return{meta:full,target:next,episodeName:full.episodes.find(e=>e.season===next.season&&e.episode===next.episode)?.name||next.name||''};
+    }
+    const released=full.episodes.filter(e=>!e.released||Date.parse(e.released)<=Date.now()).sort((a,b)=>(a.season===0)-(b.season===0)||a.season-b.season||a.episode-b.episode),first=released[0];
+    if(!first)throw new Error('No released episode is available.');
+    return{meta:full,target:{type:'series',id:full.id,season:first.season,episode:first.episode},episodeName:first.name||''};
+  }
+  function openQuickActions(meta){
+    if(!meta||guestMode)return;const dialog=$('quick-actions-dialog'),area=$('quick-actions-content');$('quick-actions-title').textContent=meta.name||'Title';area.replaceChildren();
+    const favorite=button(isWatchlisted($('viewer').value,meta)?'Remove from My list':'Add to My list',()=>{toggleWatchlist($('viewer').value,meta);renderWatchlist();favorite.textContent=isWatchlisted($('viewer').value,meta)?'Remove from My list':'Add to My list';});
+    const playButton=button('Play',async()=>{try{const resolved=await resolveQuickTarget(meta);dialog.close();await quickPlay(resolved.meta,resolved.target,resolved.episodeName,playButton);}catch(e){message('catalog-message',e.message,true);}},true);
+    const shareButton=button('Share',async()=>{try{const resolved=await resolveQuickTarget(meta);dialog.close();await quickDriveShare(resolved.meta,resolved.target,resolved.episodeName,shareButton);}catch(e){message('catalog-message',e.message,true);}});shareButton.classList.add('advanced-only');
+    const details=button('Details',()=>{dialog.close();showTitle(meta);});
+    area.append(playButton,favorite,shareButton,details);if(!dialog.open)dialog.showModal();
+  }
+  function posterCard(meta){
+    let longPressed=false,timer=null;
+    const card=button('',()=>{if(longPressed){longPressed=false;return;}showTitle(meta)});card.className='poster-card';card.setAttribute('aria-label',`Open ${meta.name}`);
+    const art=element('div','','poster-art');if(meta.poster)art.append(image(meta.poster,'','poster-image'));art.append(element('span',meta.name,'poster-fallback'));
+    card.append(art,element('strong',meta.name),element('span',meta.year||(meta.type==='series'?'Show':'Movie'),'muted'));
+    const cancel=()=>{if(timer)clearTimeout(timer);timer=null;};
+    card.addEventListener('pointerdown',event=>{if(!getSettings().longPressShortcuts||event.button>0)return;cancel();timer=setTimeout(()=>{longPressed=true;openQuickActions(meta);},550);});
+    for(const name of ['pointerup','pointercancel','pointerleave'])card.addEventListener(name,cancel);
+    card.addEventListener('contextmenu',event=>{if(!getSettings().longPressShortcuts)return;event.preventDefault();cancel();longPressed=true;openQuickActions(meta);});
+    return card;
+  }
   function updateWatchlistButton(){
     const control=$('toggle-watchlist');if(!control)return;
     control.hidden=guestMode||!currentMeta;if(control.hidden)return;
@@ -86,13 +155,11 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     section.hidden=!rows.length;$('watchlist-count').textContent=rows.length?String(rows.length):'';
     const fragment=document.createDocumentFragment();
     for(const meta of rows){
-      const card=button('',()=>showTitle(meta));card.className='poster-card';card.setAttribute('aria-label',`Open ${meta.name}`);
-      const art=element('div','','poster-art');if(meta.poster)art.append(image(meta.poster,'','poster-image'));art.append(element('span',meta.name,'poster-fallback'));
-      card.append(art,element('strong',meta.name),element('span',meta.year||(meta.type==='series'?'Show':'Movie'),'muted'));fragment.append(card);
+      fragment.append(posterCard(meta));
     }
     list.replaceChildren(fragment);
   }
-  async function openDiscover(){guestMode=false;$('page-title').textContent='Discover';$('search').placeholder='Search movies and shows';applyBrowsePreferences();renderWatchlist();await browse();}
+  async function openDiscover(){guestMode=false;$('page-title').textContent='Discover';$('search').placeholder='Search movies and shows';applyBrowsePreferences();renderWatchlist();renderSearchHistory();renderNextUp();await browse();}
 
   async function browse(more=false){
     if(!active||guestMode)return;const offset=more?nextSkip:0;if(offset===null)return;
@@ -106,12 +173,10 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       metas=more?[...new Map([...metas,...data.metas].map(m=>[m.id,m])).values()]:data.metas;nextSkip=data.nextSkip;
       const fragment=document.createDocumentFragment();
       for(const meta of metas){
-        const card=button('',()=>showTitle(meta));card.className='poster-card';card.setAttribute('aria-label',`Open ${meta.name}`);
-        const art=element('div','','poster-art');if(meta.poster)art.append(image(meta.poster,'','poster-image'));art.append(element('span',meta.name,'poster-fallback'));
-        card.append(art,element('strong',meta.name),element('span',meta.year||(meta.type==='series'?'Show':'Movie'),'muted'));fragment.append(card);
+        fragment.append(posterCard(meta));
       }
       $('catalog-grid').replaceChildren(fragment);$('catalog-more').hidden=nextSkip===null;
-      if(query)message('catalog-message',metas.length?`${metas.length} results`:'No matches. Try a shorter title or IMDb ID.');
+      if(query){if(!more)recordSearch($('viewer').value,query);message('catalog-message',metas.length?`${metas.length} results`:'No matches. Try a shorter title or IMDb ID.');}
       else {const shown=feedNames[data.feed]||'Browse';message('catalog-message',data.fallback?`${feedNames[data.requestedFeed]||'Browse'} unavailable · showing ${shown}`:metas.length?shown:'No titles in this browse view.');}
     }catch(e){
       if(generation===catalogGeneration&&active&&!guestMode){message('catalog-message',query?(e.name==='TimeoutError'?'Search timed out.':e.message):'Browse is temporarily unavailable. Search still works.',true);$('catalog-retry').hidden=false;}
@@ -119,7 +184,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
   }
 
   function buildContext(meta,target,episodeName,resolution,source){
-    return {title:meta?.name||'',poster:meta?.poster||'',episodeName:episodeName||'',resolution,current:{...target,name:episodeName||''},sourceResolution:source?.resolution||source?.quality||'',queue:target.type==='series'?episodeQueue(meta,target):[]};
+    return {title:meta?.name||'',poster:meta?.poster||'',episodeName:episodeName||'',resolution,current:{...target,name:episodeName||''},sourceResolution:source?.resolution||source?.quality||'',sourceInfo:source?{id:source.id||'',hash:source.hash||'',filename:source.filename||'',title:source.title||'',provider:source.provider||'',resolution:source.resolution||source.quality||'',videoCodec:source.videoCodec||'',audioCodecs:Array.isArray(source.audioCodecs)?source.audioCodecs.slice(0,6):[]}:null,queue:target.type==='series'?episodeQueue(meta,target):[]};
   }
   const closeTitleForPlayback = () => { if (!guestMode && $('title-dialog').open) $('title-dialog').close(); };
 
@@ -127,7 +192,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
   async function registeredSources(target, signal){
     const sources=await loadPublicSources(target,{signal});if(!sources.length)throw new Error('No source found.');
     const result=await api('/api/discover/sources',{method:'POST',data:{target,sources},signal:signal?AbortSignal.any([signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000)});
-    if(!result.sources?.length)throw new Error('No supported source found.');return result;
+    if(!result.sources?.length)throw new Error('No supported source found.');return {...result,sources:applySourceMemory(target,result.sources)};
   }
 
   async function readyFile(source, { signal, unattended=false } = {}){
@@ -151,7 +216,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     message('detail-message','Finding the recommended source…');
     try{
       await ensureService();
-      const resolution=getResolution(),registered=await registeredSources(target,AbortSignal.timeout(45000));
+      const resolution=getResolution(target),registered=await registeredSources(target,AbortSignal.timeout(45000));
       const best=recommendSource(registered.sources,target.type,resolution)||recommendSource(registered.sources,target.type,'auto');
       if(!best)throw new Error('No source matches this resolution.');
       message('detail-message',best.cached?'Opening cached source…':'Preparing recommended source…');
@@ -169,7 +234,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     message('detail-message','Finding the recommended source for Drive…');
     try{
       await ensureService();
-      const resolution=getResolution(),registered=await registeredSources(target,AbortSignal.timeout(45000));
+      const resolution=getResolution(target),registered=await registeredSources(target,AbortSignal.timeout(45000));
       const best=recommendSource(registered.sources,target.type,resolution)||recommendSource(registered.sources,target.type,'auto');
       if(!best)throw new Error('No source matches this resolution.');
       message('detail-message',best.cached?'Preparing Drive export…':'Preparing the recommended source in TorBox…');
@@ -182,8 +247,10 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     finally{if(trigger&&trigger.isConnected){trigger.disabled=false;trigger.textContent=original;}}
   }
 
-  function titleResolutionControl(){
-    const label=element('label','Quality','compact-select');const select=createResolutionSelect();label.append(select);return label;
+  function titleResolutionControl(meta){
+    const target={type:meta.type,id:meta.id},label=element('label','This title quality','compact-select advanced-only'),select=element('select');
+    for(const [value,text] of [['','Use default'],['480p','480p'],['720p','720p'],['1080p','1080p'],['2160p','4K']]){const option=element('option',text);option.value=value;select.append(option);}
+    select.value=getTitleQuality(target);select.addEventListener('change',()=>setTitleQuality(target,select.value));label.append(select);return label;
   }
 
   async function showTitle(meta){
@@ -200,18 +267,18 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
   }
 
   function renderMovieActions(meta){
-    const bar=element('div','','movie-action-bar');bar.append(titleResolutionControl());
+    const bar=element('div','','movie-action-bar');bar.append(titleResolutionControl(meta));
     const target={type:'movie',id:meta.id},actions=element('div','','row-actions');
     const playButton=button('Play',()=>quickPlay(meta,target,'',playButton),true);
-    const shareButton=button('Share',()=>quickDriveShare(meta,target,'',shareButton));shareButton.hidden=guestMode;
-    actions.append(playButton,shareButton,button('Options',()=>openOptions(meta,target)));bar.append(actions);$('episode-area').replaceChildren(bar);
+    const shareButton=button('Share',()=>quickDriveShare(meta,target,'',shareButton));shareButton.hidden=guestMode;shareButton.classList.add('advanced-only');
+    const options=button('Options',()=>openOptions(meta,target));options.classList.add('advanced-only');actions.append(playButton,shareButton,options);bar.append(actions);$('episode-area').replaceChildren(bar);
   }
 
   function renderEpisodes(meta){
     const settings=getSettings(),progressRows=settings.showEpisodeProgress?listRecent().filter(item=>item.type==='series'&&item.id===meta.id):[];
     const controls=element('div','','episode-controls');const seasonLabel=element('label','Season','compact-select');const seasonSelect=element('select');
     const seasons=[...new Set(meta.episodes.map(e=>e.season))];for(const n of seasons){const o=element('option',n===0?'Specials':`Season ${n}`);o.value=String(n);seasonSelect.append(o);}
-    if(seasons.some(n=>n>0))seasonSelect.value=String(seasons.find(n=>n>0));seasonLabel.append(seasonSelect);controls.append(seasonLabel,titleResolutionControl());
+    if(seasons.some(n=>n>0))seasonSelect.value=String(seasons.find(n=>n>0));seasonLabel.append(seasonSelect);controls.append(seasonLabel,titleResolutionControl(meta));
     const list=element('div','','episode-list');
     const render=()=>{
       list.replaceChildren();
@@ -222,8 +289,8 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
         if(progress){const label=progress.completed?'Watched':progress.position>0?`Resume ${formatResumeTime(progress.position)}`:'';if(label)info.append(element('span',label,'episode-progress-text'));}
         const actions=element('div','','episode-actions');const target={type:'series',id:meta.id,season:episode.season,episode:episode.episode};
         const playButton=button('Play',()=>quickPlay(meta,target,episode.name,playButton),true);
-        const shareButton=button('Share',()=>quickDriveShare(meta,target,episode.name,shareButton));shareButton.hidden=guestMode;
-        const more=button('Options',()=>openOptions(meta,target,episode.name));more.setAttribute('aria-label',`More options for ${episode.name}`);
+        const shareButton=button('Share',()=>quickDriveShare(meta,target,episode.name,shareButton));shareButton.hidden=guestMode;shareButton.classList.add('advanced-only');
+        const more=button('Options',()=>openOptions(meta,target,episode.name));more.setAttribute('aria-label',`More options for ${episode.name}`);more.classList.add('advanced-only');
         actions.append(playButton,shareButton,more);row.append(number,info,actions);
         if(episode.released&&Date.parse(episode.released)>Date.now()){playButton.disabled=true;shareButton.disabled=true;more.disabled=true;row.classList.add('future');}
         list.append(row);
@@ -267,7 +334,11 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
         const row=document.createElement('tr'),nameCell=element('td','','filename');
         nameCell.append(element('span',source.title,'source-title-cell'),element('small',[formatBytes(source.size),Number.isSafeInteger(source.seeders)?source.seeders+' seeders':'seeders —',qualityText(source),source.cached?'Cached':source.cached===false?'Not cached':'Cache ?'].join(' · '),'source-mobile-meta'));
         row.append(nameCell,element('td',formatBytes(source.size)),element('td',Number.isSafeInteger(source.seeders)?String(source.seeders):'—'),element('td',qualityText(source)),element('td',source.cached?'Cached':source.cached===false?'Not cached':'Unknown',source.cached?'cache-yes':'cache-no'));
-        const action=document.createElement('td');action.append(button(source.cached?'Play':'Prepare',async()=>{try{await ensureService();const result=await readyFile(source,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();closeTitleForPlayback();await play(result.file,buildContext(meta,target,episodeName,resolution,source));}catch(e){status.textContent=e.message;status.classList.add('error');}}));row.append(action);body.append(row);
+        const action=document.createElement('td');
+        if(source.memoryBad||source.memoryAudio==='bad'){
+          row.classList.add('source-blocked');const allow=button('Allow',()=>{setSourceBad(target,source,false);setAudioFeedback(target,source,'unknown');findSources(meta,target,episodeName);});allow.title='Remove this source from the local bad-source list';action.append(allow);
+        }else action.append(button(source.cached?'Play':'Prepare',async()=>{try{await ensureService();const result=await readyFile(source,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();closeTitleForPlayback();await play(result.file,buildContext(meta,target,episodeName,resolution,source));}catch(e){status.textContent=e.message;status.classList.add('error');}}));
+        row.append(action);body.append(row);
       }
       table.append(body);wrap.append(table);area.append(wrap);
       if(pages>1){
@@ -282,7 +353,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     cancelSource();const generation=sourceGeneration;sourceAbort=new AbortController();const area=$('source-options'),status=element('p','Finding sources…','status subtle-status');area.replaceChildren(status);
     const alive=()=>active&&generation===sourceGeneration&&$('source-dialog').open;
     try{
-      const result=await registeredSources(target,sourceAbort.signal);if(!alive())return;status.textContent=result.warning||'';renderSourceTable(meta,result.sources,target,episodeName,generation,area,status,getResolution());
+      const result=await registeredSources(target,sourceAbort.signal);if(!alive())return;status.textContent=result.warning||'';renderSourceTable(meta,result.sources,target,episodeName,generation,area,status,getResolution(target));
     }catch(e){if(alive()){status.textContent=e.message;status.classList.add('error');area.append(button('Retry',()=>findSources(meta,target,episodeName)));}}
   }
 
@@ -293,7 +364,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       const registered=await registeredSources(next,AbortSignal.timeout(45000));
       let best=recommendSource(registered.sources,'series',context.resolution||'auto')||recommendSource(registered.sources,'series','auto');if(!best||best.audioRisk)return false;
       const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
-      await play(result.file,{title:meta.meta.name,poster:meta.meta.poster||context.poster,episodeName:next.name||'',resolution:context.resolution||'auto',current:next,sourceResolution:best.resolution||best.quality||'',queue:rest});return true;
+      await play(result.file,{...buildContext(meta.meta,next,next.name||'',context.resolution||getResolution(next),best),poster:meta.meta.poster||context.poster,queue:rest});return true;
     }catch{return false;}
   }
 
@@ -305,7 +376,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
         const best=recommendSource(registered.sources,context.current.type,resolution);if(!best||best.audioRisk||best.videoRisk)continue;
         try{
           const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
-          await play(result.file,{...context,resolution,sourceResolution:best.resolution||best.quality||resolution});return true;
+          await play(result.file,{...context,...buildContext({name:context.title,poster:context.poster,episodes:[]},context.current,context.episodeName||'',resolution,best),queue:context.queue||[]});return true;
         }catch{}
       }
     }catch{}
@@ -320,7 +391,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       const data=await api(`/api/discover/meta?type=${entry.type}&id=${entry.id}`,{signal:AbortSignal.timeout(20000)}),meta=data.meta;
       const target=entry.type==='series'?{type:'series',id:entry.id,season:entry.season,episode:entry.episode}:{type:'movie',id:entry.id};
       const name=entry.type==='series'?(meta.episodes.find(e=>e.season===entry.season&&e.episode===entry.episode)?.name||entry.episodeName):'';
-      const registered=await registeredSources(target,AbortSignal.timeout(45000)),resolution=entry.resolution||getResolution();
+      const registered=await registeredSources(target,AbortSignal.timeout(45000)),resolution=entry.resolution||getResolution(target);
       const best=recommendSource(registered.sources,target.type,resolution)||recommendSource(registered.sources,target.type,'auto');if(!best)throw new Error('No source is available to resume.');
       const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
       const context=buildContext(meta,target,name,resolution,best);context.forceStartOver=startOver;context.rewindOnResumeSeconds=startOver?0:getSettings().resumeRewindSeconds;
@@ -330,18 +401,20 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
 
   for(const id of ['catalog-type','catalog-feed','catalog-genre'])$(id).addEventListener('change',()=>{persistBrowsePreferences();browse();});
   $('catalog-more').addEventListener('click',()=>browse(true));$('catalog-retry').addEventListener('click',()=>browse());
-  $('search').addEventListener('input',()=>{clearTimeout(searchTimer);if(guestMode)return;++catalogGeneration;catalogAbort?.abort();searchTimer=setTimeout(()=>browse(),350);});
+  $('search').addEventListener('input',()=>{clearTimeout(searchTimer);renderSearchHistory();if(guestMode)return;++catalogGeneration;catalogAbort?.abort();searchTimer=setTimeout(()=>browse(),350);});
+  $('search').addEventListener('focus',renderSearchHistory);
   $('close-title').addEventListener('click',()=>$('title-dialog').close());$('title-dialog').addEventListener('close',()=>{++titleGeneration;titleAbort?.abort();});
   $('close-source').addEventListener('click',()=>$('source-dialog').close());$('source-dialog').addEventListener('close',cancelSource);
+  $('close-quick-actions').addEventListener('click',()=>$('quick-actions-dialog').close());
   $('toggle-watchlist').addEventListener('click',()=>{if(guestMode||!currentMeta)return;toggleWatchlist($('viewer').value,currentMeta);updateWatchlistButton();renderWatchlist();});
-  $('viewer').addEventListener('change',()=>{cancelTitle();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();renderWatchlist();});
+  $('viewer').addEventListener('change',()=>{cancelTitle();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();renderWatchlist();renderSearchHistory();renderNextUp();});
   return {
     async activate(){guestMode=false;active=true;await openDiscover();},
     async activateGuest(scope){
       guestMode=true;active=true;
       await showTitle({type:scope.type,id:scope.id,name:scope.name||'Shared title',poster:scope.poster||''});
     },
-    playNext,recoverPlayback,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),settingsChanged(){renderWatchlist();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);}},
+    playNext,recoverPlayback,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
     suspend(){active=false;guestMode=false;++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
   };
 }
