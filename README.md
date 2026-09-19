@@ -2,7 +2,7 @@
 
 This branch is the **browser-key clone** of the household TorBox web player. The original player on `main` remains separate.
 
-Current version: **0.9.0-key-clone**
+Current version: **0.9.1-key-clone**
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/key/`
 
@@ -97,3 +97,14 @@ Version 0.9 adds scoped temporary guest links. From a movie/show title, the owne
 Guest links are opaque random tokens stored only in Render process memory. They expire automatically, are invalidated when the sharing owner signs out, and also disappear on a Render restart. Guest playback is restricted to video IDs obtained through source preparation for the shared title.
 
 The mobile source chooser no longer repeats the Recommended torrent in the table. Alternate sources are paginated instead of creating a vertically scrolling list. Mobile pages show three alternatives at a time and compress size, seeders, quality and cache state into each compact row.
+
+
+## Guest-safe TorBox redirect fix
+
+Version 0.9.1 corrects the first guest-playback implementation. TorBox's ordinary returned playback URL can include the account master API key, so merely rejecting key-bearing URLs caused every real guest playback attempt to fail.
+
+Guest playback now uses TorBox's redirect mode server-side. Render sends the authenticated request to TorBox with `redirect=true`, does not follow the media stream, and reads only the redirect destination. The resulting TorBox CDN destination is then validated against the approved CDN-host allowlist and checked again to ensure it does not contain the literal master API key before being returned to the guest browser.
+
+Render still does not proxy or relay the movie. It performs one small redirect-resolution request; the guest browser then streams directly from the validated TorBox CDN destination.
+
+The existing fail-closed behavior remains: if TorBox does not return a redirect, points outside the approved TorBox CDN hosts, or the redirect target still contains the master key, guest playback is blocked instead of exposing the credential.
