@@ -38,7 +38,7 @@ jobs:
           PY
           npm ci --ignore-scripts --no-audit --no-fund
           npm run check
-          npm test > "$RUNNER_TEMP/runtime-tests.log" 2>&1 || { cat "$RUNNER_TEMP/runtime-tests.log"; exit 1; }
+          npm test -- --test-reporter=tap > "$RUNNER_TEMP/runtime-tests.log" 2>&1 || { cat "$RUNNER_TEMP/runtime-tests.log"; exit 1; }
           tail -15 "$RUNNER_TEMP/runtime-tests.log"
           git diff --check
       - name: Commit verified source, remove temporary transport, and build the pinned bundle
