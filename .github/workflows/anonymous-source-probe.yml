@@ -1,6 +1,10 @@
 name: Anonymous source fallback probe
 
 on:
+  push:
+    branches: [browser-key-clone]
+    paths:
+      - '.github/workflows/anonymous-source-probe.yml'
   workflow_dispatch:
 
 permissions:
