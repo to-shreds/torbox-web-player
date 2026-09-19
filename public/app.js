@@ -1,17 +1,19 @@
 import { createDiscoveryUI } from './discover.js';
 import { diagnosePlaybackFailure } from './playback-errors.js';
-import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode, applicationStorage, flushRuntimeState, assertRuntimeReady, runtimeCapabilities, imageUrl } from './runtime.js';
 import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js';
 import { listRecent, recordRecent, removeRecent, recentForContext, resumePosition, formatResumeTime } from './history.js';
 import { getSettings, saveSettings, resetSettings } from './settings.js';
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js';
 import { clearSearchHistory } from './search-history.js';
 import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js';
+assertRuntimeReady();
 const $ = id => document.getElementById(id);
+for(const control of document.querySelectorAll('[data-runtime-capability]'))control.hidden=!runtimeCapabilities[control.dataset.runtimeCapability];
 let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '';
 let discoveryUI;
 let viewer = 'viewer-1';
-try { const saved = localStorage.getItem('tw-viewer') || sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
+try { const saved = applicationStorage()?.getItem('tw-viewer') || (!runtimeCapabilities.phonePersistence ? sessionStorage.getItem('tw-viewer') : ''); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
 $('viewer').value = viewer;
 function kidEnabled(){return !guestMode&&getKidProfile(viewer).enabled===true;}
 function applyInterfaceMode(){
@@ -123,7 +125,7 @@ function renderRecent() {
   for (const item of rows) {
     const entry = document.createElement('div'); entry.className = 'recent-entry';
     const card = document.createElement('button'); card.type = 'button'; card.className = 'recent-card';
-    if (item.poster) { const img = document.createElement('img'); img.className = 'recent-thumb'; img.src = item.poster; img.alt = ''; img.referrerPolicy = 'no-referrer'; card.append(img); }
+    if (item.poster) { const img = document.createElement('img'); img.className = 'recent-thumb'; img.src = imageUrl(item.poster); img.alt = ''; img.referrerPolicy = 'no-referrer'; card.append(img); }
     const copy = document.createElement('span'); copy.className = 'recent-copy';
     const title = document.createElement('strong'); title.className = 'recent-title'; title.textContent = item.title;
     const meta = document.createElement('span'); meta.className = 'recent-meta'; meta.textContent = recentLabel(item); copy.append(title, meta);
@@ -163,8 +165,10 @@ async function ensureTorBoxReady() {
   if (!ok) throw new Error(torboxStatusCache?.message || 'TorBox is currently unavailable. Try again after the outage clears.');
   return true;
 }
-function show(section) { if (section !== 'workspace') discoveryUI?.suspend(); for (const id of ['loading', 'setup-needed', 'login', 'workspace']) $(id).hidden = id !== section; }
+function show(section) {
+  if(section==='login'&&runtimeCapabilities.phoneCredentials){section='loading';$('loading').querySelector('p').textContent='Scan Open Player in CarStream on the phone to reconnect.';} if (section !== 'workspace') discoveryUI?.suspend(); for (const id of ['loading', 'setup-needed', 'login', 'workspace']) $(id).hidden = id !== section; }
 async function api(path, { method = 'GET', data, signal, keepalive = false } = {}) {
+  if(!['GET','HEAD'].includes(method))await flushRuntimeState();
   const headers = {}; if (data !== undefined) headers['Content-Type'] = 'application/json';
   if (sessionToken) headers.Authorization = `Bearer ${sessionToken}`;
   if (method !== 'GET') headers['X-CSRF-Token'] = csrf;
@@ -230,7 +234,7 @@ async function bootstrap() {
     if (session.setupRequired) return show('setup-needed');
     if (!session.authenticated) {
       clearSessionToken(); sessionToken = ''; csrf = ''; leaveGuestUi();
-      if (!autoLoginTried) {
+      if (!autoLoginTried && runtimeCapabilities.credentialVault) {
         autoLoginTried = true;
         const remembered = await loadRememberedApiKey();
         if (remembered) {
@@ -278,8 +282,10 @@ async function performLogout(){
 $('logout').addEventListener('click',()=>{if(kidEnabled()&&hasParentPin())requestParentPin('Enter the Parent PIN to sign out.',performLogout);else performLogout();});
 async function switchViewer(next){
   if(!['viewer-1','viewer-2'].includes(next)||next===viewer)return;
-  await stopPlayback();if($('player').open)$('player').close();viewer=next;$('viewer').value=viewer;
-  try{localStorage.setItem('tw-viewer',viewer);sessionStorage.setItem('tw-viewer',viewer);}catch{}
+  await stopPlayback();if($('player').open)$('player').close();
+  try{applicationStorage()?.setItem('tw-viewer',next);await flushRuntimeState();}catch(error){if(runtimeCapabilities.phonePersistence){text('catalog-message',error.message||'The phone could not change viewers.',true);return;}}
+  viewer=next;$('viewer').value=viewer;
+  try{if(!runtimeCapabilities.phonePersistence)sessionStorage.setItem('tw-viewer',viewer);}catch{}
   applyInterfaceMode();renderRecent();discoveryUI?.settingsChanged();
 }
 $('viewer').addEventListener('change',()=>{
@@ -313,7 +319,7 @@ async function saveProgress(context = active, keepalive = false) {
 function clearNextCountdown(){if(nextCountdownTimer)clearInterval(nextCountdownTimer);nextCountdownTimer=null;$('up-next-card').hidden=true;}
 async function releaseWakeLock(){try{await wakeLock?.release();}catch{}wakeLock=null;}
 async function acquireWakeLock(){
-  if(!getSettings().keepAwake||!('wakeLock' in navigator)||document.visibilityState!=='visible')return;
+  if(!runtimeCapabilities.screenWakeLock||!getSettings().keepAwake||!('wakeLock' in navigator)||document.visibilityState!=='visible')return;
   try{await releaseWakeLock();wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null;},{once:true});}catch{}
 }
 function armSleepTimer(context){
@@ -388,6 +394,7 @@ function tickKidUsage(context,force=false){
   if(result.timeBlocked&&active===context&&!$('kid-limit-dialog').open)showKidLimit({reason:'time'});
 }
 async function resumeAfterKidParentAction(){
+  try{await flushRuntimeState();}catch(error){text('kid-limit-pin-message',error.message||'The phone could not save the allowance.',true);return false;}
   updateKidLimitDialog();applyInterfaceMode();
   const retry=pendingKidPlayback;pendingKidPlayback=null;kidLimitReason='';
   if($('kid-limit-dialog').open)$('kid-limit-dialog').close();
@@ -627,7 +634,7 @@ function loadSettingsForm(){
 function openSettingsDialog(){loadSettingsForm();if(!$('settings-dialog').open)$('settings-dialog').showModal();}
 $('open-settings').addEventListener('click',()=>{if(kidEnabled()&&hasParentPin())requestParentPin('Enter the Parent PIN to open Settings.',openSettingsDialog);else openSettingsDialog();});
 $('close-settings').addEventListener('click',()=>$('settings-dialog').close());
-$('settings-form').addEventListener('submit',event=>{
+$('settings-form').addEventListener('submit',async event=>{
   event.preventDefault();
   const enableKid=$('setting-kid-mode').checked;
   if(enableKid&&!hasParentPin()){text('settings-message','Set a Parent PIN before enabling Kid Mode.',true);return;}
@@ -671,11 +678,12 @@ $('settings-form').addEventListener('submit',event=>{
     showPlaybackHealth:$('setting-playback-health').checked,
     autoLearnSources:$('setting-auto-learn-sources').checked
   });
+  try{await flushRuntimeState();}catch(error){text('settings-message',error.message||'The phone could not save settings.',true);return;}
   try{sessionStorage.setItem('tw-source-resolution',$('setting-resolution').value)}catch{}
   applyInterfaceMode();loadKidSettings();renderRecent();discoveryUI.settingsChanged();resetStillWatchingTimer();if(active?.video){active.video.playbackRate=getSettings().playbackRate;if(active.video.paused)updatePauseCard(active);else hidePauseCard();setHealthSource(active);setPlaybackHealth(active.video.paused?'Paused':'Playing','Settings updated.');} text('settings-message','Saved.');
 });
-$('reset-settings').addEventListener('click',()=>{resetSettings();try{sessionStorage.removeItem('tw-source-resolution')}catch{}applyInterfaceMode();loadSettingsForm();renderRecent();discoveryUI.settingsChanged();resetStillWatchingTimer();});
-$('kid-reset-allowance').addEventListener('click',()=>{resetKidAllowance(viewer);loadKidSettings();applyInterfaceMode();text('settings-message','Kid allowance reset.');});
+$('reset-settings').addEventListener('click',async()=>{resetSettings();try{await flushRuntimeState();}catch(error){text('settings-message',error.message||'The phone could not reset settings.',true);return;}try{sessionStorage.removeItem('tw-source-resolution')}catch{}applyInterfaceMode();loadSettingsForm();renderRecent();discoveryUI.settingsChanged();resetStillWatchingTimer();});
+$('kid-reset-allowance').addEventListener('click',async()=>{resetKidAllowance(viewer);try{await flushRuntimeState();}catch(error){text('settings-message',error.message||'The phone could not reset the allowance.',true);return;}loadKidSettings();applyInterfaceMode();text('settings-message','Kid allowance reset.');});
 function openParentPinChange(){
   const existing=hasParentPin();$('parent-pin-change-title').textContent=existing?'Change Parent PIN':'Set Parent PIN';
   $('parent-pin-current-wrap').hidden=!existing;$('parent-pin-current').required=existing;
@@ -700,6 +708,6 @@ $('settings-clear-searches').addEventListener('click',()=>{if(confirm('Clear sea
 $('settings-install-app').addEventListener('click',async()=>{if(!deferredInstallPrompt){text('settings-message',window.matchMedia?.('(display-mode: standalone)').matches?'The app is already installed.':'Use Chrome’s Add to Home screen / Install app command if the install prompt is not available.');return;}const prompt=deferredInstallPrompt;deferredInstallPrompt=null;await prompt.prompt();await prompt.userChoice.catch(()=>{});updateInstallButton();});
 $('settings-check-status').addEventListener('click',async()=>{text('settings-message','Checking TorBox…');const ok=await checkTorBoxStatus(true);text('settings-message',ok?(torboxStatusCache?.official==='issue'?'TorBox API is reachable, but its status page reports an issue.':'TorBox API is reachable.'):(torboxStatusCache?.message||'TorBox is unavailable.'),!ok);});
 $('retry-torbox-status').addEventListener('click',()=>checkTorBoxStatus(true));
-discoveryUI = createDiscoveryUI({ api, play: startPlayback, driveTest: openDriveTest, guard: ensureTorBoxReady });
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+discoveryUI = createDiscoveryUI({ api, play: startPlayback, driveTest: runtimeCapabilities.driveSharing ? openDriveTest : null, guard: ensureTorBoxReady });
+if(runtimeCapabilities.serviceWorker&&'serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 bootstrap();

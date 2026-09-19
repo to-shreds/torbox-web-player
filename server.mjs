@@ -1,3 +1,4 @@
+import { carStreamRoute, assertClientSession } from './lib/carstream-client.mjs';
 import { SourceLookup, MultiSourceLookup, SourceLookupError } from './lib/source-lookup.mjs';
 import { Discovery, discoveryBody } from './lib/discovery.mjs';
 import http from 'node:http';
@@ -16,6 +17,7 @@ const publicFiles = new Map([
   ['/setup.html', ['setup.html', 'text/html; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
   ['/runtime.js', ['runtime.js', 'text/javascript; charset=utf-8']],
+  ['/runtime-core.js', ['runtime-core.js', 'text/javascript; charset=utf-8']],
   ['/history.js', ['history.js', 'text/javascript; charset=utf-8']],
   ['/settings.js', ['settings.js', 'text/javascript; charset=utf-8']],
   ['/watchlist.js', ['watchlist.js', 'text/javascript; charset=utf-8']],
@@ -95,7 +97,9 @@ export function createApp({ env = process.env, provider, providerFactory, discov
     response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://images.metahub.space https://image.tmdb.org https://m.media-amazon.com; media-src https://torbox.app https://*.torbox.app https://*.tb-cdn.cx https://*.tb-cdn.io https://*.tb-cdn.pw https://*.tb-cdn.sh https://*.tb-cdn.st https://*.tb-cdn.to https://*.tb-cdn.earth; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
     if (production) response.setHeader('Strict-Transport-Security', 'max-age=31536000');
     try {
-      const url = new URL(request.url || '/', origin), path = url.pathname, method = request.method;
+      const url = new URL(request.url || '/', origin), method = request.method;
+      const phonePath = carStreamRoute(request, url.pathname, apiKeyMode && env.CARSTREAM_CLIENT_ENABLED === 'true');
+      const nativeClient = phonePath !== null, path = phonePath || url.pathname;
       const corsAllowed = applyCors(request, response);
       if (method === 'OPTIONS') {
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
@@ -108,11 +112,12 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         response.setHeader('Content-Type', type); return response.end(await readFile(join(root, 'public', filename)));
       }
 
-      const bearer = bearerId(request), cookie = cookieId(request), sessionToken = bearer || cookie;
+      const bearer = bearerId(request), cookie = nativeClient ? '' : cookieId(request), sessionToken = bearer || cookie;
       const session = configured ? sessions.read(sessionToken) : null;
+      assertClientSession(session, nativeClient);
       const bearerSession = !!bearer && !!session;
       if (!path.startsWith('/api/')) throw new AppError('NOT_FOUND', 'Page not found.', 404);
-      if (!['GET', 'HEAD'].includes(method) && !trustedOrigin(request.headers.origin)) throw new AppError('BAD_ORIGIN', 'Reload the website before trying again.', 403);
+      if (!nativeClient && !['GET', 'HEAD'].includes(method) && !trustedOrigin(request.headers.origin)) throw new AppError('BAD_ORIGIN', 'Reload the website before trying again.', 403);
       if (path === '/api/session' && method === 'GET') return json(response, 200, { authenticated: !!session, setupRequired: !configured, authMode: apiKeyMode ? 'api-key' : 'household', ...(session ? { csrf: session.csrf, viewers: VIEWERS, durable: false, guest: session.guest === true, scope: session.guest ? session.scope : undefined, keyConfigured: session.guest ? true : (apiKeyMode ? !!session.provider : !!(env.TORBOX_API_KEY || provider)) } : {}) });
       if (path === '/api/login' && method === 'POST') {
         if (!configured) throw new AppError('SETUP_REQUIRED', 'This clone is not configured for authentication.', 503);
@@ -135,8 +140,10 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         const created = sessions.create();
         if (!created) throw new AppError('SESSION_LIMIT', 'The session limit was reached. Restart the service to revoke old sessions.', 429);
         if (apiKeyMode) { created.row.provider = sessionProvider; created.row.discovery = sessionDiscovery; }
+        if (nativeClient) created.row.client = 'carstream';
         if (session) { (session.discovery || discovery).revoke(session.id); sessions.revoke(session.id); }
-        setCookie(response, created.id); return json(response, 200, { ok: true, csrf: created.row.csrf, sessionToken: created.id, authMode: apiKeyMode ? 'api-key' : 'household' });
+        if (!nativeClient) setCookie(response, created.id);
+        return json(response, 200, { ok: true, csrf: created.row.csrf, sessionToken: created.id, authMode: apiKeyMode ? 'api-key' : 'household', ...(nativeClient ? { client:'carstream', expiresAt:new Date(created.row.expires).toISOString() } : {}) });
       }
       if (path === '/api/guest/accept' && method === 'POST') {
         const data = await body(request), invite = guestInvites.read(data.token);
@@ -175,7 +182,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
           for (const [id, row] of sessions.rows) if (row.guest && row.ownerId === session.id) { row.discovery?.revokeAll(); sessions.rows.delete(id); }
           if (session.provider) session.provider.key = '';
         }
-        sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true });
+        sessions.revoke(session.id); if (!nativeClient) setCookie(response, '', 0); return json(response, 200, { ok: true });
       }
       if (path === '/api/torbox-status' && method === 'GET') {
         const cached = session.torboxStatus;
@@ -287,7 +294,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         if (!validViewer(data.viewer)) throw new AppError('BAD_VIEWER', 'Choose a viewer first.', 400);
         parseVideoId(data.videoId);
         if (session.guest && !session.allowedVideos?.has(data.videoId)) throw new AppError('GUEST_FORBIDDEN', 'This file was not selected through the shared title.', 403);
-        const progressViewer = session.guest ? 'guest:' + session.id : data.viewer;
+        const progressViewer = session.guest ? 'guest:' + session.id : nativeClient ? 'carstream:' + session.id + ':' + data.viewer : data.viewer;
         const intent = progress.beginIntent(progressViewer);
         const stream = session.guest ? await activeProvider.resolveGuest(data.videoId) : await activeProvider.resolveForRelay(data.videoId);
         if (!progress.isCurrent(progressViewer, intent)) throw new AppError('PLAYBACK_SUPERSEDED', 'A newer playback request replaced this one.', 409);
@@ -299,7 +306,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         if (!progressRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Progress is being saved too frequently.', 429);
         const data = await body(request);
         if (!validViewer(data.viewer)) throw new AppError('BAD_VIEWER', 'Choose a viewer first.', 400);
-        const progressViewer = session.guest ? 'guest:' + session.id : data.viewer;
+        const progressViewer = session.guest ? 'guest:' + session.id : nativeClient ? 'carstream:' + session.id + ':' + data.viewer : data.viewer;
         return json(response, 200, { saved: progress.write(progressViewer, data, session.id) });
       }
       throw new AppError('NOT_FOUND', 'This action is not available in this player.', 404);

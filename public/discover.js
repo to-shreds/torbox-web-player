@@ -1,3 +1,4 @@
+import { imageUrl } from './runtime.js';
 import { loadPublicSources } from './source-client.js';
 import { getSettings, updateSettings } from './settings.js';
 import { listRecent, formatResumeTime } from './history.js';
@@ -8,7 +9,7 @@ const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
 const button = (label, fn, primary = false) => { const b = element('button', label, primary ? 'primary' : ''); b.type = 'button'; b.addEventListener('click', fn); return b; };
-const image = (url, label, className) => { const i = element('img', '', className); i.alt = label; i.loading = 'lazy'; i.referrerPolicy = 'no-referrer'; i.src = url; i.addEventListener('error', () => { i.hidden = true; }); return i; };
+const image = (url, label, className) => { const i = element('img', '', className); i.alt = label; i.loading = 'lazy'; i.referrerPolicy = 'no-referrer'; i.src = imageUrl(url); i.addEventListener('error', () => { i.hidden = true; }); return i; };
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 const resolutionOf = s => String(s?.resolution || s?.quality || '').toLowerCase();
 export function sourceMatchesResolution(source, resolution = 'auto') {
@@ -134,7 +135,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     if(!meta||guestMode)return;const dialog=$('quick-actions-dialog'),area=$('quick-actions-content');$('quick-actions-title').textContent=meta.name||'Title';area.replaceChildren();
     const favorite=button(isWatchlisted($('viewer').value,meta)?'Remove from My list':'Add to My list',()=>{toggleWatchlist($('viewer').value,meta);renderWatchlist();favorite.textContent=isWatchlisted($('viewer').value,meta)?'Remove from My list':'Add to My list';});
     const playButton=button('Play',async()=>{try{const resolved=await resolveQuickTarget(meta);dialog.close();await quickPlay(resolved.meta,resolved.target,resolved.episodeName,playButton);}catch(e){message('catalog-message',e.message,true);}},true);
-    const shareButton=button('Share',async()=>{try{const resolved=await resolveQuickTarget(meta);dialog.close();await quickDriveShare(resolved.meta,resolved.target,resolved.episodeName,shareButton);}catch(e){message('catalog-message',e.message,true);}});shareButton.classList.add('advanced-only');
+    const shareButton=button('Share',async()=>{try{const resolved=await resolveQuickTarget(meta);dialog.close();await quickDriveShare(resolved.meta,resolved.target,resolved.episodeName,shareButton);}catch(e){message('catalog-message',e.message,true);}});shareButton.classList.add('advanced-only');shareButton.hidden=typeof driveTest!=='function';
     const details=button('Details',()=>{dialog.close();showTitle(meta);});
     area.append(playButton,favorite,shareButton,details);if(!dialog.open)dialog.showModal();
   }
@@ -276,7 +277,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     const bar=element('div','','movie-action-bar');bar.append(titleResolutionControl(meta));
     const target={type:'movie',id:meta.id},actions=element('div','','row-actions');
     const playButton=button('Play',()=>quickPlay(meta,target,'',playButton),true);
-    const shareButton=button('Share',()=>quickDriveShare(meta,target,'',shareButton));shareButton.hidden=guestMode;shareButton.classList.add('advanced-only');
+    const shareButton=button('Share',()=>quickDriveShare(meta,target,'',shareButton));shareButton.hidden=guestMode||typeof driveTest!=='function';shareButton.classList.add('advanced-only');
     const options=button('Options',()=>openOptions(meta,target));options.classList.add('advanced-only');actions.append(playButton,shareButton,options);bar.append(actions);$('episode-area').replaceChildren(bar);
   }
 
@@ -295,7 +296,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
         if(progress){const label=progress.completed?'Watched':progress.position>0?`Resume ${formatResumeTime(progress.position)}`:'';if(label)info.append(element('span',label,'episode-progress-text'));}
         const actions=element('div','','episode-actions');const target={type:'series',id:meta.id,season:episode.season,episode:episode.episode};
         const playButton=button('Play',()=>quickPlay(meta,target,episode.name,playButton),true);
-        const shareButton=button('Share',()=>quickDriveShare(meta,target,episode.name,shareButton));shareButton.hidden=guestMode;shareButton.classList.add('advanced-only');
+        const shareButton=button('Share',()=>quickDriveShare(meta,target,episode.name,shareButton));shareButton.hidden=guestMode||typeof driveTest!=='function';shareButton.classList.add('advanced-only');
         const more=button('Options',()=>openOptions(meta,target,episode.name));more.setAttribute('aria-label',`More options for ${episode.name}`);more.classList.add('advanced-only');
         actions.append(playButton,shareButton,more);row.append(number,info,actions);
         if(episode.released&&Date.parse(episode.released)>Date.now()){playButton.disabled=true;shareButton.disabled=true;more.disabled=true;row.classList.add('future');}

@@ -101,9 +101,9 @@
 <label class="setting-check"><input id="setting-remember-browse" type="checkbox"> Remember movie/show, browse feed, and genre choices</label>
 </fieldset>
 <fieldset class="settings-group"><legend>Drive sharing and app</legend>
-<label>Default Drive cleanup<select id="setting-drive-delete"><option value="10">10 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option><option value="45">45 minutes</option></select></label>
-<label class="setting-check"><input id="setting-drive-watch-only" type="checkbox"> Default Drive shares to watch-only</label>
-<div class="setting-inline-actions"><button id="settings-install-app" type="button">Install app</button><button id="settings-check-status" type="button">Check TorBox status</button><button id="settings-clear-learning" type="button">Clear source learning</button><button id="settings-clear-searches" type="button">Clear this viewer's searches</button></div>
+<label data-runtime-capability="driveSharing">Default Drive cleanup<select id="setting-drive-delete"><option value="10">10 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option><option value="45">45 minutes</option></select></label>
+<label class="setting-check" data-runtime-capability="driveSharing"><input id="setting-drive-watch-only" type="checkbox"> Default Drive shares to watch-only</label>
+<div class="setting-inline-actions"><button data-runtime-capability="installApp" id="settings-install-app" type="button">Install app</button><button id="settings-check-status" type="button">Check TorBox status</button><button id="settings-clear-learning" type="button">Clear source learning</button><button id="settings-clear-searches" type="button">Clear this viewer's searches</button></div>
 </fieldset>
 <div class="settings-actions"><button class="primary" type="submit">Save settings</button><button id="reset-settings" type="button">Reset defaults</button></div>
 <p id="settings-message" class="status compact-status" role="status"></p>

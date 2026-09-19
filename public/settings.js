@@ -1,3 +1,4 @@
+import { applicationStorage } from './runtime.js';
 const KEY='torbox-settings-v1';
 export const DEFAULT_SETTINGS=Object.freeze({
   interfaceMode:'simple',
@@ -53,7 +54,7 @@ const catalogTypes=new Set(['movie','series']);
 const catalogFeeds=new Set(['popular','featured','new']);
 const sizeProfiles=new Set(['data','balanced','quality']);
 const genres=new Set(['','Action','Adventure','Animation','Biography','Comedy','Crime','Documentary','Drama','Family','Fantasy','History','Horror','Mystery','Romance','Sci-Fi','Sport','Thriller','War','Western']);
-function store(){try{return localStorage}catch{return null}}
+const store=applicationStorage;
 export function normalizeSettings(raw){
   const s=raw&&typeof raw==='object'?raw:{};
   return {
