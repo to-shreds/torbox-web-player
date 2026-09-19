@@ -1,0 +1,55 @@
+name: Browser-only contract probe
+
+on:
+  push:
+    branches: [browser-key-clone]
+    paths:
+      - '.github/workflows/browser-only-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cors:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check browser CORS contracts
+        shell: bash
+        run: |
+          node <<'NODE'
+          const origin = 'https://to-shreds.github.io';
+          async function preflight(name, url, method, headers='authorization') {
+            const r = await fetch(url, {
+              method: 'OPTIONS',
+              headers: {
+                Origin: origin,
+                'Access-Control-Request-Method': method,
+                'Access-Control-Request-Headers': headers,
+              },
+              redirect: 'manual',
+              signal: AbortSignal.timeout(15000),
+            });
+            const allowOrigin = r.headers.get('access-control-allow-origin') || '';
+            const allowMethods = r.headers.get('access-control-allow-methods') || '';
+            const allowHeaders = r.headers.get('access-control-allow-headers') || '';
+            console.log(JSON.stringify({name,status:r.status,allowOrigin,allowMethods,allowHeaders}));
+            const originOk = allowOrigin === '*' || allowOrigin === origin;
+            const methodOk = allowMethods.split(',').map(x=>x.trim().toUpperCase()).includes(method);
+            const headerList = allowHeaders.toLowerCase().split(',').map(x=>x.trim());
+            const requested = headers.toLowerCase().split(',').map(x=>x.trim()).filter(Boolean);
+            const headersOk = requested.every(h => allowHeaders === '*' || headerList.includes(h));
+            if (!originOk || !methodOk || !headersOk) throw new Error(name + ' does not permit required browser preflight');
+          }
+          async function simple(name, url) {
+            const r = await fetch(url, {headers:{Origin:origin,Accept:'application/json'}, redirect:'manual', signal:AbortSignal.timeout(15000)});
+            const allowOrigin = r.headers.get('access-control-allow-origin') || '';
+            console.log(JSON.stringify({name,status:r.status,allowOrigin,contentType:r.headers.get('content-type')}));
+            if (!(allowOrigin === '*' || allowOrigin === origin)) throw new Error(name + ' does not permit browser origin');
+            await r.body?.cancel();
+          }
+          await preflight('torbox-user-me','https://api.torbox.app/v1/api/user/me','GET','authorization');
+          await preflight('torbox-create-torrent','https://api.torbox.app/v1/api/torrents/createtorrent','POST','authorization');
+          await simple('cinemeta','https://v3-cinemeta.strem.io/meta/movie/tt1254207.json');
+          await simple('zilean','https://zileanfortheweebs.midnightignite.me/dmm/filtered?ImdbId=tt1160419');
+          NODE
