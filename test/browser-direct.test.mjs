@@ -65,6 +65,11 @@ test('redundant relay client and Cloudflare Worker share the allowlisted bridge 
   assert.match(direct,/bridgeRetryable/);
   assert.match(direct,/primaryCooldownUntil/);
   assert.match(direct,/bridge_cloudflare_health/);
+  assert.match(direct,/timeoutMs=2000/);
+  assert.match(direct,/torbox-browser-direct-diagnostics-v2/);
+  assert.match(direct,/expectedDirectLimitations/);
+  assert.match(direct,/optionalFailures/);
+  assert.match(direct,/redundantTorboxReady/);
   assert.deepEqual(JSON.parse(config),{primary:'https://torbox-web-player-key.onrender.com',secondary:'https://torbox-web-player-relay.jonathanjablon.workers.dev'});
   for(const route of ['user/me','torrents/checkcached','torrents/mylist','torrents/createtorrent','torrents/requestdl'])assert.ok(worker.includes(route),route);
   assert.match(worker,/X-TorBox-Bridge/);
