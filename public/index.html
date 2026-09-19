@@ -24,6 +24,22 @@
 <dialog id="title-dialog"><div class="dialog-bar"><h2 id="detail-title"></h2><div class="dialog-actions"><button id="share-title" class="text-button" type="button">Share</button><button id="close-title" class="icon-button" aria-label="Close title">×</button></div></div><p id="detail-message" class="status compact-status" role="status"></p><div id="title-content"></div><div id="episode-area"></div></dialog>
 <dialog id="source-dialog"><div class="dialog-bar"><h2 id="source-title">Sources</h2><button id="close-source" class="icon-button" aria-label="Close sources">×</button></div><div id="source-options"></div></dialog>
 <dialog id="share-dialog"><div class="dialog-bar"><h2>Temporary access</h2><button id="close-share" class="icon-button" aria-label="Close sharing">×</button></div><p id="share-title-name" class="muted"></p><label class="compact-select" for="share-duration">Access for<select id="share-duration"><option value="2">2 hours</option><option value="6" selected>6 hours</option><option value="12">12 hours</option><option value="24">24 hours</option></select></label><button id="create-share" class="primary" type="button">Create link</button><section id="share-result" hidden><label for="share-link">Temporary link<input id="share-link" type="text" readonly></label><div class="row-actions"><button id="copy-share" type="button">Copy</button><button id="native-share" type="button">Share</button></div><p id="share-expiry" class="muted"></p></section><p class="source-note">The link can only browse and play this movie or show. It does not reveal your TorBox API key or your TorBox library. It stops working when it expires, when you sign out, or if the Render process restarts.</p></dialog>
+<dialog id="drive-dialog"><div class="dialog-bar"><h2>Drive share test</h2><button id="close-drive" class="icon-button" aria-label="Close Drive test">×</button></div>
+<p id="drive-selected" class="muted"></p>
+<section id="drive-setup">
+<p class="source-note">One-time setup: deploy the small <a href="https://github.com/to-shreds/torbox-web-player/tree/browser-key-clone/drive-bridge" target="_blank" rel="noreferrer">Google Apps Script Drive bridge</a>, then paste its /exec URL and the same secret here. The bridge only gets Drive access to files created through it.</p>
+<label for="drive-url">Apps Script /exec URL<input id="drive-url" type="url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off"></label>
+<label for="drive-secret">Bridge secret<input id="drive-secret" type="password" autocomplete="off" minlength="24" maxlength="256"></label>
+<div class="row-actions"><button id="generate-drive-secret" type="button">Generate secret</button><button id="connect-drive" class="primary" type="button">Connect Drive</button></div>
+<p id="drive-connect-message" class="status compact-status" role="status"></p>
+</section>
+<section id="drive-test-controls" hidden>
+<label class="compact-select" for="drive-delete-after">Delete exported copy after<select id="drive-delete-after"><option value="10">10 minutes (test)</option><option value="60">1 hour</option><option value="120">2 hours</option><option value="360">6 hours</option><option value="720">12 hours</option><option value="1440">24 hours</option></select></label>
+<label class="remember-key"><input id="drive-block-download" type="checkbox" checked> Watch only: disable Drive download/copy for viewers</label>
+<button id="start-drive-test" class="primary" type="button">Start Drive transfer</button>
+</section>
+<section id="drive-progress" hidden><p id="drive-status" class="status"></p><progress id="drive-progress-bar" max="1" value="0"></progress><p id="drive-timing" class="muted"></p><div id="drive-ready-actions" class="row-actions" hidden><a id="drive-open" class="button-link primary" target="_blank" rel="noreferrer">Open Drive player</a><button id="copy-drive-link" type="button">Copy link</button><button id="delete-drive-now" type="button">Delete now</button></div><p id="drive-delete-note" class="source-note"></p></section>
+</dialog>
 <dialog id="player" class="player-shell"><button id="close-player" class="player-close" aria-label="Close player">×</button><h2 id="playing-title" class="sr-only"></h2><div id="video-slot"></div><p id="player-message" class="player-status" role="status" aria-live="polite"></p></dialog>
 <footer>GitHub UI · Render control bridge · Direct TorBox video</footer>
 </body></html>
