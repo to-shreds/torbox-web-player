@@ -36,8 +36,8 @@ jobs:
             for (const [type, id] of targets) {
               const out = { provider:name, type, id, status:null, count:null, hashes:null };
               try {
-                const r = await fetch(`${base}/stream/${type}/${id}.json`, { headers:{Accept:'application/json'}, redirect:'manual', signal:AbortSignal.timeout(30000) });
-                out.status=r.status; out.contentType=r.headers.get('content-type')?.split(';')[0]||'';
+                const r = await fetch(`${base}/stream/${type}/${id}.json`, { headers:{Accept:'application/json',Origin:'https://to-shreds.github.io'}, redirect:'manual', signal:AbortSignal.timeout(30000) });
+                out.status=r.status; out.contentType=r.headers.get('content-type')?.split(';')[0]||''; out.acao=r.headers.get('access-control-allow-origin')||'';
                 if (r.status >= 300 && r.status < 400) {
                   const location=r.headers.get('location');
                   try { const u=new URL(location, base); out.redirectOrigin=u.origin; out.redirectPath=u.pathname.slice(0,120); } catch {}
