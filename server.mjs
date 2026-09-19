@@ -8,6 +8,7 @@ import { Sessions, Limiter, GuestInvites, verifyPassword, validHash } from './li
 import { ProgressStore, VIEWERS, validViewer } from './lib/progress.mjs';
 import { TorBox, AppError, parseVideoId, TORBOX_MEDIA_HOSTS } from './lib/torbox.mjs';
 import { DriveTransferTests } from './lib/drive-share.mjs';
+import { TorBoxStatusChecker } from './lib/torbox-status.mjs';
 const root = dirname(fileURLToPath(import.meta.url));
 const publicFiles = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
@@ -61,7 +62,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
     response.setHeader('Access-Control-Expose-Headers', 'Content-Type, Content-Length, Content-Range, Accept-Ranges, ETag, Last-Modified');
     return true;
   };
-  const sessions = new Sessions(now), progress = new ProgressStore(), guestInvites = new GuestInvites(now), driveTransfers = driveTransferService || new DriveTransferTests({ now });
+  const sessions = new Sessions(now), progress = new ProgressStore(), guestInvites = new GuestInvites(now), driveTransfers = driveTransferService || new DriveTransferTests({ now }), torboxStatus = new TorBoxStatusChecker({ fetchFn: discoveryFetch, now });
   const loginRate = new Limiter(15, 15 * 60000, now), operationRate = new Limiter(30, 60000, now), progressRate = new Limiter(120, 60000, now);
   let activeLogins = 0;
   const mediaHosts = (env.MEDIA_HOST_SUFFIXES || TORBOX_MEDIA_HOSTS.join(',')).split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
@@ -167,6 +168,13 @@ export function createApp({ env = process.env, provider, providerFactory, discov
           if (session.provider) session.provider.key = '';
         }
         sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true });
+      }
+      if (path === '/api/torbox-status' && method === 'GET') {
+        const cached = session.torboxStatus;
+        if (cached && cached.until > now()) return json(response, 200, cached.value);
+        const value = await torboxStatus.check(activeProvider);
+        session.torboxStatus = { value, until: now() + (value.ok ? 60000 : 15000) };
+        return json(response, 200, value);
       }
       if (path === '/api/drive/connect' && method === 'POST') {
         if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'Temporary guests cannot configure Drive sharing.', 403);
@@ -295,7 +303,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
     }
   });
   server.requestTimeout = 25000; server.headersTimeout = 15000; server.keepAliveTimeout = 5000;
-  return { server, sessions, progress, discovery, sourceLookup, guestInvites, driveTransfers };
+  return { server, sessions, progress, discovery, sourceLookup, guestInvites, driveTransfers, torboxStatus };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
