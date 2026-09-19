@@ -8,25 +8,30 @@ function paintQr(canvas,qr){const cells=qr.getModuleCount(),scale=5,edge=(cells+
 
 export function installPortableSetupUI({getCredential,importSetup,authorize,refresh}){
   const $=id=>document.getElementById(id),dialog=$('portable-dialog');
-  let token='',value=null,frameTimer=null,stream=null,scanTimer=null,scanGeneration=0,qrFrames=[],qrIndex=0;
+  let token='',value=null,frameTimer=null,stream=null,scanTimer=null,scanGeneration=0,sendGeneration=0,qrFrames=[],qrIndex=0;
   const collector=new SetupFrameCollector();
   const note=(text,error=false)=>{ $('portable-message').textContent=text; $('portable-message').classList.toggle('error',error); };
   function stopScanner(){scanGeneration++;clearTimeout(scanTimer);scanTimer=null;if(stream)for(const track of stream.getTracks())track.stop();stream=null;$('portable-camera').srcObject=null;$('portable-camera').hidden=true;}
   function stopFrames(){clearInterval(frameTimer);frameTimer=null;}
-  function clear(){stopFrames();stopScanner();token='';value=null;qrFrames=[];collector.reset();$('portable-password').value='';$('portable-unlock-password').value='';$('portable-paste').value='';$('portable-file').value='';$('portable-qr').hidden=true;$('portable-unlock').hidden=true;$('portable-preview').hidden=true;$('portable-send-result').hidden=true;$('portable-frame-controls').hidden=true;$('portable-frame-status').textContent='';note('');const c=$('portable-qr').getContext('2d');c.clearRect(0,0,$('portable-qr').width,$('portable-qr').height);}
+  function invalidateSend(){sendGeneration++;stopFrames();token='';value=null;qrFrames=[];$('portable-qr').hidden=true;$('portable-send-result').hidden=true;$('portable-frame-controls').hidden=true;$('portable-frame-status').textContent='';const canvas=$('portable-qr');canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);}
+  function clear(){invalidateSend();stopScanner();collector.reset();$('portable-password').value='';$('portable-unlock-password').value='';$('portable-paste').value='';$('portable-file').value='';$('portable-unlock').hidden=true;$('portable-preview').hidden=true;note('');}
   function open(mode){clear();$('portable-send').hidden=mode!=='send';$('portable-receive').hidden=mode!=='receive';$('portable-title').textContent=mode==='send'?'Transfer this setup':'Receive a setup';if(!dialog.open)dialog.showModal();}
   function choose(mode){authorize(()=>open(mode));}
   $('portable-open-send').addEventListener('click',()=>choose('send'));
   $('portable-open-receive').addEventListener('click',()=>choose('receive'));
   $('portable-login-receive').addEventListener('click',()=>choose('receive'));
   $('portable-close').addEventListener('click',()=>dialog.close());
+  $('portable-password').addEventListener('input',()=>{invalidateSend();note('Password changed. Generate a fresh QR, file, or link. Previously shared copies are not revoked.');});
   dialog.addEventListener('close',clear);
   document.addEventListener('visibilitychange',()=>{if(document.hidden){stopScanner();stopFrames();if(dialog.open)note('Camera and animation paused. Tap Scan or Resume to continue.');}});
   window.addEventListener('pagehide',()=>{stopScanner();stopFrames();});
 
   async function generate(){
+    invalidateSend();const generation=sendGeneration;
     const key=getCredential();if(!key)throw new Error('Connect your TorBox account before exporting this setup.');
-    value=collectPortableSetup(key);token=await encodePortableSetup(value,{password:$('portable-password').value});
+    const prepared=collectPortableSetup(key),encoded=await encodePortableSetup(prepared,{password:$('portable-password').value});
+    if(generation!==sendGeneration||!dialog.open)throw new Error('Transfer changed or closed. Generate a fresh code when ready.');
+    value=prepared;token=encoded;
     $('portable-send-result').hidden=false;$('portable-size').textContent=portableSummary(value).myList+' My List items; '+portableSummary(value).recent+' saved playback entries. Package: '+token.length+' characters.';
     return token;
   }
@@ -34,9 +39,9 @@ export function installPortableSetupUI({getCredential,importSetup,authorize,refr
   function animate(){stopFrames();if(qrFrames.length>1){frameTimer=setInterval(renderFrame,350);$('portable-pause').textContent='Pause animation';}}
   $('portable-show-qr').addEventListener('click',async()=>{
     const button=$('portable-show-qr');button.disabled=true;note('Building the QR locally...');stopFrames();
-    try{await generate();const qrcode=await library('./vendor/qrcode.js','qrcode'),url=makeSetupUrl(token,BASE);let single=null;try{single=makeQr(qrcode,url);}catch{}
+    try{await generate();const generation=sendGeneration,qrcode=await library('./vendor/qrcode.js','qrcode');if(generation!==sendGeneration||!dialog.open)return;const url=makeSetupUrl(token,BASE);let single=null;try{single=makeQr(qrcode,url);}catch{}
       if(single&&single.getModuleCount()<=113){qrFrames=[single];note('Scan this once using the other phone’s camera. Nothing was uploaded.');}
-      else{const frames=await splitSetupFrames(token);qrFrames=frames.map(text=>makeQr(qrcode,text));note('This collection needs camera transfer. On the receiving device open Receive setup, tap Scan camera, and hold it here. No repeated tapping.');}
+      else{const frames=await splitSetupFrames(token);if(generation!==sendGeneration||!dialog.open)return;qrFrames=frames.map(text=>makeQr(qrcode,text));note('This collection needs camera transfer. On the receiving device open Receive setup, tap Scan camera, and hold it here. No repeated tapping.');}
       qrIndex=0;$('portable-qr').hidden=false;$('portable-frame-controls').hidden=qrFrames.length<2;renderFrame();animate();
     }catch(error){note(error.message,true);}finally{button.disabled=false;}
   });
@@ -81,8 +86,6 @@ export function installPortableSetupUI({getCredential,importSetup,authorize,refr
   });
   $('portable-stop-camera').addEventListener('click',()=>{stopScanner();collector.reset();note('Scanner stopped.');});
 
-  // Capture and remove the private URL fragment before any asynchronous work.
-  // It never becomes a query parameter or gets submitted to the relay.
   const incoming=location.hash.startsWith('#setup=')?location.href:'';
   if(incoming){history.replaceState(null,'',location.pathname+location.search);authorize(()=>{open('receive');preview(incoming).catch(error=>note(error.message,true));});}
   return {close:()=>dialog.close()};
