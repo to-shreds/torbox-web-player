@@ -7,6 +7,7 @@ import { dirname, join, resolve } from 'node:path';
 import { Sessions, Limiter, GuestInvites, verifyPassword, validHash } from './lib/auth.mjs';
 import { ProgressStore, VIEWERS, validViewer } from './lib/progress.mjs';
 import { TorBox, AppError, parseVideoId, TORBOX_MEDIA_HOSTS } from './lib/torbox.mjs';
+import { DriveTransferTests } from './lib/drive-share.mjs';
 const root = dirname(fileURLToPath(import.meta.url));
 const publicFiles = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
@@ -42,7 +43,7 @@ async function body(request) {
   try { const data = JSON.parse(Buffer.concat(chunks).toString('utf8')); if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error(); return data; }
   catch { throw new AppError('INVALID_JSON', 'This request could not be read.', 400); }
 }
-export function createApp({ env = process.env, provider, providerFactory, discoveryFetch = fetch, discoveryService, sourceLookupService, now = Date.now } = {}) {
+export function createApp({ env = process.env, provider, providerFactory, discoveryFetch = fetch, discoveryService, sourceLookupService, driveTransferService, now = Date.now } = {}) {
   const production = env.NODE_ENV === 'production';
   const origin = env.PUBLIC_ORIGIN || env.RENDER_EXTERNAL_URL || `http://localhost:${env.PORT || 10000}`;
   const passwordHash = env.HOUSEHOLD_PASSWORD_HASH || '';
@@ -60,7 +61,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
     response.setHeader('Access-Control-Expose-Headers', 'Content-Type, Content-Length, Content-Range, Accept-Ranges, ETag, Last-Modified');
     return true;
   };
-  const sessions = new Sessions(now), progress = new ProgressStore(), guestInvites = new GuestInvites(now);
+  const sessions = new Sessions(now), progress = new ProgressStore(), guestInvites = new GuestInvites(now), driveTransfers = driveTransferService || new DriveTransferTests({ now });
   const loginRate = new Limiter(15, 15 * 60000, now), operationRate = new Limiter(30, 60000, now), progressRate = new Limiter(120, 60000, now);
   let activeLogins = 0;
   const mediaHosts = (env.MEDIA_HOST_SUFFIXES || TORBOX_MEDIA_HOSTS.join(',')).split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
@@ -91,7 +92,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.9.1-key-clone', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.10.0-key-clone', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
@@ -166,6 +167,29 @@ export function createApp({ env = process.env, provider, providerFactory, discov
           if (session.provider) session.provider.key = '';
         }
         sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true });
+      }
+      if (path === '/api/drive/configure' && method === 'POST') {
+        if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'Temporary guests cannot configure Drive sharing.', 403);
+        if (!operationRate.allow('drive:' + session.id)) throw new AppError('SLOW_DOWN', 'Please wait a minute before configuring Drive again.', 429);
+        return json(response, 200, await driveTransfers.configure(session, await body(request)));
+      }
+      if (path === '/api/drive/config' && method === 'GET') {
+        if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'Temporary guests cannot access Drive sharing.', 403);
+        return json(response, 200, { configured: driveTransfers.configured(session) });
+      }
+      if (path === '/api/drive/test/start' && method === 'POST') {
+        if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'Temporary guests cannot start Drive sharing.', 403);
+        if (!operationRate.allow('drive:' + session.id)) throw new AppError('SLOW_DOWN', 'Please wait a moment before starting another Drive transfer.', 429);
+        return json(response, 200, await driveTransfers.start(session, activeProvider, await body(request)));
+      }
+      if (path === '/api/drive/test/status' && method === 'GET') {
+        if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'Temporary guests cannot access Drive sharing.', 403);
+        return json(response, 200, await driveTransfers.status(session, activeProvider, url.searchParams.get('id') || ''));
+      }
+      if (path === '/api/drive/test/delete' && method === 'POST') {
+        if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'Temporary guests cannot access Drive sharing.', 403);
+        const data = await body(request);
+        return json(response, 200, await driveTransfers.remove(session, data.id));
       }
       if (path === '/api/share/create' && method === 'POST') {
         if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'Temporary guests cannot create sharing links.', 403);
@@ -271,10 +295,10 @@ export function createApp({ env = process.env, provider, providerFactory, discov
     }
   });
   server.requestTimeout = 25000; server.headersTimeout = 15000; server.keepAliveTimeout = 5000;
-  return { server, sessions, progress, discovery, sourceLookup, guestInvites };
+  return { server, sessions, progress, discovery, sourceLookup, guestInvites, driveTransfers };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.9.1-key-clone' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.10.0-key-clone' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }
