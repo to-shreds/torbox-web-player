@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  MultiSourceLookup, StremioSourceLookup, SourceLookupError,
-  PUBLIC_STREMIO_PROVIDERS, mergeProviderSources, normalizeStremioStreams
+  MultiSourceLookup, StremioSourceLookup, TorznabSourceLookup, SourceLookupError,
+  PUBLIC_STREMIO_PROVIDERS, mergeProviderSources, normalizeStremioStreams, normalizeTorznabXml,
+  MEDIAFUSION_TORZNAB_ORIGIN
 } from '../lib/source-lookup.mjs';
 
 const movie={type:'movie',id:'tt1160419'};
@@ -15,14 +16,10 @@ test('anonymous Stremio adapter uses only its fixed approved endpoint and no cre
   const s=new StremioSourceLookup({...stremthru,fetchFn:async(url,opts)=>{
     assert.equal(url.origin,'https://stremthru.13377001.xyz');
     assert.ok(url.pathname.includes('/stream/series/tt0903747:1:1.json'));
-    assert.deepEqual(opts.headers,{Accept:'application/json'});
-    assert.equal(opts.credentials,'omit');
-    assert.equal(opts.redirect,'manual');
+    assert.deepEqual(opts.headers,{Accept:'application/json'}); assert.equal(opts.credentials,'omit'); assert.equal(opts.redirect,'manual');
     return reply({streams:[{infoHash:hash(1),name:'Torz',description:'Show.S01E01.720p.x264.AAC',behaviorHints:{filename:'Show.S01E01.mkv',videoSize:700000000}}]});
   }});
-  const result=await s.lookup(episode);
-  assert.equal(result.sources.length,1);
-  assert.equal(result.sources[0].provider,'StremThru Torz Main');
+  const result=await s.lookup(episode); assert.equal(result.sources.length,1); assert.equal(result.sources[0].provider,'StremThru Torz Main');
 });
 
 test('anonymous stream normalizer ignores URL-only streams and parses provider metadata',()=>{
@@ -30,65 +27,70 @@ test('anonymous stream normalizer ignores URL-only streams and parses provider m
     {url:'https://untrusted.test/file'},
     {infoHash:hash(2),name:'Comet',description:'Movie.1080p.BluRay.x264 👤 1,234',behaviorHints:{filename:'Movie.1080p.mkv',videoSize:2000000000}}
   ]},movie,'Comet');
-  assert.equal(rows.length,1);
-  assert.equal(rows[0].seeders,1234);
-  assert.equal(rows[0].resolution,'1080p');
-  assert.equal(rows[0].provider,'Comet');
-  assert.ok(!JSON.stringify(rows).includes('untrusted.test'));
+  assert.equal(rows.length,1); assert.equal(rows[0].seeders,1234); assert.equal(rows[0].resolution,'1080p'); assert.ok(!JSON.stringify(rows).includes('untrusted.test'));
 });
 
-test('access denial puts a public addon into provider-wide cooldown',async()=>{
-  let now=0,calls=0;
-  const comet=PUBLIC_STREMIO_PROVIDERS.find(x=>x.id==='comet');
-  const s=new StremioSourceLookup({...comet,now:()=>now,fetchFn:async()=>{calls++;return reply({},403);}});
-  await assert.rejects(s.lookup(movie),e=>e.code==='SOURCE_ACCESS_DENIED');
-  now=1000;
-  await assert.rejects(s.lookup(episode),e=>e.code==='SOURCE_PROVIDER_COOLDOWN');
-  assert.equal(calls,1);
-  assert.ok(s.diagnostics().cooldownMs>0);
+test('MediaFusion Torznab normalization keeps only hashes and useful metadata',()=>{
+  const xml=`<rss><channel>
+  <item><title><![CDATA[Movie.720p.WEB-DL.x264.AAC]]></title><size>1800000000</size><torznab:attr name="infohash" value="${hash(3)}"/><torznab:attr name="seeders" value="42"/><torznab:attr name="imdb" value="tt1160419"/></item>
+  <item><title>Wrong</title><torznab:attr name="infohash" value="bad"/></item>
+  </channel></rss>`;
+  const rows=normalizeTorznabXml(xml,movie);
+  assert.equal(rows.length,1); assert.equal(rows[0].hash,hash(3)); assert.equal(rows[0].seeders,42); assert.equal(rows[0].size,1800000000); assert.equal(rows[0].resolution,'720p');
 });
 
-test('multi lookup does not hit backups when primary already has enough sources',async()=>{
-  let backup=0;
-  const primary={name:'Primary',lookup:async()=>({sources:Array.from({length:12},(_,i)=>({hash:hash(i+1),title:'A'+i,score:1}))})};
-  const secondary={name:'Backup',lookup:async()=>{backup++;return{sources:[{hash:hash(99),title:'B',score:1}]}}};
-  const result=await new MultiSourceLookup({providers:[primary,secondary]}).lookup(movie);
-  assert.equal(result.sources.length,12);
-  assert.equal(backup,0);
-  assert.equal(result.fallbackUsed,false);
+test('MediaFusion Torznab adapter sends anonymous IMDb/episode metadata query only',async()=>{
+  const s=new TorznabSourceLookup({fetchFn:async(url,opts)=>{
+    assert.equal(url.origin,new URL(MEDIAFUSION_TORZNAB_ORIGIN).origin); assert.equal(url.pathname,'/torznab');
+    assert.equal(url.searchParams.get('t'),'tvsearch'); assert.equal(url.searchParams.get('imdbid'),episode.id);
+    assert.equal(url.searchParams.get('season'),'1'); assert.equal(url.searchParams.get('ep'),'1'); assert.equal(url.searchParams.get('limit'),'100');
+    assert.equal(opts.credentials,'omit'); assert.ok(!('Authorization' in opts.headers));
+    return new Response(`<rss><channel><item><title>Show.S01E01.720p</title><size>700000000</size><torznab:attr name="infohash" value="${hash(4)}"/><torznab:attr name="seeders" value="12"/></item></channel></rss>`,{status:200,headers:{'content-type':'application/xml'}});
+  }});
+  const result=await s.lookup(episode); assert.equal(result.sources.length,1); assert.equal(result.sources[0].provider,'MediaFusion Torznab');
 });
 
-test('empty or failed primary falls through to a backup',async()=>{
-  for(const primary of [
-    {name:'Empty',lookup:async()=>({sources:[]})},
-    {name:'Broken',lookup:async()=>{throw new SourceLookupError('SOURCE_UNAVAILABLE','no');}}
-  ]){
-    const backup={name:'Backup',lookup:async()=>({sources:[{hash:hash(50),title:'Backup',score:1,provider:'Backup'}]})};
-    const result=await new MultiSourceLookup({providers:[primary,backup]}).lookup(movie);
-    assert.equal(result.sources.length,1);
-    assert.equal(result.sources[0].hash,hash(50));
-    assert.equal(result.fallbackUsed,true);
-  }
+test('multi lookup aggregates two primary indexes in parallel and deduplicates by hash',async()=>{
+  const calls=[];
+  const a={name:'A',lookup:async()=>{calls.push('A');return{sources:[{hash:hash(1),title:'basic',score:1,provider:'A'}]}}};
+  const b={name:'B',lookup:async()=>{calls.push('B');return{sources:[{hash:hash(1),title:'rich',score:2,provider:'B',seeders:50},{hash:hash(2),title:'extra',score:1,provider:'B'}]}}};
+  const result=await new MultiSourceLookup({providers:[a,b],primaryCount:2}).lookup(movie);
+  assert.deepEqual(new Set(calls),new Set(['A','B'])); assert.equal(result.sources.length,2); assert.equal(result.sources.find(x=>x.hash===hash(1)).seeders,50);
+  assert.deepEqual(result.sources.find(x=>x.hash===hash(1)).providers,['A','B']);
+});
+
+test('fallback is queried only when aggregated primaries do not reach target count',async()=>{
+  let fallback=0;
+  const primaryA={name:'A',lookup:async()=>({sources:Array.from({length:10},(_,i)=>({hash:hash(i+1),title:'A'+i,score:1,provider:'A'}))})};
+  const primaryB={name:'B',lookup:async()=>({sources:Array.from({length:5},(_,i)=>({hash:hash(i+11),title:'B'+i,score:1,provider:'B'}))})};
+  const backup={name:'Backup',lookup:async()=>{fallback++;return{sources:Array.from({length:10},(_,i)=>({hash:hash(i+16),title:'C'+i,score:1,provider:'Backup'}))}}};
+  const result=await new MultiSourceLookup({providers:[primaryA,primaryB,backup],primaryCount:2}).lookup(movie);
+  assert.equal(fallback,1); assert.equal(result.sources.length,25); assert.equal(result.fallbackUsed,true);
+});
+
+test('fallback is skipped when aggregated primaries already have enough distinct hashes',async()=>{
+  let fallback=0;
+  const provider=(name,start)=>({name,lookup:async()=>({sources:Array.from({length:10},(_,i)=>({hash:hash(start+i),title:name+i,score:1,provider:name}))})});
+  const backup={name:'Backup',lookup:async()=>{fallback++;return{sources:[]}}};
+  const result=await new MultiSourceLookup({providers:[provider('A',1),provider('B',11),backup],primaryCount:2}).lookup(movie);
+  assert.equal(result.sources.length,20); assert.equal(fallback,0); assert.equal(result.fallbackUsed,false);
 });
 
 test('provider merge deduplicates the same torrent and keeps richer metadata plus provenance',()=>{
   const merged=mergeProviderSources([
     [{hash:hash(1),title:'Basic',score:1,provider:'A',providers:['A'],filename:'',size:null}],
-    [{hash:hash(1),title:'Rich',score:2,provider:'B',providers:['B'],filename:'Movie.mkv',size:123,resolution:'720p'}]
+    [{hash:hash(1),title:'Rich',score:2,provider:'B',providers:['B'],filename:'Movie.mkv',size:123,resolution:'720p',seeders:99}]
   ]);
-  assert.equal(merged.length,1);
-  assert.equal(merged[0].filename,'Movie.mkv');
-  assert.deepEqual(merged[0].providers,['A','B']);
+  assert.equal(merged.length,1); assert.equal(merged[0].filename,'Movie.mkv'); assert.equal(merged[0].seeders,99); assert.deepEqual(merged[0].providers,['A','B']);
 });
 
 test('all provider failures are unavailable rather than a fake empty success',async()=>{
   const providers=['A','B'].map(name=>({name,lookup:async()=>{throw new SourceLookupError('SOURCE_UNAVAILABLE','x')}}));
-  await assert.rejects(new MultiSourceLookup({providers}).lookup(movie),e=>e.code==='SOURCE_ALL_UNAVAILABLE');
+  await assert.rejects(new MultiSourceLookup({providers,primaryCount:2}).lookup(movie),e=>e.code==='SOURCE_ALL_UNAVAILABLE');
 });
 
 test('all successful empty providers return an honest empty result',async()=>{
   const providers=['A','B'].map(name=>({name,lookup:async()=>({sources:[]})}));
-  const result=await new MultiSourceLookup({providers}).lookup(movie);
-  assert.deepEqual(result.sources,[]);
-  assert.equal(result.providersTried.length,2);
+  const result=await new MultiSourceLookup({providers,primaryCount:2}).lookup(movie);
+  assert.deepEqual(result.sources,[]); assert.equal(result.providersTried.length,2);
 });

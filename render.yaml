@@ -18,6 +18,8 @@ services:
         value: '0'
       - key: MULTI_SOURCE_LIVE_CHECK
         value: '0'
+      - key: SOURCE_PROVIDER
+        value: multi
       - key: FRONTEND_ORIGINS
         value: https://to-shreds.github.io
       - key: HOUSEHOLD_PASSWORD_HASH

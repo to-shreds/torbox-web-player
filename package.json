@@ -1,6 +1,6 @@
 {
   "name": "torbox-web-player",
-  "version": "0.8.0-key-clone",
+  "version": "0.8.1-key-clone",
   "private": true,
   "type": "module",
   "engines": {
