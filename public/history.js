@@ -54,6 +54,7 @@ export function recordRecent(context, position = 0, duration = 0, { completed = 
   try { store.setItem(STORAGE_KEY, JSON.stringify(rows)); } catch {}
   return row;
 }
+export function clearRecent(store = storage()) { try { store?.removeItem(STORAGE_KEY); } catch {} }
 export function removeRecent(key, store = storage()) {
   if (!store || typeof key !== 'string') return false;
   const rows = listRecent(store).filter(item => item.key !== key);
