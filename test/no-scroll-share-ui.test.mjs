@@ -79,7 +79,7 @@ test('Recently Played resume carries configurable rewind and player has a pause 
     readFile(new URL('../public/discover.js',import.meta.url),'utf8'),
     readFile(new URL('../public/index.html',import.meta.url),'utf8')
   ]);
-  assert.ok(discover.includes('rewindOnResumeSeconds=getSettings().resumeRewindSeconds'));
+  assert.ok(discover.includes('rewindOnResumeSeconds=startOver?0:getSettings().resumeRewindSeconds'));
   assert.ok(app.includes('position = Math.max(0, position - rewind)'));
   assert.ok(html.includes('id="pause-card"'));
   assert.ok(app.includes('updatePauseCard'));

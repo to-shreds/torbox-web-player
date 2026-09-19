@@ -17,3 +17,10 @@ test('one recent item can be removed without clearing the rest',()=>{
   assert.equal(removeRecent(rows[0].key,store),true);
   const left=listRecent(store);assert.equal(left.length,1);assert.notEqual(left[0].key,rows[0].key);
 });
+
+test('starting the next episode cleans up an earlier completed episode by default',()=>{
+  const store=memoryStore();
+  recordRecent(context,1320,1320,{completed:true,store});
+  recordRecent({...context,episodeName:'Next',current:{...context.current,episode:2}},20,1300,{store});
+  const rows=listRecent(store);assert.equal(rows.some(row=>row.episode===1),false);assert.equal(rows[0].episode,2);
+});

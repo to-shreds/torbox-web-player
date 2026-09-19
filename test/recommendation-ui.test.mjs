@@ -41,3 +41,13 @@ test('playback recovery walks strictly down the resolution ladder',()=>{
   assert.deepEqual(lowerResolutionOrder('1080p','auto'),['720p','480p']);
   assert.deepEqual(lowerResolutionOrder('720p','auto'),['480p']);
 });
+
+test('source size profile can favor a smaller data-saver source or a larger quality source',()=>{
+  const small=src('small',{resolution:'720p',size:1.2*G}),large=src('large',{resolution:'720p',size:4.8*G,score:80});
+  assert.equal(recommendSource([small,large],'movie','auto','data').id,'small');
+  assert.equal(recommendSource([small,large],'movie','auto','quality').id,'large');
+});
+test('memory-blacklisted and known-no-sound sources are not auto-selected',()=>{
+  assert.equal(recommendSource([src('bad',{memoryBad:true}),src('good')],'movie','auto').id,'good');
+  assert.equal(recommendSource([src('silent',{memoryAudio:'bad'}),src('good')],'movie','auto').id,'good');
+});
