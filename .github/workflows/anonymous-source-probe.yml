@@ -1,0 +1,48 @@
+name: Anonymous source fallback probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe anonymous Stremio source endpoints
+        shell: bash
+        run: |
+          node <<'NODE'
+          const providers = [
+            ['comet','https://comet.elfhosted.com'],
+            ['mediafusion','https://mediafusion.elfhosted.com'],
+            ['knightcrawler','https://knightcrawler.elfhosted.com']
+          ];
+          const targets = [
+            ['movie','tt1160419'],
+            ['series','tt0903747:1:1']
+          ];
+          const safeKeys = obj => obj && typeof obj === 'object' ? Object.keys(obj).filter(k=>/^[A-Za-z_]{1,40}$/.test(k)).slice(0,30) : [];
+          for (const [name, base] of providers) {
+            for (const [type, id] of targets) {
+              const out = { provider:name, type, id, status:null, count:null, hashes:null };
+              try {
+                const r = await fetch(`${base}/stream/${type}/${id}.json`, { headers:{Accept:'application/json'}, redirect:'manual', signal:AbortSignal.timeout(30000) });
+                out.status=r.status; out.contentType=r.headers.get('content-type')?.split(';')[0]||'';
+                if (r.ok) {
+                  const text=await r.text();
+                  if (text.length > 5_000_000) throw new Error('oversize');
+                  let data; try { data=JSON.parse(text); } catch { out.json=false; console.log(JSON.stringify(out)); continue; }
+                  out.json=true; out.rootFields=safeKeys(data);
+                  const streams=Array.isArray(data?.streams)?data.streams:[];
+                  out.count=streams.length;
+                  out.hashes=streams.filter(s=>/^[a-f0-9]{40}$/i.test(s?.infoHash||s?.hash||'')).length;
+                  out.streamFields=safeKeys(streams[0]); out.behaviorFields=safeKeys(streams[0]?.behaviorHints);
+                  out.hasSeederText=streams.some(s=>/\b(?:seeders?|seeds?)\b/i.test(String(s?.description||s?.title||'')));
+                }
+              } catch(e) { out.error=e?.name||'probe_failed'; }
+              console.log(JSON.stringify(out));
+            }
+          }
+          NODE
