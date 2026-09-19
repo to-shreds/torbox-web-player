@@ -1,12 +1,12 @@
 # TorBox Web Player
 
-Private household, catalog-first browser player. **Version 0.4.1 keeps the GitHub Pages / Render split and now strongly prefers browser-friendly H.264 + AAC sources to avoid silent audio in Chrome.** It remains a preview, not a fully verified replacement for Stremio. CarStream and unrelated projects are unchanged.
+Private household, catalog-first browser player. **Version 0.4.2 uses direct TorBox video delivery only. GitHub Pages hosts the UI, Render handles control/API work, and movie/episode bytes never pass through Render.** It remains a preview, not a fully verified replacement for Stremio. CarStream and unrelated projects are unchanged.
 
 ## Hosting split
 
 The files in `public/` are the complete static frontend. GitHub Pages publishes only that directory. The frontend contains no TorBox API key and points to the Render backend at `https://torbox-web-player.onrender.com`. Render is configured to accept browser API requests from `https://to-shreds.github.io` plus its own fallback frontend.
 
-Cross-host API login uses a 256-bit opaque session bearer kept in browser `sessionStorage`; Render's existing SameSite cookie remains a fallback for the Render-hosted copy. GitHub Pages does not depend on third-party cookies. API mutations from bearer sessions still require the approved frontend Origin. The video element uses an opaque, revocable media ticket so the TorBox CDN URL and master key remain server-side.
+Cross-host API login uses a 256-bit opaque session bearer kept in browser `sessionStorage`; Render's existing SameSite cookie remains a fallback for the Render-hosted copy. GitHub Pages does not depend on third-party cookies. API mutations from bearer sessions still require the approved frontend Origin. The authenticated playback response intentionally returns TorBox's temporary CDN URL directly to the signed-in browser. That URL contains TorBox token/key material; this is an explicit private-household tradeoff to keep all video bandwidth off Render.
 
 The GitHub Pages site is live at `https://to-shreds.github.io/torbox-web-player/`. The workflow at `.github/workflows/pages.yml` publishes only `public/`; the Render-hosted frontend remains available as a fallback.
 
@@ -16,7 +16,7 @@ Sign in to Discover, browse movie or show posters, search Cinemeta's broader cat
 
 The browser requests sources from the authenticated `/api/discover/lookup` route on this website. The server queries Zilean's public torrent metadata index by exact IMDb ID and season/episode. The browser no longer contacts Torrentio or another external source provider. Source results are bounded, normalized and checked against TorBox's cache through the existing server-side adapter. Choose Play for a cached candidate or Prepare for another candidate; Other versions remains available. Searching, browsing and availability checks never add torrents.
 
-Preparation checks the account by hash before creation, coalesces concurrent same-hash requests and stops automatic retries after an uncertain response. The returned torrent identity and episode are checked. Ambiguous files require explicit selection; an index release title is not assumed to be a filename or TorBox file ID. The existing authenticated player receives an opaque same-origin media ticket, not the TorBox master key.
+Preparation checks the account by hash before creation, coalesces concurrent same-hash requests and stops automatic retries after an uncertain response. The returned torrent identity and episode are checked. Ambiguous files require explicit selection; an index release title is not assumed to be a filename or TorBox file ID. The authenticated player receives the temporary TorBox CDN URL directly. There is no Render media endpoint, ticket, proxy, or video-relay fallback.
 
 **This version does not transcode or convert files.** Source ranking now gives H.264 + AAC releases a large priority boost, treats Dolby Digital / E-AC-3 / DTS / TrueHD as possible silent-audio risks in Chrome, and does not auto-start a release flagged with those audio formats. The UI warns before a risky source and offers Play anyway. This substantially improves the default choice but still does not guarantee that every release's metadata matches its actual tracks.
 
@@ -34,11 +34,11 @@ Catalog lookup, source lookup, TorBox cache checking, preparation and media deli
 
 The replacement's direct Render-hosted provider check returned 63 movie rows and 140 episode rows, all with matching IMDb IDs and valid torrent hashes. A subsequent test ran the actual frontend source function against the application's authenticated routes inside Render. It returned 40 normalized candidates for each selection, registered all of them, and confirmed 22 movie candidates and 24 episode candidates cached in TorBox, with zero unknown cache results. It added no torrents and fetched no video.
 
-Twenty-seven source adapter/client tests remain in the suite. The v0.4.0 Render build passed 143 normal tests with zero failures and five intentionally skipped optional live checks. Eight new split-host tests cover the GitHub origin, CORS preflight, opaque bearer login, cookie-free bearer API access, cross-origin media tickets, wrong-session rejection, logout revocation and project-relative static assets. See `docs/GITHUB-PAGES-0.4.0.md` and ProjectStatus for deployment status.
+Twenty-seven source adapter/client tests remain in the suite. The v0.4.2 Render build registered 143 tests: 138 passed, zero failed, and five optional live checks were skipped. Direct-delivery regressions verify that authenticated playback returns a TorBox CDN URL, that GitHub Pages receives the same direct URL, and that Render's `/media` path is gone and returns 404. See `docs/DIRECT-PLAYBACK-0.4.2.md` and ProjectStatus for deployment status.
 
 The v0.3.0 benchmark remains documented in `docs/CATALOG-0.3.0.md`: a separate earlier test added one cached public Big Buck Bunny sample not previously in the account and verified preparation, media transfer and API resume state. That was not real target-device playback. The source-fix turn made no additions.
 
-Actual physical Android/desktop picture, sound and seeking remain unverified. No new browser-decoding success or codec conversion is claimed. Existing catalog UI, preparation, media relay, progress protections and authentication were preserved.
+Jon confirmed picture and sound on Android Chrome before the direct-delivery switch. The H.264/AAC source preference remains in place. Direct CDN playback now needs a quick device retest because the transport path changed. No codec conversion is claimed. Existing catalog UI, preparation, progress protections and authentication are preserved; the media relay is removed.
 
 ## Setup and deployment
 
@@ -46,7 +46,7 @@ Existing credentials require no changes. For a new service, configure `HOUSEHOLD
 
 Build: `npm ci --ignore-scripts --no-audit --no-fund && npm run check && npm test`.
 
-Start: `npm start`. Node 24 is selected by `.node-version`. `/healthz` reports v0.4.1. The package remains dependency-free.
+Start: `npm start`. Node 24 is selected by `.node-version`. `/healthz` reports v0.4.2. The package remains dependency-free.
 
 Set `FRONTEND_ORIGINS=https://to-shreds.github.io` in Render for the GitHub Pages project site. The value is an origin only, not the repository path. The public frontend's API destination is deliberately non-secret and stored in an `api-origin` meta tag.
 
@@ -54,9 +54,9 @@ Use `SOURCE_PROVIDER=zilean`. Keep `SOURCE_ACCESS_CHECK=0`, `TORBOX_VERIFY_ON_ST
 
 ## Storage, costs and remaining scope
 
-Sessions, caches, source tickets, pending-operation guards, media tickets and progress are process memory, not durable across deployments, restarts or service sleep. Account-hash reconciliation does not replace a durable exactly-once preparation record. Progress remains tied to provider file IDs.
+Sessions, caches, source tickets, pending-operation guards and progress are process memory, not durable across deployments, restarts or service sleep. Account-hash reconciliation does not replace a durable exactly-once preparation record. Progress remains tied to provider file IDs.
 
-Video travels TorBox CDN -> Render -> browser because the observed CDN links embed the master key. Relayed bytes count toward Render outbound bandwidth. No paid service, database, persistent disk, new provider secret or subscription upgrade was added. Verify current billing before regular high-volume use rather than relying on historical numeric estimates.
+Video travels TorBox CDN -> browser directly. Render is not a video proxy, so ordinary movie/episode bytes do not count as Render outbound bandwidth. The temporary TorBox CDN URL/token is visible to the signed-in browser by design. No paid service, database, persistent disk, new provider secret or subscription upgrade was added.
 
 Still required for the full specification: target-device playback checks, a compatible conversion fallback, persistent profiles/preferences/watchlists/progress, Continue Watching, durable pending preparations, manual title corrections, automatic next, migrations and backup/restore.
 
