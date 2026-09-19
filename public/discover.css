@@ -105,3 +105,11 @@ main{max-width:1160px;padding:1rem clamp(.8rem,3vw,2rem) 3rem}.workspace-bar{dis
 .source-blocked{opacity:.55}.source-blocked .filename:after{content:' · blocked on this device';color:#d19a94;font-size:.62rem}
 .playback-health{position:fixed;z-index:17;top:max(3.7rem,calc(env(safe-area-inset-top) + 3rem));left:50%;transform:translateX(-50%);width:min(92vw,720px);padding:.55rem .65rem;border:1px solid #31504d;border-radius:10px;background:rgb(8 15 22/.86);backdrop-filter:blur(8px);color:#dbe8e6}.health-line{display:flex;align-items:center;gap:.45rem;min-width:0}.health-line strong{font-size:.72rem}.health-line span:last-child{font-size:.64rem;color:#98aabb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.health-dot{width:8px;height:8px;border-radius:50%;background:#7cb7ae;flex:0 0 auto}.playback-health[data-state*=buffer] .health-dot,.playback-health[data-state*=stalled] .health-dot,.playback-health[data-state*=recover] .health-dot{background:#d5b36b}.playback-health[data-state*=fail] .health-dot,.playback-health[data-state*=error] .health-dot,.playback-health[data-state*=attention] .health-dot{background:#d77c73}.health-source{display:block;margin:.28rem 0;color:#8295a8;font-size:.62rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.health-actions{display:flex;gap:.3rem;flex-wrap:wrap}.health-actions button{min-height:30px;padding:.2rem .45rem;font-size:.62rem}
 @media(max-width:620px){.next-up-list{grid-template-columns:1fr}.next-up-card{grid-template-columns:30px minmax(0,1fr) auto}.next-up-thumb{width:30px;height:44px}.playback-health{top:max(3.5rem,calc(env(safe-area-inset-top) + 2.8rem));padding:.45rem .5rem}.health-line span:last-child{display:none}.settings-group{grid-template-columns:1fr}.setting-help{grid-column:1}}
+
+
+/* unattended playback guard */
+.still-watching-card{position:fixed;z-index:20;left:50%;top:50%;transform:translate(-50%,-50%);width:min(90vw,420px);display:grid;gap:.65rem;text-align:center;padding:1rem 1.1rem;border:1px solid #42635f;border-radius:14px;background:rgb(8 15 22/.96);box-shadow:0 18px 48px rgb(0 0 0/.5);color:#eefaf8}
+.still-watching-card[hidden]{display:none}
+.still-watching-card strong{font-size:1.05rem}
+.still-watching-card span{font-size:.76rem;line-height:1.45;color:#a8bbc9}
+.still-watching-card button{justify-self:center;min-width:150px}
