@@ -44,7 +44,8 @@ test('bearer mutations require the approved frontend but not a third-party cooki
 test('published HTML uses project-relative assets and the public Render API origin', async t => {
   const { call }=await fixture(t);
   const html=await (await call('/')).text();
-  assert.ok(html.includes('name="api-origin" content="https://torbox-web-player-key.onrender.com"'));
+  assert.ok(html.includes('name="runtime-mode" content="direct"'));
+  assert.ok(!html.includes('torbox-web-player-key.onrender.com'));
   assert.ok(html.includes('href="./style.css"')); assert.ok(html.includes('src="./app.js"'));
   assert.ok(!html.includes('src="/app.js"')); assert.ok(!html.includes('href="/style.css"'));
 });
