@@ -36,7 +36,20 @@ jobs:
           echo "TORBOX_SUCCESS $code bytes=$(wc -c </tmp/torbox-success 2>/dev/null || echo 0)"
           cat /tmp/torbox-success
           echo
-          grep -Eo 'src="[^"]+\.js[^"]*"' /tmp/torbox-success | head -n 20 || true
+          bundle=$(grep -Eo 'src="/assets/index-[^"]+\.js"' /tmp/torbox-success | head -n1 | cut -d'"' -f2)
+          echo "TORBOX_BUNDLE=$bundle"
+          curl -L -sS "https://torbox.app$bundle" -o /tmp/torbox-bundle
+          echo "TORBOX_BUNDLE_BYTES=$(wc -c </tmp/torbox-bundle)"
+          python - <<'PY'
+import re
+text=open('/tmp/torbox-bundle','r',encoding='utf-8',errors='ignore').read()
+for needle in ['google/success','postMessage','window.opener','opener','expires_at','expires_in']:
+    print('NEEDLE',needle,'COUNT',text.count(needle))
+    for m in list(re.finditer(re.escape(needle),text))[:5]:
+        a=max(0,m.start()-500);b=min(len(text),m.end()+1200)
+        print(text[a:b])
+        print('\n---\n')
+PY
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run check
       - run: npm test
