@@ -1,0 +1,966 @@
+import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js';
+import { isTrustedDirectMediaUrl } from './runtime.js';
+
+export const DIRECT_BUILD = 'browser-direct-0.1';
+
+const CATALOG_ORIGINS = new Set(['v3-cinemeta.strem.io', 'cinemeta-catalogs.strem.io']);
+const SOURCE_ENDPOINTS = Object.freeze({
+  zilean: 'https://zileanfortheweebs.midnightignite.me',
+  stremthruMain: 'https://stremthru.13377001.xyz/stremio/torz/eyJzdG9yZXMiOlt7ImMiOiJwMnAiLCJ0IjoiIn1dfQ==',
+  stremthruElf: 'https://stremthru.elfhosted.com/stremio/torz/eyJzdG9yZXMiOlt7ImMiOiJwMnAiLCJ0IjoiIn1dfQ==',
+  mediafusion: 'https://mediafusion.elfhosted.com/torznab'
+});
+const TORBOX_ORIGIN = 'https://api.torbox.app/v1/api/';
+const MAX_TRACE = 160;
+
+let credential = '';
+let localSession = '';
+let lastDiagnostic = null;
+const traces = [];
+const tickets = new Map();
+const operations = new Map();
+const catalogCache = new Map();
+
+function directError(code, message, status = 0) {
+  const error = new Error(message);
+  error.code = code;
+  error.status = status;
+  return error;
+}
+
+function trace(op, status, detail = {}) {
+  traces.push({ at: new Date().toISOString(), op, status, ...detail });
+  if (traces.length > MAX_TRACE) traces.splice(0, traces.length - MAX_TRACE);
+}
+
+function safeError(error) {
+  return String(error?.name || 'Error').replace(/[^A-Za-z0-9_.-]/g, '').slice(0, 60) || 'Error';
+}
+
+function validTarget(input) {
+  try { return targetOf(input); }
+  catch { throw directError('INVALID_TARGET', 'Choose a valid movie or episode.', 400); }
+}
+
+function safeJson(text, label) {
+  try { return JSON.parse(text); }
+  catch { throw directError('INVALID_PROVIDER_RESPONSE', label + ' returned unreadable JSON.'); }
+}
+
+async function fetchDirect(label, url, options = {}, timeoutMs = 30000) {
+  const started = performance.now();
+  try {
+    const signal = options.signal
+      ? AbortSignal.any([options.signal, AbortSignal.timeout(timeoutMs)])
+      : AbortSignal.timeout(timeoutMs);
+    const response = await fetch(url, { credentials: 'omit', cache: 'no-store', ...options, signal });
+    trace(label, response.ok ? 'ok' : 'http_error', {
+      httpStatus: response.status,
+      durationMs: Math.round(performance.now() - started)
+    });
+    return response;
+  } catch (error) {
+    trace(label, ['TimeoutError', 'AbortError'].includes(error?.name) ? 'timeout' : 'fetch_error', {
+      error: safeError(error),
+      durationMs: Math.round(performance.now() - started)
+    });
+    if (options.signal?.aborted) throw error;
+    if (['TimeoutError', 'AbortError'].includes(error?.name)) throw directError('DIRECT_TIMEOUT', label + ' timed out.', 504);
+    throw directError(
+      'DIRECT_FETCH_BLOCKED',
+      label + ' could not be read directly by this browser. This is commonly caused by CORS. Run the Browser-only diagnostics test.',
+      502
+    );
+  }
+}
+
+async function readText(response, max = 8 * 1024 * 1024) {
+  const reader = response.body?.getReader();
+  if (!reader) return '';
+  const chunks = [];
+  let size = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > max) throw directError('RESPONSE_TOO_LARGE', 'A provider response was too large.');
+      chunks.push(value);
+    }
+  } finally {
+    await reader.cancel().catch(() => {});
+  }
+  const out = new Uint8Array(size);
+  let at = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, at);
+    at += chunk.length;
+  }
+  return new TextDecoder().decode(out);
+}
+
+async function readJson(response, max) {
+  return safeJson(await readText(response, max), 'The provider');
+}
+
+function posterUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && ['images.metahub.space', 'image.tmdb.org', 'm.media-amazon.com'].includes(url.hostname)
+      ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
+function normalizeMeta(raw, type, id) {
+  const rawId = raw?.id || raw?.imdb_id;
+  if (!raw || rawId !== id || (raw.type && raw.type !== type) || typeof raw.name !== 'string') {
+    throw directError('INVALID_METADATA', 'The catalog returned unrecognized metadata.');
+  }
+  const meta = {
+    id,
+    type,
+    name: cleanText(raw.name, 250),
+    description: cleanText(raw.description, 4000),
+    poster: posterUrl(raw.poster),
+    year: cleanText(String(raw.releaseInfo || raw.year || ''), 30),
+    genres: (Array.isArray(raw.genres) ? raw.genres : []).filter(x => typeof x === 'string').slice(0, 8).map(x => cleanText(x, 50)),
+    runtime: cleanText(raw.runtime, 40),
+    episodes: []
+  };
+  if (type === 'series') {
+    const seen = new Set();
+    for (const episodeRow of Array.isArray(raw.videos) ? raw.videos.slice(0, 20000) : []) {
+      const season = episodeRow.season;
+      const episode = episodeRow.episode ?? episodeRow.number;
+      if (!Number.isSafeInteger(season) || season < 0 || season > 999 || !Number.isSafeInteger(episode) || episode < 1 || episode > 9999) continue;
+      const key = id + ':' + season + ':' + episode;
+      if ((episodeRow.id && episodeRow.id !== key) || seen.has(key)) continue;
+      seen.add(key);
+      const released = Number.isFinite(Date.parse(episodeRow.released || episodeRow.firstAired))
+        ? new Date(episodeRow.released || episodeRow.firstAired).toISOString()
+        : null;
+      meta.episodes.push({
+        id: key,
+        season,
+        episode,
+        name: cleanText(episodeRow.name || episodeRow.title, 250) || 'Episode ' + episode,
+        description: cleanText(episodeRow.description || episodeRow.overview, 800),
+        released
+      });
+    }
+    meta.episodes.sort((a, b) => a.season - b.season || a.episode - b.episode);
+  }
+  return meta;
+}
+
+async function catalogRequest(path) {
+  const cached = catalogCache.get(path);
+  if (cached && cached.until > Date.now()) return cached.value;
+  const response = await fetchDirect(
+    'cinemeta',
+    new URL(path, 'https://v3-cinemeta.strem.io').href,
+    { headers: { Accept: 'application/json' }, redirect: 'follow' },
+    15000
+  );
+  const finalUrl = new URL(response.url || 'https://v3-cinemeta.strem.io');
+  if (!CATALOG_ORIGINS.has(finalUrl.hostname)) throw directError('CATALOG_REDIRECT', 'Cinemeta redirected to an unexpected host.');
+  if (!response.ok) throw directError('CATALOG_UNAVAILABLE', 'Cinemeta returned HTTP ' + response.status, response.status);
+  const value = await readJson(response, 4 * 1024 * 1024);
+  catalogCache.set(path, { value, until: Date.now() + 300000 });
+  return value;
+}
+
+async function catalogMeta(type, id) {
+  if (!['movie', 'series'].includes(type) || !/^tt[0-9]{5,12}$/.test(id || '')) throw directError('INVALID_TITLE', 'Choose a valid movie or show.', 400);
+  return normalizeMeta((await catalogRequest('/meta/' + type + '/' + id + '.json'))?.meta, type, id);
+}
+
+async function catalogSearch({ type = 'movie', q = '', skip = 0, genre = '', feed = 'popular' } = {}) {
+  if (!['movie', 'series'].includes(type)) throw directError('INVALID_SEARCH', 'Choose Movies or Shows.', 400);
+  q = String(q || '').trim();
+  skip = Number(skip) || 0;
+  if (/^tt[0-9]{5,12}$/.test(q)) {
+    return { metas: skip ? [] : [await catalogMeta(type, q)], nextSkip: null, provider: 'Cinemeta', feed: 'search' };
+  }
+  const ids = { popular: 'top', featured: 'imdbRating', new: 'year' };
+  const selected = ids[feed] || 'top';
+  const params = [];
+  let localGenre = '';
+  if (q) params.push('search=' + encodeURIComponent(q));
+  if (selected === 'year') {
+    params.push('genre=' + new Date().getUTCFullYear());
+    localGenre = genre;
+  } else if (genre) {
+    params.push('genre=' + encodeURIComponent(genre));
+  }
+  if (skip) params.push('skip=' + skip);
+  const path = '/catalog/' + type + '/' + selected + (params.length ? '/' + params.join('&') : '') + '.json';
+  const data = await catalogRequest(path);
+  if (!Array.isArray(data?.metas)) throw directError('INVALID_CATALOG', 'Cinemeta did not return a title list.');
+  const metas = [];
+  const seen = new Set();
+  for (const row of data.metas.slice(0, 200)) {
+    const id = row?.id || row?.imdb_id;
+    if (!/^tt[0-9]{5,12}$/.test(id || '') || seen.has(id)) continue;
+    try {
+      const meta = normalizeMeta(row, type, id);
+      meta.episodes = [];
+      if (localGenre && !meta.genres.some(g => g.toLowerCase() === localGenre.toLowerCase())) continue;
+      metas.push(meta);
+      seen.add(id);
+    } catch {}
+  }
+  return {
+    metas,
+    nextSkip: data.metas.length >= 100 ? skip + Math.min(data.metas.length, 200) : null,
+    provider: 'Cinemeta',
+    feed
+  };
+}
+
+function inferredResolution(text) {
+  const match = /\b(2160p|1440p|1080p|720p|576p|480p|360p|4k)\b/i.exec(text || '');
+  return match ? (match[1].toLowerCase() === '4k' ? '4K' : match[1].toLowerCase()) : '';
+}
+
+function inferredQuality(text) {
+  const match = /\b(WEB[ ._-]?DL|WEBRip|BluRay|BDRip|BRRip|HDRip|HDTV|DVDRip|REMUX|CAM|TS)\b/i.exec(text || '');
+  return match ? cleanText(match[1].replace(/[ ._-]+/g, '-'), 40) : '';
+}
+
+function inferredContainer(name) {
+  return /\.([a-z0-9]{2,6})$/i.exec(name || '')?.[1]?.toLowerCase() || '';
+}
+
+function explicitSeeders(stream) {
+  for (const value of [stream?.seeders, stream?.seeds, stream?.seedersCount, stream?.behaviorHints?.seeders]) {
+    if (Number.isSafeInteger(value) && value >= 0) return value;
+  }
+  const match = /(?:👤|\bseed(?:er)?s?\b\s*[:=]?)\s*([0-9][0-9,]*)/i.exec(
+    [stream?.description, stream?.title, stream?.name].filter(v => typeof v === 'string').join(' ')
+  );
+  return match ? Number(match[1].replace(/,/g, '')) : null;
+}
+
+function normalizeZilean(data, input) {
+  const selected = validTarget(input);
+  if (!Array.isArray(data)) throw directError('SOURCE_RESPONSE_INVALID', 'Zilean returned an unreadable response.');
+  const rows = [];
+  for (const row of data.slice(0, 2000)) {
+    if (!row || row.imdb_id !== selected.id || !/^[a-f0-9]{40}$/i.test(row.info_hash || '') || typeof row.raw_title !== 'string') continue;
+    if (selected.type === 'series') {
+      if (Array.isArray(row.seasons) && row.seasons.length && !row.seasons.includes(selected.season)) continue;
+      if (Array.isArray(row.episodes) && row.episodes.length && !row.episodes.includes(selected.episode)) continue;
+    }
+    rows.push({
+      hash: row.info_hash,
+      title: cleanText(row.raw_title, 450),
+      label: 'Zilean',
+      provider: 'Zilean',
+      videoCodec: cleanText(row.codec, 40),
+      audioCodecs: (Array.isArray(row.audio) ? row.audio : []).filter(v => typeof v === 'string').slice(0, 6).map(v => cleanText(v, 40)),
+      resolution: cleanText(row.resolution, 20),
+      releaseQuality: cleanText(row.quality, 40),
+      container: cleanText(row.container || row.extension, 24),
+      seeders: Number.isSafeInteger(row.seeders) && row.seeders >= 0 ? row.seeders : null,
+      filename: '',
+      fileIdx: null,
+      size: parseSizeBytes(row.size)
+    });
+  }
+  return normalizeSources(rows);
+}
+
+function normalizeStremio(data, input, name) {
+  validTarget(input);
+  if (!data || !Array.isArray(data.streams)) throw directError('SOURCE_RESPONSE_INVALID', name + ' returned an unreadable response.');
+  const rows = [];
+  for (const stream of data.streams.slice(0, 1500)) {
+    const hash = stream?.infoHash || stream?.hash;
+    if (!/^[a-f0-9]{40}$/i.test(hash || '')) continue;
+    const filename = cleanText(stream.behaviorHints?.filename || stream.filename, 350);
+    const text = [filename, stream.description, stream.title, stream.name].filter(v => typeof v === 'string').join(' ');
+    rows.push({
+      hash,
+      filename,
+      title: filename || cleanText(stream.description || stream.title || stream.name, 450) || 'Torrent source',
+      label: name,
+      provider: name,
+      fileIdx: Number.isSafeInteger(stream.fileIdx) && stream.fileIdx >= 0 ? stream.fileIdx : null,
+      size: parseSizeBytes(stream.behaviorHints?.videoSize ?? stream.size),
+      seeders: explicitSeeders(stream),
+      resolution: inferredResolution(text),
+      releaseQuality: inferredQuality(text),
+      container: inferredContainer(filename),
+      videoCodec: cleanText(stream.videoCodec, 40),
+      audioCodecs: (Array.isArray(stream.audioCodecs) ? stream.audioCodecs : []).filter(v => typeof v === 'string').slice(0, 6).map(v => cleanText(v, 40))
+    });
+  }
+  return normalizeSources(rows);
+}
+
+function xmlDecode(value) {
+  return String(value || '')
+    .replace(/^<!\[CDATA\[|\]\]>$/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'");
+}
+
+function xmlTag(block, tag) {
+  const match = new RegExp('<' + tag + '\\b[^>]*>([\\s\\S]*?)<\\/' + tag + '>', 'i').exec(block || '');
+  return match ? cleanText(xmlDecode(match[1].trim()), 700) : '';
+}
+
+function torzAttrs(block) {
+  const output = {};
+  for (const tag of String(block || '').match(/<torznab:attr\b[^>]*\/?\s*>/gi) || []) {
+    const name = /\bname=["']([^"']+)["']/i.exec(tag)?.[1]?.toLowerCase();
+    const value = /\bvalue=["']([^"']*)["']/i.exec(tag)?.[1];
+    if (name && value !== undefined && !Object.hasOwn(output, name)) output[name] = xmlDecode(value);
+  }
+  return output;
+}
+
+function normalizeTorznab(xml, input) {
+  const selected = validTarget(input);
+  const rows = [];
+  for (const item of String(xml || '').match(/<item\b[^>]*>[\s\S]*?<\/item>/gi) || []) {
+    const attrs = torzAttrs(item);
+    const hash = attrs.infohash;
+    const title = xmlTag(item, 'title');
+    if (!/^[a-f0-9]{40}$/i.test(hash || '') || !title) continue;
+    if (/^tt[0-9]{5,12}$/.test(attrs.imdb || '') && attrs.imdb !== selected.id) continue;
+    const seedValue = Number(attrs.seeders);
+    rows.push({
+      hash,
+      title,
+      filename: '',
+      label: 'MediaFusion Torznab',
+      provider: 'MediaFusion Torznab',
+      fileIdx: null,
+      size: parseSizeBytes(xmlTag(item, 'size') || attrs.size),
+      seeders: Number.isSafeInteger(seedValue) && seedValue >= 0 ? seedValue : null,
+      resolution: inferredResolution(title),
+      releaseQuality: inferredQuality(title),
+      container: inferredContainer(title),
+      videoCodec: '',
+      audioCodecs: []
+    });
+  }
+  return normalizeSources(rows);
+}
+
+async function sourceZilean(target) {
+  const url = new URL('/dmm/filtered', SOURCE_ENDPOINTS.zilean);
+  url.searchParams.set('ImdbId', target.id);
+  if (target.type === 'series') {
+    url.searchParams.set('Season', target.season);
+    url.searchParams.set('Episode', target.episode);
+  }
+  const response = await fetchDirect('zilean', url, { headers: { Accept: 'application/json' } }, 35000);
+  if (!response.ok) throw directError('SOURCE_HTTP', 'Zilean returned HTTP ' + response.status, response.status);
+  return normalizeZilean(await readJson(response, 4 * 1024 * 1024), target);
+}
+
+async function sourceStremthru(target, origin, label, op) {
+  const resourceId = target.type === 'series' ? target.id + ':' + target.season + ':' + target.episode : target.id;
+  const url = new URL('/stream/' + target.type + '/' + resourceId + '.json', origin);
+  const response = await fetchDirect(op, url, { headers: { Accept: 'application/json' }, redirect: 'follow' }, 30000);
+  if (!response.ok) throw directError('SOURCE_HTTP', label + ' returned HTTP ' + response.status, response.status);
+  return normalizeStremio(await readJson(response, 8 * 1024 * 1024), target, label);
+}
+
+async function sourceMediafusion(target) {
+  const url = new URL(SOURCE_ENDPOINTS.mediafusion);
+  url.searchParams.set('t', target.type === 'series' ? 'tvsearch' : 'movie');
+  url.searchParams.set('imdbid', target.id);
+  url.searchParams.set('limit', '100');
+  if (target.type === 'series') {
+    url.searchParams.set('season', target.season);
+    url.searchParams.set('ep', target.episode);
+  }
+  const response = await fetchDirect(
+    'mediafusion_torznab',
+    url,
+    { headers: { Accept: 'application/rss+xml, application/xml, text/xml' }, redirect: 'follow' },
+    30000
+  );
+  if (!response.ok) throw directError('SOURCE_HTTP', 'MediaFusion returned HTTP ' + response.status, response.status);
+  return normalizeTorznab(await readText(response, 4 * 1024 * 1024), target);
+}
+
+function richness(source) {
+  return (source.filename ? 5 : 0) + (source.size ? 4 : 0) + (source.seeders != null ? 3 : 0)
+    + (source.resolution ? 3 : 0) + (source.videoCodec ? 2 : 0) + (source.audioCodecs?.length ? 2 : 0);
+}
+
+async function directSources(input) {
+  const target = validTarget(input);
+  const jobs = [
+    ['Zilean', () => sourceZilean(target)],
+    ['StremThru Main', () => sourceStremthru(target, SOURCE_ENDPOINTS.stremthruMain, 'StremThru Main', 'stremthru_main')],
+    ['StremThru ElfHosted', () => sourceStremthru(target, SOURCE_ENDPOINTS.stremthruElf, 'StremThru ElfHosted', 'stremthru_elf')],
+    ['MediaFusion Torznab', () => sourceMediafusion(target)]
+  ];
+  const settled = await Promise.allSettled(jobs.map(row => row[1]()));
+  const providers = [];
+  const map = new Map();
+  settled.forEach((result, index) => {
+    if (result.status !== 'fulfilled') return;
+    providers.push(jobs[index][0]);
+    for (const source of result.value) {
+      const old = map.get(source.hash);
+      if (!old || richness(source) > richness(old)) map.set(source.hash, source);
+    }
+  });
+  const sources = [...map.values()].slice(0, 40);
+  if (!sources.length && settled.every(row => row.status === 'rejected')) {
+    throw directError(
+      'DIRECT_SOURCE_UNAVAILABLE',
+      'Every direct source index was blocked or unavailable. Run Browser-only diagnostics and paste the log.',
+      502
+    );
+  }
+  return { sources, provider: 'Browser direct', providers, failures: settled.filter(row => row.status === 'rejected').length };
+}
+
+function requireKey() {
+  if (!credential) throw directError('LOGIN_REQUIRED', 'Enter your TorBox API key.', 401);
+  return credential;
+}
+
+async function torboxFetch(path, { params = {}, method = 'GET', body, tokenInQuery = false, label } = {}) {
+  const key = requireKey();
+  const url = new URL(path, TORBOX_ORIGIN);
+  for (const [name, value] of Object.entries(params)) {
+    if (Array.isArray(value)) {
+      for (const item of value) url.searchParams.append(name, String(item));
+    } else if (value !== undefined && value !== null) {
+      url.searchParams.set(name, String(value));
+    }
+  }
+  const headers = { Accept: 'application/json' };
+  if (tokenInQuery) url.searchParams.set('token', key);
+  else headers.Authorization = 'Bearer ' + key;
+
+  const response = await fetchDirect(
+    label || ('torbox_' + path.replace(/[^a-z0-9]+/gi, '_')),
+    url,
+    { method, headers, body, redirect: 'follow' },
+    20000
+  );
+  if ([401, 403].includes(response.status)) throw directError('TORBOX_ACCESS_DENIED', 'TorBox rejected this API key.', 401);
+  if (response.status === 429) throw directError('TORBOX_RATE_LIMITED', 'TorBox is rate limiting requests.', 429);
+  if (!response.ok) throw directError('TORBOX_HTTP_ERROR', 'TorBox returned HTTP ' + response.status, response.status);
+
+  const text = await readText(response, 8 * 1024 * 1024);
+  if (!text) return null;
+  const payload = safeJson(text, 'TorBox');
+  if (payload?.success === false) throw directError('TORBOX_REQUEST_FAILED', 'TorBox reported that the request failed.');
+  return payload && Object.hasOwn(payload, 'data') ? payload.data : payload;
+}
+
+async function torboxAccount() {
+  const data = await torboxFetch('user/me', { params: { settings: false }, label: 'torbox_user_me' });
+  if (!data || typeof data !== 'object') throw directError('TORBOX_SCHEMA', 'TorBox returned an unreadable account response.');
+  return {
+    valid: true,
+    planCode: String(data.plan ?? 'not supplied').slice(0, 40),
+    checkedAt: new Date().toISOString()
+  };
+}
+
+async function torboxCached(hashes) {
+  if (!hashes.length) return {};
+  const url = new URL('torrents/checkcached', TORBOX_ORIGIN);
+  for (const hash of hashes) url.searchParams.append('hash', hash);
+  url.searchParams.set('format', 'object');
+  url.searchParams.set('list_files', 'false');
+  const key = requireKey();
+  const response = await fetchDirect(
+    'torbox_checkcached',
+    url,
+    { headers: { Accept: 'application/json', Authorization: 'Bearer ' + key } },
+    20000
+  );
+  if (!response.ok) throw directError('TORBOX_CACHE', 'TorBox cache check returned HTTP ' + response.status, response.status);
+  const payload = await readJson(response, 8 * 1024 * 1024);
+  const data = payload?.data ?? payload;
+  if (!data || typeof data !== 'object') throw directError('TORBOX_CACHE', 'TorBox returned an unreadable cache response.');
+  const output = {};
+  for (const hash of hashes) {
+    const row = data[hash];
+    output[hash] = row === true || !!(row && typeof row === 'object');
+  }
+  return output;
+}
+
+function availability(item) {
+  if (item?.download_finished === true && item?.download_present === true) return 'Ready to watch';
+  if (item?.download_finished === true && item?.download_present === false) return 'Unavailable';
+  if (item?.download_finished === false) return 'Preparing';
+  return 'Unable to check';
+}
+
+function normalizeItem(item) {
+  if (!item || !Number.isSafeInteger(item.id)) throw directError('TORBOX_SCHEMA', 'TorBox returned an unreadable torrent.');
+  const state = availability(item);
+  return (Array.isArray(item.files) ? item.files : [])
+    .filter(file => Number.isSafeInteger(file.id)
+      && (/\.(mp4|m4v|webm|mkv|mov|avi|ts|m2ts|mpg|mpeg|wmv|ogv)$/i.test(file.short_name || file.name || '')
+        || /^video\//i.test(file.mimetype || '')))
+    .map(file => ({
+      id: 'torrents:' + item.id + ':' + file.id,
+      title: cleanText(file.short_name || file.name, 700) || 'File ' + file.id,
+      collection: cleanText(item.name, 700),
+      size: Number.isFinite(file.size) ? file.size : null,
+      mime: cleanText(file.mimetype, 80),
+      state,
+      compatibility: 'Browser compatibility not yet verified',
+      providerProgress: typeof item.progress === 'number' ? item.progress : null
+    }));
+}
+
+function episodeIdentity(name) {
+  const match = /(?:^|[^a-z0-9])s(\d{1,3})[ ._-]*e(\d{1,4})(?!\d)/i.exec(name || '')
+    || /(?:^|[^a-z0-9])(\d{1,3})x(\d{1,4})(?!\d)/i.exec(name || '');
+  return match ? { season: +match[1], episode: +match[2] } : null;
+}
+
+function chooseVideo(files, target, source, explicit) {
+  let candidates = files.filter(file => !/(?:^|[ ._-])(sample|trailer|featurette)(?:[ ._-]|$)/i.test(file.title));
+  if (target.type === 'series') {
+    candidates = candidates.filter(file => {
+      const identity = episodeIdentity(file.title);
+      return identity
+        ? identity.season === target.season && identity.episode === target.episode
+        : !!source.filename && file.title.toLowerCase().endsWith(source.filename.toLowerCase());
+    });
+  }
+  if (explicit) {
+    const file = candidates.find(row => row.id === explicit);
+    if (!file) throw directError('FILE_SELECTION_INVALID', 'That file does not match this episode.', 400);
+    return { file, candidates };
+  }
+  const named = source.filename
+    ? candidates.filter(file => file.title.toLowerCase().endsWith(source.filename.toLowerCase()))
+    : [];
+  return {
+    file: named.length === 1 ? named[0] : candidates.length === 1 ? candidates[0] : null,
+    candidates
+  };
+}
+
+async function myTorrents(params = {}) {
+  const data = await torboxFetch('torrents/mylist', { params, label: 'torbox_mylist' });
+  return Array.isArray(data) ? data : data ? [data] : [];
+}
+
+async function findTorrent(hash) {
+  for (let offset = 0; offset < 10000; offset += 100) {
+    const rows = await myTorrents({ offset, limit: 100, bypass_cache: true });
+    const found = rows.find(row => String(row?.hash || '').toLowerCase() === hash);
+    if (found) return found;
+    if (rows.length < 100) return null;
+  }
+  throw directError('LIBRARY_LIMIT', 'The TorBox account is too large to safely scan.', 409);
+}
+
+async function createTorrent(hash, onlyCached) {
+  const form = new FormData();
+  form.set('magnet', 'magnet:?xt=urn:btih:' + hash);
+  form.set('allow_zip', 'false');
+  form.set('add_only_if_cached', String(onlyCached));
+  const key = requireKey();
+  const response = await fetchDirect(
+    'torbox_create_torrent',
+    new URL('torrents/createtorrent', TORBOX_ORIGIN),
+    { method: 'POST', headers: { Accept: 'application/json', Authorization: 'Bearer ' + key }, body: form },
+    25000
+  );
+  if (!response.ok) throw directError('TORBOX_CREATE', 'TorBox create returned HTTP ' + response.status, response.status);
+  const payload = await readJson(response, 4 * 1024 * 1024);
+  if (payload?.success !== true || !Number.isSafeInteger(payload?.data?.torrent_id)) {
+    throw directError('TORBOX_CREATE', 'TorBox did not confirm a torrent identifier.');
+  }
+  return payload.data.torrent_id;
+}
+
+async function torrentItem(id) {
+  const rows = await myTorrents({ id, bypass_cache: true });
+  const row = rows.find(item => item?.id === id) || rows[0];
+  if (!row || row.id !== id) throw directError('PREPARED_ITEM_MISSING', 'The prepared torrent is not in this account.', 404);
+  return row;
+}
+
+async function registerSources(input) {
+  const target = validTarget(input.target);
+  const meta = await catalogMeta(target.type, target.id);
+  if (target.type === 'series' && !meta.episodes.some(row => row.season === target.season && row.episode === target.episode)) {
+    throw directError('EPISODE_NOT_FOUND', 'The selected episode is not in this show.', 400);
+  }
+  const sources = normalizeSources(input.sources || []);
+  let cache = {};
+  let warning = '';
+  try {
+    cache = await torboxCached([...new Set(sources.map(source => source.hash))]);
+  } catch (error) {
+    warning = 'Sources were found, but direct TorBox cache checking failed: ' + error.message;
+  }
+  const rows = sources.map(source => {
+    const id = crypto.randomUUID();
+    const cached = typeof cache[source.hash] === 'boolean' ? cache[source.hash] : null;
+    tickets.set(id, { source, target, until: Date.now() + 1800000 });
+    return {
+      id,
+      title: source.title,
+      label: source.label,
+      provider: source.provider,
+      providers: source.providers,
+      filename: source.filename,
+      quality: source.quality,
+      hint: source.hint,
+      size: source.size,
+      seeders: source.seeders,
+      releaseQuality: source.releaseQuality,
+      container: source.container,
+      resolution: source.resolution,
+      cached,
+      browserFriendly: source.browserFriendly,
+      audioRisk: source.audioRisk,
+      videoRisk: source.videoRisk,
+      videoCodec: source.videoCodec,
+      audioCodecs: source.audioCodecs,
+      score: source.score + (cached ? 8 : 0)
+    };
+  }).sort((a, b) => b.score - a.score);
+  return { sources: rows, warning, target, state: rows.length ? 'sources_found' : 'no_sources' };
+}
+
+function ticket(id) {
+  const row = tickets.get(id);
+  if (!row || row.until <= Date.now()) throw directError('SOURCE_EXPIRED', 'This source selection expired. Reopen the title.', 404);
+  return row;
+}
+
+async function prepareSource(id, onlyCached = false) {
+  const row = ticket(id);
+  const hash = row.source.hash;
+  row.until = Date.now() + 86400000;
+  let operation = operations.get(hash);
+  if (!operation) {
+    operation = { torrentId: null, promise: null };
+    operations.set(hash, operation);
+  }
+  if (!operation.promise && operation.torrentId === null) {
+    operation.promise = (async () => {
+      const existing = await findTorrent(hash);
+      operation.torrentId = existing?.id ?? await createTorrent(hash, onlyCached);
+    })().finally(() => { operation.promise = null; });
+  }
+  if (operation.promise) await operation.promise;
+  return sourceStatus(id);
+}
+
+async function sourceStatus(id, explicit) {
+  const row = ticket(id);
+  const operation = operations.get(row.source.hash);
+  if (!operation) return { state: 'not_started', message: 'Choose Play or Prepare to use this source.' };
+  if (operation.promise) return { state: 'preparing', message: 'TorBox is processing your request.', progress: null };
+  const item = await torrentItem(operation.torrentId);
+  if (String(item.hash || '').toLowerCase() !== row.source.hash) throw directError('TORRENT_IDENTITY_MISMATCH', 'TorBox returned a different torrent.');
+  if (item.download_finished !== true || item.download_present !== true) {
+    return {
+      state: 'preparing',
+      message: 'TorBox is preparing this source.',
+      progress: typeof item.progress === 'number' ? item.progress : null
+    };
+  }
+  const files = normalizeItem(item);
+  const picked = chooseVideo(files, row.target, row.source, explicit);
+  if (picked.file) {
+    return {
+      state: 'ready',
+      file: picked.file,
+      target: row.target,
+      compatibility: {
+        browserFriendly: row.source.browserFriendly,
+        audioRisk: row.source.audioRisk,
+        videoRisk: row.source.videoRisk,
+        hint: row.source.hint,
+        videoCodec: row.source.videoCodec,
+        audioCodecs: row.source.audioCodecs
+      },
+      message: 'The selected file is ready.'
+    };
+  }
+  if (!picked.candidates.length) return { state: 'unavailable', message: 'No video could be matched confidently.' };
+  return { state: 'choose_file', message: 'Choose the correct video file.', files: picked.candidates };
+}
+
+async function resolveVideo(videoId) {
+  const match = /^torrents:([0-9]{1,12}):([0-9]{1,12})$/.exec(videoId || '');
+  if (!match) throw directError('BAD_VIDEO_ID', 'This file identifier is invalid.', 400);
+  const itemId = +match[1];
+  const fileId = +match[2];
+  const item = await torrentItem(itemId);
+  const file = normalizeItem(item).find(row => row.id === videoId);
+  if (!file || file.state !== 'Ready to watch') throw directError('FILE_NOT_READY', 'This file is not ready.', 409);
+  const link = await torboxFetch('torrents/requestdl', {
+    params: { torrent_id: itemId, file_id: fileId, zip_link: false, redirect: false },
+    tokenInQuery: true,
+    label: 'torbox_requestdl'
+  });
+  if (typeof link !== 'string' || !isTrustedDirectMediaUrl(link)) throw directError('MEDIA_HOST_NOT_VERIFIED', 'TorBox returned an untrusted playback URL.');
+  return { file, link };
+}
+
+function pathAndQuery(value) {
+  return new URL(value, 'https://direct.invalid');
+}
+
+export async function directApi(path, { method = 'GET', data } = {}) {
+  const url = pathAndQuery(path);
+  const pathname = url.pathname;
+
+  if (pathname === '/api/session') {
+    return {
+      authenticated: !!credential,
+      setupRequired: false,
+      authMode: 'browser-direct',
+      ...(credential ? { csrf: 'local', viewers: ['viewer-1', 'viewer-2'], durable: true, keyConfigured: true } : {})
+    };
+  }
+
+  if (pathname === '/api/login' && method === 'POST') {
+    const key = String(data?.apiKey || '').trim();
+    if (key.length < 8 || key.length > 512) throw directError('BAD_API_KEY', 'Enter a valid TorBox API key.', 401);
+    const old = credential;
+    credential = key;
+    try {
+      const account = await torboxAccount();
+      localSession = crypto.randomUUID().replace(/-/g, '') + 'abcdefghijk';
+      return { ok: true, csrf: 'local', sessionToken: localSession.slice(0, 43), authMode: 'browser-direct', account };
+    } catch (error) {
+      credential = old;
+      throw error;
+    }
+  }
+
+  if (pathname === '/api/logout') {
+    credential = '';
+    localSession = '';
+    tickets.clear();
+    operations.clear();
+    return { ok: true };
+  }
+
+  if (pathname === '/api/owner/unlock') {
+    if (String(data?.apiKey || '').trim() !== credential) throw directError('BAD_API_KEY', 'That API key did not match this browser session.', 401);
+    return { ok: true };
+  }
+
+  if (pathname === '/api/owner/diagnostics') {
+    return {
+      account: await torboxAccount(),
+      authMode: 'browser-direct',
+      apiKeyPersistence: 'Encrypted browser vault only when Remember is enabled',
+      directMedia: true,
+      proxyEnabled: false,
+      mediaRelayEnabled: false,
+      credentialProtection: 'The TorBox API key stays in this browser and is sent directly to TorBox.',
+      catalogProvider: 'Cinemeta direct',
+      sourceProvider: 'Direct browser source indexes',
+      progressStorage: 'browser-local',
+      automaticNextEnabled: true
+    };
+  }
+
+  if (pathname === '/api/torbox-status') {
+    try {
+      await torboxAccount();
+      return { ok: true, official: 'unknown', message: 'TorBox API is reachable directly from this browser.' };
+    } catch (error) {
+      return { ok: false, official: 'unknown', message: error.message };
+    }
+  }
+
+  if (pathname === '/api/discover/catalog') {
+    return catalogSearch({
+      type: url.searchParams.get('type') || 'movie',
+      q: url.searchParams.get('q') || '',
+      skip: Number(url.searchParams.get('skip') || 0),
+      genre: url.searchParams.get('genre') || '',
+      feed: url.searchParams.get('feed') || 'popular'
+    });
+  }
+
+  if (pathname === '/api/discover/meta') {
+    return { meta: await catalogMeta(url.searchParams.get('type'), url.searchParams.get('id')) };
+  }
+
+  if (pathname === '/api/discover/lookup') {
+    const type = url.searchParams.get('type');
+    const target = { type, id: url.searchParams.get('id') };
+    if (type === 'series') {
+      target.season = Number(url.searchParams.get('season'));
+      target.episode = Number(url.searchParams.get('episode'));
+    }
+    return directSources(target);
+  }
+
+  if (pathname === '/api/discover/sources' && method === 'POST') return registerSources(data || {});
+  if (pathname === '/api/discover/prepare' && method === 'POST') return prepareSource(data?.source, data?.onlyCached === true);
+  if (pathname === '/api/discover/status') return sourceStatus(url.searchParams.get('source'), url.searchParams.get('file') || undefined);
+
+  if (pathname === '/api/playback' && method === 'POST') {
+    const resolved = await resolveVideo(data?.videoId);
+    return {
+      file: resolved.file,
+      mediaUrl: resolved.link,
+      delivery: 'direct',
+      conversion: false,
+      exposesTorBoxToken: true,
+      leaseId: crypto.randomUUID(),
+      progress: { position: 0, duration: 0 }
+    };
+  }
+
+  if (pathname === '/api/progress') return { saved: true };
+
+  if (pathname === '/api/library') {
+    const rows = await myTorrents({
+      offset: Number(url.searchParams.get('offset') || 0),
+      limit: 100,
+      bypass_cache: url.searchParams.get('refresh') === '1'
+    });
+    return {
+      files: rows.flatMap(normalizeItem),
+      nextOffset: rows.length === 100 ? Number(url.searchParams.get('offset') || 0) + 100 : null,
+      updatedAt: new Date().toISOString(),
+      stale: false
+    };
+  }
+
+  if (pathname.startsWith('/api/drive/') || pathname.startsWith('/api/share/') || pathname === '/api/setup-transfer') {
+    throw directError('DIRECT_FEATURE_UNAVAILABLE', 'This browser-direct experiment intentionally does not use Render for that optional feature.', 501);
+  }
+
+  throw directError('NOT_FOUND', 'This direct-browser action is not implemented.', 404);
+}
+
+async function reachability(url) {
+  try {
+    await fetch(url, { mode: 'no-cors', credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(8000) });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function probe(id, label, url, { headers = {}, method = 'GET' } = {}) {
+  const started = performance.now();
+  try {
+    const response = await fetch(url, {
+      method,
+      headers,
+      credentials: 'omit',
+      cache: 'no-store',
+      redirect: 'follow',
+      signal: AbortSignal.timeout(12000)
+    });
+    const durationMs = Math.round(performance.now() - started);
+    return {
+      id,
+      label,
+      status: response.ok ? 'DIRECT_OK' : 'HTTP_ERROR',
+      httpStatus: response.status,
+      durationMs,
+      corsReadable: true,
+      note: response.ok
+        ? 'Browser JavaScript could read this response directly.'
+        : 'Browser JavaScript could read the response, but the service returned HTTP ' + response.status + '.'
+    };
+  } catch (error) {
+    const durationMs = Math.round(performance.now() - started);
+    if (['TimeoutError', 'AbortError'].includes(error?.name)) {
+      return { id, label, status: 'TIMEOUT', httpStatus: null, durationMs, corsReadable: false, note: 'The direct browser request timed out.' };
+    }
+    const reachable = await reachability(new URL(url).origin);
+    return {
+      id,
+      label,
+      status: reachable ? 'CORS_BLOCKED_OR_UNREADABLE' : 'NETWORK_ERROR',
+      httpStatus: null,
+      durationMs,
+      corsReadable: false,
+      note: reachable
+        ? 'The host is reachable, but browser JavaScript could not read the cross-origin response. CORS is the likely blocker.'
+        : 'The host could not be reached by either readable or opaque browser fetch.'
+    };
+  }
+}
+
+export async function runDirectDiagnostics(overrideKey = '') {
+  const key = String(overrideKey || credential || '').trim();
+  const tests = [
+    probe('cinemeta', 'Cinemeta catalog', 'https://v3-cinemeta.strem.io/meta/movie/tt0111161.json'),
+    probe('zilean', 'Zilean', 'https://zileanfortheweebs.midnightignite.me/dmm/filtered?ImdbId=tt0111161'),
+    probe('stremthru_main', 'StremThru Main', SOURCE_ENDPOINTS.stremthruMain + '/stream/movie/tt0111161.json'),
+    probe('stremthru_elf', 'StremThru ElfHosted', SOURCE_ENDPOINTS.stremthruElf + '/stream/movie/tt0111161.json'),
+    probe('mediafusion', 'MediaFusion Torznab', 'https://mediafusion.elfhosted.com/torznab?t=movie&imdbid=tt0111161&limit=1')
+  ];
+
+  if (key) {
+    const headers = { Authorization: 'Bearer ' + key, Accept: 'application/json' };
+    tests.push(
+      probe('torbox_user', 'TorBox user/me', 'https://api.torbox.app/v1/api/user/me?settings=false', { headers }),
+      probe('torbox_mylist', 'TorBox torrent list', 'https://api.torbox.app/v1/api/torrents/mylist?offset=0&limit=1', { headers })
+    );
+  } else {
+    tests.push(Promise.resolve({
+      id: 'torbox_user',
+      label: 'TorBox authenticated API',
+      status: 'NOT_TESTED',
+      httpStatus: null,
+      durationMs: 0,
+      corsReadable: false,
+      note: 'No API key was supplied to the diagnostic test.'
+    }));
+  }
+
+  const results = await Promise.all(tests);
+  const blockers = results.filter(row => row.status !== 'DIRECT_OK').map(row => row.id);
+
+  lastDiagnostic = {
+    schema: 'torbox-browser-direct-diagnostics-v1',
+    build: DIRECT_BUILD,
+    generatedAt: new Date().toISOString(),
+    environment: {
+      origin: location.origin,
+      secureContext: isSecureContext,
+      online: navigator.onLine,
+      userAgent: navigator.userAgent,
+      platform: navigator.platform || '',
+      serviceWorker: 'serviceWorker' in navigator,
+      credentialSupplied: !!key
+    },
+    results,
+    blockers,
+    recentTrace: traces.slice(-60)
+  };
+  return lastDiagnostic;
+}
+
+export function diagnosticText(report = lastDiagnostic) {
+  return report ? JSON.stringify(report, null, 2) : '';
+}
+
+export function recentDirectTrace() {
+  return traces.slice();
+}
