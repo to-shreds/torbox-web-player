@@ -788,9 +788,9 @@ export async function directApi(path, { method = 'GET', data } = {}) {
       authMode: 'browser-direct',
       apiKeyPersistence: 'Encrypted browser vault only when Remember is enabled',
       directMedia: true,
-      proxyEnabled: false,
+      proxyEnabled: true,
       mediaRelayEnabled: false,
-      credentialProtection: 'The TorBox API key stays in this browser and is sent directly to TorBox.',
+      credentialProtection: 'The TorBox API key stays in this browser and is forwarded transiently through the selected stateless bridge. The bridge does not store it.',
       catalogProvider: 'Cinemeta direct',
       sourceProvider: 'Direct browser source indexes',
       progressStorage: 'browser-local',
@@ -801,7 +801,7 @@ export async function directApi(path, { method = 'GET', data } = {}) {
   if (pathname === '/api/torbox-status') {
     try {
       await torboxAccount();
-      return { ok: true, official: 'unknown', message: 'TorBox API is reachable directly from this browser.' };
+      return { ok: true, official: 'unknown', message: 'TorBox API is reachable through the redundant bridge.' };
     } catch (error) {
       return { ok: false, official: 'unknown', message: error.message };
     }
