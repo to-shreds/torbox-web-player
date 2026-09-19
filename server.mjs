@@ -4,7 +4,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
-import { Sessions, Limiter, verifyPassword, validHash } from './lib/auth.mjs';
+import { Sessions, Limiter, GuestInvites, verifyPassword, validHash } from './lib/auth.mjs';
 import { ProgressStore, VIEWERS, validViewer } from './lib/progress.mjs';
 import { TorBox, AppError, parseVideoId, TORBOX_MEDIA_HOSTS } from './lib/torbox.mjs';
 const root = dirname(fileURLToPath(import.meta.url));
@@ -60,7 +60,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
     response.setHeader('Access-Control-Expose-Headers', 'Content-Type, Content-Length, Content-Range, Accept-Ranges, ETag, Last-Modified');
     return true;
   };
-  const sessions = new Sessions(now), progress = new ProgressStore();
+  const sessions = new Sessions(now), progress = new ProgressStore(), guestInvites = new GuestInvites(now);
   const loginRate = new Limiter(15, 15 * 60000, now), operationRate = new Limiter(30, 60000, now), progressRate = new Limiter(120, 60000, now);
   let activeLogins = 0;
   const mediaHosts = (env.MEDIA_HOST_SUFFIXES || TORBOX_MEDIA_HOSTS.join(',')).split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
@@ -91,7 +91,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.8.1-key-clone', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.9.0-key-clone', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
@@ -103,7 +103,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
       const bearerSession = !!bearer && !!session;
       if (!path.startsWith('/api/')) throw new AppError('NOT_FOUND', 'Page not found.', 404);
       if (!['GET', 'HEAD'].includes(method) && !trustedOrigin(request.headers.origin)) throw new AppError('BAD_ORIGIN', 'Reload the website before trying again.', 403);
-      if (path === '/api/session' && method === 'GET') return json(response, 200, { authenticated: !!session, setupRequired: !configured, authMode: apiKeyMode ? 'api-key' : 'household', ...(session ? { csrf: session.csrf, viewers: VIEWERS, durable: false, keyConfigured: apiKeyMode ? !!session.provider : !!(env.TORBOX_API_KEY || provider) } : {}) });
+      if (path === '/api/session' && method === 'GET') return json(response, 200, { authenticated: !!session, setupRequired: !configured, authMode: apiKeyMode ? 'api-key' : 'household', ...(session ? { csrf: session.csrf, viewers: VIEWERS, durable: false, guest: session.guest === true, scope: session.guest ? session.scope : undefined, keyConfigured: session.guest ? true : (apiKeyMode ? !!session.provider : !!(env.TORBOX_API_KEY || provider)) } : {}) });
       if (path === '/api/login' && method === 'POST') {
         if (!configured) throw new AppError('SETUP_REQUIRED', 'This clone is not configured for authentication.', 503);
         if (!loginRate.allow('household') || activeLogins >= 2) throw new AppError('LOGIN_RATE_LIMITED', 'Too many sign-in attempts. Try again in 15 minutes.', 429);
@@ -128,12 +128,57 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         if (session) { (session.discovery || discovery).revoke(session.id); sessions.revoke(session.id); }
         setCookie(response, created.id); return json(response, 200, { ok: true, csrf: created.row.csrf, sessionToken: created.id, authMode: apiKeyMode ? 'api-key' : 'household' });
       }
+      if (path === '/api/guest/accept' && method === 'POST') {
+        const data = await body(request), invite = guestInvites.read(data.token);
+        if (!invite) throw new AppError('GUEST_LINK_INVALID', 'This temporary access link has expired or is no longer valid.', 401);
+        sessions.prune();
+        const owner = sessions.rows.get(invite.ownerId);
+        if (!owner || owner.expires <= now() || !owner.provider) throw new AppError('GUEST_LINK_INVALID', 'The person who shared this title is no longer signed in. Ask them for a new link.', 401);
+        const created = sessions.create();
+        if (!created) throw new AppError('SESSION_LIMIT', 'Too many temporary sessions are open. Ask for a new link later.', 429);
+        created.row.guest = true;
+        created.row.ownerId = owner.id;
+        created.row.scope = { ...invite.scope };
+        created.row.provider = owner.provider;
+        created.row.discovery = new Discovery({ provider: owner.provider, fetchFn: discoveryFetch, now });
+        created.row.allowedVideos = new Set();
+        created.row.expires = Math.min(created.row.expires, invite.expires);
+        setCookie(response, created.id, Math.max(1, Math.floor((created.row.expires - now()) / 1000)));
+        return json(response, 200, { ok: true, guest: true, scope: created.row.scope, csrf: created.row.csrf, sessionToken: created.id, expiresAt: new Date(created.row.expires).toISOString() });
+      }
       if (!session) throw new AppError('LOGIN_REQUIRED', apiKeyMode ? 'Enter your TorBox API key to sign in.' : 'Sign in to your household first.', 401);
       const activeProvider = session.provider || torbox;
       const activeDiscovery = session.discovery || discovery;
+      const guestScope = session.guest ? session.scope : null;
+      const guestAllows = target => !guestScope || !!target && target.type === guestScope.type && target.id === guestScope.id;
+      const rememberGuestVideos = result => {
+        if (!session.guest || !result) return;
+        if (!session.allowedVideos) session.allowedVideos = new Set();
+        if (result.state === 'ready' && result.file?.id) session.allowedVideos.add(result.file.id);
+        if (result.state === 'choose_file' && Array.isArray(result.files)) for (const file of result.files) if (file?.id) session.allowedVideos.add(file.id);
+      };
       if (!['GET', 'HEAD'].includes(method) && !bearerSession && request.headers['x-csrf-token'] !== session.csrf) throw new AppError('BAD_CSRF', 'Reload the page and try again.', 403);
-      if (path === '/api/logout' && method === 'POST') { activeDiscovery.revoke(session.id); if (session.provider) session.provider.key = ''; sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
+      if (path === '/api/logout' && method === 'POST') {
+        activeDiscovery.revoke(session.id);
+        if (!session.guest) {
+          guestInvites.revokeOwner(session.id);
+          for (const [id, row] of sessions.rows) if (row.guest && row.ownerId === session.id) { row.discovery?.revokeAll(); sessions.rows.delete(id); }
+          if (session.provider) session.provider.key = '';
+        }
+        sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true });
+      }
+      if (path === '/api/share/create' && method === 'POST') {
+        if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'Temporary guests cannot create sharing links.', 403);
+        const data = await body(request);
+        const type = data.type, id = data.id, hours = Number(data.hours || 6);
+        if (!['movie','series'].includes(type) || !/^tt[0-9]{5,12}$/.test(id || '') || !Number.isFinite(hours) || hours < 1 || hours > 24) throw new AppError('INVALID_SHARE', 'Choose a movie/show and an access time from 1 to 24 hours.', 400);
+        const meta = await activeDiscovery.catalog.meta(type, id);
+        const created = guestInvites.create({ ownerId: session.id, scope: { type, id, name: meta.name, poster: meta.poster || '' }, ttlMs: hours * 3600000 });
+        if (!created) throw new AppError('SHARE_LIMIT', 'A temporary access link could not be created right now.', 429);
+        return json(response, 200, { token: created.token, scope: created.row.scope, expiresAt: new Date(created.row.expires).toISOString() });
+      }
       if (path === '/api/owner/unlock' && method === 'POST') {
+        if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'Temporary guests cannot open owner tools.', 403);
         if (!loginRate.allow('household') || activeLogins >= 2) throw new AppError('LOGIN_RATE_LIMITED', 'Too many credential checks. Try again in 15 minutes.', 429);
         const data = await body(request); activeLogins++;
         let ok = false;
@@ -148,7 +193,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
       }
       if (path.startsWith('/api/owner/')) {
         if (session.ownerUntil <= now()) throw new AppError('OWNER_REAUTH_REQUIRED', 'Re-enter your TorBox API key to open owner tools.', 403);
-        if (path === '/api/owner/revoke' && method === 'POST') { discovery.revokeAll(); for (const row of sessions.rows.values()) { row.discovery?.revokeAll(); if (row.provider) row.provider.key = ''; } sessions.revokeAll(); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
+        if (path === '/api/owner/revoke' && method === 'POST') { discovery.revokeAll(); guestInvites.rows.clear(); for (const row of sessions.rows.values()) { row.discovery?.revokeAll(); if (row.provider && !row.guest) row.provider.key = ''; } sessions.revokeAll(); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
         if (path === '/api/owner/diagnostics' && method === 'POST') {
           if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before checking again.', 429);
           const account = await activeProvider.account();
@@ -158,28 +203,41 @@ export function createApp({ env = process.env, provider, providerFactory, discov
       if (path.startsWith('/api/discover/')) {
         if (!catalogRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Please pause before checking more titles.', 429);
         let result;
-        if (path === '/api/discover/catalog' && method === 'GET') result = await activeDiscovery.catalog.search({ type: url.searchParams.get('type') || 'movie', q: url.searchParams.get('q') || '', skip: Number(url.searchParams.get('skip') || 0), genre: url.searchParams.get('genre') || '', feed: url.searchParams.get('feed') || 'popular' });
-        else if (path === '/api/discover/meta' && method === 'GET') result = { meta: await activeDiscovery.catalog.meta(url.searchParams.get('type'), url.searchParams.get('id')) };
-        else if (path === '/api/discover/lookup' && method === 'GET') {
+        if (path === '/api/discover/catalog' && method === 'GET') {
+          if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'This temporary link is limited to the shared title.', 403);
+          result = await activeDiscovery.catalog.search({ type: url.searchParams.get('type') || 'movie', q: url.searchParams.get('q') || '', skip: Number(url.searchParams.get('skip') || 0), genre: url.searchParams.get('genre') || '', feed: url.searchParams.get('feed') || 'popular' });
+        } else if (path === '/api/discover/meta' && method === 'GET') {
+          const target = { type: url.searchParams.get('type'), id: url.searchParams.get('id') };
+          if (!guestAllows(target)) throw new AppError('GUEST_FORBIDDEN', 'This temporary link is limited to the shared title.', 403);
+          result = { meta: await activeDiscovery.catalog.meta(target.type, target.id) };
+        } else if (path === '/api/discover/lookup' && method === 'GET') {
           const type = url.searchParams.get('type');
-          result = await sourceLookup.lookup({ type, id: url.searchParams.get('id'), ...(type === 'series' ? {
+          const target = { type, id: url.searchParams.get('id'), ...(type === 'series' ? {
             season: url.searchParams.has('season') ? Number(url.searchParams.get('season')) : undefined,
             episode: url.searchParams.has('episode') ? Number(url.searchParams.get('episode')) : undefined
-          } : {}) });
-        }
-        else if (path === '/api/discover/sources' && method === 'POST') result = await activeDiscovery.register(await discoveryBody(request), session.id);
-        else if (path === '/api/discover/prepare' && method === 'POST') {
-          if (!preparationRate.allow('household')) throw new AppError('SLOW_DOWN', 'Too many preparation requests. Check existing preparations before adding another.', 429);
+          } : {}) };
+          if (!guestAllows(target)) throw new AppError('GUEST_FORBIDDEN', 'This temporary link is limited to the shared title.', 403);
+          result = await sourceLookup.lookup(target);
+        } else if (path === '/api/discover/sources' && method === 'POST') {
+          const data = await discoveryBody(request);
+          if (!guestAllows(data.target)) throw new AppError('GUEST_FORBIDDEN', 'This temporary link is limited to the shared title.', 403);
+          result = await activeDiscovery.register(data, session.id);
+          rememberGuestVideos(result);
+        } else if (path === '/api/discover/prepare' && method === 'POST') {
+          if (!preparationRate.allow(session.guest ? session.id : 'household')) throw new AppError('SLOW_DOWN', 'Too many preparation requests. Check existing preparations before adding another.', 429);
           const data = await discoveryBody(request);
           result = await activeDiscovery.prepare(data.source, session.id, data.onlyCached === true);
+          rememberGuestVideos(result);
         } else if (path === '/api/discover/status' && method === 'GET') {
           const selected = url.searchParams.get('file'); if (selected) parseVideoId(selected);
           result = await activeDiscovery.status(url.searchParams.get('source'), session.id, selected);
+          rememberGuestVideos(result);
         } else throw new AppError('NOT_FOUND', 'This catalog action is not available.', 404);
         if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
         return json(response, 200, result);
       }
       if (path === '/api/library' && method === 'GET') {
+        if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'This temporary link does not include access to the TorBox library.', 403);
         if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before refreshing again.', 429);
         return json(response, 200, await activeProvider.list(url.searchParams.get('kind') || 'torrents', Number(url.searchParams.get('offset') || 0), url.searchParams.get('refresh') === '1'));
       }
@@ -188,18 +246,21 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         const data = await body(request);
         if (!validViewer(data.viewer)) throw new AppError('BAD_VIEWER', 'Choose a viewer first.', 400);
         parseVideoId(data.videoId);
-        const intent = progress.beginIntent(data.viewer);
+        if (session.guest && !session.allowedVideos?.has(data.videoId)) throw new AppError('GUEST_FORBIDDEN', 'This file was not selected through the shared title.', 403);
+        const progressViewer = session.guest ? 'guest:' + session.id : data.viewer;
+        const intent = progress.beginIntent(progressViewer);
         const stream = await activeProvider.resolveForRelay(data.videoId);
-        if (!progress.isCurrent(data.viewer, intent)) throw new AppError('PLAYBACK_SUPERSEDED', 'A newer playback request replaced this one.', 409);
+        if (!progress.isCurrent(progressViewer, intent)) throw new AppError('PLAYBACK_SUPERSEDED', 'A newer playback request replaced this one.', 409);
         if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
-        const lease = progress.start(data.viewer, data.videoId, { reset: data.startOver === true, sessionId: session.id });
+        const lease = progress.start(progressViewer, data.videoId, { reset: data.startOver === true, sessionId: session.id });
         return json(response, 200, { file: stream.file, mediaUrl: stream.upstreamUrl, delivery: 'direct', conversion: false, exposesTorBoxToken: true, ...lease });
       }
       if (path === '/api/progress' && method === 'PUT') {
         if (!progressRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Progress is being saved too frequently.', 429);
         const data = await body(request);
         if (!validViewer(data.viewer)) throw new AppError('BAD_VIEWER', 'Choose a viewer first.', 400);
-        return json(response, 200, { saved: progress.write(data.viewer, data, session.id) });
+        const progressViewer = session.guest ? 'guest:' + session.id : data.viewer;
+        return json(response, 200, { saved: progress.write(progressViewer, data, session.id) });
       }
       throw new AppError('NOT_FOUND', 'This action is not available in this player.', 404);
     } catch (error) {
@@ -210,10 +271,10 @@ export function createApp({ env = process.env, provider, providerFactory, discov
     }
   });
   server.requestTimeout = 25000; server.headersTimeout = 15000; server.keepAliveTimeout = 5000;
-  return { server, sessions, progress, discovery, sourceLookup };
+  return { server, sessions, progress, discovery, sourceLookup, guestInvites };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.8.1-key-clone' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.9.0-key-clone' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }
