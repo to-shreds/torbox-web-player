@@ -56,7 +56,7 @@ test('Recently Played is individually removable with confirmation and no clear-a
     readFile(new URL('../public/app.js',import.meta.url),'utf8'),
     readFile(new URL('../public/index.html',import.meta.url),'utf8')
   ]);
-  assert.ok(app.includes("className = 'recent-remove'"));
+  assert.ok(app.includes("className='recent-remove'"));
   assert.ok(app.includes('Remove "'));
   assert.ok(app.includes('removeRecent(item.key)'));
   assert.ok(!html.includes('id="clear-recent"'));
