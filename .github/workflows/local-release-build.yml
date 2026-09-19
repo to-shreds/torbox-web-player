@@ -41,8 +41,10 @@ jobs:
         run: |
           mkdir -p .release-browser
           npm install --prefix .release-browser --ignore-scripts --no-audit --no-fund playwright@1.56.1
-          .release-browser/node_modules/.bin/playwright install --with-deps chromium firefox webkit
+          .release-browser/node_modules/.bin/playwright install --with-deps chromium firefox webkit > .release-browser/install.log 2>&1 || { tail -n 60 .release-browser/install.log; exit 1; }
+          sudo apt-get install -y --no-install-recommends ffmpeg >> .release-browser/install.log 2>&1 || { tail -n 60 .release-browser/install.log; exit 1; }
           ffmpeg -hide_banner -loglevel error -y -f lavfi -i testsrc=size=320x180:rate=24 -f lavfi -i anullsrc=r=44100:cl=stereo -t 4 -c:v libx264 -pix_fmt yuv420p -c:a aac -movflags +faststart .release-browser/fixture.mp4
+          echo "All three browser engines and H.264/AAC fixture are ready."
       - name: Run browser acceptance
         run: node tools/browser-local-acceptance.mjs
       - name: Upload browser evidence
