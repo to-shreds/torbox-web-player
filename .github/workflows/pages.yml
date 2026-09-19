@@ -1,10 +1,11 @@
 name: Deploy frontends to GitHub Pages
 on:
   push:
-    branches: [main, browser-key-clone]
+    branches: [main]
     paths:
       - 'public/**'
       - '.github/workflows/pages.yml'
+      - '.github/clone-revision'
   workflow_dispatch:
 permissions:
   contents: read
