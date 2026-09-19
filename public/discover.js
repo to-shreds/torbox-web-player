@@ -1,4 +1,3 @@
-import { loadPublicSources } from './source-client.js';
 import { getSettings, updateSettings } from './settings.js';
 import { listRecent, formatResumeTime } from './history.js';
 import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js';
@@ -196,7 +195,8 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
 
   async function ensureService(){ if(typeof guard==='function') await guard(); }
   async function registeredSources(target, signal){
-    const sources=await loadPublicSources(target,{signal});if(!sources.length)throw new Error('No source found.');
+    const params=new URLSearchParams({type:target.type,id:target.id});if(target.type==='series'){params.set('season',target.season);params.set('episode',target.episode);}
+    const lookup=await api(`/api/discover/lookup?${params}`,{signal:signal?AbortSignal.any([signal,AbortSignal.timeout(45000)]):AbortSignal.timeout(45000)}),sources=Array.isArray(lookup?.sources)?lookup.sources:[];if(!sources.length)throw new Error('No source found.');
     const result=await api('/api/discover/sources',{method:'POST',data:{target,sources},signal:signal?AbortSignal.any([signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000)});
     if(!result.sources?.length)throw new Error('No supported source found.');return {...result,sources:applySourceMemory(target,result.sources)};
   }
