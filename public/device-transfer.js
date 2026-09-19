@@ -62,6 +62,8 @@ export function applyTransferredState(state,store=storage()){
     if(!allowed.has(key))throw new Error('The transfer package contains unsupported setup data.');
     const value=normalizeJsonValue(key,raw);total+=value.length;if(total>MAX_STATE_CHARS)throw new Error('The transfer package is too large.');staged.push([key,value]);
   }
+  const imported=new Set(staged.map(([key])=>key));
+  for(const key of TRANSFER_STORAGE_KEYS)if(!imported.has(key))store.removeItem(key);
   for(const [key,value] of staged)store.setItem(key,value);
   return staged.length;
 }

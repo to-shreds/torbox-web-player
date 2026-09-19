@@ -22,8 +22,12 @@ test('setup transfer encrypts credential and portable state but leaves device so
   const payload=await decryptEncryptedTransfer(created.code,created.envelope,{cryptoObj:webcrypto});
   assert.equal(payload.apiKey,apiKey);assert.equal(payload.createdAt,1234);assert.equal(payload.state['tw-viewer'],'viewer-2');
   assert.equal(payload.state['torbox-source-memory-v1'],undefined);
-  const target=memoryStore();assert.ok(applyTransferredState(payload.state,target)>0);
-  assert.equal(target.getItem('tw-viewer'),'viewer-2');assert.equal(target.getItem('torbox-source-memory-v1'),null);
+  const target=memoryStore({'torbox-watchlist-v1':JSON.stringify({'viewer-1':[{id:'stale'}]}),'torbox-source-memory-v1':JSON.stringify({titles:{keepDeviceLearning:true}})});
+  assert.ok(applyTransferredState(payload.state,target)>0);
+  assert.equal(target.getItem('tw-viewer'),'viewer-2');assert.equal(target.getItem('torbox-source-memory-v1'),JSON.stringify({titles:{keepDeviceLearning:true}}));
+  const sparse=memoryStore({'torbox-watchlist-v1':'{}','torbox-recent-v1':'[]'});
+  applyTransferredState({'tw-viewer':'viewer-1'},sparse);
+  assert.equal(sparse.getItem('torbox-watchlist-v1'),null);assert.equal(sparse.getItem('torbox-recent-v1'),null);
 });
 
 test('wrong transfer code cannot decrypt a package',async()=>{
