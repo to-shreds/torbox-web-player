@@ -1,6 +1,8 @@
-const DEFAULT_API_ORIGIN = 'https://torbox-web-player.onrender.com';
+const DEFAULT_API_ORIGIN = 'https://torbox-web-player-key.onrender.com';
 const browser = typeof location !== 'undefined';
 const configured = typeof document !== 'undefined' ? document.querySelector('meta[name="api-origin"]')?.content?.trim() : '';
+export const RUNTIME_MODE = typeof document !== 'undefined' ? (document.querySelector('meta[name="runtime-mode"]')?.content?.trim() || 'backend') : 'backend';
+export const isDirectRuntime = () => RUNTIME_MODE === 'direct';
 export const API_ORIGIN = new URL(configured || (browser ? location.origin : DEFAULT_API_ORIGIN), DEFAULT_API_ORIGIN).origin;
 const SESSION_KEY = 'torbox-web-session';
 export const apiUrl = path => browser ? new URL(path, API_ORIGIN).href : path;

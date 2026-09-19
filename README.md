@@ -1,63 +1,68 @@
-# TorBox Web Player
+# TorBox Player
 
-Private household, catalog-first browser player. **Version 0.4.2 uses direct TorBox video delivery only. GitHub Pages hosts the UI, Render handles control/API work, and movie/episode bytes never pass through Render.** It remains a preview, not a fully verified replacement for Stremio. CarStream and unrelated projects are unchanged.
+Current version: **2.0.0**
 
-## Hosting split
+Canonical frontend: `https://to-shreds.github.io/torbox-web-player/`
 
-The files in `public/` are the complete static frontend. GitHub Pages publishes only that directory. The frontend contains no TorBox API key and points to the Render backend at `https://torbox-web-player.onrender.com`. Render is configured to accept browser API requests from `https://to-shreds.github.io` plus its own fallback frontend.
+`/direct/` redirects to that same player. `/key/` remains the pinned v1.1 Render-backed fallback. The original household-password prototype is retained in Git history and the `legacy-household-2026-09-19` branch, not served as the primary product.
 
-Cross-host API login uses a 256-bit opaque session bearer kept in browser `sessionStorage`; Render's existing SameSite cookie remains a fallback for the Render-hosted copy. GitHub Pages does not depend on third-party cookies. API mutations from bearer sessions still require the approved frontend Origin. The authenticated playback response intentionally returns TorBox's temporary CDN URL directly to the signed-in browser. That URL contains TorBox token/key material; this is an explicit private-household tradeoff to keep all video bandwidth off Render.
+## What runs where
 
-The GitHub Pages site is live at `https://to-shreds.github.io/torbox-web-player/`. The workflow at `.github/workflows/pages.yml` publishes only `public/`; the Render-hosted frontend remains available as a fallback.
+The primary product is a static browser application. Cinemeta metadata, source discovery, normalization, ranking, playback selection, settings, Continue Watching, My List, parental limits, and source learning run in the user's browser. Video streams directly from TorBox's CDN to the browser.
 
-## Current experience
+Only the required TorBox API operations use a narrow stateless bridge: Render first, Cloudflare backup. Both are configured in `public/relay-config.json`. The bridges receive the user's TorBox credential for each request. They do not provide the player with a database, cloud profile, or shared history. Neither bridge relays the video.
 
-Sign in to Discover, browse movie or show posters, search Cinemeta's broader catalog, and open a title. Shows have a season selector and numerically ordered episodes, including Specials where supplied. Search text stays in place when switching to the secondary My TorBox files tab. A title does not need to be in the TorBox account to appear in Discover.
+A fast primary-read timeout allows fallback without subjecting the backup and write operations to the same two-second deadline. An upstream TorBox rate-limit response is not treated as permission to bypass the account's quota by switching hosts. Ordinary authentication/validation errors do not fail over. An ambiguous torrent-create failure is reconciled against the account before replay; this reduces duplicate requests but is not a provider-supported exactly-once guarantee.
 
-The browser requests sources from the authenticated `/api/discover/lookup` route on this website. The server queries Zilean's public torrent metadata index by exact IMDb ID and season/episode. The browser no longer contacts Torrentio or another external source provider. Source results are bounded, normalized and checked against TorBox's cache through the existing server-side adapter. Choose Play for a cached candidate or Prepare for another candidate; Other versions remains available. Searching, browsing and availability checks never add torrents.
+The working `/key/` backend is still deployed from `browser-key-clone`. Do not repoint or delete that Render service when publishing the static main player. Its stateless bridge is also used by the new player. Cloudflare deployment uses the already-existing Arcade GitHub Actions secrets; never commit those secrets or a real TorBox API key.
 
-Preparation checks the account by hash before creation, coalesces concurrent same-hash requests and stops automatic retries after an uncertain response. The returned torrent identity and episode are checked. Ambiguous files require explicit selection; an index release title is not assumed to be a filename or TorBox file ID. The authenticated player receives the temporary TorBox CDN URL directly. There is no Render media endpoint, ticket, proxy, or video-relay fallback.
+## Simple by default
 
-**This version does not transcode or convert files.** Source ranking now gives H.264 + AAC releases a large priority boost, treats Dolby Digital / E-AC-3 / DTS / TrueHD as possible silent-audio risks in Chrome, and does not auto-start a release flagged with those audio formats. The UI warns before a risky source and offers Play anyway. This substantially improves the default choice but still does not guarantee that every release's metadata matches its actual tracks.
+First launch asks only for the user's own TorBox API key. Remembering it is optional and uses the existing encrypted IndexedDB vault. Source selection is automatic. Full mode in Settings exposes technical controls without cluttering the default experience.
 
-## Provider contracts and privacy
+Existing features include focused search with Search/Enter keyboard dismissal, Continue Watching with configurable resume rewind, My List, Next Up, auto-next, source recovery, per-title quality, data-saving source preferences, audio/source feedback, sleep timer, Still Watching, and per-viewer Kid Mode with Parent PIN and time/episode/movie limits.
 
-Cinemeta supplies catalog metadata, not proof of video availability. Its manifest is https://v3-cinemeta.strem.io/manifest.json. No additional metadata key is required. Poster requests remain restricted to the configured HTTPS image hosts.
+Parental controls are local application controls, not device management. Clearing browser data or using another unrestricted browser can defeat them. Local encryption does not protect credentials against malicious scripts running on this same origin.
 
-The current source endpoint is the public Zilean instance at `https://zileanfortheweebs.midnightignite.me/dmm/filtered`. This instance is identified by the maintained AIOStreams configuration; Zilean's primary API defines this endpoint as anonymous GET search. References and measured results are in `docs/SOURCE-LOOKUP-0.3.1.md`.
+## Backendless setup transfer
 
-The index receives only public title identifiers and the server's network address. The source adapter has no TorBox-key or household-cookie input. Requests use a fixed destination, no credentials, no redirects, bounded responses, coalescing, short failure caching and rate-limit cooldowns. The GitHub-hosted frontend's browser connections are restricted to the Render backend; source-provider calls remain server-side. There is no arbitrary URL source proxy or fallback that circumvents a provider refusal.
+Open **Settings → Sync & devices → Transfer this setup**. The receiver can use **Receive setup** in Settings or the small link on the connection screen. Transfer is not a mandatory onboarding step.
 
-Catalog lookup, source lookup, TorBox cache checking, preparation and media delivery remain distinct. An HTTP error or malformed source response does not become a successful empty result. The upstream Zilean implementation itself can return an empty list after an internal failure, so an empty provider response cannot prove universal absence of sources. No provider guarantees every title is indexed.
+Only these categories are copied:
 
-## Verification
+- TorBox API credential.
+- Ordinary settings, encoded as differences from defaults.
+- Continue Watching/recent playback IDs, episode identifiers, positions, durations, completion state, and ordering.
+- My List IDs, preserving the existing two viewer lists.
 
-The replacement's direct Render-hosted provider check returned 63 movie rows and 140 episode rows, all with matching IMDb IDs and valid torrent hashes. A subsequent test ran the actual frontend source function against the application's authenticated routes inside Render. It returned 40 normalized candidates for each selection, registered all of them, and confirmed 22 movie candidates and 24 episode candidates cached in TorBox, with zero unknown cache results. It added no torrents and fetched no video.
+The format deliberately excludes Parent PIN/verifier, Kid Mode configuration, allowances/usage, selected viewer, search history, learned source/audio compatibility, relay configuration, source URLs, posters, titles, and descriptions. Metadata is re-fetched by ID after import. The receiver's existing parental controls remain untouched; a new device starts without inherited parental controls. Imports on a PIN-protected destination require its existing PIN.
 
-Twenty-seven source adapter/client tests remain in the suite. The v0.4.2 Render build registered 143 tests: 138 passed, zero failed, and five optional live checks were skipped. Direct-delivery regressions verify that authenticated playback returns a TorBox CDN URL, that GitHub Pages receives the same direct URL, and that Render's `/media` path is gone and returns 404. See `docs/DIRECT-PLAYBACK-0.4.2.md` and ProjectStatus for deployment status.
+The package uses a compact versioned tuple format and lossless DEFLATE compression where available. Small packages become a single URL QR. Larger ones automatically use looping multipart QR, decoded by the receiver's in-page camera scanner. The receiver collects unique frames in any order, ignores duplicates, rejects mixed transfers, and verifies the assembled payload. A normal camera app cannot assemble multipart QR: open this player's Receive setup screen for that mode.
 
-The v0.3.0 benchmark remains documented in `docs/CATALOG-0.3.0.md`: a separate earlier test added one cached public Big Buck Bunny sample not previously in the account and verified preparation, media transfer and API resume state. That was not real target-device playback. The source-fix turn made no additions.
+A local `.twsetup` file and private transfer link are always available. File creation, QR generation, camera decoding, payload validation, and import run locally. No transfer package is uploaded to Render, Cloudflare, a QR-generation service, or any database. Camera frames stay in the page; camera tracks stop when the dialog closes or the page is hidden.
 
-Jon confirmed picture and sound on Android Chrome before the direct-delivery switch. The H.264/AAC source preference remains in place. Direct CDN playback now needs a quick device retest because the transport path changed. No codec conversion is claimed. Existing catalog UI, preparation, progress protections and authentication are preserved; the media relay is removed.
+### Transfer security
 
-## Setup and deployment
+A self-contained QR/link/file without a password is a bearer credential. Anyone who photographs, copies, or receives it can import the account. Compression and an integrity digest do not make it confidential. It is not one-time, has no enforced expiry, and cannot be revoked independently of the underlying API key. Do not publish one or paste it into diagnostic reports.
 
-Existing credentials require no changes. For a new service, configure `HOUSEHOLD_PASSWORD_HASH` and `TORBOX_API_KEY` directly in Render; `/setup` can generate a salted hash locally. Never commit real passwords, hashes, keys, cookies or private media URLs.
+An optional transfer password (10–200 characters) encrypts the compressed payload using AES-GCM, a random salt/IV, and PBKDF2-SHA-256 at 210,000 iterations. Send the password separately. It is not the Parent PIN. A password is recommended for sending a file or link rather than scanning between trusted nearby devices.
 
-Build: `npm ci --ignore-scripts --no-audit --no-fund && npm run check && npm test`.
+Transfer URL data stays in the fragment and is removed immediately by the receiving page. Browser history, screenshots, clipboard, extensions, and whoever transports a file are still part of the trust boundary. After explicit confirmation, the receiver validates the imported credential through the normal TorBox bridge before replacing the three portable storage records. Save failure restores the prior portable state and remembered key where browser storage remains writable.
 
-Start: `npm start`. Node 24 is selected by `.node-version`. `/healthz` reports v0.4.2. The package remains dependency-free.
+The source is not signed out or erased. Later changes do not synchronize. Ongoing cloud sync and additional debrid providers are not implemented by this release.
 
-Set `FRONTEND_ORIGINS=https://to-shreds.github.io` in Render for the GitHub Pages project site. The value is an origin only, not the repository path. The public frontend's API destination is deliberately non-secret and stored in an `api-origin` meta tag.
+## Browser state and old addresses
 
-Use `SOURCE_PROVIDER=zilean`. Keep `SOURCE_ACCESS_CHECK=0`, `TORBOX_VERIFY_ON_START=0`, `CATALOG_CONTRACT_CHECK=0` and `CATALOG_LIVE_CHECK=0` for normal operation. The optional legacy catalog test may add a cached public sample when explicitly enabled; the new source pipeline test is read-only.
+Root, `/direct/`, and `/key/` are paths on the same origin. Existing local settings/history/vault keys are retained; moving to the main address does not intentionally wipe them. These paths are not separate security or storage boundaries. The main service worker handles only an explicit static-asset allowlist and does not intercept `/key/`, arbitrary navigation, APIs, or video. It never clears other projects' caches.
 
-## Storage, costs and remaining scope
+## Optional features
 
-Sessions, caches, source tickets, pending-operation guards and progress are process memory, not durable across deployments, restarts or service sleep. Account-hash reconciliation does not replace a durable exactly-once preparation record. Progress remains tied to provider file IDs.
+The old server-backed setup transfer, temporary guest sharing, and Drive-sharing experiment are not active in the main browser-local runtime. The previous `/key/` player remains available for legacy optional behavior. App installation, status checks, source-learning reset, and search-history reset remain available in the main Settings screen.
 
-Video travels TorBox CDN -> browser directly. Render is not a video proxy, so ordinary movie/episode bytes do not count as Render outbound bandwidth. The temporary TorBox CDN URL/token is visible to the signed-in browser by design. No paid service, database, persistent disk, new provider secret or subscription upgrade was added.
+## Development and verification
 
-Still required for the full specification: target-device playback checks, a compatible conversion fallback, persistent profiles/preferences/watchlists/progress, Continue Watching, durable pending preparations, manual title corrections, automatic next, migrations and backup/restore.
+Source on `main` controls the primary product. The browser-local candidate is verified before promotion. `browser-key-clone` controls the frozen fallback backend/frontend. `browser-direct-experiment` is a historical integration branch, not a second independently maintained UI.
 
-Implementation source here is authoritative. Readiness and next steps are in `to-shreds/ProjectStatus`, `projects/torbox-web-player/STATUS.md`. Earlier reports remain history; their Torrentio, original setup and same-origin-only descriptions do not control this version.
+Run `npm ci --ignore-scripts`, `npm run check`, and `npm test`. QR encoder/decoder sources and licenses are vendored in `public/vendor/`; the running app does not depend on an external script CDN. Browser acceptance exercises Chromium, Firefox, and WebKit using synthetic metadata, a fixture credential, and a generated H.264/AAC clip. It tests full static hosting, source URLs, primary-bridge failure, keyboard dismissal, QR decode/import, encrypted-file import, metadata restoration, and old-address migration. These simulations are not a claim of physical Android/iPhone camera or live TorBox playback acceptance.
+
+The six optional live integration tests remain opt-in. No real credentials are needed for normal CI. Build/readiness and remaining physical-device acceptance are recorded in `to-shreds/ProjectStatus/projects/torbox-web-player-browser-key/STATUS.md`.

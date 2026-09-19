@@ -41,10 +41,13 @@ test('bearer mutations require the approved frontend but not a third-party cooki
   assert.equal((await call('/api/playback',{method:'POST',token,data:{viewer:'viewer-1',videoId:'torrents:1:0'}})).status,200);
   assert.equal((await call('/api/playback',{method:'POST',token,origin:'https://evil.test',data:{viewer:'viewer-1',videoId:'torrents:1:0'}})).status,403);
 });
-test('published HTML uses project-relative assets and the public Render API origin', async t => {
+test('published direct HTML uses project-relative assets and permits only the Render bridge, not the old API origin', async t => {
   const { call }=await fixture(t);
   const html=await (await call('/')).text();
-  assert.ok(html.includes('name="api-origin" content="https://torbox-web-player.onrender.com"'));
+  assert.ok(html.includes('name="runtime-mode" content="direct"'));
+  assert.ok(!html.includes('name="api-origin"'));
+  assert.ok(html.includes('https://torbox-web-player-key.onrender.com'));
+  assert.ok(html.includes('https://torbox-web-player-relay.jonathanjablon.workers.dev'));
   assert.ok(html.includes('href="./style.css"')); assert.ok(html.includes('src="./app.js"'));
   assert.ok(!html.includes('src="/app.js"')); assert.ok(!html.includes('href="/style.css"'));
 });

@@ -98,3 +98,35 @@ test('progress validation rejects NaN, negative times, unknown duration and over
 test('new playback intents invalidate older async requests only for that viewer', () => {
   const store = new ProgressStore(), a = store.beginIntent('viewer-1'), b = store.beginIntent('viewer-2'); assert.ok(store.isCurrent('viewer-1', a)); store.beginIntent('viewer-1'); assert.equal(store.isCurrent('viewer-1', a), false); assert.ok(store.isCurrent('viewer-2', b));
 });
+
+test('guest resolver follows only the TorBox redirect metadata and returns a key-free CDN URL', async () => {
+  const key='tb-master-secret';
+  const item={id:7,name:'Fixture',download_finished:true,download_present:true,files:[{id:3,short_name:'Fixture.mp4',size:1000,mimetype:'video/mp4'}]};
+  const seen=[];
+  const provider=new TorBox({key,fetchFn:async (url,opts)=>{
+    seen.push({url:String(url),redirect:opts.redirect});
+    const u=new URL(url);
+    if(u.pathname.endsWith('/torrents/mylist')) return new Response(JSON.stringify({success:true,data:item}),{status:200,headers:{'content-type':'application/json'}});
+    if(u.pathname.endsWith('/torrents/requestdl')) {
+      assert.equal(u.searchParams.get('token'),key);
+      assert.equal(u.searchParams.get('redirect'),'true');
+      assert.equal(opts.redirect,'manual');
+      return new Response(null,{status:302,headers:{location:'https://store.tb-cdn.io/file?presigned=abc123'}});
+    }
+    throw new Error('unexpected request');
+  }});
+  const result=await provider.resolveGuest('torrents:7:3');
+  assert.equal(result.url,'https://store.tb-cdn.io/file?presigned=abc123');
+  assert.ok(!result.url.includes(key));
+  assert.equal(seen.length,2);
+});
+test('guest resolver fails closed if TorBox redirect target contains the master key', async () => {
+  const key='tb-master-secret';
+  const item={id:7,name:'Fixture',download_finished:true,download_present:true,files:[{id:3,short_name:'Fixture.mp4',size:1000,mimetype:'video/mp4'}]};
+  const provider=new TorBox({key,fetchFn:async url=>{
+    const u=new URL(url);
+    if(u.pathname.endsWith('/torrents/mylist')) return new Response(JSON.stringify({success:true,data:item}),{status:200,headers:{'content-type':'application/json'}});
+    return new Response(null,{status:302,headers:{location:'https://store.tb-cdn.io/file?token='+key}});
+  }});
+  await assert.rejects(provider.resolveGuest('torrents:7:3'),e=>e.code==='UNSAFE_PROVIDER_URL');
+});

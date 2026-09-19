@@ -1,0 +1,25 @@
+name: Browser-key clone CI
+
+on:
+  push:
+    branches: [browser-key-clone]
+    paths-ignore:
+      - '.github/workflows/browser-only-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: browser-key-clone
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run check
+      - run: npm test

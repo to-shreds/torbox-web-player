@@ -1,0 +1,34 @@
+name: MediaFusion Torznab anonymous probe
+on:
+  push:
+    branches: [browser-key-clone]
+    paths: ['.github/workflows/mediafusion-torznab-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe public Torznab searches
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base='https://mediafusion.elfhosted.com/torznab';
+          const qs=[
+            ['movie',new URLSearchParams({t:'movie',imdbid:'tt1160419',limit:'100'})],
+            ['episode',new URLSearchParams({t:'tvsearch',imdbid:'tt0903747',season:'1',ep:'1',limit:'100'})]
+          ];
+          for(const [label,p] of qs){
+            const out={label};
+            try{
+              const r=await fetch(base+'?'+p,{headers:{Accept:'application/rss+xml, application/xml, text/xml'},redirect:'manual',signal:AbortSignal.timeout(30000)});
+              out.status=r.status;out.type=r.headers.get('content-type')?.split(';')[0]||'';
+              const text=await r.text();out.bytes=text.length;
+              out.items=(text.match(/<item(?:\s|>)/g)||[]).length;
+              out.hashes=(text.match(/name=["']infohash["'][^>]*value=["'][a-f0-9]{40}["']/ig)||[]).length;
+              out.seeders=(text.match(/name=["']seeders["'][^>]*value=["'][0-9]+["']/ig)||[]).length;
+            }catch(e){out.error=e?.name||'probe_failed';}
+            console.log(JSON.stringify(out));
+          }
+          NODE

@@ -1,0 +1,1 @@
+(async()=>{const target=new URL('../',location.href);target.search=location.search;target.hash=location.hash;try{const r=await navigator.serviceWorker?.getRegistration(location.href);if(r&&new URL(r.scope).pathname===location.pathname)await r.unregister();}catch{}location.replace(target.href);})();

@@ -1,0 +1,70 @@
+name: Prepare and verify browser-local release
+on:
+  push:
+    branches: [browser-local-release]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: browser-local-release-candidate
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Vendor pinned QR components locally
+        run: |
+          mkdir -p .release-vendor public/vendor
+          printf '%s\n' '{"private":true,"dependencies":{"qrcode-generator":"1.4.4","jsqr":"1.4.0"}}' > .release-vendor/package.json
+          npm install --prefix .release-vendor --ignore-scripts --no-audit --no-fund
+          cp .release-vendor/node_modules/qrcode-generator/qrcode.js public/vendor/qrcode.js
+          cp .release-vendor/node_modules/jsqr/dist/jsQR.js public/vendor/jsqr.js
+          test -s public/vendor/qrcode-LICENSE.txt
+          cp .release-vendor/node_modules/jsqr/LICENSE public/vendor/jsqr-LICENSE.txt
+          cp .release-vendor/package-lock.json tools/vendor-package-lock.json
+          sha256sum public/vendor/*.js
+      - name: Materialize narrow source migration
+        run: node tools/prepare-browser-local.mjs
+      - name: Verify all unit and integration tests
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run check
+          npm test
+      - name: Install browser test harness and licensed-codec browser
+        run: |
+          mkdir -p .release-browser
+          npm install --prefix .release-browser --ignore-scripts --no-audit --no-fund playwright@1.56.1
+          .release-browser/node_modules/.bin/playwright install --with-deps firefox webkit > .release-browser/install.log 2>&1 || { tail -n 60 .release-browser/install.log; exit 1; }
+          .release-browser/node_modules/.bin/playwright install chrome >> .release-browser/install.log 2>&1 || { tail -n 60 .release-browser/install.log; exit 1; }
+          sudo apt-get install -y --no-install-recommends ffmpeg >> .release-browser/install.log 2>&1 || { tail -n 60 .release-browser/install.log; exit 1; }
+          ffmpeg -hide_banner -loglevel error -y -f lavfi -i testsrc=size=320x180:rate=24 -f lavfi -i anullsrc=r=44100:cl=stereo -t 4 -c:v libx264 -pix_fmt yuv420p -c:a aac -movflags +faststart .release-browser/fixture.mp4
+          echo "Chrome, Firefox, WebKit and H.264/AAC fixture are ready."
+      - name: Run browser acceptance
+        run: node tools/browser-local-acceptance.mjs
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-local-acceptance
+          path: |
+            .release-results/*.png
+            .release-results/acceptance.json
+          if-no-files-found: ignore
+          include-hidden-files: true
+      - name: Persist only the tested generated source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public server.mjs entry.mjs package.json package-lock.json test tools/vendor-package-lock.json tools/.browser-local-prepared
+          if ! git diff --cached --quiet; then
+            git commit -m "Materialize verified browser-local v2 source and vendored QR libraries"
+          fi
+          git push origin HEAD:browser-local-release
+          echo "VERIFIED_SOURCE=$(git rev-parse HEAD)"

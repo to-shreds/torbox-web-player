@@ -1,12 +1,7 @@
-name: Deploy frontends to GitHub Pages
+name: Verify and publish TorBox Player
 on:
   push:
     branches: [main]
-    paths:
-      - 'public/**'
-      - '.github/workflows/pages.yml'
-      - '.github/clone-revision'
-      - '.github/direct-revision'
   workflow_dispatch:
 permissions:
   contents: read
@@ -17,39 +12,86 @@ concurrency:
   cancel-in-progress: true
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
-      - name: Checkout main player
+      - name: Checkout exact primary source
         uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.sha }}
           path: main-src
-      - name: Checkout browser-key clone
-        uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
         with:
-          ref: browser-key-clone
-          path: clone-src
-      - name: Checkout browser-direct experiment
-        uses: actions/checkout@v6
-        with:
-          ref: browser-direct-experiment
-          path: direct-src
-      - name: Assemble Pages site
-        shell: bash
+          node-version: '24'
+      - name: Verify primary source before publishing
+        working-directory: main-src
         run: |
-          mkdir -p site/key site/direct
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run check
+          npm test
+      - name: Checkout pinned v1.1 fallback
+        uses: actions/checkout@v6
+        with:
+          ref: d5dd3bd71ee2679178e66440c5240a80eaba41f2
+          path: fallback-src
+      - name: Assemble canonical site
+        shell: bash
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p site/key
           cp -a main-src/public/. site/
-          cp -a clone-src/public/. site/key/
-          cp -a direct-src/public/. site/direct/
+          cp -a fallback-src/public/. site/key/
+          touch site/.nojekyll
+          node - <<'NODE'
+          const fs=require('fs');
+          const pkg=JSON.parse(fs.readFileSync('main-src/package.json'));
+          const html=fs.readFileSync('site/index.html','utf8');
+          if(pkg.version!=='2.0.0'||!html.includes('id="portable-settings-group"')||html.includes('Household password'))throw Error('Wrong primary tree');
+          const fallback=fs.readFileSync('site/key/index.html','utf8');
+          if(!fallback.includes('<span class="tag">KEY</span>'))throw Error('Wrong fallback tree');
+          if(!fs.readFileSync('site/direct/redirect.js','utf8').includes('location.replace'))throw Error('Old direct address is not migrated');
+          fs.writeFileSync('site/version.json',JSON.stringify({version:pkg.version,source:process.env.RELEASE_SHA,runtime:'browser-local',fallback:'d5dd3bd71ee2679178e66440c5240a80eaba41f2'})+'\n');
+          NODE
+          cmp site/key/app.js fallback-src/public/app.js
+          cmp site/key/index.html fallback-src/public/index.html
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Upload combined frontend
+      - name: Upload verified site
         uses: actions/upload-pages-artifact@v4
         with:
           path: site
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify public version and primary assets
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json, os, time, urllib.request
+          base='https://to-shreds.github.io/torbox-web-player/'
+          sha=os.environ['RELEASE_SHA']
+          for attempt in range(12):
+              try:
+                  def get(name):
+                      with urllib.request.urlopen(base+name+'?release='+sha, timeout=15) as response:
+                          return response.read().decode('utf-8')
+                  version=json.loads(get('version.json'))
+                  assert version['source']==sha and version['runtime']=='browser-local'
+                  assert 'id="portable-settings-group"' in get('index.html')
+                  assert 'location.replace' in get('direct/redirect.js')
+                  assert '<span class="tag">KEY</span>' in get('key/index.html')
+                  assert 'encodePortableSetup' in get('portable-setup.js')
+                  print('LIVE_VERIFIED',json.dumps(version))
+                  break
+              except Exception as error:
+                  if attempt==11: raise
+                  print('Publication not yet visible:',type(error).__name__)
+                  time.sleep(5)
+          PY
