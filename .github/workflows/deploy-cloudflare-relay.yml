@@ -1,0 +1,50 @@
+name: Deploy Cloudflare backup relay
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: browser-direct-experiment
+          fetch-depth: 0
+
+      - name: Deploy Cloudflare Worker
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: relay/cloudflare
+          command: deploy
+
+      - name: Write deployed backup URL into browser config
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const url=(process.env.DEPLOYMENT_URL||'').trim().replace(/\/+$/,'');
+          if(!/^https:\/\/[A-Za-z0-9.-]+\.workers\.dev$/.test(url)) throw new Error('Cloudflare deployment URL was not recognized: '+url);
+          fs.writeFileSync('public/relay-config.json', JSON.stringify({
+            primary:'https://torbox-web-player-key.onrender.com',
+            secondary:url
+          }, null, 2)+'\n');
+          NODE
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/relay-config.json
+          git diff --cached --quiet || git commit -m "Configure Cloudflare backup relay"
+          git push origin HEAD:browser-direct-experiment
+
+      - name: Republish GitHub Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main
