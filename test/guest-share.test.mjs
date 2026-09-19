@@ -20,6 +20,7 @@ function fakeProvider(value){
     account:async()=>{if(value!==key) throw Object.assign(new Error('denied'),{code:'TORBOX_ACCESS_DENIED',status:502}); return {valid:true};},
     list:async()=>({files:[],stale:false}),
     resolveForRelay:async videoId=>({upstreamUrl:'https://store.tb-cdn.io/file?token='+value,file:{id:videoId}}),
+    resolve:async videoId=>({url:'https://store.tb-cdn.io/file?token=temporary-file-token',file:{id:videoId}}),
     request:async()=>[]
   };
 }
@@ -88,4 +89,15 @@ test('owner sign-out invalidates existing guest sessions and invitation links',a
   assert.equal((await call('/api/logout',{method:'POST',token:ownerToken,data:{}})).status,200);
   assert.equal((await call('/api/library',{token:guest})).status,401);
   assert.equal((await call('/api/guest/accept',{method:'POST',data:{token:invite.token}})).status,401);
+});
+
+test('guest playback uses the safe direct-link resolver rather than the owner direct resolver',async t=>{
+  const {call,sessions}=await fixture(t),ownerToken=await owner(call);
+  const invite=await (await call('/api/share/create',{method:'POST',token:ownerToken,data:{type:'series',id:show,hours:2}})).json();
+  const accepted=await (await call('/api/guest/accept',{method:'POST',data:{token:invite.token}})).json();
+  const row=sessions.read(accepted.sessionToken),videoId='torrents:7:3'; row.allowedVideos.add(videoId);
+  const playback=await call('/api/playback',{method:'POST',token:accepted.sessionToken,data:{viewer:'viewer-1',videoId}});
+  assert.equal(playback.status,200); const body=await playback.json();
+  assert.equal(body.guestSafeLink,true); assert.equal(body.mediaUrl,'https://store.tb-cdn.io/file?token=temporary-file-token');
+  assert.ok(!body.mediaUrl.includes(key));
 });
