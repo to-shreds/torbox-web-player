@@ -21,7 +21,8 @@ jobs:
           const providers = [
             ['comet','https://comet.elfhosted.com'],
             ['mediafusion','https://mediafusion.elfhosted.com'],
-            ['knightcrawler','https://knightcrawler.elfhosted.com']
+            ['knightcrawler','https://knightcrawler.elfhosted.com'],
+            ['stremthru-torz','https://stremthru.elfhosted.com/stremio/torz/eyJzdG9yZXMiOlt7ImMiOiJwMnAiLCJ0IjoiIn1dfQ==']
           ];
           const targets = [
             ['movie','tt1160419'],
@@ -34,6 +35,10 @@ jobs:
               try {
                 const r = await fetch(`${base}/stream/${type}/${id}.json`, { headers:{Accept:'application/json'}, redirect:'manual', signal:AbortSignal.timeout(30000) });
                 out.status=r.status; out.contentType=r.headers.get('content-type')?.split(';')[0]||'';
+                if (r.status >= 300 && r.status < 400) {
+                  const location=r.headers.get('location');
+                  try { const u=new URL(location, base); out.redirectOrigin=u.origin; out.redirectPath=u.pathname.slice(0,120); } catch {}
+                }
                 if (r.ok) {
                   const text=await r.text();
                   if (text.length > 5_000_000) throw new Error('oversize');
