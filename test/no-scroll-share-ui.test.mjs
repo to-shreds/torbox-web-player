@@ -13,7 +13,7 @@ test('mobile source chooser is paginated and non-scrolling',async()=>{
   assert.ok(css.includes(".source-table-wrap{overflow:hidden"));
 });
 
-test('owner Share buttons route to the Drive transfer test while guests do not get them',async()=>{
+test('owner Share buttons route to Drive while guests do not get them',async()=>{
   const [js,html]=await Promise.all([
     readFile(new URL('../public/discover.js',import.meta.url),'utf8'),
     readFile(new URL('../public/index.html',import.meta.url),'utf8')
@@ -25,18 +25,27 @@ test('owner Share buttons route to the Drive transfer test while guests do not g
   assert.ok(html.includes('Start Drive transfer'));
 });
 
-test('Drive test exposes timing, watch-only control, and permanent-delete controls',async()=>{
-  const [app,html,bridge]=await Promise.all([
+test('Drive test uses TorBox Google OAuth with one success-URL paste and no Apps Script setup',async()=>{
+  const [app,html]=await Promise.all([
     readFile(new URL('../public/app.js',import.meta.url),'utf8'),
-    readFile(new URL('../public/index.html',import.meta.url),'utf8'),
-    readFile(new URL('../drive-bridge/Code.gs',import.meta.url),'utf8')
+    readFile(new URL('../public/index.html',import.meta.url),'utf8')
   ]);
-  assert.ok(app.includes('TorBox → Drive'));
-  assert.ok(app.includes('playbackMs'));
+  assert.ok(app.includes('open-drive-oauth'));
+  assert.ok(app.includes('/api/drive/connect'));
+  assert.ok(html.includes('No Apps Script or Google Cloud setup'));
+  assert.ok(html.includes('id="drive-success-url"'));
   assert.ok(html.includes('disable Drive download/copy for viewers'));
   assert.ok(html.includes('Delete now'));
-  assert.ok(bridge.includes("method: 'delete'"));
-  assert.ok(bridge.includes("itemDownloadRestriction"));
-  assert.ok(bridge.includes("cleanupExpiredShares"));
-  assert.ok(bridge.includes("cleanupBridgeOrphans"));
+  assert.ok(!html.includes('script.new'));
+  assert.ok(!html.includes('drive-bridge'));
+});
+
+test('browser-key clone is discovery-only and does not display TorBox library',async()=>{
+  const [js,html]=await Promise.all([
+    readFile(new URL('../public/discover.js',import.meta.url),'utf8'),
+    readFile(new URL('../public/index.html',import.meta.url),'utf8')
+  ]);
+  for(const value of ['My files','library-panel','library-tab'])assert.ok(!html.includes(value));
+  assert.ok(!js.includes('openLibrary'));
+  assert.ok(!js.includes('loadLibrary'));
 });
