@@ -55,7 +55,7 @@ function createResolutionSelect(value = getResolution()) {
 }
 
 export function createDiscoveryUI({ api, play, loadLibrary }) {
-  let view='discover', active=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0;
+  let view='discover', active=false, guestMode=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0;
   let catalogAbort,titleAbort,sourceAbort,searchTimer,pollTimer,metas=[],nextSkip=null,currentMeta;
 
   function cancelSource(){++preparationGeneration;++sourceGeneration;sourceAbort?.abort();clearTimeout(pollTimer);}
@@ -97,6 +97,7 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
   function buildContext(meta,target,episodeName,resolution,source){
     return {title:meta?.name||'',poster:meta?.poster||'',episodeName:episodeName||'',resolution,current:{...target,name:episodeName||''},sourceResolution:source?.resolution||source?.quality||'',queue:target.type==='series'?episodeQueue(meta,target):[]};
   }
+  const closeTitleForPlayback = () => { if (!guestMode && $('title-dialog').open) $('title-dialog').close(); };
 
   async function registeredSources(target, signal){
     const sources=await loadPublicSources(target,{signal});if(!sources.length)throw new Error('No source found.');
@@ -130,7 +131,7 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
       message('detail-message',best.cached?'Opening cached source…':'Preparing recommended source…');
       const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
       const context=buildContext(meta,target,episodeName,resolution,best);
-      if($('source-dialog').open)$('source-dialog').close();if($('title-dialog').open)$('title-dialog').close();
+      if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
       await play(result.file,context);return true;
     }catch(e){message('detail-message',e.message,true);return false;}
     finally{if(trigger&&trigger.isConnected){trigger.disabled=false;trigger.textContent=original;}}
@@ -142,7 +143,7 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
 
   async function showTitle(meta){
     cancelTitle();currentMeta=null;const generation=titleGeneration;titleAbort=new AbortController();$('title-content').replaceChildren();$('episode-area').replaceChildren();
-    $('detail-title').textContent=meta.name;message('detail-message','Loading…');if(!$('title-dialog').open)$('title-dialog').showModal();
+    $('detail-title').textContent=meta.name;$('share-title').hidden=guestMode;message('detail-message','Loading…');if(!$('title-dialog').open)$('title-dialog').showModal();
     try{
       const data=await api(`/api/discover/meta?type=${meta.type}&id=${meta.id}`,{signal:AbortSignal.any([titleAbort.signal,AbortSignal.timeout(20000)])});
       if(generation!==titleGeneration||!$('title-dialog').open||!active)return;currentMeta=data.meta;
@@ -185,26 +186,41 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
     await findSources(meta,target,episodeName);
   }
 
-  function renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution){
-    area.replaceChildren(status);const controls=element('div','','source-controls');const label=element('label','Resolution');const select=createResolutionSelect(resolution);label.append(select);controls.append(label);area.append(controls);
+  function renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution,page=0){
+    area.replaceChildren(status);
+    const controls=element('div','','source-controls'),label=element('label','Resolution'),select=createResolutionSelect(resolution);label.append(select);controls.append(label);area.append(controls);
     const visible=filterSourcesByResolution(list,resolution);
-    if(!visible.length){area.append(element('p','No sources match this resolution.','source-note'));select.addEventListener('change',()=>renderSourceTable(meta,list,target,episodeName,generation,area,status,select.value));return;}
+    if(!visible.length){
+      area.append(element('p','No sources match this resolution.','source-note'));
+      select.addEventListener('change',()=>renderSourceTable(meta,list,target,episodeName,generation,area,status,select.value,0));
+      return;
+    }
     const best=recommendSource(visible,target.type,resolution),context=best?buildContext(meta,target,episodeName,resolution,best):null;
     if(best){
-      const box=element('section','','recommended');const copy=element('div','','recommended-copy');
-      copy.append(element('div','Recommended','recommended-kicker'),element('div',best.title,'recommended-title'),element('p',[best.cached?'Cached':'Not cached',qualityText(best),formatBytes(best.size)].join(' · '),'recommended-meta'));
-      box.append(copy,button(best.cached?'Play':'Prepare',async()=>{try{const result=await readyFile(best,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();if($('title-dialog').open)$('title-dialog').close();await play(result.file,context);}catch(e){status.textContent=e.message;status.classList.add('error');}},true));area.append(box);
+      const box=element('section','','recommended'),copy=element('div','','recommended-copy');
+      copy.append(element('div','Recommended','recommended-kicker'),element('div',best.title,'recommended-title'),element('p',[best.cached?'Cached':'Not cached',qualityText(best),formatBytes(best.size),Number.isSafeInteger(best.seeders)?best.seeders+' seeders':''].filter(Boolean).join(' · '),'recommended-meta'));
+      box.append(copy,button(best.cached?'Play':'Prepare',async()=>{try{const result=await readyFile(best,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();closeTitleForPlayback();await play(result.file,context);}catch(e){status.textContent=e.message;status.classList.add('error');}},true));area.append(box);
     }
-    const wrap=element('div','','source-table-wrap'),table=element('table','','source-table'),head=document.createElement('thead'),hr=document.createElement('tr');
-    for(const title of ['Filename','Size','Seeders','Quality','TorBox',''])hr.append(element('th',title));head.append(hr);table.append(head);const body=document.createElement('tbody');
-    for(const source of visible){
-      const row=document.createElement('tr');if(best?.id===source.id)row.className='recommended-row';
-      row.append(element('td',source.title,'filename'),element('td',formatBytes(source.size)),element('td',Number.isSafeInteger(source.seeders)?String(source.seeders):'—'),element('td',qualityText(source)),element('td',source.cached?'Cached':source.cached===false?'Not cached':'Unknown',source.cached?'cache-yes':'cache-no'));
-      const action=document.createElement('td');action.append(button(source.cached?'Play':'Prepare',async()=>{try{const result=await readyFile(source,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();if($('title-dialog').open)$('title-dialog').close();await play(result.file,buildContext(meta,target,episodeName,resolution,source));}catch(e){status.textContent=e.message;status.classList.add('error');}}));row.append(action);body.append(row);
+
+    const alternates=visible.filter(source=>source.id!==best?.id);
+    if(alternates.length){
+      const mobile=typeof matchMedia==='function'&&matchMedia('(max-width: 620px)').matches,pageSize=mobile?3:6,pages=Math.max(1,Math.ceil(alternates.length/pageSize)),safePage=Math.min(Math.max(0,page),pages-1);
+      const rows=alternates.slice(safePage*pageSize,(safePage+1)*pageSize);
+      const wrap=element('div','','source-table-wrap'),table=element('table','','source-table'),head=document.createElement('thead'),hr=document.createElement('tr');
+      for(const title of ['Filename','Size','Seeders','Quality','TorBox',''])hr.append(element('th',title));head.append(hr);table.append(head);const body=document.createElement('tbody');
+      for(const source of rows){
+        const row=document.createElement('tr'),nameCell=element('td','','filename');
+        nameCell.append(element('span',source.title,'source-title-cell'),element('small',[formatBytes(source.size),Number.isSafeInteger(source.seeders)?source.seeders+' seeders':'seeders —',qualityText(source),source.cached?'Cached':source.cached===false?'Not cached':'Cache ?'].join(' · '),'source-mobile-meta'));
+        row.append(nameCell,element('td',formatBytes(source.size)),element('td',Number.isSafeInteger(source.seeders)?String(source.seeders):'—'),element('td',qualityText(source)),element('td',source.cached?'Cached':source.cached===false?'Not cached':'Unknown',source.cached?'cache-yes':'cache-no'));
+        const action=document.createElement('td');action.append(button(source.cached?'Play':'Prepare',async()=>{try{const result=await readyFile(source,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();closeTitleForPlayback();await play(result.file,buildContext(meta,target,episodeName,resolution,source));}catch(e){status.textContent=e.message;status.classList.add('error');}}));row.append(action);body.append(row);
+      }
+      table.append(body);wrap.append(table);area.append(wrap);
+      if(pages>1){
+        const pager=element('nav','','source-pager'),prev=button('‹',()=>renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution,safePage-1)),next=button('›',()=>renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution,safePage+1));
+        prev.disabled=safePage===0;next.disabled=safePage===pages-1;pager.append(prev,element('span',`${safePage+1} / ${pages}`),next);area.append(pager);
+      }
     }
-    table.append(body);wrap.append(table);area.append(wrap);
-    if(visible.every(s=>s.seeders==null))area.append(element('p','Seeder counts are unavailable from the current index. Filename is the release name until TorBox resolves the internal file.','source-note'));
-    select.addEventListener('change',()=>{setResolution(select.value);renderSourceTable(meta,list,target,episodeName,generation,area,status,select.value);});
+    select.addEventListener('change',()=>{setResolution(select.value);renderSourceTable(meta,list,target,episodeName,generation,area,status,select.value,0);});
   }
 
   async function findSources(meta,target,episodeName=''){
@@ -255,6 +271,30 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
     }catch(e){message('catalog-message',e.message,true);return false;}
   }
 
+  async function openShare(){
+    if(guestMode||!currentMeta)return;
+    $('share-title-name').textContent=currentMeta.type==='series'?`Share all released episodes of ${currentMeta.name}`:`Share ${currentMeta.name}`;
+    $('share-result').hidden=true;$('share-link').value='';$('share-expiry').textContent='';
+    if(!$('share-dialog').open)$('share-dialog').showModal();
+  }
+  async function createShare(){
+    if(guestMode||!currentMeta)return;
+    const buttonEl=$('create-share');buttonEl.disabled=true;buttonEl.textContent='Creating…';
+    try{
+      const result=await api('/api/share/create',{method:'POST',data:{type:currentMeta.type,id:currentMeta.id,hours:Number($('share-duration').value)}});
+      const link=`${location.origin}${location.pathname}#guest=${result.token}`;
+      $('share-link').value=link;$('share-result').hidden=false;$('share-expiry').textContent=`Expires ${new Date(result.expiresAt).toLocaleString()}`;
+      $('native-share').hidden=typeof navigator.share!=='function';
+    }catch(e){$('share-expiry').textContent=e.message;$('share-result').hidden=false;}
+    finally{buttonEl.disabled=false;buttonEl.textContent='Create link';}
+  }
+  $('share-title').addEventListener('click',openShare);
+  $('close-share').addEventListener('click',()=>$('share-dialog').close());
+  $('create-share').addEventListener('click',createShare);
+  $('copy-share').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('share-link').value);$('share-expiry').textContent='Copied.';}catch{$('share-link').select();}});
+  $('native-share').addEventListener('click',async()=>{try{await navigator.share({title:currentMeta?.name||'Temporary access',url:$('share-link').value});}catch{}});
+  $('title-dialog').addEventListener('cancel',event=>{if(guestMode)event.preventDefault();});
+
   $('discover-tab').addEventListener('click',openDiscover);$('library-tab').addEventListener('click',openLibrary);
   for(const id of ['catalog-type','catalog-feed','catalog-genre'])$(id).addEventListener('change',()=>browse());
   $('catalog-more').addEventListener('click',()=>browse(true));$('catalog-retry').addEventListener('click',()=>browse());
@@ -263,7 +303,13 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
   $('close-source').addEventListener('click',()=>$('source-dialog').close());$('source-dialog').addEventListener('close',cancelSource);
   $('viewer').addEventListener('change',()=>{cancelTitle();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();});
   return {
-    async activate(){active=true;await openDiscover();},openLibrary,playNext,recoverPlayback,resumeRecent,
-    suspend(){active=false;++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
+    async activate(){guestMode=false;active=true;await openDiscover();},
+    async activateGuest(scope){
+      guestMode=true;active=true;view='guest';
+      $('share-title').hidden=true;
+      await showTitle({type:scope.type,id:scope.id,name:scope.name||'Shared title',poster:scope.poster||''});
+    },
+    openLibrary,playNext,recoverPlayback,resumeRecent,
+    suspend(){active=false;guestMode=false;++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();if($('share-dialog').open)$('share-dialog').close();}
   };
 }
