@@ -59,11 +59,12 @@ test('logout revokes discovery tickets along with existing session access', asyn
   assert.equal((await call('/api/logout', { method: 'POST', headers: auth, body: '{}' })).status, 200);
   assert.equal(calls[0][0], 'revoke'); assert.equal((await call('/api/discover/catalog', { headers: auth })).status, 401);
 });
-test('same-origin modules are served, media remains same-origin, connections and media are restricted to this website', async t => {
+test('same-origin modules are served, API connections stay local, and media is limited to TorBox CDNs', async t => {
   const { call } = await fixture(t);
   for (const path of ['/discover.js', '/source-client.js', '/discover.css']) assert.equal((await call(path)).status, 200);
   const policy = (await call('/')).headers.get('content-security-policy');
-  assert.ok(policy.includes("media-src 'self';")); assert.ok(policy.includes("connect-src 'self';"));
+  assert.ok(policy.includes('media-src https://torbox.app')); assert.ok(policy.includes('https://*.tb-cdn.io'));
+  assert.ok(policy.includes("connect-src 'self';"));
   assert.ok(!policy.includes('api.torbox.app'));
 });
 test('revocation during an in-flight discovery request prevents returning its data', async t => {
