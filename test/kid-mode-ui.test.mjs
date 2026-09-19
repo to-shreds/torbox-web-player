@@ -18,8 +18,8 @@ test('Kid Mode UI exposes per-viewer limits and Parent PIN controls',async()=>{
 
 test('Kid Mode persists viewer choice and gates protected actions',async()=>{
   const app=await read('../public/app.js');
-  assert.match(app,/localStorage\.getItem\('tw-viewer'\)/);
-  assert.match(app,/localStorage\.setItem\('tw-viewer',viewer\)/);
+  assert.match(app,/applicationStorage\(\)\?\.getItem\('tw-viewer'\)/);
+  assert.match(app,/applicationStorage\(\)\?\.setItem\('tw-viewer',next\)/);
   assert.match(app,/Enter the Parent PIN to open Settings/);
   assert.match(app,/Enter the Parent PIN to change viewers/);
   assert.match(app,/Enter the Parent PIN to sign out/);

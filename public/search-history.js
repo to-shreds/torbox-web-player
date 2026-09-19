@@ -1,8 +1,9 @@
+import { applicationStorage } from './runtime.js';
 const KEY='torbox-search-history-v1';
 const MAX_ITEMS=30;
 const validViewer=value=>/^viewer-[12]$/.test(value||'')?value:'viewer-1';
 const clean=value=>typeof value==='string'?value.replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,150):'';
-const storage=()=>{try{return localStorage}catch{return null}};
+const storage=applicationStorage;
 function load(store=storage()){if(!store)return{};try{const v=JSON.parse(store.getItem(KEY)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{};}catch{return{};}}
 function save(data,store=storage()){try{store?.setItem(KEY,JSON.stringify(data));}catch{}}
 export function listSearchHistory(viewer='viewer-1',store=storage()){

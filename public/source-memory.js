@@ -1,7 +1,8 @@
+import { applicationStorage } from './runtime.js';
 const KEY='torbox-source-memory-v1';
 const QUALITY=new Set(['480p','720p','1080p','2160p']);
 const clean=(value,max=240)=>typeof value==='string'?value.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,max):'';
-const storage=()=>{try{return localStorage}catch{return null}};
+const storage=applicationStorage;
 export function titleKey(target){
   return target&&['movie','series'].includes(target.type)&&/^tt[0-9]{5,12}$/.test(target.id||'')?`${target.type}:${target.id}`:'';
 }

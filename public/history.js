@@ -1,3 +1,4 @@
+import { applicationStorage, storedImageReference } from './runtime.js';
 import { getSettings } from './settings.js';
 const STORAGE_KEY = 'torbox-recent-v1';
 const MAX_ITEMS = 20;
@@ -19,12 +20,12 @@ export function normalizeRecent(raw) {
   const duration = num(raw.duration), position = Math.min(num(raw.position), duration || Number.MAX_SAFE_INTEGER);
   return {
     key, type, id, season, episode, title: clean(raw.title, 160) || 'Untitled',
-    episodeName: clean(raw.episodeName, 160), poster: /^https:\/\//.test(raw.poster || '') ? clean(raw.poster, 500) : '',
+    episodeName: clean(raw.episodeName, 160), poster: storedImageReference(clean(raw.poster, 500)),
     resolution: clean(raw.resolution, 20) || 'auto', position, duration, completed: raw.completed === true,
     updatedAt: Number.isFinite(raw.updatedAt) && raw.updatedAt > 0 ? raw.updatedAt : Date.now()
   };
 }
-function storage() { try { return localStorage; } catch { return null; } }
+const storage = applicationStorage;
 export function listRecent(store = storage()) {
   if (!store) return [];
   try {

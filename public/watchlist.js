@@ -1,11 +1,12 @@
+import { applicationStorage, storedImageReference } from './runtime.js';
 const KEY='torbox-watchlist-v1';
 const MAX_ITEMS=100;
 const validViewer=value=>/^viewer-[12]$/.test(value||'')?value:'viewer-1';
 const clean=(value,max=240)=>typeof value==='string'?value.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,max):'';
-const storage=()=>{try{return localStorage}catch{return null}};
+const storage=applicationStorage;
 export function normalizeWatchItem(raw){
   if(!raw||typeof raw!=='object'||!['movie','series'].includes(raw.type)||!/^tt[0-9]{5,12}$/.test(raw.id||''))return null;
-  return {type:raw.type,id:raw.id,name:clean(raw.name,160)||'Untitled',poster:/^https:\/\//.test(raw.poster||'')?clean(raw.poster,500):'',year:clean(String(raw.year||''),12),addedAt:Number.isFinite(raw.addedAt)&&raw.addedAt>0?raw.addedAt:Date.now()};
+  return {type:raw.type,id:raw.id,name:clean(raw.name,160)||'Untitled',poster:storedImageReference(clean(raw.poster,500)),year:clean(String(raw.year||''),12),addedAt:Number.isFinite(raw.addedAt)&&raw.addedAt>0?raw.addedAt:Date.now()};
 }
 function load(store=storage()){
   if(!store)return {};

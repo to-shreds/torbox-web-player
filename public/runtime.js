@@ -1,31 +1,33 @@
-const DEFAULT_API_ORIGIN = 'https://torbox-web-player-key.onrender.com';
+import { createRuntime, DEFAULT_API_ORIGIN } from './runtime-core.js';
+export { createRuntime, isCarStreamApiAction, CARSTREAM_API_ACTIONS, TORBOX_MEDIA_SUFFIXES, isTrustedDirectMediaUrl } from './runtime-core.js';
 const browser = typeof location !== 'undefined';
-const configured = typeof document !== 'undefined' ? document.querySelector('meta[name="api-origin"]')?.content?.trim() : '';
-export const API_ORIGIN = new URL(configured || (browser ? location.origin : DEFAULT_API_ORIGIN), DEFAULT_API_ORIGIN).origin;
-const SESSION_KEY = 'torbox-web-session';
-export const apiUrl = path => browser ? new URL(path, API_ORIGIN).href : path;
-export const mediaUrl = path => new URL(path, API_ORIGIN).href;
-export const apiMode = () => browser && location.origin !== API_ORIGIN ? 'cors' : 'same-origin';
-export const credentialsMode = () => browser && location.origin !== API_ORIGIN ? 'omit' : 'same-origin';
-export function getSessionToken() {
-  if (typeof sessionStorage === 'undefined') return '';
-  try { const value = sessionStorage.getItem(SESSION_KEY) || ''; return /^[A-Za-z0-9_-]{43}$/.test(value) ? value : ''; } catch { return ''; }
-}
-export function setSessionToken(value) {
-  if (!/^[A-Za-z0-9_-]{43}$/.test(value || '') || typeof sessionStorage === 'undefined') return false;
-  try { sessionStorage.setItem(SESSION_KEY, value); return true; } catch { return false; }
-}
-export function clearSessionToken() {
-  if (typeof sessionStorage === 'undefined') return;
-  try { sessionStorage.removeItem(SESSION_KEY); } catch {}
-}
-
-export const TORBOX_MEDIA_SUFFIXES = Object.freeze(['torbox.app','tb-cdn.cx','tb-cdn.io','tb-cdn.pw','tb-cdn.sh','tb-cdn.st','tb-cdn.to','tb-cdn.earth']);
-export function isTrustedDirectMediaUrl(value) {
-  try {
-    const url = new URL(value);
-    const host = url.hostname.toLowerCase();
-    return url.protocol === 'https:' && !url.username && !url.password && (!url.port || url.port === '443')
-      && TORBOX_MEDIA_SUFFIXES.some(suffix => host === suffix || host.endsWith('.' + suffix));
-  } catch { return false; }
+const meta = name => typeof document !== 'undefined' ? document.querySelector(`meta[name="${name}"]`)?.content?.trim() || '' : '';
+const store = name => { try { return globalThis[name] || null; } catch { return null; } };
+const runtime = createRuntime({
+  mode:meta('player-runtime') || 'internet',
+  pageOrigin:browser ? location.origin : DEFAULT_API_ORIGIN,
+  apiOrigin:meta('api-origin') || (browser ? location.origin : DEFAULT_API_ORIGIN),
+  apiPrefix:meta('api-prefix') || '/tw', browser, secureContext:globalThis.isSecureContext === true,
+  localStorage:() => store('localStorage'), sessionStorage:() => store('sessionStorage')
+});
+export const API_ORIGIN = runtime.apiOrigin;
+export const apiUrl = runtime.apiUrl;
+export const mediaUrl = runtime.mediaUrl;
+export const imageUrl = runtime.imageUrl;
+export const apiMode = runtime.apiMode;
+export const credentialsMode = runtime.credentialsMode;
+export const getSessionToken = runtime.getSessionToken;
+export const setSessionToken = runtime.setSessionToken;
+export const clearSessionToken = runtime.clearSessionToken;
+export const runtimeMode = runtime.mode;
+export const runtimeCapabilities = runtime.capabilities;
+export const isTrustedPlaybackUrl = runtime.isTrustedPlaybackUrl;
+export const applicationStorage = runtime.applicationStorage;
+export const flushRuntimeState = runtime.flushState;
+export const parentPinService = runtime.parentPinService;
+export const installRuntimeServices = runtime.installServices;
+export function assertRuntimeReady() { runtime.applicationStorage(); runtime.parentPinService(); }
+export function storedImageReference(value) {
+  if(runtime.mode!=='carstream')return typeof value==='string'&&/^https:\/\//.test(value)?value:'';
+  try{return value?new URL(runtime.imageUrl(value)).pathname:'';}catch{return '';}
 }

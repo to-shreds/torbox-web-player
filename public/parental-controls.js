@@ -1,9 +1,10 @@
+import { applicationStorage, parentPinService } from './runtime.js';
 const STORAGE_KEY='torbox-parental-controls-v1';
 const PIN_ITERATIONS=150000;
 const VIEWERS=new Set(['viewer-1','viewer-2']);
 const MAX_CONTENT_ROWS=240;
 
-function storage(){try{return localStorage}catch{return null}}
+const storage=applicationStorage;
 function cleanInt(value,min,max,fallback=0){
   const n=Number(value);return Number.isFinite(n)?Math.min(max,Math.max(min,Math.round(n))):fallback;
 }
@@ -113,8 +114,9 @@ function equalHex(a,b){
   if(typeof a!=='string'||typeof b!=='string'||a.length!==b.length)return false;
   let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0;
 }
-export function hasParentPin(store=storage(),now=Date.now()){return !!readState(store,now).pin}
+export function hasParentPin(store=storage(),now=Date.now()){const phone=parentPinService();return phone?phone.hasPin():!!readState(store,now).pin}
 export async function setParentPin(pin,store=storage(),cryptoObj=globalThis.crypto,now=Date.now()){
+  const phone=parentPinService();if(phone)return await phone.setPin(pin);
   if(!/^\d{4,8}$/.test(String(pin||'')))throw new Error('Parent PIN must be 4 to 8 digits.');
   if(!cryptoObj?.getRandomValues)throw new Error('Secure browser cryptography is not available on this device.');
   const state=readState(store,now),salt=cryptoObj.getRandomValues(new Uint8Array(16));
@@ -123,6 +125,7 @@ export async function setParentPin(pin,store=storage(),cryptoObj=globalThis.cryp
   writeState(state,store);return true;
 }
 export async function verifyParentPin(pin,store=storage(),cryptoObj=globalThis.crypto,now=Date.now()){
+  const phone=parentPinService();if(phone)return await phone.verifyPin(pin);
   if(!/^\d{4,8}$/.test(String(pin||'')))return false;
   const state=readState(store,now);if(!state.pin)return false;
   const hash=await pinHash(String(pin),fromHex(state.pin.salt),state.pin.iterations,cryptoObj);
