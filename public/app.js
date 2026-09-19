@@ -1,6 +1,7 @@
 import { createDiscoveryUI } from './discover.js';
 import { diagnosePlaybackFailure } from './playback-errors.js';
-import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode, isDirectRuntime } from './runtime.js';
+import { directApi, runDirectDiagnostics, diagnosticText } from './direct-runtime.js';
 import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js';
 import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js';
 import { listRecent, recordRecent, removeRecent, recentForContext, resumePosition, formatResumeTime } from './history.js';
@@ -167,6 +168,7 @@ async function ensureTorBoxReady() {
 }
 function show(section) { if (section !== 'workspace') discoveryUI?.suspend(); for (const id of ['loading', 'setup-needed', 'login', 'workspace']) $(id).hidden = id !== section; }
 async function api(path, { method = 'GET', data, signal, keepalive = false } = {}) {
+  if(isDirectRuntime())return directApi(path,{method,data,signal,keepalive});
   const headers = {}; if (data !== undefined) headers['Content-Type'] = 'application/json';
   if (sessionToken) headers.Authorization = `Bearer ${sessionToken}`;
   if (method !== 'GET') headers['X-CSRF-Token'] = csrf;
@@ -654,6 +656,34 @@ function loadSettingsForm(){
   updateInstallButton();text('settings-message','');text('transfer-message','');
 }
 function openSettingsDialog(){loadSettingsForm();if(!$('settings-dialog').open)$('settings-dialog').showModal();}
+async function runDiagnosticsFlow(key=''){
+  if(!isDirectRuntime())return;
+  $('diagnostics-summary').textContent='Running direct-access tests…';
+  $('diagnostics-output').textContent='';
+  if(!$('diagnostics-dialog').open)$('diagnostics-dialog').showModal();
+  try{
+    const report=await runDirectDiagnostics(key),blocked=report.blockers.length;
+    $('diagnostics-summary').textContent=blocked?blocked+' test(s) need attention. Copy this log and paste it into ChatGPT.':'All tested core endpoints were readable directly by this browser.';
+    $('diagnostics-output').textContent=diagnosticText(report);
+  }catch(error){
+    $('diagnostics-summary').textContent='The diagnostic runner failed.';
+    $('diagnostics-output').textContent=JSON.stringify({schema:'torbox-browser-direct-diagnostics-error',error:error?.name||'Error',message:String(error?.message||'').slice(0,300)},null,2);
+  }
+}
+$('run-login-diagnostics').addEventListener('click',()=>runDiagnosticsFlow($('api-key').value.trim()));
+$('settings-run-diagnostics').addEventListener('click',()=>runDiagnosticsFlow());
+$('settings-open-diagnostics').addEventListener('click',()=>{if(!$('diagnostics-dialog').open)$('diagnostics-dialog').showModal();});
+$('close-diagnostics').addEventListener('click',()=>$('diagnostics-dialog').close());
+$('copy-diagnostics').addEventListener('click',async()=>{
+  const value=$('diagnostics-output').textContent||'';if(!value)return;
+  try{await navigator.clipboard.writeText(value);$('diagnostics-summary').textContent='Diagnostic log copied. Paste it into ChatGPT.';}
+  catch{$('diagnostics-output').focus();const range=document.createRange();range.selectNodeContents($('diagnostics-output'));const selection=getSelection();selection.removeAllRanges();selection.addRange(range);$('diagnostics-summary').textContent='Copy the selected diagnostic log.';}
+});
+$('download-diagnostics').addEventListener('click',()=>{
+  const value=$('diagnostics-output').textContent||'';if(!value)return;
+  const blob=new Blob([value],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='torbox-browser-direct-diagnostics.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
 $('open-settings').addEventListener('click',()=>{if(kidEnabled()&&hasParentPin())requestParentPin('Enter the Parent PIN to open Settings.',openSettingsDialog);else openSettingsDialog();});
 $('close-settings').addEventListener('click',()=>$('settings-dialog').close());
 $('settings-form').addEventListener('submit',event=>{
@@ -733,6 +763,7 @@ $('settings-clear-searches').addEventListener('click',()=>{if(confirm('Clear sea
 $('settings-install-app').addEventListener('click',async()=>{if(!deferredInstallPrompt){text('settings-message',window.matchMedia?.('(display-mode: standalone)').matches?'The app is already installed.':'Use Chrome’s Add to Home screen / Install app command if the install prompt is not available.');return;}const prompt=deferredInstallPrompt;deferredInstallPrompt=null;await prompt.prompt();await prompt.userChoice.catch(()=>{});updateInstallButton();});
 $('settings-check-status').addEventListener('click',async()=>{text('settings-message','Checking TorBox…');const ok=await checkTorBoxStatus(true);text('settings-message',ok?(torboxStatusCache?.official==='issue'?'TorBox API is reachable, but its status page reports an issue.':'TorBox API is reachable.'):(torboxStatusCache?.message||'TorBox is unavailable.'),!ok);});
 $('retry-torbox-status').addEventListener('click',()=>checkTorBoxStatus(true));
-discoveryUI = createDiscoveryUI({ api, play: startPlayback, driveTest: openDriveTest, guard: ensureTorBoxReady });
+document.body.classList.toggle('direct-runtime',isDirectRuntime());
+discoveryUI = createDiscoveryUI({ api, play: startPlayback, driveTest: isDirectRuntime()?null:openDriveTest, guard: ensureTorBoxReady });
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 bootstrap();
