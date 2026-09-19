@@ -21,6 +21,7 @@ function fakeProvider(value){
     list:async()=>({files:[],stale:false}),
     resolveForRelay:async videoId=>({upstreamUrl:'https://store.tb-cdn.io/file?token='+value,file:{id:videoId}}),
     resolve:async videoId=>({url:'https://store.tb-cdn.io/file?token=temporary-file-token',file:{id:videoId}}),
+    resolveGuest:async videoId=>({url:'https://store.tb-cdn.io/file?token=temporary-file-token',file:{id:videoId}}),
     request:async()=>[]
   };
 }
