@@ -9,11 +9,11 @@ const movie={type:'movie',id:'tt1160419'};
 const episode={type:'series',id:'tt0903747',season:1,episode:1};
 const hash=n=>n.toString(16).padStart(40,'0');
 const reply=(data,status=200,headers={})=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json',...headers}});
-const stremthru=PUBLIC_STREMIO_PROVIDERS.find(x=>x.id==='stremthru');
+const stremthru=PUBLIC_STREMIO_PROVIDERS.find(x=>x.id==='stremthru-main');
 
 test('anonymous Stremio adapter uses only its fixed approved endpoint and no credentials',async()=>{
   const s=new StremioSourceLookup({...stremthru,fetchFn:async(url,opts)=>{
-    assert.equal(url.origin,'https://stremthru.elfhosted.com');
+    assert.equal(url.origin,'https://stremthru.13377001.xyz');
     assert.ok(url.pathname.includes('/stream/series/tt0903747:1:1.json'));
     assert.deepEqual(opts.headers,{Accept:'application/json'});
     assert.equal(opts.credentials,'omit');
@@ -22,7 +22,7 @@ test('anonymous Stremio adapter uses only its fixed approved endpoint and no cre
   }});
   const result=await s.lookup(episode);
   assert.equal(result.sources.length,1);
-  assert.equal(result.sources[0].provider,'StremThru Torz');
+  assert.equal(result.sources[0].provider,'StremThru Torz Main');
 });
 
 test('anonymous stream normalizer ignores URL-only streams and parses provider metadata',()=>{
