@@ -7,7 +7,7 @@ import { getSettings, saveSettings, resetSettings } from './settings.js';
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js';
 import { clearSearchHistory } from './search-history.js';
 const $ = id => document.getElementById(id);
-let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null;
+let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false;
 let discoveryUI;
 let viewer = 'viewer-1';
 try { const saved = sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
@@ -289,6 +289,39 @@ function armSleepTimer(context){
   const minutes=getSettings().sleepTimerMinutes;if(!minutes)return;
   context.sleepTimer=setTimeout(()=>{if(active!==context)return;context.video.pause();text('player-message',`Sleep timer · paused after ${minutes} minutes`);},minutes*60000);
 }
+function clearStillWatchingTimer(clearDue=true){
+  if(stillWatchingTimer)clearTimeout(stillWatchingTimer);stillWatchingTimer=null;
+  if(clearDue)stillWatchingDue=false;
+}
+function hideStillWatchingPrompt(){
+  stillWatchingPromptActive=false;
+  if($('still-watching-card'))$('still-watching-card').hidden=true;
+}
+function triggerStillWatchingPrompt(){
+  const context=active,minutes=getSettings().stillWatchingMinutes;
+  if(!context||!minutes){clearStillWatchingTimer();hideStillWatchingPrompt();return;}
+  clearStillWatchingTimer();stillWatchingPromptActive=true;
+  context.video.pause();
+  $('still-watching-card').hidden=false;
+  setPlaybackHealth('Still watching?',`Paused after ${minutes} minutes without confirmation.`);
+  text('player-message',`Still watching? Playback paused after ${minutes} minutes.`);
+}
+function armStillWatchingTimer(){
+  const minutes=getSettings().stillWatchingMinutes;
+  if(!minutes){clearStillWatchingTimer();hideStillWatchingPrompt();return;}
+  if(stillWatchingPromptActive)return;
+  if(stillWatchingDue){triggerStillWatchingPrompt();return;}
+  if(stillWatchingTimer)return;
+  stillWatchingTimer=setTimeout(()=>{
+    stillWatchingTimer=null;
+    if(!active||active.video.paused){stillWatchingDue=true;return;}
+    triggerStillWatchingPrompt();
+  },minutes*60000);
+}
+function resetStillWatchingTimer(){
+  clearStillWatchingTimer();hideStillWatchingPrompt();
+  if(active&&!active.video.paused)armStillWatchingTimer();
+}
 function scheduleNextEpisode(context){
   const playbackContext=context.playbackContext;if(!getSettings().autoNext||!playbackContext?.queue?.length){text('player-message','Finished');return;}
   const next=playbackContext.queue[0],delay=getSettings().autoNextDelaySeconds;
@@ -300,7 +333,7 @@ async function detachPlayback() {
   const old = active; active = null; hidePauseCard();clearNextCountdown();await releaseWakeLock();
   if (old) { clearInterval(old.timer);clearTimeout(old.bufferTimer);clearTimeout(old.sleepTimer);clearTimeout(old.healthyTimer); const saving = saveProgress(old, true); old.video.pause(); old.video.removeAttribute('src'); old.video.load(); old.video.remove(); await saving; }
 }
-async function stopPlayback() { playGeneration++; await detachPlayback(); }
+async function stopPlayback() { playGeneration++; clearStillWatchingTimer(); hideStillWatchingPrompt(); await detachPlayback(); }
 async function startPlayback(file, playbackContext = null, retryCount = 0) {
   const generation = ++playGeneration, selectedViewer = viewer;
   await detachPlayback(); if (generation !== playGeneration) return false;
@@ -342,13 +375,13 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
       video.play().catch(error => { if (active === context && error.name === 'NotAllowedError') text('player-message', 'Tap play'); });
     });
     video.addEventListener('playing', () => { if (active === context) {
-      context.started = true; context.recovering = false; clearBuffer(); hidePauseCard(); clearNextCountdown(); acquireWakeLock(); if(!context.sleepTimer)armSleepTimer(context); setPlaybackHealth('Playing','Stream is advancing normally.'); text('player-message', '');
+      context.started = true; context.recovering = false; clearBuffer(); hidePauseCard(); clearNextCountdown(); acquireWakeLock(); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); setPlaybackHealth('Playing','Stream is advancing normally.'); text('player-message', '');
       clearTimeout(context.healthyTimer);if(getSettings().autoLearnSources&&playbackContext?.sourceInfo&&!context.sourceLearned)context.healthyTimer=setTimeout(()=>{if(active===context&&!video.paused&&video.currentTime>5){rememberSourceSuccess(playbackContext.current,playbackContext.sourceInfo);context.sourceLearned=true;setHealthSource(context);}},15000);
     } });
     video.addEventListener('canplay',()=>{clearBuffer();if(active===context&&context.started&&!video.paused)setPlaybackHealth('Playing','Stream is ready.');});
     video.addEventListener('timeupdate', () => { if (active !== context || !context.ready) return; if (Math.abs(video.currentTime - context.lastTime) > .2) { context.lastTime = video.currentTime; clearBuffer(); } if(video.paused)updatePauseCard(context); });
     video.addEventListener('waiting', armBuffer); video.addEventListener('stalled',()=>{setPlaybackHealth('Stalled','The browser reports that data stopped arriving.');armBuffer();});
-    video.addEventListener('pause', () => { if (active === context && !context.recovering) { clearTimeout(context.healthyTimer);releaseWakeLock(); setPlaybackHealth('Paused','Playback is paused.'); saveProgress(context); updatePauseCard(context); } });
+    video.addEventListener('pause', () => { if (active === context && !context.recovering) { clearTimeout(context.healthyTimer);releaseWakeLock(); if(!stillWatchingPromptActive&&!video.ended)clearStillWatchingTimer(); saveProgress(context); if(stillWatchingPromptActive){hidePauseCard();setPlaybackHealth('Still watching?','Tap Keep watching to continue.');}else{setPlaybackHealth('Paused','Playback is paused.');updatePauseCard(context);} } });
     video.addEventListener('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });
     video.addEventListener('ended', async () => {
       if (active !== context) return; clearBuffer(); hidePauseCard(); await saveProgress(context);
@@ -377,6 +410,14 @@ async function rejectCurrentSource(kind){
 $('health-sound-good').addEventListener('click',()=>{const p=active?.playbackContext;if(!p?.sourceInfo)return;setAudioFeedback(p.current,p.sourceInfo,'good');rememberSourceSuccess(p.current,p.sourceInfo);active.sourceLearned=true;setPlaybackHealth('Playing','Sound confirmed on this device.');});
 $('health-sound-bad').addEventListener('click',()=>rejectCurrentSource('audio'));
 $('health-source-bad').addEventListener('click',()=>rejectCurrentSource('source'));
+$('keep-watching').addEventListener('click',()=>{
+  if(!active)return;
+  clearStillWatchingTimer();hideStillWatchingPrompt();text('player-message','');
+  active.video.play().catch(()=>text('player-message','Tap play to continue.'));
+});
+$('player').addEventListener('pointerdown',()=>{
+  if(active&&!stillWatchingPromptActive&&!active.video.paused)resetStillWatchingTimer();
+});
 $('close-player').addEventListener('click', () => $('player').close());
 $('player').addEventListener('close', () => stopPlayback());
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { saveProgress(active, true); releaseWakeLock(); } else if(active&&!active.video.paused) acquireWakeLock(); });
@@ -384,8 +425,8 @@ document.addEventListener('keydown',event=>{
   if(!$('player').open||!active||!getSettings().keyboardShortcuts||event.altKey||event.ctrlKey||event.metaKey)return;
   const tag=event.target?.tagName;if(['INPUT','TEXTAREA','SELECT','BUTTON'].includes(tag))return;
   const step=getSettings().seekSeconds,key=event.key.toLowerCase();
-  if(key==='j'||key==='arrowleft'){event.preventDefault();active.video.currentTime=Math.max(0,active.video.currentTime-step);}
-  else if(key==='l'||key==='arrowright'){event.preventDefault();const end=Number.isFinite(active.video.duration)?active.video.duration:active.video.currentTime+step;active.video.currentTime=Math.min(end,active.video.currentTime+step);}
+  if(key==='j'||key==='arrowleft'){event.preventDefault();resetStillWatchingTimer();active.video.currentTime=Math.max(0,active.video.currentTime-step);}
+  else if(key==='l'||key==='arrowright'){event.preventDefault();resetStillWatchingTimer();const end=Number.isFinite(active.video.duration)?active.video.duration:active.video.currentTime+step;active.video.currentTime=Math.min(end,active.video.currentTime+step);}
 });
 window.addEventListener('pagehide', () => { saveProgress(active, true); });
 $('open-drive-oauth').addEventListener('click', () => {
@@ -452,6 +493,7 @@ function loadSettingsForm(){
   $('setting-auto-next-delay').value=String(settings.autoNextDelaySeconds);
   $('setting-playback-rate').value=String(settings.playbackRate);
   $('setting-sleep-timer').value=String(settings.sleepTimerMinutes);
+  $('setting-still-watching').value=String(settings.stillWatchingMinutes);
   $('setting-seek').value=String(settings.seekSeconds);
   $('setting-size-profile').value=settings.sourceSizeProfile;
   $('setting-watchlist-limit').value=String(settings.watchlistLimit);
@@ -495,6 +537,7 @@ $('settings-form').addEventListener('submit',event=>{
     showCompletedRecent:$('setting-show-completed-recent').checked,
     playbackRate:Number($('setting-playback-rate').value),
     sleepTimerMinutes:Number($('setting-sleep-timer').value),
+    stillWatchingMinutes:Number($('setting-still-watching').value),
     keepAwake:$('setting-keep-awake').checked,
     keyboardShortcuts:$('setting-keyboard-shortcuts').checked,
     seekSeconds:Number($('setting-seek').value),
@@ -513,9 +556,9 @@ $('settings-form').addEventListener('submit',event=>{
     autoLearnSources:$('setting-auto-learn-sources').checked
   });
   try{sessionStorage.setItem('tw-source-resolution',$('setting-resolution').value)}catch{}
-  applyInterfaceMode();renderRecent();discoveryUI.settingsChanged();if(active?.video){active.video.playbackRate=getSettings().playbackRate;if(active.video.paused)updatePauseCard(active);else hidePauseCard();setHealthSource(active);setPlaybackHealth(active.video.paused?'Paused':'Playing','Settings updated.');} text('settings-message','Saved.');
+  applyInterfaceMode();renderRecent();discoveryUI.settingsChanged();resetStillWatchingTimer();if(active?.video){active.video.playbackRate=getSettings().playbackRate;if(active.video.paused)updatePauseCard(active);else hidePauseCard();setHealthSource(active);setPlaybackHealth(active.video.paused?'Paused':'Playing','Settings updated.');} text('settings-message','Saved.');
 });
-$('reset-settings').addEventListener('click',()=>{resetSettings();try{sessionStorage.removeItem('tw-source-resolution')}catch{}applyInterfaceMode();loadSettingsForm();renderRecent();discoveryUI.settingsChanged();});
+$('reset-settings').addEventListener('click',()=>{resetSettings();try{sessionStorage.removeItem('tw-source-resolution')}catch{}applyInterfaceMode();loadSettingsForm();renderRecent();discoveryUI.settingsChanged();resetStillWatchingTimer();});
 $('settings-clear-learning').addEventListener('click',()=>{if(confirm('Clear learned source preferences, audio feedback, bad-source blocks, and per-title quality choices on this device?')){clearSourceMemory();text('settings-message','Source learning cleared.');}});
 $('settings-clear-searches').addEventListener('click',()=>{if(confirm('Clear search history for this viewer on this device?')){clearSearchHistory(viewer);discoveryUI.settingsChanged();text('settings-message','Search history cleared.');}});
 $('settings-install-app').addEventListener('click',async()=>{if(!deferredInstallPrompt){text('settings-message',window.matchMedia?.('(display-mode: standalone)').matches?'The app is already installed.':'Use Chrome’s Add to Home screen / Install app command if the install prompt is not available.');return;}const prompt=deferredInstallPrompt;deferredInstallPrompt=null;await prompt.prompt();await prompt.userChoice.catch(()=>{});updateInstallButton();});
