@@ -5,7 +5,7 @@ import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js';
 import { listRecent, recordRecent, removeRecent, recentForContext, resumePosition, formatResumeTime } from './history.js';
 import { getSettings, saveSettings, resetSettings } from './settings.js';
 const $ = id => document.getElementById(id);
-let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null;
+let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null;
 let discoveryUI;
 let viewer = 'viewer-1';
 try { const saved = sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
@@ -20,6 +20,7 @@ async function openDriveTest(file, context = {}) {
   if (guestMode || !file?.id) return;
   driveSelected = { file, context };
   $('drive-block-download').checked = getSettings().driveWatchOnly;
+  $('drive-delete-after').value = String(getSettings().driveDeleteMinutes);
   driveRunId = '';
   $('drive-selected').textContent = [context.title || file.title, context.episodeName || '', formatDriveSize(file.size)].filter(Boolean).join(' · ');
   $('drive-progress').hidden = true; $('drive-ready-actions').hidden = true; $('drive-status').textContent = ''; $('drive-timing').textContent = ''; $('drive-delete-note').textContent = '';
@@ -78,7 +79,8 @@ function recentLabel(item) {
   return `${episode} · ${time}`;
 }
 function renderRecent() {
-  const rows = listRecent().slice(0, getSettings().recentLimit), section = $('recent-section'), list = $('recent-list');
+  const settings=getSettings(),all=listRecent(),rows=(settings.showCompletedRecent?all:all.filter(item=>!item.completed)).slice(0,settings.recentLimit), section = $('recent-section'), list = $('recent-list');
+  $('recent-heading').textContent=settings.showCompletedRecent?'Recently played':'Continue watching';
   section.hidden = !rows.length || $('discover-panel').hidden;
   const fragment = document.createDocumentFragment();
   for (const item of rows) {
@@ -92,7 +94,7 @@ function renderRecent() {
     card.append(copy); card.addEventListener('click', () => discoveryUI.resumeRecent(item));
     const remove=document.createElement('button');remove.type='button';remove.className='recent-remove';remove.textContent='×';remove.setAttribute('aria-label',`Remove ${item.title} from Recently played`);
     remove.addEventListener('click',event=>{event.stopPropagation();if(confirm(`Remove "${item.title}" from Recently played?`)){removeRecent(item.key);renderRecent();}});
-    entry.append(card,remove);fragment.append(entry);
+    if(item.position>0||item.completed){const start=document.createElement('button');start.type='button';start.className='recent-start-over';start.textContent='Start over';start.addEventListener('click',event=>{event.stopPropagation();discoveryUI.startOverRecent(item);});entry.append(card,remove,start);}else entry.append(card,remove);fragment.append(entry);
   }
   list.replaceChildren(fragment);
 }
@@ -261,9 +263,27 @@ async function saveProgress(context = active, keepalive = false) {
     if (!result.saved && active === context) text('player-message', 'Local resume is saved, but the temporary server progress lease was replaced.', true);
   } catch { if (active === context) text('player-message', 'Playback continues. Resume is saved on this device.', false); }
 }
+function clearNextCountdown(){if(nextCountdownTimer)clearInterval(nextCountdownTimer);nextCountdownTimer=null;$('up-next-card').hidden=true;}
+async function releaseWakeLock(){try{await wakeLock?.release();}catch{}wakeLock=null;}
+async function acquireWakeLock(){
+  if(!getSettings().keepAwake||!('wakeLock' in navigator)||document.visibilityState!=='visible')return;
+  try{await releaseWakeLock();wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null;},{once:true});}catch{}
+}
+function armSleepTimer(context){
+  clearTimeout(context.sleepTimer);context.sleepTimer=null;
+  const minutes=getSettings().sleepTimerMinutes;if(!minutes)return;
+  context.sleepTimer=setTimeout(()=>{if(active!==context)return;context.video.pause();text('player-message',`Sleep timer · paused after ${minutes} minutes`);},minutes*60000);
+}
+function scheduleNextEpisode(context){
+  const playbackContext=context.playbackContext;if(!getSettings().autoNext||!playbackContext?.queue?.length){text('player-message','Finished');return;}
+  const next=playbackContext.queue[0],delay=getSettings().autoNextDelaySeconds;
+  if(delay===0){text('player-message',`Next · S${next.season}E${next.episode} ${next.name||''}`);discoveryUI.playNext(playbackContext).then(moved=>{if(!moved&&active===context)text('player-message','Next episode could not be selected automatically.',true);});return;}
+  let remaining=delay;$('up-next-title').textContent=`Next · S${next.season}E${next.episode} ${next.name||''}`;clearNextCountdown();$('up-next-card').hidden=false;$('up-next-time').textContent=`Playing in ${remaining}s`;
+  nextCountdownTimer=setInterval(async()=>{if(active!==context){clearNextCountdown();return;}remaining-=1;if(remaining>0){$('up-next-time').textContent=`Playing in ${remaining}s`;return;}clearNextCountdown();text('player-message','Opening next episode…');const moved=await discoveryUI.playNext(playbackContext);if(!moved&&active===context)text('player-message','Next episode could not be selected automatically.',true);},1000);
+}
 async function detachPlayback() {
-  const old = active; active = null; hidePauseCard();
-  if (old) { clearInterval(old.timer); const saving = saveProgress(old, true); old.video.pause(); old.video.removeAttribute('src'); old.video.load(); old.video.remove(); await saving; }
+  const old = active; active = null; hidePauseCard();clearNextCountdown();await releaseWakeLock();
+  if (old) { clearInterval(old.timer);clearTimeout(old.bufferTimer);clearTimeout(old.sleepTimer); const saving = saveProgress(old, true); old.video.pause(); old.video.removeAttribute('src'); old.video.load(); old.video.remove(); await saving; }
 }
 async function stopPlayback() { playGeneration++; await detachPlayback(); }
 async function startPlayback(file, playbackContext = null, retryCount = 0) {
@@ -274,8 +294,8 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
   try {
     const result = await api('/api/playback', { method: 'POST', data: { viewer: selectedViewer, videoId: file.id } });
     if (generation !== playGeneration || !$('player').open || selectedViewer !== viewer) return false;
-    const video = document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata';
-    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, retryCount, diagnosing:false, recovering:false, ready:false, started:false, timer:null, bufferTimer:null, lastTime:0 };
+    const video = document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.playbackRate=getSettings().playbackRate;
+    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, retryCount, diagnosing:false, recovering:false, ready:false, started:false, timer:null, bufferTimer:null, sleepTimer:null, lastTime:0 };
     active = context; $('video-slot').replaceChildren(video);
     const clearBuffer = () => { clearTimeout(context.bufferTimer); context.bufferTimer = null; };
     const recover = async reason => {
@@ -296,7 +316,7 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
     video.addEventListener('loadedmetadata', () => {
       if (active !== context) return;
       const local = playbackContext ? recentForContext(playbackContext) : null;
-      let position = Math.max(result.progress.position || 0, resumePosition(local));
+      let position = playbackContext?.forceStartOver ? 0 : Math.max(result.progress.position || 0, resumePosition(local));
       const rewind = Number(playbackContext?.rewindOnResumeSeconds) || 0;
       if (rewind > 0 && position > 0) position = Math.max(0, position - rewind);
       if (Number.isFinite(video.duration) && position > 0) video.currentTime = Math.min(position, Math.max(0, video.duration - .25));
@@ -305,19 +325,16 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
       text('player-message', position > 0 ? `Resuming ${formatResumeTime(position)}` : '');
       video.play().catch(error => { if (active === context && error.name === 'NotAllowedError') text('player-message', 'Tap play'); });
     });
-    video.addEventListener('playing', () => { if (active === context) { context.started = true; context.recovering = false; clearBuffer(); hidePauseCard(); text('player-message', ''); } });
+    video.addEventListener('playing', () => { if (active === context) { context.started = true; context.recovering = false; clearBuffer(); hidePauseCard(); clearNextCountdown(); acquireWakeLock(); if(!context.sleepTimer)armSleepTimer(context); text('player-message', ''); } });
     video.addEventListener('canplay', clearBuffer);
     video.addEventListener('timeupdate', () => { if (active !== context || !context.ready) return; if (Math.abs(video.currentTime - context.lastTime) > .2) { context.lastTime = video.currentTime; clearBuffer(); } if(video.paused)updatePauseCard(context); });
     video.addEventListener('waiting', armBuffer); video.addEventListener('stalled', armBuffer);
-    video.addEventListener('pause', () => { if (active === context && !context.recovering) { saveProgress(context); updatePauseCard(context); } });
+    video.addEventListener('pause', () => { if (active === context && !context.recovering) { releaseWakeLock(); saveProgress(context); updatePauseCard(context); } });
     video.addEventListener('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });
     video.addEventListener('ended', async () => {
       if (active !== context) return; clearBuffer(); hidePauseCard(); await saveProgress(context);
       if (playbackContext) { recordRecent(playbackContext, video.duration || video.currentTime, video.duration || 0, { completed:true }); scheduleRecentRender(); }
-      if (getSettings().autoNext && playbackContext?.queue?.length) {
-        const next=playbackContext.queue[0]; text('player-message', `Next · S${next.season}E${next.episode} ${next.name || ''}`);
-        const moved=await discoveryUI.playNext(playbackContext); if(!moved&&active===context)text('player-message','Next episode could not be selected automatically.',true);
-      } else text('player-message','Finished');
+      await releaseWakeLock();scheduleNextEpisode(context);
     });
     video.addEventListener('error', async () => {
       if (active !== context || context.diagnosing) return; context.diagnosing = true; clearBuffer();
@@ -330,9 +347,17 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
     video.src=context.mediaUrl; return true;
   } catch (error) { if (generation===playGeneration) text('player-message',error.message,true); return false; }
 }
+$('cancel-auto-next').addEventListener('click',()=>{clearNextCountdown();text('player-message','Finished');});
 $('close-player').addEventListener('click', () => $('player').close());
 $('player').addEventListener('close', () => stopPlayback());
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveProgress(active, true); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { saveProgress(active, true); releaseWakeLock(); } else if(active&&!active.video.paused) acquireWakeLock(); });
+document.addEventListener('keydown',event=>{
+  if(!$('player').open||!active||!getSettings().keyboardShortcuts||event.altKey||event.ctrlKey||event.metaKey)return;
+  const tag=event.target?.tagName;if(['INPUT','TEXTAREA','SELECT','BUTTON'].includes(tag))return;
+  const step=getSettings().seekSeconds,key=event.key.toLowerCase();
+  if(key==='j'||key==='arrowleft'){event.preventDefault();active.video.currentTime=Math.max(0,active.video.currentTime-step);}
+  else if(key==='l'||key==='arrowright'){event.preventDefault();const end=Number.isFinite(active.video.duration)?active.video.duration:active.video.currentTime+step;active.video.currentTime=Math.min(end,active.video.currentTime+step);}
+});
 window.addEventListener('pagehide', () => { saveProgress(active, true); });
 $('open-drive-oauth').addEventListener('click', () => {
   const url = driveOauthUrl || 'https://api.torbox.app/v1/api/integration/oauth/google';
@@ -382,17 +407,36 @@ $('copy-drive-link').addEventListener('click', async () => {
   catch { text('drive-status', 'Could not copy automatically. Open the Drive player and copy its URL.', true); }
 });
 $('close-drive').addEventListener('click', () => $('drive-dialog').close());
+function updateInstallButton(){
+  const button=$('settings-install-app');if(!button)return;
+  button.disabled=!deferredInstallPrompt;button.textContent=window.matchMedia?.('(display-mode: standalone)').matches?'Installed':'Install app';
+}
+window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstallPrompt=event;updateInstallButton();});
+window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;updateInstallButton();text('settings-message','Installed.');});
 function loadSettingsForm(){
   const settings=getSettings();
   $('setting-resolution').value=settings.resolution;
   $('setting-rewind').value=String(settings.resumeRewindSeconds);
   $('setting-buffer').value=String(settings.bufferSeconds);
   $('setting-recent-limit').value=String(settings.recentLimit);
+  $('setting-auto-next-delay').value=String(settings.autoNextDelaySeconds);
+  $('setting-playback-rate').value=String(settings.playbackRate);
+  $('setting-sleep-timer').value=String(settings.sleepTimerMinutes);
+  $('setting-seek').value=String(settings.seekSeconds);
+  $('setting-size-profile').value=settings.sourceSizeProfile;
+  $('setting-watchlist-limit').value=String(settings.watchlistLimit);
+  $('setting-drive-delete').value=String(settings.driveDeleteMinutes);
   $('setting-auto-next').checked=settings.autoNext;
   $('setting-auto-recovery').checked=settings.autoRecovery;
   $('setting-pause-overlay').checked=settings.pauseOverlay;
   $('setting-drive-watch-only').checked=settings.driveWatchOnly;
-  text('settings-message','');
+  $('setting-show-completed-recent').checked=settings.showCompletedRecent;
+  $('setting-keep-awake').checked=settings.keepAwake;
+  $('setting-keyboard-shortcuts').checked=settings.keyboardShortcuts;
+  $('setting-show-episode-progress').checked=settings.showEpisodeProgress;
+  $('setting-remember-browse').checked=settings.rememberBrowse;
+  $('setting-show-watchlist').checked=settings.showWatchlist;
+  updateInstallButton();text('settings-message','');
 }
 $('open-settings').addEventListener('click',()=>{loadSettingsForm();if(!$('settings-dialog').open)$('settings-dialog').showModal();});
 $('close-settings').addEventListener('click',()=>$('settings-dialog').close());
@@ -404,16 +448,30 @@ $('settings-form').addEventListener('submit',event=>{
     bufferSeconds:Number($('setting-buffer').value),
     recentLimit:Number($('setting-recent-limit').value),
     autoNext:$('setting-auto-next').checked,
+    autoNextDelaySeconds:Number($('setting-auto-next-delay').value),
     autoRecovery:$('setting-auto-recovery').checked,
     pauseOverlay:$('setting-pause-overlay').checked,
-    driveWatchOnly:$('setting-drive-watch-only').checked
+    driveWatchOnly:$('setting-drive-watch-only').checked,
+    driveDeleteMinutes:Number($('setting-drive-delete').value),
+    showCompletedRecent:$('setting-show-completed-recent').checked,
+    playbackRate:Number($('setting-playback-rate').value),
+    sleepTimerMinutes:Number($('setting-sleep-timer').value),
+    keepAwake:$('setting-keep-awake').checked,
+    keyboardShortcuts:$('setting-keyboard-shortcuts').checked,
+    seekSeconds:Number($('setting-seek').value),
+    showEpisodeProgress:$('setting-show-episode-progress').checked,
+    rememberBrowse:$('setting-remember-browse').checked,
+    sourceSizeProfile:$('setting-size-profile').value,
+    showWatchlist:$('setting-show-watchlist').checked,
+    watchlistLimit:Number($('setting-watchlist-limit').value)
   });
   try{sessionStorage.setItem('tw-source-resolution',$('setting-resolution').value)}catch{}
-  renderRecent();if(active?.video?.paused)updatePauseCard(active);else hidePauseCard();
-  text('settings-message','Saved.');
+  renderRecent();discoveryUI.settingsChanged();if(active?.video){active.video.playbackRate=getSettings().playbackRate;if(active.video.paused)updatePauseCard(active);else hidePauseCard();} text('settings-message','Saved.');
 });
-$('reset-settings').addEventListener('click',()=>{resetSettings();try{sessionStorage.removeItem('tw-source-resolution')}catch{}loadSettingsForm();renderRecent();});
+$('reset-settings').addEventListener('click',()=>{resetSettings();try{sessionStorage.removeItem('tw-source-resolution')}catch{}loadSettingsForm();renderRecent();discoveryUI.settingsChanged();});
+$('settings-install-app').addEventListener('click',async()=>{if(!deferredInstallPrompt){text('settings-message',window.matchMedia?.('(display-mode: standalone)').matches?'The app is already installed.':'Use Chrome’s Add to Home screen / Install app command if the install prompt is not available.');return;}const prompt=deferredInstallPrompt;deferredInstallPrompt=null;await prompt.prompt();await prompt.userChoice.catch(()=>{});updateInstallButton();});
 $('settings-check-status').addEventListener('click',async()=>{text('settings-message','Checking TorBox…');const ok=await checkTorBoxStatus(true);text('settings-message',ok?(torboxStatusCache?.official==='issue'?'TorBox API is reachable, but its status page reports an issue.':'TorBox API is reachable.'):(torboxStatusCache?.message||'TorBox is unavailable.'),!ok);});
 $('retry-torbox-status').addEventListener('click',()=>checkTorBoxStatus(true));
 discoveryUI = createDiscoveryUI({ api, play: startPlayback, driveTest: openDriveTest, guard: ensureTorBoxReady });
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 bootstrap();
