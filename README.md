@@ -2,7 +2,7 @@
 
 This branch is the **browser-key clone** of the household TorBox web player. The original player on `main` remains separate.
 
-Current version: **0.8.1-key-clone**
+Current version: **0.9.0-key-clone**
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/key/`
 
@@ -88,3 +88,12 @@ The public provider probe also observed hundreds of anonymous StremThru hashes f
 - Full physical-device acceptance of every fallback/auto-next case is still ongoing.
 
 Implementation source on this branch is authoritative. Project readiness is tracked in `to-shreds/ProjectStatus/projects/torbox-web-player-browser-key/STATUS.md`.
+
+
+## Temporary sharing and compact source chooser
+
+Version 0.9 adds scoped temporary guest links. From a movie/show title, the owner can create a 2, 6, 12 or 24 hour link. A guest link can access only that shared movie or show, not search, the TorBox library, owner tools, or the TorBox API key. Series links allow the released episodes of that one show. Guest playback still uses the owner's TorBox connection through a process-memory guest session, and video remains direct TorBox CDN -> guest browser.
+
+Guest links are opaque random tokens stored only in Render process memory. They expire automatically, are invalidated when the sharing owner signs out, and also disappear on a Render restart. Guest playback is restricted to video IDs obtained through source preparation for the shared title.
+
+The mobile source chooser no longer repeats the Recommended torrent in the table. Alternate sources are paginated instead of creating a vertically scrolling list. Mobile pages show three alternatives at a time and compress size, seeders, quality and cache state into each compact row.
