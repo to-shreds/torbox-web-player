@@ -169,7 +169,7 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
     active = context; $('video-slot').replaceChildren(video);
     const clearBuffer = () => { clearTimeout(context.bufferTimer); context.bufferTimer = null; };
     const recover = async reason => {
-      if (active !== context || context.recovering || !context.started || video.paused || video.ended) return;
+      if (active !== context || context.recovering || video.ended || (reason === 'buffer' && (!context.started || video.paused))) return;
       context.recovering = true; clearBuffer(); await saveProgress(context); video.pause();
       text('player-message', reason === 'buffer' ? 'Buffering · switching to a lower resolution…' : 'Stream failed · finding a lower-resolution source…');
       const moved = playbackContext ? await discoveryUI.recoverPlayback(playbackContext) : false;
@@ -194,7 +194,7 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
     });
     video.addEventListener('playing', () => { if (active === context) { context.started = true; context.recovering = false; clearBuffer(); text('player-message', ''); } });
     video.addEventListener('canplay', clearBuffer);
-    video.addEventListener('timeupdate', () => { if (active !== context && !context.ready) return; if (Math.abs(video.currentTime - context.lastTime) > .2) { context.lastTime = video.currentTime; clearBuffer(); } });
+    video.addEventListener('timeupdate', () => { if (active !== context || !context.ready) return; if (Math.abs(video.currentTime - context.lastTime) > .2) { context.lastTime = video.currentTime; clearBuffer(); } });
     video.addEventListener('waiting', armBuffer); video.addEventListener('stalled', armBuffer);
     video.addEventListener('pause', () => { if (active === context && !context.recovering) saveProgress(context); });
     video.addEventListener('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });

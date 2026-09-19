@@ -65,7 +65,7 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
     view=next;$('discover-panel').hidden=next!=='discover';$('library-panel').hidden=next!=='library';
     $('discover-tab').setAttribute('aria-selected',String(next==='discover'));$('library-tab').setAttribute('aria-selected',String(next==='library'));
     $('page-title').textContent=next==='discover'?'Discover':'My files';$('search').placeholder=next==='discover'?'Search movies and shows':'Search TorBox files';
-    $('recent-section').hidden = next !== 'discover';
+    $('recent-section').hidden = next !== 'discover' || !$('recent-list').children.length;
   }
   async function openLibrary(){displayTab('library');++catalogGeneration;catalogAbort?.abort();await loadLibrary();}
   async function openDiscover(){displayTab('discover');await browse();}
@@ -170,7 +170,7 @@ export function createDiscoveryUI({ api, play, loadLibrary }) {
         const row=element('article','','episode-row');const number=element('strong',String(episode.episode).padStart(2,'0'),'episode-number');
         const info=element('div','','episode-info');info.append(element('strong',episode.name));if(episode.description)info.append(element('span',episode.description,'episode-overview'));
         const actions=element('div','','episode-actions');const target={type:'series',id:meta.id,season:episode.season,episode:episode.episode};
-        const playButton=button('Play',()=>quickPlay(meta,target,episode.name,playButton),true);const more=button('More',()=>openOptions(meta,target,episode.name));more.setAttribute('aria-label',`More options for ${episode.name}`);
+        const playButton=button('Play',()=>quickPlay(meta,target,episode.name,playButton),true);const more=button('Options',()=>openOptions(meta,target,episode.name));more.setAttribute('aria-label',`More options for ${episode.name}`);
         actions.append(playButton,more);row.append(number,info,actions);
         if(episode.released&&Date.parse(episode.released)>Date.now()){playButton.disabled=true;more.disabled=true;row.classList.add('future');}
         list.append(row);
