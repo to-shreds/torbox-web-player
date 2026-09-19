@@ -21,6 +21,8 @@ test('browser-direct experiment uses a local runtime and exposes a sanitized dia
   assert.match(app, /diagnosticText/);
   assert.match(direct, /CORS_BLOCKED_OR_UNREADABLE/);
   assert.match(direct, /TorBox user\/me/);
+  assert.match(direct, /TorBox Relay status \(no auth\)/);
+  assert.match(direct, /TorBox Relay status \(Bearer auth\)/);
   assert.match(direct, /Cinemeta catalog/);
   assert.doesNotMatch(direct, /recentTrace:[^\n]*credential/);
   assert.match(discover, /\/api\/discover\/lookup/);
@@ -32,6 +34,7 @@ test('browser-direct CSP permits explicit upstream APIs and does not permit Rend
   const html = await read('../public/index.html');
   for (const host of [
     'api.torbox.app',
+    'relay.torbox.app',
     'v3-cinemeta.strem.io',
     'cinemeta-catalogs.strem.io',
     'zileanfortheweebs.midnightignite.me',
