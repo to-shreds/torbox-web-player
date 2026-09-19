@@ -1,6 +1,7 @@
 import { createDiscoveryUI } from './discover.js';
 import { diagnosePlaybackFailure, matchesFormat } from './playback-errors.js';
 import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js';
+import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js';
 const $ = id => document.getElementById(id);
 let csrf = '', sessionToken = getSessionToken(), files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, retryFile = null, libraryAbort = null, searchTimer;
 let discoveryUI;
@@ -37,24 +38,47 @@ async function api(path, { method = 'GET', data, signal, keepalive = false } = {
   }
   return result;
 }
+let autoLoginTried = false;
+async function connectWithKey(apiKey, remember = false) {
+  const result = await api('/api/login', { method: 'POST', data: { apiKey } });
+  sessionToken = result.sessionToken || '';
+  if (!sessionToken || !setSessionToken(sessionToken)) throw new Error('The browser could not save the private session.');
+  csrf = result.csrf;
+  if (remember) await rememberApiKey(apiKey);
+  return result;
+}
 async function bootstrap() {
   try {
     const session = await api('/api/session');
     if (session.setupRequired) return show('setup-needed');
-    if (!session.authenticated) { clearSessionToken(); sessionToken = ''; csrf = ''; return show('login'); }
+    if (!session.authenticated) {
+      clearSessionToken(); sessionToken = ''; csrf = '';
+      if (!autoLoginTried) {
+        autoLoginTried = true;
+        const remembered = await loadRememberedApiKey();
+        if (remembered) {
+          try { await connectWithKey(remembered, false); return await bootstrap(); }
+          catch { clearSessionToken(); sessionToken = ''; csrf = ''; }
+        }
+      }
+      return show('login');
+    }
     csrf = session.csrf; show('workspace'); await discoveryUI.activate();
   } catch (error) { show('loading'); $('loading').querySelector('p').textContent = error.message; }
 }
 $('login-form').addEventListener('submit', async event => {
-  event.preventDefault(); const button = event.submitter; button.disabled = true; text('login-message', 'Signing in…');
-  const password = $('password').value; $('password').value = '';
-  try { const result = await api('/api/login', { method: 'POST', data: { password } }); sessionToken = result.sessionToken || ''; if (!sessionToken || !setSessionToken(sessionToken)) throw new Error('The browser could not save the private session.'); csrf = result.csrf; text('login-message', ''); await bootstrap(); }
-  catch (error) { text('login-message', error.message, true); }
+  event.preventDefault(); const button = event.submitter; button.disabled = true; text('login-message', 'Checking TorBox…');
+  const apiKey = $('api-key').value; $('api-key').value = '';
+  try { await connectWithKey(apiKey, $('remember-key').checked); text('login-message', ''); await bootstrap(); }
+  catch (error) { clearSessionToken(); sessionToken = ''; csrf = ''; text('login-message', error.message, true); }
   finally { button.disabled = false; }
+});
+$('forget-key').addEventListener('click', async () => {
+  await forgetApiKey(); $('remember-key').checked = false; text('login-message', 'Saved key removed from this device.');
 });
 $('logout').addEventListener('click', async () => {
   await stopPlayback();
-  try { await api('/api/logout', { method: 'POST', data: {} }); clearSessionToken(); sessionToken = ''; csrf = ''; files = []; $('files').replaceChildren(); $('diagnostics').textContent = ''; $('owner-password').value = ''; try { sessionStorage.removeItem('tw-viewer'); } catch {} show('login'); }
+  try { await api('/api/logout', { method: 'POST', data: {} }); clearSessionToken(); sessionToken = ''; csrf = ''; files = []; $('files').replaceChildren(); $('diagnostics').textContent = ''; $('owner-password').value = ''; try { sessionStorage.removeItem('tw-viewer'); } catch {} autoLoginTried = true; show('login'); }
   catch (error) { text('library-message', error.message, true); }
 });
 function renderFiles() {
@@ -167,9 +191,9 @@ $('owner-form').addEventListener('submit', async event => {
   event.preventDefault(); const button = event.submitter; button.disabled = true;
   const password = $('owner-password').value; $('owner-password').value = ''; text('owner-message', 'Checking connection…'); $('diagnostics').textContent = '';
   try {
-    await api('/api/owner/unlock', { method: 'POST', data: { password } }); $('revoke').hidden = false;
+    await api('/api/owner/unlock', { method: 'POST', data: { apiKey: password } }); $('revoke').hidden = false;
     const result = await api('/api/owner/diagnostics', { method: 'POST', data: {} });
-    text('owner-message', 'TorBox accepted the key. Video is direct from TorBox; Render handles only control/API requests.');
+    text('owner-message', 'TorBox accepted this key. Render is holding it only in this process session; video remains direct from TorBox.');
     $('diagnostics').textContent = JSON.stringify(result, null, 2);
   } catch (error) { text('owner-message', error.message, true); }
   finally { button.disabled = false; }

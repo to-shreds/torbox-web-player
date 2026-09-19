@@ -1,4 +1,4 @@
-const DEFAULT_API_ORIGIN = 'https://torbox-web-player.onrender.com';
+const DEFAULT_API_ORIGIN = 'https://torbox-web-player-key.onrender.com';
 const browser = typeof location !== 'undefined';
 const configured = typeof document !== 'undefined' ? document.querySelector('meta[name="api-origin"]')?.content?.trim() : '';
 export const API_ORIGIN = new URL(configured || (browser ? location.origin : DEFAULT_API_ORIGIN), DEFAULT_API_ORIGIN).origin;

@@ -41,10 +41,11 @@ async function body(request) {
   try { const data = JSON.parse(Buffer.concat(chunks).toString('utf8')); if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error(); return data; }
   catch { throw new AppError('INVALID_JSON', 'This request could not be read.', 400); }
 }
-export function createApp({ env = process.env, provider, discoveryFetch = fetch, discoveryService, sourceLookupService, now = Date.now } = {}) {
+export function createApp({ env = process.env, provider, providerFactory, discoveryFetch = fetch, discoveryService, sourceLookupService, now = Date.now } = {}) {
   const production = env.NODE_ENV === 'production';
   const origin = env.PUBLIC_ORIGIN || env.RENDER_EXTERNAL_URL || `http://localhost:${env.PORT || 10000}`;
   const passwordHash = env.HOUSEHOLD_PASSWORD_HASH || '';
+  const apiKeyMode = env.AUTH_MODE === 'api-key';
   const frontendOrigins = new Set((env.FRONTEND_ORIGINS || '').split(',').map(value => value.trim()).filter(Boolean));
   frontendOrigins.add(origin);
   const trustedOrigin = value => typeof value === 'string' && frontendOrigins.has(value);
@@ -63,10 +64,11 @@ export function createApp({ env = process.env, provider, discoveryFetch = fetch,
   let activeLogins = 0;
   const mediaHosts = (env.MEDIA_HOST_SUFFIXES || TORBOX_MEDIA_HOSTS.join(',')).split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
   const torbox = provider || new TorBox({ key: env.TORBOX_API_KEY || '', mediaHosts });
+  const makeProvider = key => providerFactory ? providerFactory(key) : new TorBox({ key, mediaHosts });
   const discovery = discoveryService || new Discovery({ provider: torbox, fetchFn: discoveryFetch, now });
   const sourceLookup = sourceLookupService || new SourceLookup({ fetchFn: discoveryFetch, now, provider: env.SOURCE_PROVIDER || 'zilean' });
   const catalogRate = new Limiter(90, 60000, now), preparationRate = new Limiter(8, 60000, now);
-  const configured = validHash(passwordHash);
+  const configured = apiKeyMode || validHash(passwordHash);
   const setCookie = (response, value, maxAge = 30 * 86400) => response.setHeader('Set-Cookie', `tw_session=${value}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${production ? '; Secure' : ''}`);
   const server = http.createServer(async (request, response) => {
     response.setHeader('Cache-Control', 'no-store, private');
@@ -85,7 +87,7 @@ export function createApp({ env = process.env, provider, discoveryFetch = fetch,
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.4.2', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.5.0-key-clone', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
@@ -97,42 +99,63 @@ export function createApp({ env = process.env, provider, discoveryFetch = fetch,
       const bearerSession = !!bearer && !!session;
       if (!path.startsWith('/api/')) throw new AppError('NOT_FOUND', 'Page not found.', 404);
       if (!['GET', 'HEAD'].includes(method) && !trustedOrigin(request.headers.origin)) throw new AppError('BAD_ORIGIN', 'Reload the website before trying again.', 403);
-      if (path === '/api/session' && method === 'GET') return json(response, 200, { authenticated: !!session, setupRequired: !configured, ...(session ? { csrf: session.csrf, viewers: VIEWERS, durable: false, keyConfigured: !!(env.TORBOX_API_KEY || provider) } : {}) });
+      if (path === '/api/session' && method === 'GET') return json(response, 200, { authenticated: !!session, setupRequired: !configured, authMode: apiKeyMode ? 'api-key' : 'household', ...(session ? { csrf: session.csrf, viewers: VIEWERS, durable: false, keyConfigured: apiKeyMode ? !!session.provider : !!(env.TORBOX_API_KEY || provider) } : {}) });
       if (path === '/api/login' && method === 'POST') {
-        if (!configured) throw new AppError('SETUP_REQUIRED', 'Complete the secure Render setup first.', 503);
+        if (!configured) throw new AppError('SETUP_REQUIRED', 'This clone is not configured for authentication.', 503);
         if (!loginRate.allow('household') || activeLogins >= 2) throw new AppError('LOGIN_RATE_LIMITED', 'Too many sign-in attempts. Try again in 15 minutes.', 429);
-        const data = await body(request); activeLogins++;
-        let ok; try { ok = await verifyPassword(data.password, passwordHash); } finally { activeLogins--; }
-        if (!ok) throw new AppError('WRONG_PASSWORD', 'That household password did not match.', 401);
+        const data = await body(request);
+        let sessionProvider = null, sessionDiscovery = null;
+        activeLogins++;
+        try {
+          if (apiKeyMode) {
+            const key = typeof data.apiKey === 'string' ? data.apiKey.trim() : '';
+            if (key.length < 8 || key.length > 512 || /[\u0000-\u001f\u007f]/.test(key)) throw new AppError('BAD_API_KEY', 'Enter a valid TorBox API key.', 401);
+            sessionProvider = makeProvider(key);
+            await sessionProvider.account();
+            sessionDiscovery = new Discovery({ provider: sessionProvider, fetchFn: discoveryFetch, now });
+          } else {
+            const ok = await verifyPassword(data.password, passwordHash);
+            if (!ok) throw new AppError('WRONG_PASSWORD', 'That household password did not match.', 401);
+          }
+        } finally { activeLogins--; }
         const created = sessions.create();
         if (!created) throw new AppError('SESSION_LIMIT', 'The session limit was reached. Restart the service to revoke old sessions.', 429);
-        if (session) { discovery.revoke(session.id); sessions.revoke(session.id); }
-        setCookie(response, created.id); return json(response, 200, { ok: true, csrf: created.row.csrf, sessionToken: created.id });
+        if (apiKeyMode) { created.row.provider = sessionProvider; created.row.discovery = sessionDiscovery; }
+        if (session) { (session.discovery || discovery).revoke(session.id); sessions.revoke(session.id); }
+        setCookie(response, created.id); return json(response, 200, { ok: true, csrf: created.row.csrf, sessionToken: created.id, authMode: apiKeyMode ? 'api-key' : 'household' });
       }
-      if (!session) throw new AppError('LOGIN_REQUIRED', 'Sign in to your household first.', 401);
+      if (!session) throw new AppError('LOGIN_REQUIRED', apiKeyMode ? 'Enter your TorBox API key to sign in.' : 'Sign in to your household first.', 401);
+      const activeProvider = session.provider || torbox;
+      const activeDiscovery = session.discovery || discovery;
       if (!['GET', 'HEAD'].includes(method) && !bearerSession && request.headers['x-csrf-token'] !== session.csrf) throw new AppError('BAD_CSRF', 'Reload the page and try again.', 403);
-      if (path === '/api/logout' && method === 'POST') { discovery.revoke(session.id); sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
+      if (path === '/api/logout' && method === 'POST') { activeDiscovery.revoke(session.id); if (session.provider) session.provider.key = ''; sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
       if (path === '/api/owner/unlock' && method === 'POST') {
-        if (!loginRate.allow('household') || activeLogins >= 2) throw new AppError('LOGIN_RATE_LIMITED', 'Too many password checks. Try again in 15 minutes.', 429);
+        if (!loginRate.allow('household') || activeLogins >= 2) throw new AppError('LOGIN_RATE_LIMITED', 'Too many credential checks. Try again in 15 minutes.', 429);
         const data = await body(request); activeLogins++;
-        let ok; try { ok = await verifyPassword(data.password, passwordHash); } finally { activeLogins--; }
-        if (!ok) throw new AppError('WRONG_PASSWORD', 'That household password did not match.', 401);
+        let ok = false;
+        try {
+          if (apiKeyMode) {
+            const supplied = typeof data.apiKey === 'string' ? data.apiKey.trim() : '';
+            ok = !!session.provider?.key && supplied === session.provider.key;
+          } else ok = await verifyPassword(data.password, passwordHash);
+        } finally { activeLogins--; }
+        if (!ok) throw new AppError(apiKeyMode ? 'BAD_API_KEY' : 'WRONG_PASSWORD', apiKeyMode ? 'That TorBox API key did not match this session.' : 'That household password did not match.', 401);
         session.ownerUntil = now() + 5 * 60000; return json(response, 200, { ok: true });
       }
       if (path.startsWith('/api/owner/')) {
         if (session.ownerUntil <= now()) throw new AppError('OWNER_REAUTH_REQUIRED', 'Re-enter the household password to open owner tools.', 403);
-        if (path === '/api/owner/revoke' && method === 'POST') { discovery.revokeAll(); sessions.revokeAll(); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
+        if (path === '/api/owner/revoke' && method === 'POST') { discovery.revokeAll(); for (const row of sessions.rows.values()) { row.discovery?.revokeAll(); if (row.provider) row.provider.key = ''; } sessions.revokeAll(); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
         if (path === '/api/owner/diagnostics' && method === 'POST') {
           if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before checking again.', 429);
-          const account = await torbox.account();
-          return json(response, 200, { account, directMedia: true, proxyEnabled: false, mediaRelayEnabled: false, credentialProtection: 'The signed-in browser intentionally receives the temporary TorBox media URL/token.', discoveryConfigured: true, catalogProvider: 'Cinemeta', sourceProvider: 'Zilean (server-side)', progressStorage: 'temporary server memory', automaticNextEnabled: false });
+          const account = await activeProvider.account();
+          return json(response, 200, { account, authMode: apiKeyMode ? 'api-key' : 'household', apiKeyPersistence: apiKeyMode ? 'Render process memory only' : 'Render environment', directMedia: true, proxyEnabled: false, mediaRelayEnabled: false, credentialProtection: apiKeyMode ? 'The API key is supplied by the browser and retained only in this process session.' : 'The signed-in browser intentionally receives the temporary TorBox media URL/token.', discoveryConfigured: true, catalogProvider: 'Cinemeta', sourceProvider: 'Zilean (server-side)', progressStorage: 'temporary server memory', automaticNextEnabled: false });
         }
       }
       if (path.startsWith('/api/discover/')) {
         if (!catalogRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Please pause before checking more titles.', 429);
         let result;
-        if (path === '/api/discover/catalog' && method === 'GET') result = await discovery.catalog.search({ type: url.searchParams.get('type') || 'movie', q: url.searchParams.get('q') || '', skip: Number(url.searchParams.get('skip') || 0), genre: url.searchParams.get('genre') || '' });
-        else if (path === '/api/discover/meta' && method === 'GET') result = { meta: await discovery.catalog.meta(url.searchParams.get('type'), url.searchParams.get('id')) };
+        if (path === '/api/discover/catalog' && method === 'GET') result = await activeDiscovery.catalog.search({ type: url.searchParams.get('type') || 'movie', q: url.searchParams.get('q') || '', skip: Number(url.searchParams.get('skip') || 0), genre: url.searchParams.get('genre') || '' });
+        else if (path === '/api/discover/meta' && method === 'GET') result = { meta: await activeDiscovery.catalog.meta(url.searchParams.get('type'), url.searchParams.get('id')) };
         else if (path === '/api/discover/lookup' && method === 'GET') {
           const type = url.searchParams.get('type');
           result = await sourceLookup.lookup({ type, id: url.searchParams.get('id'), ...(type === 'series' ? {
@@ -140,21 +163,21 @@ export function createApp({ env = process.env, provider, discoveryFetch = fetch,
             episode: url.searchParams.has('episode') ? Number(url.searchParams.get('episode')) : undefined
           } : {}) });
         }
-        else if (path === '/api/discover/sources' && method === 'POST') result = await discovery.register(await discoveryBody(request), session.id);
+        else if (path === '/api/discover/sources' && method === 'POST') result = await activeDiscovery.register(await discoveryBody(request), session.id);
         else if (path === '/api/discover/prepare' && method === 'POST') {
           if (!preparationRate.allow('household')) throw new AppError('SLOW_DOWN', 'Too many preparation requests. Check existing preparations before adding another.', 429);
           const data = await discoveryBody(request);
-          result = await discovery.prepare(data.source, session.id, data.onlyCached === true);
+          result = await activeDiscovery.prepare(data.source, session.id, data.onlyCached === true);
         } else if (path === '/api/discover/status' && method === 'GET') {
           const selected = url.searchParams.get('file'); if (selected) parseVideoId(selected);
-          result = await discovery.status(url.searchParams.get('source'), session.id, selected);
+          result = await activeDiscovery.status(url.searchParams.get('source'), session.id, selected);
         } else throw new AppError('NOT_FOUND', 'This catalog action is not available.', 404);
         if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
         return json(response, 200, result);
       }
       if (path === '/api/library' && method === 'GET') {
         if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before refreshing again.', 429);
-        return json(response, 200, await torbox.list(url.searchParams.get('kind') || 'torrents', Number(url.searchParams.get('offset') || 0), url.searchParams.get('refresh') === '1'));
+        return json(response, 200, await activeProvider.list(url.searchParams.get('kind') || 'torrents', Number(url.searchParams.get('offset') || 0), url.searchParams.get('refresh') === '1'));
       }
       if (path === '/api/playback' && method === 'POST') {
         if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before requesting another stream.', 429);
@@ -162,7 +185,7 @@ export function createApp({ env = process.env, provider, discoveryFetch = fetch,
         if (!validViewer(data.viewer)) throw new AppError('BAD_VIEWER', 'Choose a viewer first.', 400);
         parseVideoId(data.videoId);
         const intent = progress.beginIntent(data.viewer);
-        const stream = await torbox.resolveForRelay(data.videoId);
+        const stream = await activeProvider.resolveForRelay(data.videoId);
         if (!progress.isCurrent(data.viewer, intent)) throw new AppError('PLAYBACK_SUPERSEDED', 'A newer playback request replaced this one.', 409);
         if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
         const lease = progress.start(data.viewer, data.videoId, { reset: data.startOver === true, sessionId: session.id });
@@ -187,6 +210,6 @@ export function createApp({ env = process.env, provider, discoveryFetch = fetch,
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.4.2' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.5.0-key-clone' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }
