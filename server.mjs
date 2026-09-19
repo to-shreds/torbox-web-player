@@ -249,11 +249,11 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         if (session.guest && !session.allowedVideos?.has(data.videoId)) throw new AppError('GUEST_FORBIDDEN', 'This file was not selected through the shared title.', 403);
         const progressViewer = session.guest ? 'guest:' + session.id : data.viewer;
         const intent = progress.beginIntent(progressViewer);
-        const stream = await activeProvider.resolveForRelay(data.videoId);
+        const stream = session.guest ? await activeProvider.resolve(data.videoId) : await activeProvider.resolveForRelay(data.videoId);
         if (!progress.isCurrent(progressViewer, intent)) throw new AppError('PLAYBACK_SUPERSEDED', 'A newer playback request replaced this one.', 409);
         if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
         const lease = progress.start(progressViewer, data.videoId, { reset: data.startOver === true, sessionId: session.id });
-        return json(response, 200, { file: stream.file, mediaUrl: stream.upstreamUrl, delivery: 'direct', conversion: false, exposesTorBoxToken: true, ...lease });
+        return json(response, 200, { file: stream.file, mediaUrl: session.guest ? stream.url : stream.upstreamUrl, delivery: 'direct', conversion: false, exposesTorBoxToken: true, guestSafeLink: session.guest === true, ...lease });
       }
       if (path === '/api/progress' && method === 'PUT') {
         if (!progressRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Progress is being saved too frequently.', 429);
