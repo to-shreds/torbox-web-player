@@ -1,7 +1,7 @@
 import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js';
 import { isTrustedDirectMediaUrl } from './runtime.js';
 
-export const DIRECT_BUILD = 'browser-direct-0.3';
+export const DIRECT_BUILD = 'browser-direct-0.4';
 
 const CATALOG_ORIGINS = new Set(['v3-cinemeta.strem.io', 'cinemeta-catalogs.strem.io']);
 const SOURCE_ENDPOINTS = Object.freeze({
@@ -449,7 +449,7 @@ async function relayConfig(){
   relayConfigCache=value;relayConfigAt=Date.now();return value;
 }
 function bridgeRetryable(status){return status===408||status===429||status>=500}
-async function bridgeOne(origin,route,{params={},method='GET',json,timeoutMs=7000,label='torbox_bridge'}={}){
+async function bridgeOne(origin,route,{params={},method='GET',json,timeoutMs=2000,label='torbox_bridge'}={}){
   const key=requireKey(),url=new URL('/relay/torbox/'+route,origin);
   for(const [name,value] of Object.entries(params)){if(Array.isArray(value)){for(const item of value)url.searchParams.append(name,String(item));}else if(value!==undefined&&value!==null)url.searchParams.set(name,String(value));}
   const started=performance.now();
@@ -956,10 +956,26 @@ export async function runDirectDiagnostics(overrideKey = '') {
   const cfg=await relayConfig();
   tests.push(bridgeHealth(cfg.primary,'bridge_render_health'),bridgeHealth(cfg.secondary,'bridge_cloudflare_health'));
   const results = await Promise.all(tests);
-  const blockers = results.filter(row => !['DIRECT_OK','NOT_CONFIGURED'].includes(row.status)).map(row => row.id);
+  const byId=Object.fromEntries(results.map(row=>[row.id,row]));
+  const directSourceIds=['stremthru_main','stremthru_elf','mediafusion'];
+  const sourceProvidersDirect=directSourceIds.filter(id=>byId[id]?.status==='DIRECT_OK');
+  const architecture={
+    catalogDirect:byId.cinemeta?.status==='DIRECT_OK',
+    sourceProvidersDirect,
+    renderBridge:byId.bridge_render_health?.status==='DIRECT_OK',
+    cloudflareBridge:byId.bridge_cloudflare_health?.status==='DIRECT_OK'
+  };
+  architecture.torboxBridgeAvailable=architecture.renderBridge||architecture.cloudflareBridge;
+  architecture.redundantTorboxReady=architecture.renderBridge&&architecture.cloudflareBridge;
+  const blockers=[];
+  if(!architecture.catalogDirect)blockers.push('catalog');
+  if(!sourceProvidersDirect.length)blockers.push('source_discovery');
+  if(!architecture.torboxBridgeAvailable)blockers.push('torbox_bridge');
+  const expectedDirectLimitations=['torbox_user','torbox_mylist','torbox_relay_status_public','torbox_relay_status_auth'].filter(id=>byId[id]&&byId[id].status!=='DIRECT_OK');
+  const optionalFailures=['zilean'].filter(id=>byId[id]&&byId[id].status!=='DIRECT_OK');
 
   lastDiagnostic = {
-    schema: 'torbox-browser-direct-diagnostics-v1',
+    schema: 'torbox-browser-direct-diagnostics-v2',
     build: DIRECT_BUILD,
     generatedAt: new Date().toISOString(),
     environment: {
@@ -972,7 +988,10 @@ export async function runDirectDiagnostics(overrideKey = '') {
       credentialSupplied: !!key
     },
     results,
+    architecture,
     blockers,
+    expectedDirectLimitations,
+    optionalFailures,
     recentTrace: traces.slice(-60)
   };
   return lastDiagnostic;
