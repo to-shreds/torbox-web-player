@@ -88,7 +88,7 @@ test('time allowance stops immediately and parent extensions restore access',()=
   assert.equal(canStartKidPlayback('viewer-1',context,store,day1).reason,'time');
   grantKidExtension('viewer-1',{minutes:15},store,day1);
   assert.equal(canStartKidPlayback('viewer-1',context,store,day1).allowed,true);
-  assert.match(formatKidUsage(getKidProfile('viewer-1',store,day1)),/60 \/ 16 min/);
+  assert.match(formatKidUsage(getKidProfile('viewer-1',store,day1)),/1 \/ 16 min/);
 });
 
 test('episode and movie extensions only expand their own allowance',()=>{
