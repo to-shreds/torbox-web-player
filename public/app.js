@@ -6,14 +6,18 @@ import { listRecent, recordRecent, removeRecent, recentForContext, resumePositio
 import { getSettings, saveSettings, resetSettings } from './settings.js';
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js';
 import { clearSearchHistory } from './search-history.js';
+import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js';
 const $ = id => document.getElementById(id);
-let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false;
+let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '';
 let discoveryUI;
 let viewer = 'viewer-1';
-try { const saved = sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
+try { const saved = localStorage.getItem('tw-viewer') || sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
 $('viewer').value = viewer;
+function kidEnabled(){return !guestMode&&getKidProfile(viewer).enabled===true;}
 function applyInterfaceMode(){
-  const full=getSettings().interfaceMode==='full';document.body.classList.toggle('mode-full',full);document.body.classList.toggle('mode-simple',!full);
+  const kid=kidEnabled(),full=!kid&&getSettings().interfaceMode==='full';
+  document.body.classList.toggle('mode-full',full);document.body.classList.toggle('mode-simple',!full);document.body.classList.toggle('kid-mode',kid);
+  const badge=$('kid-mode-badge');if(badge){badge.hidden=!kid;badge.title=kid?formatKidUsage(getKidProfile(viewer)):'';}
 }
 applyInterfaceMode();
 function setPlaybackHealth(state,detail=''){
@@ -26,6 +30,24 @@ function setHealthSource(context=active){
   for(const id of ['health-sound-good','health-sound-bad','health-source-bad'])$(id).disabled=!source;
 }
 function text(id, value, error = false) { $(id).textContent = value; $(id).classList.toggle('error', error); }
+function requestParentPin(message,onSuccess){
+  if(!hasParentPin()){if(typeof onSuccess==='function')onSuccess();return;}
+  parentPinCallback=onSuccess;$('parent-pin-prompt').textContent=message||'Enter the Parent PIN.';
+  $('parent-pin-input').value='';text('parent-pin-message','');
+  if(!$('parent-pin-dialog').open)$('parent-pin-dialog').showModal();
+  setTimeout(()=>$('parent-pin-input').focus(),0);
+}
+$('close-parent-pin').addEventListener('click',()=>{parentPinCallback=null;$('parent-pin-dialog').close();});
+$('parent-pin-form').addEventListener('submit',async event=>{
+  event.preventDefault();const button=event.submitter;button.disabled=true;text('parent-pin-message','Checking…');
+  try{
+    const ok=await verifyParentPin($('parent-pin-input').value);$('parent-pin-input').value='';
+    if(!ok){text('parent-pin-message','Incorrect PIN.',true);return;}
+    const callback=parentPinCallback;parentPinCallback=null;$('parent-pin-dialog').close();text('parent-pin-message','');
+    if(typeof callback==='function')await callback();
+  }catch(error){text('parent-pin-message',error.message,true);}
+  finally{button.disabled=false;}
+});
 function formatDriveSize(bytes) { return Number.isFinite(bytes) && bytes > 0 ? (bytes / 1024 ** 3).toFixed(2) + ' GB' : 'size unknown'; }
 function formatDriveElapsed(ms) {
   const seconds = Math.max(0, Math.round((ms || 0) / 1000));
@@ -238,7 +260,7 @@ $('login-form').addEventListener('submit', async event => {
 $('forget-key').addEventListener('click', async () => {
   await forgetApiKey(); $('remember-key').checked = false; text('login-message', 'Saved key removed from this device.');
 });
-$('logout').addEventListener('click', async () => {
+async function performLogout(){
   await stopPlayback();
   try {
     await api('/api/logout', { method: 'POST', data: {} });
@@ -250,11 +272,21 @@ $('logout').addEventListener('click', async () => {
       autoLoginTried = true; show('login'); text('login-message', 'Temporary access ended.');
       return;
     }
-    try { sessionStorage.removeItem('tw-viewer'); } catch {}
     autoLoginTried = true; show('login');
   } catch (error) { text('login-message', error.message, true); }
+}
+$('logout').addEventListener('click',()=>{if(kidEnabled()&&hasParentPin())requestParentPin('Enter the Parent PIN to sign out.',performLogout);else performLogout();});
+async function switchViewer(next){
+  if(!['viewer-1','viewer-2'].includes(next)||next===viewer)return;
+  await stopPlayback();if($('player').open)$('player').close();viewer=next;$('viewer').value=viewer;
+  try{localStorage.setItem('tw-viewer',viewer);sessionStorage.setItem('tw-viewer',viewer);}catch{}
+  applyInterfaceMode();renderRecent();discoveryUI?.settingsChanged();
+}
+$('viewer').addEventListener('change',()=>{
+  const target=$('viewer').value;$('viewer').value=viewer;
+  const change=()=>switchViewer(target);
+  if(kidEnabled()&&hasParentPin())requestParentPin('Enter the Parent PIN to change viewers.',change);else change();
 });
-$('viewer').addEventListener('change', () => { stopPlayback(); if ($('player').open) $('player').close(); viewer = $('viewer').value; try { sessionStorage.setItem('tw-viewer', viewer); } catch {} });
 function hidePauseCard(){ $('pause-card').hidden=true; }
 function updatePauseCard(context=active){
   if(!context||!getSettings().pauseOverlay||!context.video?.paused||context.video.ended||!context.started){hidePauseCard();return;}
