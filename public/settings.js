@@ -15,6 +15,7 @@ export const DEFAULT_SETTINGS=Object.freeze({
   pauseOverlay:true,
   playbackRate:1,
   sleepTimerMinutes:0,
+  stillWatchingMinutes:90,
   keepAwake:true,
   keyboardShortcuts:true,
   seekSeconds:10,
@@ -42,6 +43,7 @@ const recent=new Set([4,6,8,10,12,16]);
 const nextDelay=new Set([0,5,8,10,15]);
 const rates=new Set([0.75,1,1.25,1.5,1.75,2]);
 const sleep=new Set([0,15,30,45,60,90]);
+const stillWatching=new Set([0,60,75,90,120]);
 const seeks=new Set([5,10,15,30]);
 const driveDelete=new Set([10,20,30,45]);
 const watchlistLimit=new Set([6,12,18,24]);
@@ -70,6 +72,7 @@ export function normalizeSettings(raw){
     pauseOverlay:s.pauseOverlay!==false,
     playbackRate:rates.has(Number(s.playbackRate))?Number(s.playbackRate):DEFAULT_SETTINGS.playbackRate,
     sleepTimerMinutes:sleep.has(Number(s.sleepTimerMinutes))?Number(s.sleepTimerMinutes):DEFAULT_SETTINGS.sleepTimerMinutes,
+    stillWatchingMinutes:stillWatching.has(Number(s.stillWatchingMinutes))?Number(s.stillWatchingMinutes):DEFAULT_SETTINGS.stillWatchingMinutes,
     keepAwake:s.keepAwake!==false,
     keyboardShortcuts:s.keyboardShortcuts!==false,
     seekSeconds:seeks.has(Number(s.seekSeconds))?Number(s.seekSeconds):DEFAULT_SETTINGS.seekSeconds,
