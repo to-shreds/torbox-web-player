@@ -2,7 +2,7 @@
 
 This branch is the browser-key clone of the household TorBox web player. The original player on `main` remains separate and is not modified by this branch.
 
-Current version: **0.13.0-key-clone**
+Current version: **0.13.1-key-clone**
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/key/`
 
@@ -72,14 +72,14 @@ Full mode includes a playback-health panel that distinguishes states such as Ope
 
 The player can remember a source after sustained successful playback and favor it or its release family later. This learning can be disabled or cleared in Settings.
 
-Additional optional player settings include playback speed, sleep timer, Screen Wake Lock where supported, pause overlay, keyboard seeking, and seek-step length.
+Additional optional player settings include playback speed, sleep timer, a configurable Still watching? guard, Screen Wake Lock where supported, pause overlay, keyboard seeking, and seek-step length. The Still watching? guard defaults to 90 minutes, can be set to Off, 60, 75, 90, or 120 minutes, and carries across auto-next episodes so short episodes cannot reset unattended playback indefinitely.
 
 ## Settings
 
 Settings are browser-local. Current groups include:
 
 - Interface: Simple or Full, long-press shortcuts.
-- Playback: default quality, source-size profile, speed, sleep timer, recovery timing, keyboard seeking, wake lock, playback health, source learning.
+- Playback: default quality, source-size profile, speed, sleep timer, Still watching? timeout, recovery timing, keyboard seeking, wake lock, playback health, source learning.
 - Episodes and history: rewind, Continue Watching count, auto-next and countdown, Next Up, watched/resume labels, completed-episode cleanup.
 - Discover, My list, and search: My list size, search-history size, remembered browse filters.
 - Drive sharing and app: Drive defaults, TorBox status check, app install, source-learning reset, search-history reset.
