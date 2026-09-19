@@ -1,7 +1,7 @@
 import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js';
 import { isTrustedDirectMediaUrl } from './runtime.js';
 
-export const DIRECT_BUILD = 'browser-direct-0.2';
+export const DIRECT_BUILD = 'browser-direct-0.3';
 
 const CATALOG_ORIGINS = new Set(['v3-cinemeta.strem.io', 'cinemeta-catalogs.strem.io']);
 const SOURCE_ENDPOINTS = Object.freeze({
@@ -435,35 +435,70 @@ function requireKey() {
   return credential;
 }
 
-async function torboxFetch(path, { params = {}, method = 'GET', body, tokenInQuery = false, label } = {}) {
-  const key = requireKey();
-  const url = new URL(path, TORBOX_ORIGIN);
-  for (const [name, value] of Object.entries(params)) {
-    if (Array.isArray(value)) {
-      for (const item of value) url.searchParams.append(name, String(item));
-    } else if (value !== undefined && value !== null) {
-      url.searchParams.set(name, String(value));
+const DEFAULT_RELAY_PRIMARY='https://torbox-web-player-key.onrender.com';
+let relayConfigCache=null,relayConfigAt=0,primaryCooldownUntil=0;
+async function relayConfig(){
+  if(relayConfigCache&&Date.now()-relayConfigAt<300000)return relayConfigCache;
+  let value={primary:DEFAULT_RELAY_PRIMARY,secondary:''};
+  try{
+    const response=await fetch('./relay-config.json',{cache:'no-store',credentials:'same-origin',signal:AbortSignal.timeout(5000)});
+    if(response.ok){const data=await response.json();for(const name of ['primary','secondary'])if(typeof data?.[name]==='string')value[name]=data[name].replace(/\/+$/,'');}
+  }catch{}
+  const valid=url=>{try{const u=new URL(url);return u.protocol==='https:'&&!u.username&&!u.password?u.origin:''}catch{return''}};
+  value={primary:valid(value.primary)||DEFAULT_RELAY_PRIMARY,secondary:valid(value.secondary)};
+  relayConfigCache=value;relayConfigAt=Date.now();return value;
+}
+function bridgeRetryable(status){return status===408||status===429||status>=500}
+async function bridgeOne(origin,route,{params={},method='GET',json,timeoutMs=7000,label='torbox_bridge'}={}){
+  const key=requireKey(),url=new URL('/relay/torbox/'+route,origin);
+  for(const [name,value] of Object.entries(params)){if(Array.isArray(value)){for(const item of value)url.searchParams.append(name,String(item));}else if(value!==undefined&&value!==null)url.searchParams.set(name,String(value));}
+  const started=performance.now();
+  try{
+    const response=await fetch(url,{method,headers:{Accept:'application/json',Authorization:'Bearer '+key,...(json?{'Content-Type':'application/json'}:{})},body:json?JSON.stringify(json):undefined,credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(timeoutMs)});
+    const backend=response.headers.get('x-torbox-bridge')||(origin.includes('onrender.com')?'render':'cloudflare');
+    trace(label,response.ok?'ok':'http_error',{backend,httpStatus:response.status,durationMs:Math.round(performance.now()-started)});
+    return{response,backend,origin};
+  }catch(error){
+    trace(label,['TimeoutError','AbortError'].includes(error?.name)?'timeout':'fetch_error',{backend:origin.includes('onrender.com')?'render':'cloudflare',error:safeError(error),durationMs:Math.round(performance.now()-started)});
+    const e=directError('BRIDGE_UNAVAILABLE','The TorBox bridge could not be reached.',503);e.retryable=true;e.ambiguous=true;throw e;
+  }
+}
+async function bridgeRequest(route,options={}){
+  const cfg=await relayConfig(),preferBackup=cfg.secondary&&Date.now()<primaryCooldownUntil;
+  const order=preferBackup?[cfg.secondary,cfg.primary]:[cfg.primary,cfg.secondary].filter(Boolean);
+  let last;
+  for(let i=0;i<order.length;i++){
+    try{
+      const result=await bridgeOne(order[i],route,options);
+      if(result.response.ok)return result;
+      if(!bridgeRetryable(result.response.status)||i===order.length-1)return result;
+      last=result;
+      if(order[i]===cfg.primary)primaryCooldownUntil=Date.now()+120000;
+    }catch(error){
+      last=error;
+      if(i===order.length-1)throw error;
+      if(order[i]===cfg.primary)primaryCooldownUntil=Date.now()+120000;
     }
   }
-  const headers = { Accept: 'application/json' };
-  if (tokenInQuery) url.searchParams.set('token', key);
-  else headers.Authorization = 'Bearer ' + key;
+  if(last?.response)return last;throw last||directError('BRIDGE_UNAVAILABLE','No TorBox bridge is configured.',503);
+}
+async function bridgeHealth(origin,label){
+  if(!origin)return{id:label,label,status:'NOT_CONFIGURED',httpStatus:null,durationMs:0,corsReadable:false,note:'No backup relay URL is configured.'};
+  const started=performance.now();
+  try{const r=await fetch(new URL('/relay/health',origin),{cache:'no-store',credentials:'omit',signal:AbortSignal.timeout(7000)});return{id:label,label,status:r.ok?'DIRECT_OK':'HTTP_ERROR',httpStatus:r.status,durationMs:Math.round(performance.now()-started),corsReadable:true,note:r.ok?'Relay health endpoint is reachable.':'Relay health endpoint returned HTTP '+r.status+'.'};}
+  catch(e){return{id:label,label,status:['TimeoutError','AbortError'].includes(e?.name)?'TIMEOUT':'NETWORK_ERROR',httpStatus:null,durationMs:Math.round(performance.now()-started),corsReadable:false,note:'Relay health endpoint could not be reached.'};}
+}
 
-  const response = await fetchDirect(
-    label || ('torbox_' + path.replace(/[^a-z0-9]+/gi, '_')),
-    url,
-    { method, headers, body, redirect: 'follow' },
-    20000
-  );
-  if ([401, 403].includes(response.status)) throw directError('TORBOX_ACCESS_DENIED', 'TorBox rejected this API key.', 401);
-  if (response.status === 429) throw directError('TORBOX_RATE_LIMITED', 'TorBox is rate limiting requests.', 429);
-  if (!response.ok) throw directError('TORBOX_HTTP_ERROR', 'TorBox returned HTTP ' + response.status, response.status);
-
-  const text = await readText(response, 8 * 1024 * 1024);
-  if (!text) return null;
-  const payload = safeJson(text, 'TorBox');
-  if (payload?.success === false) throw directError('TORBOX_REQUEST_FAILED', 'TorBox reported that the request failed.');
-  return payload && Object.hasOwn(payload, 'data') ? payload.data : payload;
+async function torboxFetch(path,{params={},method='GET',body,label}={}){
+  const json=path==='torrents/createtorrent'&&body?body:undefined;
+  const result=await bridgeRequest(path,{params,method,json,label:label||('torbox_'+path.replace(/[^a-z0-9]+/gi,'_'))});
+  const response=result.response;
+  if([401,403].includes(response.status))throw directError('TORBOX_ACCESS_DENIED','TorBox rejected this API key.',401);
+  if(response.status===429)throw directError('TORBOX_RATE_LIMITED','TorBox or the primary bridge is rate limiting requests.',429);
+  if(!response.ok)throw directError('TORBOX_HTTP_ERROR','TorBox bridge returned HTTP '+response.status,response.status);
+  const text=await response.text();if(!text)return null;const payload=safeJson(text,'TorBox');
+  if(payload?.success===false)throw directError('TORBOX_REQUEST_FAILED','TorBox reported that the request failed.');
+  return payload&&Object.hasOwn(payload,'data')?payload.data:payload;
 }
 
 async function torboxAccount() {
@@ -476,29 +511,11 @@ async function torboxAccount() {
   };
 }
 
-async function torboxCached(hashes) {
-  if (!hashes.length) return {};
-  const url = new URL('torrents/checkcached', TORBOX_ORIGIN);
-  for (const hash of hashes) url.searchParams.append('hash', hash);
-  url.searchParams.set('format', 'object');
-  url.searchParams.set('list_files', 'false');
-  const key = requireKey();
-  const response = await fetchDirect(
-    'torbox_checkcached',
-    url,
-    { headers: { Accept: 'application/json', Authorization: 'Bearer ' + key } },
-    20000
-  );
-  if (!response.ok) throw directError('TORBOX_CACHE', 'TorBox cache check returned HTTP ' + response.status, response.status);
-  const payload = await readJson(response, 8 * 1024 * 1024);
-  const data = payload?.data ?? payload;
-  if (!data || typeof data !== 'object') throw directError('TORBOX_CACHE', 'TorBox returned an unreadable cache response.');
-  const output = {};
-  for (const hash of hashes) {
-    const row = data[hash];
-    output[hash] = row === true || !!(row && typeof row === 'object');
-  }
-  return output;
+async function torboxCached(hashes){
+  if(!hashes.length)return{};
+  const data=await torboxFetch('torrents/checkcached',{params:{hash:hashes,format:'object',list_files:false},label:'torbox_checkcached'});
+  if(!data||typeof data!=='object')throw directError('TORBOX_CACHE','TorBox returned an unreadable cache response.');
+  const output={};for(const hash of hashes){const row=data[hash];output[hash]=row===true||!!(row&&typeof row==='object');}return output;
 }
 
 function availability(item) {
@@ -572,24 +589,18 @@ async function findTorrent(hash) {
   throw directError('LIBRARY_LIMIT', 'The TorBox account is too large to safely scan.', 409);
 }
 
-async function createTorrent(hash, onlyCached) {
-  const form = new FormData();
-  form.set('magnet', 'magnet:?xt=urn:btih:' + hash);
-  form.set('allow_zip', 'false');
-  form.set('add_only_if_cached', String(onlyCached));
-  const key = requireKey();
-  const response = await fetchDirect(
-    'torbox_create_torrent',
-    new URL('torrents/createtorrent', TORBOX_ORIGIN),
-    { method: 'POST', headers: { Accept: 'application/json', Authorization: 'Bearer ' + key }, body: form },
-    25000
-  );
-  if (!response.ok) throw directError('TORBOX_CREATE', 'TorBox create returned HTTP ' + response.status, response.status);
-  const payload = await readJson(response, 4 * 1024 * 1024);
-  if (payload?.success !== true || !Number.isSafeInteger(payload?.data?.torrent_id)) {
-    throw directError('TORBOX_CREATE', 'TorBox did not confirm a torrent identifier.');
+async function createTorrent(hash,onlyCached){
+  try{
+    const data=await torboxFetch('torrents/createtorrent',{method:'POST',body:{hash,onlyCached},label:'torbox_create_torrent'});
+    if(!Number.isSafeInteger(data?.torrent_id))throw directError('TORBOX_CREATE','TorBox did not confirm a torrent identifier.');
+    return data.torrent_id;
+  }catch(error){
+    if(!error?.ambiguous)throw error;
+    for(let attempt=0;attempt<4;attempt++){await new Promise(r=>setTimeout(r,1200));const existing=await findTorrent(hash);if(existing)return existing.id;}
+    const data=await torboxFetch('torrents/createtorrent',{method:'POST',body:{hash,onlyCached},label:'torbox_create_torrent_backup'});
+    if(!Number.isSafeInteger(data?.torrent_id))throw directError('TORBOX_CREATE','TorBox did not confirm a torrent identifier.');
+    return data.torrent_id;
   }
-  return payload.data.torrent_id;
 }
 
 async function torrentItem(id) {
@@ -714,7 +725,6 @@ async function resolveVideo(videoId) {
   if (!file || file.state !== 'Ready to watch') throw directError('FILE_NOT_READY', 'This file is not ready.', 409);
   const link = await torboxFetch('torrents/requestdl', {
     params: { torrent_id: itemId, file_id: fileId, zip_link: false, redirect: false },
-    tokenInQuery: true,
     label: 'torbox_requestdl'
   });
   if (typeof link !== 'string' || !isTrustedDirectMediaUrl(link)) throw directError('MEDIA_HOST_NOT_VERIFIED', 'TorBox returned an untrusted playback URL.');
@@ -937,8 +947,10 @@ export async function runDirectDiagnostics(overrideKey = '') {
     }));
   }
 
+  const cfg=await relayConfig();
+  tests.push(bridgeHealth(cfg.primary,'bridge_render_health'),bridgeHealth(cfg.secondary,'bridge_cloudflare_health'));
   const results = await Promise.all(tests);
-  const blockers = results.filter(row => row.status !== 'DIRECT_OK').map(row => row.id);
+  const blockers = results.filter(row => !['DIRECT_OK','NOT_CONFIGURED'].includes(row.status)).map(row => row.id);
 
   lastDiagnostic = {
     schema: 'torbox-browser-direct-diagnostics-v1',
