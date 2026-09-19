@@ -18,6 +18,12 @@ const publicFiles = new Map([
   ['/runtime.js', ['runtime.js', 'text/javascript; charset=utf-8']],
   ['/history.js', ['history.js', 'text/javascript; charset=utf-8']],
   ['/settings.js', ['settings.js', 'text/javascript; charset=utf-8']],
+  ['/watchlist.js', ['watchlist.js', 'text/javascript; charset=utf-8']],
+  ['/search-history.js', ['search-history.js', 'text/javascript; charset=utf-8']],
+  ['/source-memory.js', ['source-memory.js', 'text/javascript; charset=utf-8']],
+  ['/sw.js', ['sw.js', 'text/javascript; charset=utf-8']],
+  ['/manifest.webmanifest', ['manifest.webmanifest', 'application/manifest+json; charset=utf-8']],
+  ['/icon.svg', ['icon.svg', 'image/svg+xml; charset=utf-8']],
   ['/playback-errors.js', ['playback-errors.js', 'text/javascript; charset=utf-8']],
   ['/discover.js', ['discover.js', 'text/javascript; charset=utf-8']],
   ['/source-client.js', ['source-client.js', 'text/javascript; charset=utf-8']],
@@ -94,7 +100,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.12.0-key-clone', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.13.0-key-clone', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
