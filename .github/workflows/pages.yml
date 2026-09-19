@@ -1,7 +1,7 @@
-name: Deploy frontend to GitHub Pages
+name: Deploy frontends to GitHub Pages
 on:
   push:
-    branches: [main]
+    branches: [main, browser-key-clone]
     paths:
       - 'public/**'
       - '.github/workflows/pages.yml'
@@ -20,14 +20,28 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout main player
         uses: actions/checkout@v6
+        with:
+          ref: main
+          path: main-src
+      - name: Checkout browser-key clone
+        uses: actions/checkout@v6
+        with:
+          ref: browser-key-clone
+          path: clone-src
+      - name: Assemble Pages site
+        shell: bash
+        run: |
+          mkdir -p site/key
+          cp -a main-src/public/. site/
+          cp -a clone-src/public/. site/key/
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Upload frontend
+      - name: Upload combined frontend
         uses: actions/upload-pages-artifact@v4
         with:
-          path: public
+          path: site
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
