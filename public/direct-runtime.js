@@ -1,7 +1,7 @@
 import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js';
 import { isTrustedDirectMediaUrl } from './runtime.js';
 
-export const DIRECT_BUILD = 'browser-direct-0.1';
+export const DIRECT_BUILD = 'browser-direct-0.2';
 
 const CATALOG_ORIGINS = new Set(['v3-cinemeta.strem.io', 'cinemeta-catalogs.strem.io']);
 const SOURCE_ENDPOINTS = Object.freeze({
@@ -11,6 +11,7 @@ const SOURCE_ENDPOINTS = Object.freeze({
   mediafusion: 'https://mediafusion.elfhosted.com/torznab'
 });
 const TORBOX_ORIGIN = 'https://api.torbox.app/v1/api/';
+const TORBOX_RELAY_ORIGIN = 'https://relay.torbox.app/';
 const MAX_TRACE = 160;
 
 let credential = '';
@@ -913,14 +914,16 @@ export async function runDirectDiagnostics(overrideKey = '') {
     probe('zilean', 'Zilean', 'https://zileanfortheweebs.midnightignite.me/dmm/filtered?ImdbId=tt0111161'),
     probe('stremthru_main', 'StremThru Main', SOURCE_ENDPOINTS.stremthruMain + '/stream/movie/tt0111161.json'),
     probe('stremthru_elf', 'StremThru ElfHosted', SOURCE_ENDPOINTS.stremthruElf + '/stream/movie/tt0111161.json'),
-    probe('mediafusion', 'MediaFusion Torznab', 'https://mediafusion.elfhosted.com/torznab?t=movie&imdbid=tt0111161&limit=1')
+    probe('mediafusion', 'MediaFusion Torznab', 'https://mediafusion.elfhosted.com/torznab?t=movie&imdbid=tt0111161&limit=1'),
+    probe('torbox_relay_status_public', 'TorBox Relay status (no auth)', TORBOX_RELAY_ORIGIN)
   ];
 
   if (key) {
     const headers = { Authorization: 'Bearer ' + key, Accept: 'application/json' };
     tests.push(
       probe('torbox_user', 'TorBox user/me', 'https://api.torbox.app/v1/api/user/me?settings=false', { headers }),
-      probe('torbox_mylist', 'TorBox torrent list', 'https://api.torbox.app/v1/api/torrents/mylist?offset=0&limit=1', { headers })
+      probe('torbox_mylist', 'TorBox torrent list', 'https://api.torbox.app/v1/api/torrents/mylist?offset=0&limit=1', { headers }),
+      probe('torbox_relay_status_auth', 'TorBox Relay status (Bearer auth)', TORBOX_RELAY_ORIGIN, { headers })
     );
   } else {
     tests.push(Promise.resolve({
