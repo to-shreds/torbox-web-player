@@ -134,3 +134,16 @@ main{max-width:1160px;padding:1rem clamp(.8rem,3vw,2rem) 3rem}.workspace-bar{dis
 #parent-pin-form,#parent-pin-change-form{display:grid;gap:.6rem}
 #parent-pin-form input,#parent-pin-change-form input,#kid-limit-pin-form input{width:100%;margin-top:.2rem}
 @media(max-width:620px){.kid-time-row{grid-template-columns:1fr 110px}.kid-parent-actions{grid-template-columns:1fr}}
+
+
+/* v1.0 focused search experience */
+.search-results-heading{margin:.3rem 0 .2rem;font-size:.95rem;color:#dce7f2;font-weight:700}
+.search-mode #search-history-section,
+.search-mode #next-up-section,
+.search-mode #recent-section,
+.search-mode #watchlist-section,
+.search-mode .catalog-filters,
+.search-mode .preview-note{display:none!important}
+.search-mode #discover-panel{margin-top:.15rem}
+.search-mode #catalog-message{margin-top:.25rem}
+@media(max-width:620px){.search-results-heading{font-size:.88rem;margin-top:.2rem}}

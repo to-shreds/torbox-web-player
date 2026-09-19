@@ -2,7 +2,7 @@
 
 This branch is the browser-key clone of the household TorBox web player. The original player on `main` remains separate and is not modified by this branch.
 
-Current version: **0.14.0-key-clone**
+Current version: **1.0.0**
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/key/`
 
@@ -45,6 +45,12 @@ Automatic source selection continues to prioritize browser-friendly cached sourc
 - Automatic exclusion of sources marked bad or known to have no sound on this device.
 
 These preferences are browser-local and do not change TorBox account data.
+
+## v1.0 stable release
+
+Version 1.0.0 marks the browser-key player as the first stable release. The core architecture, media path, discovery model, Simple/Full split, resume behavior, source recovery, PWA shell, and parental-control model are now established product behavior rather than experimental preview behavior.
+
+Search now has a focused interaction model. With an empty search field, the normal home rows remain visible. As soon as a query is active, Recent searches, Next Up, Continue Watching, My list, and browse filters are temporarily hidden so search results appear directly beneath the search area. Clearing the query restores the home experience. Pressing the Android keyboard Search/Enter action immediately runs the query and removes focus from the field so the soft keyboard collapses.
 
 ## Home experience
 

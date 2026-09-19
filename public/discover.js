@@ -76,13 +76,19 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     if(!getSettings().rememberBrowse)return;
     updateSettings({catalogType:$('catalog-type').value,catalogFeed:$('catalog-feed').value,catalogGenre:$('catalog-genre').value});
   }
+  function applySearchMode(){
+    const query=$('search').value.trim(),searching=!!query&&!guestMode;
+    document.body.classList.toggle('search-mode',searching);
+    const heading=$('search-results-heading');
+    if(heading){heading.hidden=!searching;heading.textContent=searching?`Search results for “${query}”`:'Search results';}
+  }
   function renderSearchHistory(){
     const section=$('search-history-section'),list=$('search-history-list'),settings=getSettings(),query=$('search').value.trim();
     if(!section||!list||guestMode||!settings.showSearchHistory||query){if(section)section.hidden=true;return;}
     const rows=listSearchHistory($('viewer').value).slice(0,settings.searchHistoryLimit);section.hidden=!rows.length;
     const fragment=document.createDocumentFragment();
     for(const row of rows){
-      const chip=element('span','','search-history-chip'),open=button(row.query,()=>{$('search').value=row.query;section.hidden=true;browse();}),remove=button('×',event=>{event.stopPropagation();removeSearch($('viewer').value,row.query);renderSearchHistory();});
+      const chip=element('span','','search-history-chip'),open=button(row.query,()=>{$('search').value=row.query;applySearchMode();section.hidden=true;browse();}),remove=button('×',event=>{event.stopPropagation();removeSearch($('viewer').value,row.query);renderSearchHistory();});
       remove.className='search-history-remove';remove.setAttribute('aria-label',`Remove search ${row.query}`);chip.append(open,remove);fragment.append(chip);
     }
     list.replaceChildren(fragment);
@@ -159,13 +165,13 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     }
     list.replaceChildren(fragment);
   }
-  async function openDiscover(){guestMode=false;$('page-title').textContent='Discover';$('search').placeholder='Search movies and shows';applyBrowsePreferences();renderWatchlist();renderSearchHistory();renderNextUp();await browse();}
+  async function openDiscover(){guestMode=false;$('page-title').textContent='Discover';$('search').placeholder='Search movies and shows';applyBrowsePreferences();applySearchMode();renderWatchlist();renderSearchHistory();renderNextUp();await browse();}
 
   async function browse(more=false){
     if(!active||guestMode)return;const offset=more?nextSkip:0;if(offset===null)return;
     const generation=++catalogGeneration;catalogAbort?.abort();catalogAbort=new AbortController();$('catalog-more').disabled=true;$('catalog-retry').hidden=true;
     if(!more){metas=[];nextSkip=null;$('catalog-grid').replaceChildren();$('catalog-more').hidden=true;}
-    const query=$('search').value.trim();message('catalog-message',query?'Searching…':'Loading browse…');
+    const query=$('search').value.trim();applySearchMode();message('catalog-message',query?'Searching…':'Loading browse…');
     try{
       const params=new URLSearchParams({type:$('catalog-type').value,q:query,skip:String(offset),genre:$('catalog-genre').value,feed:$('catalog-feed').value});
       const data=await api('/api/discover/catalog?'+params,{signal:AbortSignal.any([catalogAbort.signal,AbortSignal.timeout(20000)])});
@@ -401,7 +407,16 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
 
   for(const id of ['catalog-type','catalog-feed','catalog-genre'])$(id).addEventListener('change',()=>{persistBrowsePreferences();browse();});
   $('catalog-more').addEventListener('click',()=>browse(true));$('catalog-retry').addEventListener('click',()=>browse());
-  $('search').addEventListener('input',()=>{clearTimeout(searchTimer);renderSearchHistory();if(guestMode)return;++catalogGeneration;catalogAbort?.abort();searchTimer=setTimeout(()=>browse(),350);});
+  $('search').addEventListener('input',()=>{
+    clearTimeout(searchTimer);applySearchMode();renderSearchHistory();if(guestMode)return;++catalogGeneration;catalogAbort?.abort();
+    if(!$('search').value.trim()){browse();return;}
+    searchTimer=setTimeout(()=>browse(),350);
+  });
+  $('search').addEventListener('keydown',event=>{
+    if(event.key!=='Enter')return;
+    event.preventDefault();clearTimeout(searchTimer);applySearchMode();$('search').blur();
+    if(guestMode)return;++catalogGeneration;catalogAbort?.abort();browse();
+  });
   $('search').addEventListener('focus',renderSearchHistory);
   $('close-title').addEventListener('click',()=>$('title-dialog').close());$('title-dialog').addEventListener('close',()=>{++titleGeneration;titleAbort?.abort();});
   $('close-source').addEventListener('click',()=>$('source-dialog').close());$('source-dialog').addEventListener('close',cancelSource);
@@ -415,6 +430,6 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       await showTitle({type:scope.type,id:scope.id,name:scope.name||'Shared title',poster:scope.poster||''});
     },
     playNext,recoverPlayback,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
-    suspend(){active=false;guestMode=false;++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
+    suspend(){active=false;guestMode=false;document.body.classList.remove('search-mode');++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
   };
 }
