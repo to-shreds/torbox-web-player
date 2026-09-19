@@ -9,16 +9,17 @@
 <section id="login" class="panel narrow" hidden><p class="eyebrow">THIS DEVICE</p><h1>Connect TorBox</h1><p class="muted">Your API key is the sign-in. It is never committed to GitHub or stored in Render configuration.</p><form id="login-form"><label for="api-key">TorBox API key</label><input id="api-key" type="password" autocapitalize="none" spellcheck="false" autocomplete="off" maxlength="512" required><label class="remember-key"><input id="remember-key" type="checkbox"> Remember encrypted on this device</label><button class="primary" type="submit">Connect</button></form><button id="forget-key" class="text-button" type="button">Forget saved key</button><p id="login-message" role="status"></p></section>
 <section id="workspace" hidden>
 <h1 id="page-title" class="sr-only">Discover</h1>
-<div class="workspace-bar"><strong class="workspace-title">Discover</strong><div class="compact-actions"><label class="sr-only" for="viewer">Viewer</label><select id="viewer" aria-label="Viewer"><option value="viewer-1">Viewer 1</option><option value="viewer-2">Viewer 2</option></select><button id="logout" class="text-button">Sign out</button></div></div>
+<div class="workspace-bar"><strong class="workspace-title">Discover</strong><div class="compact-actions"><label class="sr-only" for="viewer">Viewer</label><select id="viewer" aria-label="Viewer"><option value="viewer-1">Viewer 1</option><option value="viewer-2">Viewer 2</option></select><button id="open-settings" class="text-button" type="button">Settings</button><button id="logout" class="text-button">Sign out</button></div></div>
 <label class="search-label global-search" for="search"><span class="sr-only">Search</span><input id="search" type="search" placeholder="Search movies and shows" autocomplete="off" maxlength="150"></label>
-<section id="recent-section" class="recent-section" hidden><div class="section-head"><strong>Recently played</strong><button id="clear-recent" class="text-button" type="button">Clear</button></div><div id="recent-list" class="recent-list"></div></section>
+<aside id="torbox-status-banner" class="service-banner" hidden><span id="torbox-status-text"></span><div class="service-banner-actions"><button id="retry-torbox-status" class="text-button" type="button">Retry</button><a href="https://status.torbox.app/" target="_blank" rel="noreferrer">TorBox status</a></div></aside>
+<section id="recent-section" class="recent-section" hidden><div class="section-head"><strong>Recently played</strong></div><div id="recent-list" class="recent-list"></div></section>
 <section id="discover-panel">
 <div class="catalog-filters"><label for="catalog-type">Type<select id="catalog-type"><option value="movie">Movies</option><option value="series">Shows</option></select></label><label for="catalog-feed">Browse<select id="catalog-feed"><option value="popular">Popular</option><option value="featured">Featured</option><option value="new">New</option></select></label><label for="catalog-genre">Genre<select id="catalog-genre"><option value="">All</option><option>Action</option><option>Adventure</option><option>Animation</option><option>Biography</option><option>Comedy</option><option>Crime</option><option>Documentary</option><option>Drama</option><option>Family</option><option>Fantasy</option><option>History</option><option>Horror</option><option>Mystery</option><option>Romance</option><option>Sci-Fi</option><option>Sport</option><option>Thriller</option><option>War</option><option>Western</option></select></label></div>
 <p id="catalog-message" class="status subtle-status" role="status" aria-live="polite"></p><button id="catalog-retry" class="text-button" hidden>Retry browse</button><div id="catalog-grid" class="poster-grid"></div><button id="catalog-more" class="more-button" hidden>More</button>
 </section>
 
 <p class="preview-note">Auto-next and playback recovery prefer cached, browser-friendly lower-resolution sources when needed.</p>
-<details class="owner"><summary>Connection</summary><p class="muted">Re-enter this session's TorBox API key to check access.</p><form id="owner-form"><label for="owner-password">TorBox API key</label><input id="owner-password" type="password" autocapitalize="none" spellcheck="false" autocomplete="off" maxlength="512" required><button type="submit">Check</button></form><p id="owner-message" role="status"></p><pre id="diagnostics"></pre><button id="revoke" hidden>Sign out every session</button></details>
+
 </section>
 </main>
 <dialog id="title-dialog"><div class="dialog-bar"><h2 id="detail-title"></h2><div class="dialog-actions"><button id="close-title" class="icon-button" aria-label="Close title">×</button></div></div><p id="detail-message" class="status compact-status" role="status"></p><div id="title-content"></div><div id="episode-area"></div></dialog>
@@ -42,6 +43,20 @@
 </section>
 <section id="drive-progress" hidden><p id="drive-status" class="status"></p><progress id="drive-progress-bar" max="1" value="0"></progress><p id="drive-timing" class="muted"></p><div id="drive-ready-actions" class="row-actions" hidden><a id="drive-open" class="button-link primary" target="_blank" rel="noreferrer">Open Drive player</a><button id="copy-drive-link" type="button">Copy link</button><button id="delete-drive-now" type="button">Delete now</button></div><p id="drive-delete-note" class="source-note"></p></section>
 </dialog>
-<dialog id="player" class="player-shell"><button id="close-player" class="player-close" aria-label="Close player">×</button><h2 id="playing-title" class="sr-only"></h2><div id="video-slot"></div><p id="player-message" class="player-status" role="status" aria-live="polite"></p></dialog>
+<dialog id="settings-dialog"><div class="dialog-bar"><h2>Settings</h2><button id="close-settings" class="icon-button" aria-label="Close settings">×</button></div>
+<form id="settings-form" class="settings-grid">
+<label>Default quality<select id="setting-resolution"><option value="auto">Auto · prefer 720p</option><option value="480p">480p</option><option value="720p">720p</option><option value="1080p">1080p</option><option value="2160p">4K</option></select></label>
+<label>Recently Played rewind<select id="setting-rewind"><option value="0">No rewind</option><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option><option value="30">30 seconds</option></select></label>
+<label>Buffering before recovery<select id="setting-buffer"><option value="8">8 seconds</option><option value="12">12 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option></select></label>
+<label>Recently Played items<select id="setting-recent-limit"><option value="4">4</option><option value="6">6</option><option value="8">8</option><option value="10">10</option></select></label>
+<label class="setting-check"><input id="setting-auto-next" type="checkbox"> Automatically play the next released episode</label>
+<label class="setting-check"><input id="setting-auto-recovery" type="checkbox"> Automatically switch to a lower resolution after playback failure</label>
+<label class="setting-check"><input id="setting-pause-overlay" type="checkbox"> Show title and time on the pause screen</label>
+<label class="setting-check"><input id="setting-drive-watch-only" type="checkbox"> Default Drive shares to watch-only</label>
+<div class="settings-actions"><button class="primary" type="submit">Save settings</button><button id="reset-settings" type="button">Reset defaults</button><button id="settings-check-status" type="button">Check TorBox status</button></div>
+<p id="settings-message" class="status compact-status" role="status"></p>
+</form>
+</dialog>
+<dialog id="player" class="player-shell"><button id="close-player" class="player-close" aria-label="Close player">×</button><h2 id="playing-title" class="sr-only"></h2><div class="player-media-shell"><div id="video-slot"></div><div id="pause-card" class="pause-card" hidden><strong id="pause-title"></strong><span id="pause-subtitle"></span><span id="pause-time"></span></div></div><p id="player-message" class="player-status" role="status" aria-live="polite"></p></dialog>
 <footer>GitHub UI · Render control bridge · Direct TorBox video</footer>
 </body></html>
