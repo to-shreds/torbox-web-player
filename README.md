@@ -2,7 +2,7 @@
 
 This branch is the **browser-key clone** of the household TorBox web player. The original player on `main` remains separate.
 
-Current version: **0.11.0-key-clone**
+Current version: **0.12.0-key-clone**
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/key/`
 
@@ -142,3 +142,18 @@ Owner playback: `TorBox CDN -> owner browser`
 Drive timing test: `TorBox -> Google Drive -> viewer`
 
 Render still handles only control/API traffic and does not relay video bytes.
+
+
+## v0.12 catalog redirect fix and player controls
+
+The no-query browse failure is now traced to a second, distinct Cinemeta contract issue. Cinemeta search requests return HTTP 200 directly, while no-query browse requests such as Popular return HTTP 307 to `cinemeta-catalogs.strem.io`. The catalog adapter had deliberately used `redirect: 'error'`, so every browse request failed before normalization while search continued to work.
+
+The adapter now follows a bounded redirect only to the two explicit HTTPS Cinemeta hosts `v3-cinemeta.strem.io` and `cinemeta-catalogs.strem.io`. Arbitrary redirect destinations remain rejected. This is covered by unit tests and a live browse probe.
+
+Recently Played no longer has a Clear-all control. Each card has its own small remove button and requires confirmation before deletion. Opening an item from Recently Played rewinds by 10 seconds by default; Settings can choose 0, 5, 10, 15 or 30 seconds.
+
+The old TorBox connection-check panel is removed. The app instead performs a real availability preflight using both the signed-in TorBox API and TorBox's official status page. An outage warning is shown before playback/share attempts, and actions that need TorBox are blocked when the account API is actually unreachable.
+
+The native HTML5 video controls remain. A custom in-page pause overlay now shows title, episode/movie identity, elapsed time, total time and remaining time. Android Chrome may hide sibling HTML overlays if it promotes the video element into its own native fullscreen surface; the overlay is reliable in the site's normal fullscreen dialog.
+
+A Settings dialog now controls default quality, Recently Played rewind, buffering threshold, Recently Played card count, automatic next episode, automatic recovery, the pause overlay, Drive watch-only default, and a manual TorBox status check.

@@ -94,7 +94,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.11.0-key-clone', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '0.12.0-key-clone', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
@@ -308,6 +308,6 @@ export function createApp({ env = process.env, provider, providerFactory, discov
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.11.0-key-clone' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '0.12.0-key-clone' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }
