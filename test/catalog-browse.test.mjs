@@ -15,3 +15,10 @@ test('New browse uses the current-year Cinemeta catalog',async()=>{
   const result=await c.search({type:'series',feed:'new'});
   assert.equal(result.feed,'new'); assert.ok(seen.includes('/catalog/series/year/')); assert.ok(seen.includes('genre='+new Date().getUTCFullYear()));
 });
+test('browse accepts current Cinemeta imdb_id catalog rows',async()=>{
+  const c=new Catalog({fetchFn:async()=>ok({metas:[{imdb_id:ID,type:'movie',name:'Fixture',poster:'https://images.metahub.space/poster/medium/'+ID+'/img'}]})});
+  const result=await c.search({type:'movie',feed:'popular'});
+  assert.equal(result.metas.length,1);
+  assert.equal(result.metas[0].id,ID);
+  assert.equal(result.metas[0].name,'Fixture');
+});
