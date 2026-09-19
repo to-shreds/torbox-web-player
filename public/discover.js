@@ -176,7 +176,7 @@ export function createDiscoveryUI({ api, play, loadLibrary, driveTest }) {
     const bar=element('div','','movie-action-bar');bar.append(titleResolutionControl());
     const target={type:'movie',id:meta.id},actions=element('div','','row-actions');
     const playButton=button('Play',()=>quickPlay(meta,target,'',playButton),true);
-    const shareButton=button('Share',()=>quickDriveShare(meta,target,'',shareButton));
+    const shareButton=button('Share',()=>quickDriveShare(meta,target,'',shareButton));shareButton.hidden=guestMode;
     actions.append(playButton,shareButton,button('Options',()=>openOptions(meta,target)));bar.append(actions);$('episode-area').replaceChildren(bar);
   }
 
@@ -192,7 +192,7 @@ export function createDiscoveryUI({ api, play, loadLibrary, driveTest }) {
         const info=element('div','','episode-info');info.append(element('strong',episode.name));if(episode.description)info.append(element('span',episode.description,'episode-overview'));
         const actions=element('div','','episode-actions');const target={type:'series',id:meta.id,season:episode.season,episode:episode.episode};
         const playButton=button('Play',()=>quickPlay(meta,target,episode.name,playButton),true);
-        const shareButton=button('Share',()=>quickDriveShare(meta,target,episode.name,shareButton));
+        const shareButton=button('Share',()=>quickDriveShare(meta,target,episode.name,shareButton));shareButton.hidden=guestMode;
         const more=button('Options',()=>openOptions(meta,target,episode.name));more.setAttribute('aria-label',`More options for ${episode.name}`);
         actions.append(playButton,shareButton,more);row.append(number,info,actions);
         if(episode.released&&Date.parse(episode.released)>Date.now()){playButton.disabled=true;shareButton.disabled=true;more.disabled=true;row.classList.add('future');}
@@ -222,10 +222,8 @@ export function createDiscoveryUI({ api, play, loadLibrary, driveTest }) {
       const box=element('section','','recommended'),copy=element('div','','recommended-copy');
       copy.append(element('div','Recommended','recommended-kicker'),element('div',best.title,'recommended-title'),element('p',[best.cached?'Cached':'Not cached',qualityText(best),formatBytes(best.size),Number.isSafeInteger(best.seeders)?best.seeders+' seeders':''].filter(Boolean).join(' · '),'recommended-meta'));
       const recommendedActions=element('div','','recommended-actions');
-      recommendedActions.append(
-        button(best.cached?'Play':'Prepare',async()=>{try{const result=await readyFile(best,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();closeTitleForPlayback();await play(result.file,context);}catch(e){status.textContent=e.message;status.classList.add('error');}},true),
-        button('Share',async()=>{try{const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});$('source-dialog').close();if($('title-dialog').open)$('title-dialog').close();await driveTest(result.file,context);}catch(e){status.textContent=e.message;status.classList.add('error');}})
-      );
+      recommendedActions.append(button(best.cached?'Play':'Prepare',async()=>{try{const result=await readyFile(best,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();closeTitleForPlayback();await play(result.file,context);}catch(e){status.textContent=e.message;status.classList.add('error');}},true));
+      if(!guestMode&&typeof driveTest==='function')recommendedActions.append(button('Share',async()=>{try{const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});$('source-dialog').close();if($('title-dialog').open)$('title-dialog').close();await driveTest(result.file,context);}catch(e){status.textContent=e.message;status.classList.add('error');}}));
       box.append(copy,recommendedActions);area.append(box);
     }
 
