@@ -54,6 +54,86 @@ async function body(request, maxBytes = 8192) {
   try { const data = JSON.parse(Buffer.concat(chunks).toString('utf8')); if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error(); return data; }
   catch { throw new AppError('INVALID_JSON', 'This request could not be read.', 400); }
 }
+
+const TORBOX_RELAY_PREFIX='/relay/torbox/';
+const TORBOX_RELAY_RULES=Object.freeze({
+  'user/me':Object.freeze({method:'GET',query:new Set(['settings'])}),
+  'torrents/checkcached':Object.freeze({method:'GET',query:new Set(['hash','format','list_files'])}),
+  'torrents/mylist':Object.freeze({method:'GET',query:new Set(['id','offset','limit','bypass_cache'])}),
+  'torrents/createtorrent':Object.freeze({method:'POST',query:new Set()}),
+  'torrents/requestdl':Object.freeze({method:'GET',query:new Set(['torrent_id','file_id','zip_link','redirect']),tokenInQuery:true})
+});
+function relayApiKey(request){
+  const match=/^Bearer ([^\u0000-\u001f\u007f]{8,512})$/.exec(request.headers.authorization||'');
+  if(!match)throw new AppError('RELAY_AUTH_REQUIRED','A TorBox API key is required for this bridge request.',401);
+  return match[1];
+}
+function relayRule(path,method){
+  if(!path.startsWith(TORBOX_RELAY_PREFIX))return null;
+  const route=path.slice(TORBOX_RELAY_PREFIX.length),rule=TORBOX_RELAY_RULES[route];
+  if(!rule)throw new AppError('RELAY_ROUTE_NOT_ALLOWED','That TorBox route is not allowed through this bridge.',404);
+  if(method!==rule.method)throw new AppError('RELAY_METHOD_NOT_ALLOWED','That method is not allowed for this TorBox route.',405);
+  return {route,rule};
+}
+function relayQuery(input,allowed){
+  const output=new URLSearchParams();
+  for(const [name,value] of input){
+    if(!allowed.has(name))throw new AppError('RELAY_QUERY_NOT_ALLOWED','That TorBox query parameter is not allowed.',400);
+    if(value.length>512||/[\u0000-\u001f\u007f]/.test(value))throw new AppError('RELAY_QUERY_INVALID','A TorBox query parameter is invalid.',400);
+    output.append(name,value);
+  }
+  return output;
+}
+async function torboxRelayRequest(request,url,{fetchFn=fetch,backend='render'}={}){
+  const selected=relayRule(url.pathname,request.method);
+  if(!selected)return null;
+  const key=relayApiKey(request),query=relayQuery(url.searchParams,selected.rule.query);
+  const upstream=new URL(selected.route,'https://api.torbox.app/v1/api/');
+  for(const [name,value] of query)upstream.searchParams.append(name,value);
+  const headers={Accept:'application/json'};
+  let bodyValue;
+  if(selected.rule.tokenInQuery)upstream.searchParams.set('token',key);
+  else headers.Authorization='Bearer '+key;
+  if(selected.route==='torrents/createtorrent'){
+    const data=await body(request,4096),hash=typeof data.hash==='string'?data.hash.toLowerCase():'';
+    if(!/^[a-f0-9]{40}$/.test(hash))throw new AppError('RELAY_HASH_INVALID','A valid torrent hash is required.',400);
+    const form=new FormData();
+    form.set('magnet','magnet:?xt=urn:btih:'+hash);
+    form.set('allow_zip','false');
+    form.set('add_only_if_cached',String(data.onlyCached===true));
+    bodyValue=form;
+  }
+  let upstreamResponse;
+  try{
+    upstreamResponse=await fetchFn(upstream,{
+      method:selected.rule.method,
+      headers,
+      ...(bodyValue?{body:bodyValue}:{}),
+      redirect:'error',
+      signal:AbortSignal.timeout(20000)
+    });
+  }catch(error){
+    if(['TimeoutError','AbortError'].includes(error?.name))throw new AppError('RELAY_UPSTREAM_TIMEOUT','TorBox took too long to respond through this bridge.',504);
+    throw new AppError('RELAY_UPSTREAM_UNAVAILABLE','This bridge could not reach TorBox.',502);
+  }
+  const bytes=new Uint8Array(await upstreamResponse.arrayBuffer());
+  if(bytes.byteLength>8*1024*1024)throw new AppError('RELAY_RESPONSE_TOO_LARGE','TorBox returned too much data through this bridge.',502);
+  return {
+    status:upstreamResponse.status,
+    body:bytes,
+    contentType:upstreamResponse.headers.get('content-type')||'application/json; charset=utf-8',
+    retryAfter:upstreamResponse.headers.get('retry-after')||'',
+    backend
+  };
+}
+function sendRelay(response,result){
+  response.statusCode=result.status;
+  response.setHeader('Content-Type',result.contentType);
+  response.setHeader('X-TorBox-Bridge',result.backend);
+  response.setHeader('Cache-Control','no-store, private');
+  if(result.retryAfter)response.setHeader('Retry-After',result.retryAfter);
+  response.end(Buffer.from(result.body));
+}
 export function createApp({ env = process.env, provider, providerFactory, discoveryFetch = fetch, discoveryService, sourceLookupService, driveTransferService, now = Date.now } = {}) {
   const production = env.NODE_ENV === 'production';
   const origin = env.PUBLIC_ORIGIN || env.RENDER_EXTERNAL_URL || `http://localhost:${env.PORT || 10000}`;
@@ -69,7 +149,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
     response.setHeader('Vary', 'Origin');
     response.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, OPTIONS');
     response.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-CSRF-Token, Range');
-    response.setHeader('Access-Control-Expose-Headers', 'Content-Type, Content-Length, Content-Range, Accept-Ranges, ETag, Last-Modified');
+    response.setHeader('Access-Control-Expose-Headers', 'Content-Type, Content-Length, Content-Range, Accept-Ranges, ETag, Last-Modified, Retry-After, X-TorBox-Bridge');
     return true;
   };
   const sessions = new Sessions(now), progress = new ProgressStore(), guestInvites = new GuestInvites(now), driveTransfers = driveTransferService || new DriveTransferTests({ now }), torboxStatus = new TorBoxStatusChecker({ fetchFn: discoveryFetch, now }), setupTransfers = new SetupTransfers({ now });
@@ -104,6 +184,16 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         response.statusCode = 204; response.end(); return;
       }
       if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.1.0', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/relay/health') {
+        if(!corsAllowed)throw new AppError('BAD_ORIGIN','This frontend is not allowed to use the TorBox bridge.',403);
+        response.setHeader('X-TorBox-Bridge','render');
+        return json(response,200,{ok:true,bridge:'render',protocol:1});
+      }
+      if (path.startsWith(TORBOX_RELAY_PREFIX)) {
+        if(!corsAllowed)throw new AppError('BAD_ORIGIN','This frontend is not allowed to use the TorBox bridge.',403);
+        const relayed=await torboxRelayRequest(request,url,{fetchFn:discoveryFetch,backend:'render'});
+        return sendRelay(response,relayed);
+      }
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
