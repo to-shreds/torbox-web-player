@@ -9,6 +9,7 @@ import { ProgressStore, VIEWERS, validViewer } from './lib/progress.mjs';
 import { TorBox, AppError, parseVideoId, TORBOX_MEDIA_HOSTS } from './lib/torbox.mjs';
 import { DriveTransferTests } from './lib/drive-share.mjs';
 import { TorBoxStatusChecker } from './lib/torbox-status.mjs';
+import { SetupTransfers } from './lib/setup-transfer.mjs';
 const root = dirname(fileURLToPath(import.meta.url));
 const publicFiles = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
@@ -22,6 +23,7 @@ const publicFiles = new Map([
   ['/search-history.js', ['search-history.js', 'text/javascript; charset=utf-8']],
   ['/source-memory.js', ['source-memory.js', 'text/javascript; charset=utf-8']],
   ['/parental-controls.js', ['parental-controls.js', 'text/javascript; charset=utf-8']],
+  ['/device-transfer.js', ['device-transfer.js', 'text/javascript; charset=utf-8']],
   ['/sw.js', ['sw.js', 'text/javascript; charset=utf-8']],
   ['/manifest.webmanifest', ['manifest.webmanifest', 'application/manifest+json; charset=utf-8']],
   ['/icon.svg', ['icon.svg', 'image/svg+xml; charset=utf-8']],
@@ -41,12 +43,12 @@ function bearerId(request) {
   const match = /^Bearer ([A-Za-z0-9_-]{43})$/.exec(request.headers.authorization || '');
   return match ? match[1] : '';
 }
-async function body(request) {
+async function body(request, maxBytes = 8192) {
   if (request.headers['content-type']?.split(';')[0] !== 'application/json') throw new AppError('JSON_REQUIRED', 'Send a JSON request.', 415);
   const chunks = []; let size = 0;
   for await (const chunk of request) {
     size += chunk.length;
-    if (size > 8192) throw new AppError('REQUEST_TOO_LARGE', 'This request is too large.', 413);
+    if (size > maxBytes) throw new AppError('REQUEST_TOO_LARGE', 'This request is too large.', 413);
     chunks.push(chunk);
   }
   try { const data = JSON.parse(Buffer.concat(chunks).toString('utf8')); if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error(); return data; }
@@ -70,8 +72,8 @@ export function createApp({ env = process.env, provider, providerFactory, discov
     response.setHeader('Access-Control-Expose-Headers', 'Content-Type, Content-Length, Content-Range, Accept-Ranges, ETag, Last-Modified');
     return true;
   };
-  const sessions = new Sessions(now), progress = new ProgressStore(), guestInvites = new GuestInvites(now), driveTransfers = driveTransferService || new DriveTransferTests({ now }), torboxStatus = new TorBoxStatusChecker({ fetchFn: discoveryFetch, now });
-  const loginRate = new Limiter(15, 15 * 60000, now), operationRate = new Limiter(30, 60000, now), progressRate = new Limiter(120, 60000, now);
+  const sessions = new Sessions(now), progress = new ProgressStore(), guestInvites = new GuestInvites(now), driveTransfers = driveTransferService || new DriveTransferTests({ now }), torboxStatus = new TorBoxStatusChecker({ fetchFn: discoveryFetch, now }), setupTransfers = new SetupTransfers({ now });
+  const loginRate = new Limiter(15, 15 * 60000, now), operationRate = new Limiter(30, 60000, now), progressRate = new Limiter(120, 60000, now), transferCreateRate = new Limiter(6, 60000, now), transferRedeemRate = new Limiter(30, 60000, now);
   let activeLogins = 0;
   const mediaHosts = (env.MEDIA_HOST_SUFFIXES || TORBOX_MEDIA_HOSTS.join(',')).split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
   const torbox = provider || new TorBox({ key: env.TORBOX_API_KEY || '', mediaHosts });
@@ -101,7 +103,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.0.0', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.1.0', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
@@ -114,6 +116,12 @@ export function createApp({ env = process.env, provider, providerFactory, discov
       if (!path.startsWith('/api/')) throw new AppError('NOT_FOUND', 'Page not found.', 404);
       if (!['GET', 'HEAD'].includes(method) && !trustedOrigin(request.headers.origin)) throw new AppError('BAD_ORIGIN', 'Reload the website before trying again.', 403);
       if (path === '/api/session' && method === 'GET') return json(response, 200, { authenticated: !!session, setupRequired: !configured, authMode: apiKeyMode ? 'api-key' : 'household', ...(session ? { csrf: session.csrf, viewers: VIEWERS, durable: false, guest: session.guest === true, scope: session.guest ? session.scope : undefined, keyConfigured: session.guest ? true : (apiKeyMode ? !!session.provider : !!(env.TORBOX_API_KEY || provider)) } : {}) });
+      if (path === '/api/setup-transfer' && method === 'GET') {
+        if (!transferRedeemRate.allow(request.socket.remoteAddress || 'unknown')) throw new AppError('SLOW_DOWN', 'Too many transfer attempts. Try again in a minute.', 429);
+        const row=setupTransfers.take(url.searchParams.get('id')||'');
+        if(!row)throw new AppError('TRANSFER_NOT_FOUND','This setup transfer expired, was already used, or the link is not valid.',404);
+        return json(response,200,{envelope:row.envelope,expiresAt:new Date(row.expires).toISOString()});
+      }
       if (path === '/api/login' && method === 'POST') {
         if (!configured) throw new AppError('SETUP_REQUIRED', 'This clone is not configured for authentication.', 503);
         if (!loginRate.allow('household') || activeLogins >= 2) throw new AppError('LOGIN_RATE_LIMITED', 'Too many sign-in attempts. Try again in 15 minutes.', 429);
@@ -168,6 +176,13 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         if (result.state === 'choose_file' && Array.isArray(result.files)) for (const file of result.files) if (file?.id) session.allowedVideos.add(file.id);
       };
       if (!['GET', 'HEAD'].includes(method) && !bearerSession && request.headers['x-csrf-token'] !== session.csrf) throw new AppError('BAD_CSRF', 'Reload the page and try again.', 403);
+      if (path === '/api/setup-transfer' && method === 'POST') {
+        if(session.guest)throw new AppError('GUEST_FORBIDDEN','Temporary guests cannot transfer a setup.',403);
+        if(!transferCreateRate.allow(session.id))throw new AppError('SLOW_DOWN','Please wait before creating another setup transfer.',429);
+        const data=await body(request,196608),row=setupTransfers.create(data.lookup,data.envelope);
+        if(!row)throw new AppError('INVALID_TRANSFER','The encrypted setup transfer could not be saved.',400);
+        return json(response,200,{ok:true,expiresAt:new Date(row.expires).toISOString()});
+      }
       if (path === '/api/logout' && method === 'POST') {
         activeDiscovery.revoke(session.id);
         if (!session.guest) {
@@ -315,6 +330,6 @@ export function createApp({ env = process.env, provider, providerFactory, discov
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.0.0' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.1.0' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }

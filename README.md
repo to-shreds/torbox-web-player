@@ -2,7 +2,7 @@
 
 This branch is the browser-key clone of the household TorBox web player. The original player on `main` remains separate and is not modified by this branch.
 
-Current version: **1.0.0**
+Current version: **1.1.0**
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/key/`
 
@@ -19,6 +19,12 @@ Native HTML5 video controls remain the base player controls. The custom interfac
 ## Credential and media model
 
 The TorBox API key is the clone's sign-in credential. It is not committed to GitHub and is not stored as a Render environment secret. It is held in the Render process session after sign-in. If the user enables Remember encrypted on this device, the browser stores an AES-GCM encrypted copy using a non-exportable Web Crypto key in IndexedDB.
+
+## v1.1 setup transfer
+
+Settings now includes **Sync & devices → Transfer this setup**. It creates a one-time, ten-minute transfer that copies the remembered TorBox credential plus portable browser state to another device. The transfer package is encrypted in the source browser with AES-GCM; the one-time code derives the encryption key, only a SHA-256 lookup of that code reaches Render, and the temporary encrypted envelope is deleted when redeemed. The code itself is carried in the transfer link URL fragment, so it is not sent to Render in the HTTP request.
+
+Transferred state includes the selected viewer, general settings, Continue Watching history, My list, search history, and Kid Mode/PIN/allowance state. Device-specific source/audio compatibility learning is intentionally not transferred. If the API key is not remembered on the source device, Settings asks for it once and verifies it against the current session before creating the encrypted package. Opening a transfer link on the destination device validates the debrid credential before applying the imported state and stores the credential using the destination browser's existing encrypted vault. This transfer does not yet enable ongoing cloud synchronization.
 
 Video does not pass through Render.
 

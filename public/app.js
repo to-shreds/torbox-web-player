@@ -2,6 +2,7 @@ import { createDiscoveryUI } from './discover.js';
 import { diagnosePlaybackFailure } from './playback-errors.js';
 import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js';
 import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js';
+import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js';
 import { listRecent, recordRecent, removeRecent, recentForContext, resumePosition, formatResumeTime } from './history.js';
 import { getSettings, saveSettings, resetSettings } from './settings.js';
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js';
@@ -10,6 +11,7 @@ import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidPr
 const $ = id => document.getElementById(id);
 let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '';
 let discoveryUI;
+let activeSetupTransferLink='';
 let viewer = 'viewer-1';
 try { const saved = localStorage.getItem('tw-viewer') || sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
 $('viewer').value = viewer;
@@ -222,8 +224,34 @@ async function connectWithKey(apiKey, remember = false) {
   if (remember) await rememberApiKey(apiKey);
   return result;
 }
+function clearSetupTransferHash(){try{history.replaceState(null,'',location.pathname+location.search)}catch{}}
+async function acceptSetupTransfer(code){
+  let existing=false;try{existing=!!(await loadRememberedApiKey())||['torbox-recent-v1','torbox-watchlist-v1','torbox-parental-controls-v1'].some(key=>localStorage.getItem(key)!==null)}catch{}
+  if(existing&&!confirm('Replace this device’s current player setup with the transferred setup?')){clearSetupTransferHash();return false;}
+  show('loading');$('loading').querySelector('p').textContent='Transferring this setup securely…';
+  const lookup=await transferLookup(code),result=await api('/api/setup-transfer?id='+encodeURIComponent(lookup));
+  const payload=await decryptEncryptedTransfer(code,result.envelope);
+  await connectWithKey(payload.apiKey,true);
+  applyTransferredState(payload.state);
+  try{const saved=localStorage.getItem('tw-viewer');if(['viewer-1','viewer-2'].includes(saved))viewer=saved;sessionStorage.setItem('tw-viewer',viewer)}catch{}
+  $('viewer').value=viewer;clearSetupTransferHash();applyInterfaceMode();$('loading').querySelector('p').textContent='Setup transferred. Opening the player…';return true;
+}
+async function publishSetupTransfer(apiKey){
+  const created=await createEncryptedTransfer(apiKey),saved=await api('/api/setup-transfer',{method:'POST',data:{lookup:created.lookup,envelope:created.envelope}});
+  activeSetupTransferLink=buildTransferLink(created.code);$('transfer-code').value=created.code;$('transfer-link').value=activeSetupTransferLink;$('transfer-result').hidden=false;
+  $('transfer-expiry').textContent='Works once and expires '+new Date(saved.expiresAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+'.';
+  $('transfer-key-wrap').hidden=true;$('transfer-api-key').value='';text('transfer-message','Transfer ready. Open the link on the other device.');
+}
+async function beginSetupTransfer(){
+  text('transfer-message','Preparing encrypted transfer…');
+  const remembered=await loadRememberedApiKey();
+  if(remembered){await publishSetupTransfer(remembered);return;}
+  $('transfer-key-wrap').hidden=false;$('transfer-api-key').focus();text('transfer-message','Re-enter your TorBox API key once so the new device can inherit the debrid connection. It will be encrypted before upload.');
+}
 async function bootstrap() {
   try {
+    const transferCode=transferCodeFromHash();
+    if(transferCode&&!guestMode){try{const imported=await acceptSetupTransfer(transferCode);if(imported)return await bootstrap();}catch(error){clearSetupTransferHash();show('login');text('login-message','Setup transfer failed: '+error.message,true);return;}}
     const invite = guestTokenFromHash();
     if (invite && !guestMode) { await acceptGuestInvite(invite); return await bootstrap(); }
     const session = await api('/api/session');
@@ -622,7 +650,8 @@ function loadSettingsForm(){
   $('setting-long-press').checked=settings.longPressShortcuts;
   $('setting-playback-health').checked=settings.showPlaybackHealth;
   $('setting-auto-learn-sources').checked=settings.autoLearnSources;
-  updateInstallButton();text('settings-message','');
+  $('transfer-share').hidden=!navigator.share;$('transfer-key-wrap').hidden=true;$('transfer-api-key').value='';
+  updateInstallButton();text('settings-message','');text('transfer-message','');
 }
 function openSettingsDialog(){loadSettingsForm();if(!$('settings-dialog').open)$('settings-dialog').showModal();}
 $('open-settings').addEventListener('click',()=>{if(kidEnabled()&&hasParentPin())requestParentPin('Enter the Parent PIN to open Settings.',openSettingsDialog);else openSettingsDialog();});
@@ -695,6 +724,10 @@ $('parent-pin-change-form').addEventListener('submit',async event=>{
   }catch(error){text('parent-pin-change-message',error.message,true);}
   finally{button.disabled=false;}
 });
+$('transfer-create').addEventListener('click',async()=>{const button=$('transfer-create');button.disabled=true;try{await beginSetupTransfer()}catch(error){text('transfer-message',error.message,true)}finally{button.disabled=false}});
+$('transfer-key-continue').addEventListener('click',async()=>{const button=$('transfer-key-continue'),apiKey=$('transfer-api-key').value.trim();button.disabled=true;try{await api('/api/owner/unlock',{method:'POST',data:{apiKey}});await publishSetupTransfer(apiKey)}catch(error){text('transfer-message',error.message,true)}finally{button.disabled=false}});
+$('transfer-copy').addEventListener('click',async()=>{if(!activeSetupTransferLink)return;try{await navigator.clipboard.writeText(activeSetupTransferLink);text('transfer-message','Transfer link copied. Open it on the other device.')}catch{$('transfer-link').focus();$('transfer-link').select();text('transfer-message','Copy the selected transfer link.')}});
+$('transfer-share').addEventListener('click',async()=>{if(!activeSetupTransferLink||!navigator.share)return;try{await navigator.share({title:'TorBox Web setup transfer',text:'Open this one-time link on the device you want to set up.',url:activeSetupTransferLink})}catch(error){if(error?.name!=='AbortError')text('transfer-message','This device could not open the share sheet.',true)}});
 $('settings-clear-learning').addEventListener('click',()=>{if(confirm('Clear learned source preferences, audio feedback, bad-source blocks, and per-title quality choices on this device?')){clearSourceMemory();text('settings-message','Source learning cleared.');}});
 $('settings-clear-searches').addEventListener('click',()=>{if(confirm('Clear search history for this viewer on this device?')){clearSearchHistory(viewer);discoveryUI.settingsChanged();text('settings-message','Search history cleared.');}});
 $('settings-install-app').addEventListener('click',async()=>{if(!deferredInstallPrompt){text('settings-message',window.matchMedia?.('(display-mode: standalone)').matches?'The app is already installed.':'Use Chrome’s Add to Home screen / Install app command if the install prompt is not available.');return;}const prompt=deferredInstallPrompt;deferredInstallPrompt=null;await prompt.prompt();await prompt.userChoice.catch(()=>{});updateInstallButton();});

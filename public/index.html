@@ -100,6 +100,13 @@
 <label class="setting-check"><input id="setting-show-search-history" type="checkbox"> Show removable search history</label>
 <label class="setting-check"><input id="setting-remember-browse" type="checkbox"> Remember movie/show, browse feed, and genre choices</label>
 </fieldset>
+<fieldset class="settings-group"><legend>Sync &amp; devices</legend>
+<p class="setting-help">Transfer this device’s debrid connection, viewers, settings, Continue Watching, My list, search history, and Kid Mode/PIN state to another device. Device-specific source/audio learning stays here. A transfer does not turn on ongoing cloud sync.</p>
+<button id="transfer-create" type="button">Transfer this setup</button>
+<div id="transfer-key-wrap" hidden><label for="transfer-api-key">TorBox API key<input id="transfer-api-key" type="password" autocapitalize="none" spellcheck="false" autocomplete="off" maxlength="512"></label><button id="transfer-key-continue" type="button">Continue transfer</button></div>
+<div id="transfer-result" hidden><label for="transfer-code">One-time code<input id="transfer-code" type="text" readonly></label><label for="transfer-link">Transfer link<input id="transfer-link" type="text" readonly></label><div class="setting-inline-actions"><button id="transfer-copy" type="button">Copy transfer link</button><button id="transfer-share" type="button">Share to another device</button></div><p id="transfer-expiry" class="setting-help"></p></div>
+<p id="transfer-message" class="status compact-status" role="status"></p>
+</fieldset>
 <fieldset class="settings-group"><legend>Drive sharing and app</legend>
 <label>Default Drive cleanup<select id="setting-drive-delete"><option value="10">10 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option><option value="45">45 minutes</option></select></label>
 <label class="setting-check"><input id="setting-drive-watch-only" type="checkbox"> Default Drive shares to watch-only</label>
