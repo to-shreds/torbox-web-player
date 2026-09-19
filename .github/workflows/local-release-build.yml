@@ -26,7 +26,7 @@ jobs:
           npm install --prefix .release-vendor --ignore-scripts --no-audit --no-fund
           cp .release-vendor/node_modules/qrcode-generator/qrcode.js public/vendor/qrcode.js
           cp .release-vendor/node_modules/jsqr/dist/jsQR.js public/vendor/jsqr.js
-          cp .release-vendor/node_modules/qrcode-generator/LICENSE public/vendor/qrcode-LICENSE.txt
+          test -s public/vendor/qrcode-LICENSE.txt
           cp .release-vendor/node_modules/jsqr/LICENSE public/vendor/jsqr-LICENSE.txt
           cp .release-vendor/package-lock.json tools/vendor-package-lock.json
           sha256sum public/vendor/*.js
@@ -54,6 +54,7 @@ jobs:
             .release-results/*.png
             .release-results/acceptance.json
           if-no-files-found: ignore
+          include-hidden-files: true
       - name: Persist only the tested generated source
         run: |
           git config user.name "github-actions[bot]"
