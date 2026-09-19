@@ -34,7 +34,7 @@ test('clearing search restores Home and refreshes browse immediately',async()=>{
   assert.match(discover,/document\.body\.classList\.remove\('search-mode'\)/);
 });
 
-test('stable release metadata is 1.0.0',async()=>{
+test('stable release metadata is 1.1.0',async()=>{
   const [pkg,entry,server,sw,readme]=await Promise.all([
     read('../package.json'),read('../entry.mjs'),read('../server.mjs'),read('../public/sw.js'),read('../README.md')
   ]);
