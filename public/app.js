@@ -290,13 +290,17 @@ window.addEventListener('pagehide', () => { saveProgress(active, true); });
 $('open-drive-oauth').addEventListener('click', () => {
   const url = driveOauthUrl || 'https://api.torbox.app/v1/api/integration/oauth/google';
   window.open(url, '_blank', 'noopener,noreferrer');
-  text('drive-connect-message', 'Authorize Google Drive in the new tab. When TorBox says it succeeded, copy that page address, come back here, paste it below, and tap Finish connection.');
+  text('drive-connect-message', 'Authorize Google Drive in the new tab. When TorBox says it succeeded, copy that page address, come back here, and tap Finish connection. The site will read your clipboard when Chrome permits it; the box below is the fallback.');
 });
 $('finish-drive-connect').addEventListener('click', async () => {
   const button = $('finish-drive-connect'); button.disabled = true; text('drive-connect-message', 'Checking Google Drive…');
-  const successUrl = $('drive-success-url').value.trim();
+  let successUrl = $('drive-success-url').value.trim();
+  if (!successUrl && navigator.clipboard?.readText) {
+    try { successUrl = (await navigator.clipboard.readText()).trim(); } catch {}
+  }
   $('drive-success-url').value = '';
   try {
+    if (!successUrl) throw new Error('Copy the TorBox Google success-page address first, or paste it into the box.');
     const result = await api('/api/drive/connect', { method: 'POST', data: { successUrl } });
     driveConfigured = true; driveOauthUrl = result.oauthUrl || driveOauthUrl;
     $('drive-setup').hidden = true; $('drive-test-controls').hidden = false;

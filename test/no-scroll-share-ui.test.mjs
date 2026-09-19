@@ -32,6 +32,7 @@ test('Drive test uses TorBox Google OAuth with one success-URL paste and no Apps
   ]);
   assert.ok(app.includes('open-drive-oauth'));
   assert.ok(app.includes('/api/drive/connect'));
+  assert.ok(app.includes('navigator.clipboard?.readText'));
   assert.ok(html.includes('No Apps Script or Google Cloud setup'));
   assert.ok(html.includes('id="drive-success-url"'));
   assert.ok(html.includes('disable Drive download/copy for viewers'));
