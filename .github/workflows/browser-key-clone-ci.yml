@@ -20,6 +20,21 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
+      - name: Temporary public-contract probe
+        shell: bash
+        run: |
+          set -x
+          for u in \
+            'https://v3-cinemeta.strem.io/catalog/movie/top.json' \
+            'https://v3-cinemeta.strem.io/catalog/movie/top/genre=Action.json' \
+            'https://v3-cinemeta.strem.io/catalog/movie/imdbRating.json' \
+            'https://v3-cinemeta.strem.io/catalog/movie/year/genre=2026.json'; do
+            code=$(curl -L -sS -o /tmp/out -w '%{http_code}' "$u" || true)
+            echo "PROBE $code $u bytes=$(wc -c </tmp/out 2>/dev/null || echo 0) head=$(head -c 120 /tmp/out | tr '\n' ' ')"
+          done
+          code=$(curl -L -sS -o /tmp/torbox-success -w '%{http_code}' 'https://torbox.app/google/success' || true)
+          echo "TORBOX_SUCCESS $code bytes=$(wc -c </tmp/torbox-success 2>/dev/null || echo 0)"
+          grep -Eo '.{0,80}(postMessage|window\.opener|token|success).{0,120}' /tmp/torbox-success | head -n 30 || true
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run check
       - run: npm test
