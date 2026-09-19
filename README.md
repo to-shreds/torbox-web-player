@@ -1,63 +1,90 @@
-# TorBox Web Player
+# TorBox Browser-Key Player
 
-Private household, catalog-first browser player. **Version 0.4.2 uses direct TorBox video delivery only. GitHub Pages hosts the UI, Render handles control/API work, and movie/episode bytes never pass through Render.** It remains a preview, not a fully verified replacement for Stremio. CarStream and unrelated projects are unchanged.
+This branch is the **browser-key clone** of the household TorBox web player. The original player on `main` remains separate.
 
-## Hosting split
+Current version: **0.8.1-key-clone**
 
-The files in `public/` are the complete static frontend. GitHub Pages publishes only that directory. The frontend contains no TorBox API key and points to the Render backend at `https://torbox-web-player.onrender.com`. Render is configured to accept browser API requests from `https://to-shreds.github.io` plus its own fallback frontend.
+Frontend: `https://to-shreds.github.io/torbox-web-player/key/`
 
-Cross-host API login uses a 256-bit opaque session bearer kept in browser `sessionStorage`; Render's existing SameSite cookie remains a fallback for the Render-hosted copy. GitHub Pages does not depend on third-party cookies. API mutations from bearer sessions still require the approved frontend Origin. The authenticated playback response intentionally returns TorBox's temporary CDN URL directly to the signed-in browser. That URL contains TorBox token/key material; this is an explicit private-household tradeoff to keep all video bandwidth off Render.
+Backend: `https://torbox-web-player-key.onrender.com`
 
-The GitHub Pages site is live at `https://to-shreds.github.io/torbox-web-player/`. The workflow at `.github/workflows/pages.yml` publishes only `public/`; the Render-hosted frontend remains available as a fallback.
+## Credential model
 
-## Current experience
+The TorBox API key is the clone's only sign-in credential. There is no separate household password. The key is not committed to GitHub and is not stored as a Render environment secret.
 
-Sign in to Discover, browse movie or show posters, search Cinemeta's broader catalog, and open a title. Shows have a season selector and numerically ordered episodes, including Specials where supplied. Search text stays in place when switching to the secondary My TorBox files tab. A title does not need to be in the TorBox account to appear in Discover.
+When entered, the key is validated against TorBox and held only in that Render process session. The optional **Remember encrypted on this device** feature stores an AES-GCM-encrypted copy locally in the browser using a non-exportable Web Crypto key in IndexedDB.
 
-The browser requests sources from the authenticated `/api/discover/lookup` route on this website. The server queries Zilean's public torrent metadata index by exact IMDb ID and season/episode. The browser no longer contacts Torrentio or another external source provider. Source results are bounded, normalized and checked against TorBox's cache through the existing server-side adapter. Choose Play for a cached candidate or Prepare for another candidate; Other versions remains available. Searching, browsing and availability checks never add torrents.
+## Media path
 
-Preparation checks the account by hash before creation, coalesces concurrent same-hash requests and stops automatic retries after an uncertain response. The returned torrent identity and episode are checked. Ambiguous files require explicit selection; an index release title is not assumed to be a filename or TorBox file ID. The authenticated player receives the temporary TorBox CDN URL directly. There is no Render media endpoint, ticket, proxy, or video-relay fallback.
+Video is **never relayed through Render**.
 
-**This version does not transcode or convert files.** Source ranking now gives H.264 + AAC releases a large priority boost, treats Dolby Digital / E-AC-3 / DTS / TrueHD as possible silent-audio risks in Chrome, and does not auto-start a release flagged with those audio formats. The UI warns before a risky source and offers Play anyway. This substantially improves the default choice but still does not guarantee that every release's metadata matches its actual tracks.
+Playback path:
 
-## Provider contracts and privacy
+`TorBox CDN -> browser`
 
-Cinemeta supplies catalog metadata, not proof of video availability. Its manifest is https://v3-cinemeta.strem.io/manifest.json. No additional metadata key is required. Poster requests remain restricted to the configured HTTPS image hosts.
+Render handles only control/API work such as authentication, catalog/source lookup, TorBox cache checks, torrent preparation, playback-link generation and temporary progress. The temporary TorBox playback URL/token is intentionally visible to the signed-in browser.
 
-The current source endpoint is the public Zilean instance at `https://zileanfortheweebs.midnightignite.me/dmm/filtered`. This instance is identified by the maintained AIOStreams configuration; Zilean's primary API defines this endpoint as anonymous GET search. References and measured results are in `docs/SOURCE-LOOKUP-0.3.1.md`.
+## Source discovery
 
-The index receives only public title identifiers and the server's network address. The source adapter has no TorBox-key or household-cookie input. Requests use a fixed destination, no credentials, no redirects, bounded responses, coalescing, short failure caching and rate-limit cooldowns. The GitHub-hosted frontend's browser connections are restricted to the Render backend; source-provider calls remain server-side. There is no arbitrary URL source proxy or fallback that circumvents a provider refusal.
+Version 0.8.1 uses anonymous multi-source metadata aggregation.
 
-Catalog lookup, source lookup, TorBox cache checking, preparation and media delivery remain distinct. An HTTP error or malformed source response does not become a successful empty result. The upstream Zilean implementation itself can return an empty list after an internal failure, so an empty provider response cannot prove universal absence of sources. No provider guarantees every title is indexed.
+Every uncached movie/episode lookup queries in parallel:
+
+1. **Zilean** filtered search.
+2. **MediaFusion Torznab** public search.
+
+The results are normalized and deduplicated by torrent infohash before the existing TorBox cache check. MediaFusion Torznab can provide real seeder counts, which are preserved when available.
+
+If the two primary indexes return fewer than 20 distinct hashes, the backend tries:
+
+3. **StremThru Torz Main**
+4. **StremThru Torz ElfHosted**
+
+Provider-specific cooldowns, 15-minute successful-result caching and in-flight request coalescing reduce traffic to the public community services.
+
+No TorBox API key, session bearer or playback URL is sent to Zilean, MediaFusion or StremThru. They receive only public media identifiers such as IMDb ID, season and episode plus the backend's network address.
+
+Comet is not currently an active source because its tested anonymous raw stream endpoint returned HTTP 403 to the public probe. MediaFusion's Stremio stream endpoint returned empty results on the same samples, so the working public Torznab interface is used instead. See `docs/MULTI-SOURCE-0.8.1.md`.
+
+## Player experience
+
+The clone has a compact mobile-first UI.
+
+Movies and episodes expose **Play** and **Options** directly. Play automatically chooses the recommended source, checks TorBox cache state, prepares the source if necessary and starts it. Options opens the detailed source table.
+
+The source table includes release/filename, size, seeders when supplied, quality, TorBox cache status and manual Play/Prepare controls. Resolution filters include Auto, 480p, 720p, 1080p and 4K.
+
+The recommendation algorithm favors cached, browser-compatible H.264/AAC sources, generally prefers 720p in Auto mode, targets about 3 GiB or less for movies and 1 GiB or less for episodes, and heavily penalizes known Dolby/DTS/TrueHD audio risks and known video-compatibility risks.
+
+## Resume, auto-next and recovery
+
+Recently Played is stored locally in the browser and keyed to the canonical movie or exact TV episode, rather than a TorBox file ID. This allows a timestamp to survive switching torrent sources.
+
+TV playback queues the next released episode and attempts to resolve and start it automatically, including across seasons.
+
+If an active stream stalls for about 12 seconds or crashes, the player saves its canonical position and tries a safe lower-resolution source:
+
+- 4K -> 1080p -> 720p -> 480p
+- 1080p -> 720p -> 480p
+- 720p -> 480p
+
+If no acceptable lower-resolution source works, it makes one fresh-link attempt before stopping.
 
 ## Verification
 
-The replacement's direct Render-hosted provider check returned 63 movie rows and 140 episode rows, all with matching IMDb IDs and valid torrent hashes. A subsequent test ran the actual frontend source function against the application's authenticated routes inside Render. It returned 40 normalized candidates for each selection, registered all of them, and confirmed 22 movie candidates and 24 episode candidates cached in TorBox, with zero unknown cache results. It added no torrents and fetched no video.
+The final v0.8.1 Render build registered **175 tests: 169 passed, 0 failed, 6 optional live checks skipped**.
 
-Twenty-seven source adapter/client tests remain in the suite. The v0.4.2 Render build registered 143 tests: 138 passed, zero failed, and five optional live checks were skipped. Direct-delivery regressions verify that authenticated playback returns a TorBox CDN URL, that GitHub Pages receives the same direct URL, and that Render's `/media` path is gone and returns 404. See `docs/DIRECT-PLAYBACK-0.4.2.md` and ProjectStatus for deployment status.
+A separate enabled read-only live observation from Render confirmed MediaFusion Torznab returned 40 normalized movie sources and 40 normalized episode sources for the test titles, with explicit seeder counts on 27 movie results and 20 episode results. That check added zero torrents.
 
-The v0.3.0 benchmark remains documented in `docs/CATALOG-0.3.0.md`: a separate earlier test added one cached public Big Buck Bunny sample not previously in the account and verified preparation, media transfer and API resume state. That was not real target-device playback. The source-fix turn made no additions.
+The public provider probe also observed hundreds of anonymous StremThru hashes from GitHub-hosted infrastructure, while the active production design treats those instances only as fallbacks because their availability can vary by caller/network.
 
-Jon confirmed picture and sound on Android Chrome before the direct-delivery switch. The H.264/AAC source preference remains in place. Direct CDN playback now needs a quick device retest because the transport path changed. No codec conversion is claimed. Existing catalog UI, preparation, progress protections and authentication are preserved; the media relay is removed.
+## Remaining limitations
 
-## Setup and deployment
+- Recently Played/resume is browser-profile local, not cross-device.
+- Public source services are community infrastructure and can rate-limit or change.
+- Seeder values are shown only when a provider actually supplies them.
+- Codec conversion/transcoding is not implemented.
+- Automatic buffering detection is heuristic.
+- Full physical-device acceptance of every fallback/auto-next case is still ongoing.
 
-Existing credentials require no changes. For a new service, configure `HOUSEHOLD_PASSWORD_HASH` and `TORBOX_API_KEY` directly in Render; `/setup` can generate a salted hash locally. Never commit real passwords, hashes, keys, cookies or private media URLs.
-
-Build: `npm ci --ignore-scripts --no-audit --no-fund && npm run check && npm test`.
-
-Start: `npm start`. Node 24 is selected by `.node-version`. `/healthz` reports v0.4.2. The package remains dependency-free.
-
-Set `FRONTEND_ORIGINS=https://to-shreds.github.io` in Render for the GitHub Pages project site. The value is an origin only, not the repository path. The public frontend's API destination is deliberately non-secret and stored in an `api-origin` meta tag.
-
-Use `SOURCE_PROVIDER=zilean`. Keep `SOURCE_ACCESS_CHECK=0`, `TORBOX_VERIFY_ON_START=0`, `CATALOG_CONTRACT_CHECK=0` and `CATALOG_LIVE_CHECK=0` for normal operation. The optional legacy catalog test may add a cached public sample when explicitly enabled; the new source pipeline test is read-only.
-
-## Storage, costs and remaining scope
-
-Sessions, caches, source tickets, pending-operation guards and progress are process memory, not durable across deployments, restarts or service sleep. Account-hash reconciliation does not replace a durable exactly-once preparation record. Progress remains tied to provider file IDs.
-
-Video travels TorBox CDN -> browser directly. Render is not a video proxy, so ordinary movie/episode bytes do not count as Render outbound bandwidth. The temporary TorBox CDN URL/token is visible to the signed-in browser by design. No paid service, database, persistent disk, new provider secret or subscription upgrade was added.
-
-Still required for the full specification: target-device playback checks, a compatible conversion fallback, persistent profiles/preferences/watchlists/progress, Continue Watching, durable pending preparations, manual title corrections, automatic next, migrations and backup/restore.
-
-Implementation source here is authoritative. Readiness and next steps are in `to-shreds/ProjectStatus`, `projects/torbox-web-player/STATUS.md`. Earlier reports remain history; their Torrentio, original setup and same-origin-only descriptions do not control this version.
+Implementation source on this branch is authoritative. Project readiness is tracked in `to-shreds/ProjectStatus/projects/torbox-web-player-browser-key/STATUS.md`.
