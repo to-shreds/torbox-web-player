@@ -62,3 +62,23 @@ main{max-width:1160px;padding:1rem clamp(.8rem,3vw,2rem) 3rem}.workspace-bar{dis
   .source-pager{margin:.3rem 0 0}
   #share-dialog{padding:.7rem}
 }
+
+/* v0.10 Google Drive temporary-share test */
+.recommended-actions{display:flex;gap:.35rem;flex-shrink:0}
+#drive-dialog{width:min(620px,96vw);max-height:92dvh;overflow:auto}
+#drive-dialog label{display:block;margin:.55rem 0;font-size:.72rem;color:#9fb0c2}
+#drive-dialog input,#drive-dialog select{width:100%;margin-top:.25rem}
+#drive-dialog progress{width:100%;height:12px;margin:.45rem 0}
+#drive-test-controls,#drive-progress{margin-top:.8rem;padding-top:.65rem;border-top:1px solid #253241}
+#drive-ready-actions{align-items:center;flex-wrap:wrap;margin:.6rem 0}
+.button-link{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:.45rem .75rem;border:1px solid #334155;border-radius:9px;text-decoration:none}
+.button-link.primary{background:#1d4f4a;border-color:#32766f;color:#effffb}
+#drive-dialog .source-note a{color:#8fd0ca}
+@media(max-width:620px){
+  .row-actions,.episode-actions{gap:.25rem}
+  .row-actions button,.episode-actions button{padding:.3rem .42rem;font-size:.68rem}
+  .recommended-actions{flex-direction:column;gap:.25rem}
+  .recommended-actions button{min-width:66px}
+  #drive-dialog{width:96vw;max-height:94dvh;padding:.7rem}
+  #drive-dialog .dialog-bar{top:-.7rem}
+}
