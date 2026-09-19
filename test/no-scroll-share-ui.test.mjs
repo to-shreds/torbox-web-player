@@ -50,3 +50,37 @@ test('browser-key clone is discovery-only and does not display TorBox library',a
   assert.ok(!js.includes('openLibrary'));
   assert.ok(!js.includes('loadLibrary'));
 });
+
+test('Recently Played is individually removable with confirmation and no clear-all control',async()=>{
+  const [app,html]=await Promise.all([
+    readFile(new URL('../public/app.js',import.meta.url),'utf8'),
+    readFile(new URL('../public/index.html',import.meta.url),'utf8')
+  ]);
+  assert.ok(app.includes("className = 'recent-remove'"));
+  assert.ok(app.includes('Remove "'));
+  assert.ok(app.includes('removeRecent(item.key)'));
+  assert.ok(!html.includes('id="clear-recent"'));
+});
+test('settings and TorBox outage preflight are visible while old connection checker is gone',async()=>{
+  const [app,html]=await Promise.all([
+    readFile(new URL('../public/app.js',import.meta.url),'utf8'),
+    readFile(new URL('../public/index.html',import.meta.url),'utf8')
+  ]);
+  assert.ok(html.includes('id="settings-dialog"'));
+  assert.ok(html.includes('id="torbox-status-banner"'));
+  assert.ok(app.includes('/api/torbox-status'));
+  assert.ok(app.includes('ensureTorBoxReady'));
+  assert.ok(!html.includes('id="owner-form"'));
+  assert.ok(!html.includes('>Connection<'));
+});
+test('Recently Played resume carries configurable rewind and player has a pause overlay',async()=>{
+  const [app,discover,html]=await Promise.all([
+    readFile(new URL('../public/app.js',import.meta.url),'utf8'),
+    readFile(new URL('../public/discover.js',import.meta.url),'utf8'),
+    readFile(new URL('../public/index.html',import.meta.url),'utf8')
+  ]);
+  assert.ok(discover.includes('rewindOnResumeSeconds=getSettings().resumeRewindSeconds'));
+  assert.ok(app.includes('position = Math.max(0, position - rewind)'));
+  assert.ok(html.includes('id="pause-card"'));
+  assert.ok(app.includes('updatePauseCard'));
+});
