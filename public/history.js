@@ -54,7 +54,11 @@ export function recordRecent(context, position = 0, duration = 0, { completed = 
   try { store.setItem(STORAGE_KEY, JSON.stringify(rows)); } catch {}
   return row;
 }
-export function clearRecent(store = storage()) { try { store?.removeItem(STORAGE_KEY); } catch {} }
+export function removeRecent(key, store = storage()) {
+  if (!store || typeof key !== 'string') return false;
+  const rows = listRecent(store).filter(item => item.key !== key);
+  try { store.setItem(STORAGE_KEY, JSON.stringify(rows)); return true; } catch { return false; }
+}
 export function formatResumeTime(seconds) {
   const value = Math.max(0, Math.floor(num(seconds))); const h = Math.floor(value / 3600), m = Math.floor(value % 3600 / 60), s = value % 60;
   return h ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
