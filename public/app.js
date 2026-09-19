@@ -4,7 +4,7 @@ import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessi
 import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js';
 import { listRecent, recordRecent, clearRecent, recentForContext, resumePosition, formatResumeTime } from './history.js';
 const $ = id => document.getElementById(id);
-let csrf = '', sessionToken = getSessionToken(), files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, libraryAbort = null, searchTimer, recentRenderTimer, guestMode = false;
+let csrf = '', sessionToken = getSessionToken(), files = [], nextOffset = null, loadGeneration = 0, playGeneration = 0, active = null, libraryAbort = null, searchTimer, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false;
 let discoveryUI;
 let viewer = 'viewer-1';
 try { const saved = sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
@@ -19,6 +19,67 @@ formatLabel.append(format); $('refresh').before(formatLabel);
 const formatNote = document.createElement('p'); formatNote.className = 'muted'; formatNote.hidden = true;
 $('files').before(formatNote);
 function text(id, value, error = false) { $(id).textContent = value; $(id).classList.toggle('error', error); }
+function formatDriveSize(bytes) { return Number.isFinite(bytes) && bytes > 0 ? (bytes / 1024 ** 3).toFixed(2) + ' GB' : 'size unknown'; }
+function formatDriveElapsed(ms) {
+  const seconds = Math.max(0, Math.round((ms || 0) / 1000));
+  return seconds < 60 ? seconds + 's' : Math.floor(seconds / 60) + 'm ' + String(seconds % 60).padStart(2, '0') + 's';
+}
+function randomBridgeSecret() {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+}
+async function openDriveTest(file, context = {}) {
+  if (guestMode || !file?.id) return;
+  driveSelected = { file, context };
+  driveRunId = '';
+  $('drive-selected').textContent = [context.title || file.title, context.episodeName || '', formatDriveSize(file.size)].filter(Boolean).join(' · ');
+  $('drive-progress').hidden = true; $('drive-ready-actions').hidden = true; $('drive-status').textContent = ''; $('drive-timing').textContent = ''; $('drive-delete-note').textContent = '';
+  if (!$('drive-dialog').open) $('drive-dialog').showModal();
+  try {
+    const config = await api('/api/drive/config');
+    driveConfigured = config.configured === true;
+  } catch { driveConfigured = false; }
+  $('drive-setup').hidden = driveConfigured;
+  $('drive-test-controls').hidden = !driveConfigured;
+}
+function stopDrivePolling() { if (drivePollTimer) clearTimeout(drivePollTimer); drivePollTimer = null; }
+function scheduleDrivePoll(delay = 1800) { stopDrivePolling(); drivePollTimer = setTimeout(pollDriveTest, delay); }
+function updateDriveStatus(result) {
+  const pct = Math.round((Number(result.progress) || 0) * 100);
+  $('drive-progress-bar').value = Number(result.progress) || 0;
+  const labels = {
+    queued: 'Waiting for TorBox to queue the Google Drive transfer…',
+    pending: 'TorBox queued the Google Drive transfer…',
+    uploading: 'TorBox → Google Drive · ' + pct + '%',
+    drive_locating: 'Upload finished · locating the file in Drive…',
+    drive_processing: 'Upload finished · Google Drive is processing the video…',
+    ready: 'Ready to watch from Google Drive.',
+    failed: result.detail || 'Drive transfer failed.',
+    deleted: 'The temporary Drive copy was deleted.'
+  };
+  text('drive-status', labels[result.status] || result.detail || result.status, result.status === 'failed');
+  const timing = ['Elapsed ' + formatDriveElapsed(result.elapsedMs)];
+  if (Number.isFinite(result.uploadMs)) timing.push('TorBox → Drive ' + formatDriveElapsed(result.uploadMs));
+  if (Number.isFinite(result.playbackMs)) timing.push('Playable ' + formatDriveElapsed(result.playbackMs));
+  $('drive-timing').textContent = timing.join(' · ');
+  if (result.previewUrl) {
+    $('drive-open').href = result.previewUrl; $('drive-ready-actions').hidden = false;
+    $('drive-delete-note').textContent = (result.downloadRestricted ? 'Viewer download/copy is disabled. ' : '') + (result.deleteAt ? 'Permanent deletion scheduled for ' + new Date(result.deleteAt).toLocaleString() + '.' : '');
+  }
+}
+async function pollDriveTest() {
+  if (!driveRunId) return;
+  try {
+    const result = await api('/api/drive/test/status?id=' + encodeURIComponent(driveRunId));
+    updateDriveStatus(result);
+    if (['ready', 'failed', 'deleted'].includes(result.status)) { stopDrivePolling(); return; }
+    scheduleDrivePoll(result.status === 'drive_processing' ? 3000 : 1800);
+  } catch (error) {
+    text('drive-status', error.message, true);
+    scheduleDrivePoll(5000);
+  }
+}
+
 function recentLabel(item) {
   const episode = item.type === 'series' ? `S${item.season}E${item.episode}${item.episodeName ? ' · ' + item.episodeName : ''}` : 'Movie';
   const time = item.completed ? 'Finished' : item.position > 0 ? `Resume ${formatResumeTime(item.position)}` : 'Start';
@@ -276,6 +337,38 @@ $('close-player').addEventListener('click', () => $('player').close());
 $('player').addEventListener('close', () => stopPlayback());
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveProgress(active, true); });
 window.addEventListener('pagehide', () => { saveProgress(active, true); });
+$('generate-drive-secret').addEventListener('click', () => { $('drive-secret').value = randomBridgeSecret(); $('drive-secret').type = 'text'; $('drive-secret').select(); });
+$('connect-drive').addEventListener('click', async () => {
+  const button = $('connect-drive'); button.disabled = true; text('drive-connect-message', 'Checking the Apps Script bridge…');
+  try {
+    await api('/api/drive/configure', { method: 'POST', data: { url: $('drive-url').value.trim(), secret: $('drive-secret').value.trim() } });
+    driveConfigured = true; $('drive-setup').hidden = true; $('drive-test-controls').hidden = false; $('drive-secret').value = ''; text('drive-connect-message', '');
+  } catch (error) { text('drive-connect-message', error.message, true); }
+  finally { button.disabled = false; }
+});
+$('start-drive-test').addEventListener('click', async () => {
+  if (!driveSelected?.file?.id) return;
+  const button = $('start-drive-test'); button.disabled = true; $('drive-progress').hidden = false; $('drive-ready-actions').hidden = true;
+  text('drive-status', 'Starting TorBox → Google Drive transfer…'); $('drive-progress-bar').value = 0; $('drive-timing').textContent = '';
+  try {
+    const result = await api('/api/drive/test/start', { method: 'POST', data: { videoId: driveSelected.file.id, deleteMinutes: Number($('drive-delete-after').value), blockDownload: $('drive-block-download').checked } });
+    driveRunId = result.id; updateDriveStatus(result); scheduleDrivePoll(800);
+  } catch (error) { text('drive-status', error.message, true); }
+  finally { button.disabled = false; }
+});
+$('delete-drive-now').addEventListener('click', async () => {
+  if (!driveRunId) return;
+  const button = $('delete-drive-now'); button.disabled = true;
+  try { const result = await api('/api/drive/test/delete', { method: 'POST', data: { id: driveRunId } }); updateDriveStatus(result); stopDrivePolling(); }
+  catch (error) { text('drive-status', error.message, true); }
+  finally { button.disabled = false; }
+});
+$('copy-drive-link').addEventListener('click', async () => {
+  const url = $('drive-open').href;
+  try { await navigator.clipboard.writeText(url); $('drive-delete-note').textContent = 'Drive link copied. ' + $('drive-delete-note').textContent; }
+  catch { text('drive-status', 'Could not copy automatically. Open the Drive player and copy its URL.', true); }
+});
+$('close-drive').addEventListener('click', () => $('drive-dialog').close());
 $('owner-form').addEventListener('submit', async event => {
   event.preventDefault(); const button = event.submitter; button.disabled = true;
   const password = $('owner-password').value; $('owner-password').value = ''; text('owner-message', 'Checking connection…'); $('diagnostics').textContent = '';
@@ -292,5 +385,5 @@ $('revoke').addEventListener('click', async () => {
   try { await api('/api/owner/revoke', { method: 'POST', data: {} }); location.reload(); }
   catch (error) { text('owner-message', error.message, true); }
 });
-discoveryUI = createDiscoveryUI({ api, play: startPlayback, loadLibrary });
+discoveryUI = createDiscoveryUI({ api, play: startPlayback, loadLibrary, driveTest: openDriveTest });
 bootstrap();
