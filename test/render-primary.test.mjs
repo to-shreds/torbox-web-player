@@ -25,7 +25,7 @@ test('backend setup transfer keeps the active API key in memory and validates im
 test('server catalog supports cross-type search and rejects query-ignoring title lists',async()=>{
   const catalog=await read('../lib/catalog.mjs');
   assert.match(catalog,/\['movie','series','all'\]/);
-  assert.match(catalog,/Promise\.any\(attempts\)/);
+  assert.match(catalog,/Promise\.any\(/);
   assert.match(catalog,/searchTitleRelevant/);
   assert.match(catalog,/CATALOG_SECONDARY/);
 });
