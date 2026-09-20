@@ -129,6 +129,32 @@ test('torrent creation uses only a hash magnet, with cached-only explicit option
   } });
   assert.equal(await g.create(HASH, true), 0);
 });
+test('an uncached add that TorBox accepts without the cached identifier is reconciled by hash', async () => {
+  // Ordinary one-tap Play sends onlyCached=false whenever the chosen source is not already
+  // cached. That branch was never exercised, and an accepted addition was reported as a failure.
+  let created = 0, listed = 0;
+  const g = new TorrentGateway({
+    provider: { key: 'synthetic', request: async path => { listed++; assert.equal(path, 'torrents/mylist'); return [{ id: 91, hash: HASH }]; } },
+    fetchFn: async (url, opts) => {
+      created++; assert.ok(url.pathname.endsWith('/createtorrent'));
+      assert.equal(opts.body.get('add_only_if_cached'), 'false');
+      return response({ success: true, data: { hash: HASH, queued_id: 5 } });
+    }
+  });
+  assert.equal(await g.create(HASH, false), 91);
+  assert.equal(created, 1); assert.equal(listed, 1);
+});
+test('an accepted add that cannot be reconciled stays uncertain instead of silently retrying', async () => {
+  let created = 0;
+  for (const provider of [
+    { key: 'synthetic', request: async () => [] },
+    { key: 'synthetic', request: async () => { throw new AppError('LIBRARY_SCHEMA', 'unreadable'); } }
+  ]) {
+    const g = new TorrentGateway({ provider, fetchFn: async () => { created++; return response({ success: true, data: { hash: HASH } }); } });
+    await assert.rejects(() => g.create(HASH, false), e => e.code === 'CREATE_UNCERTAIN');
+  }
+  assert.equal(created, 2);
+});
 test('unconfirmed creation never turns into an automatically retried write', async () => {
   const { discovery: d, calls } = fixture({ create: async () => { calls.create++; throw new AppError('CREATE_UNCERTAIN', 'Interrupted'); } });
   const id = await registered(d);
