@@ -48,7 +48,7 @@ test('published direct HTML uses project-relative assets and permits only the Re
   assert.ok(!html.includes('name="api-origin"'));
   assert.ok(html.includes('https://torbox-web-player-key.onrender.com'));
   assert.ok(html.includes('https://torbox-web-player-relay.jonathanjablon.workers.dev'));
-  assert.ok(html.includes('href="./style.css"')); assert.ok(html.includes('src="./app.js?v=2.2.0"'));
+  assert.ok(html.includes('href="./style.css"')); assert.ok(html.includes('src="./app.js?v=2.2.1"'));
   assert.ok(!html.includes('src="/app.js"')); assert.ok(!html.includes('href="/style.css"'));
 });
 test('GitHub Pages bearer session receives a direct TorBox media URL, never a Render media ticket', async t => {
