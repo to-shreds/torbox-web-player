@@ -66,9 +66,19 @@ Verified: `npm run check` clean, suite 337 tests / 331 pass / 0 fail / 6 optiona
 
 **Not yet physically verified.** Physical Android Play remains the acceptance test.
 
-## Deployment fact that previous rounds missed
+## Deployment state
 
-Render auto-deploys `torbox-web-player-key` (`srv-damu91142hec73chb7qg`) from **`browser-key-clone`**, not `main`. A server-side fix merged only to `main` never reaches the live control plane. `lib/` is currently identical on both branches; this repair must land on `browser-key-clone` to take effect. That service also has **no request or application logging** beyond Render's own platform lines, which is why previous rounds had to guess.
+The repair is **live on Render**. `browser-key-clone` commit `070a62342d200f3cb6ae6911d0e1daea681d6beb`, deploy `dep-danvr0mk1f9s73a5js90`, live at 2026-09-20T15:37:02Z. Render ran its own `npm ci && npm run check && npm test` during that build and it passed.
+
+## Deployment facts that previous rounds missed
+
+Render serves `torbox-web-player-key` (`srv-damu91142hec73chb7qg`) from **`browser-key-clone`**, not `main`. A server-side fix merged only to `main` never reaches the live control plane. `lib/` is currently identical on both branches, so backend changes must be landed on both.
+
+Despite `autoDeploy: yes` / `autoDeployTrigger: commit`, **every deploy in this service's entire history has `trigger: "api"`** — the GitHub push webhook has never fired for it. Pushing to `browser-key-clone` alone does **not** deploy; the deploy must be triggered explicitly. Assume a push has not gone live until a new deploy id is confirmed.
+
+That service also has **no request or application logging** beyond Render's own platform lines, which is why previous rounds had to guess.
+
+A second service, `torbox-web-player` (`srv-daln52bl550s73brnhtg`, branch `main`), is also running and consuming a free instance. It does not serve the canonical app.
 
 ## Known acceptance boundary
 
@@ -84,7 +94,7 @@ The current user request is to have another agent independently audit the projec
 
 ## Next action
 
-1. Land the `create()` reconciliation repair on **`browser-key-clone`** so the live Render control plane actually runs it, and confirm the resulting deploy goes live.
+1. ~~Land the `create()` reconciliation repair on `browser-key-clone`.~~ Done: deploy `dep-danvr0mk1f9s73a5js90` is live.
 2. Retest Play for **Elena of Avalor** on the physical Android device. That is the acceptance evidence; a green suite is not.
 3. If Play still fails, read the new `torbox_create_identifier_missing` line in the Render logs. It names the fields TorBox actually returned, which settles the response shape without another speculative change.
 4. Only once Play succeeds, retest audio, seeking, resume, auto-next, pause overlay, and recovery on the same device.
