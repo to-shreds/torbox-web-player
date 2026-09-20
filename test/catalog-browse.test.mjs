@@ -64,3 +64,32 @@ test('server cross-type search returns movies and series from one request',async
   const result=await c.search({type:'all',q:'Shared Title'});
   assert.deepEqual(new Set(result.metas.map(row=>row.type)),new Set(['movie','series']));
 });
+
+test('IMDb suggestion fallback recovers Elena when both Cinemeta search endpoints ignore the query',async()=>{
+  const seen=[];
+  const junk={metas:[{imdb_id:'tt13210838',type:'series',name:'The Gentlemen'},{imdb_id:'tt14688458',type:'series',name:'Silo'}]};
+  const c=new Catalog({fetchFn:async url=>{
+    const value=String(url);seen.push(value);
+    if(value.includes('v3.sg.media-imdb.com/suggestion/'))return ok({d:[{id:'tt4549142',l:'Elena of Avalor',qid:'tvSeries',y:2016}]});
+    if(value.includes('/catalog/series/top/search=Elena%20of%20Avalor.json'))return ok(junk);
+    throw new Error('unexpected '+value);
+  }});
+  const result=await c.search({type:'series',q:'Elena of Avalor'});
+  assert.equal(result.metas[0]?.id,'tt4549142');
+  assert.equal(result.metas[0]?.name,'Elena of Avalor');
+  assert.equal(result.metas[0]?.type,'series');
+  assert.ok(seen.some(value=>value.includes('v3.sg.media-imdb.com/suggestion/')));
+});
+test('IMDb suggestions ignore people and wrong media types',async()=>{
+  const c=new Catalog({fetchFn:async url=>{
+    const value=String(url);
+    if(value.includes('v3.sg.media-imdb.com/suggestion/'))return ok({d:[
+      {id:'nm1234567',l:'Elena Person',qid:'name'},
+      {id:'tt1111111',l:'Elena Movie',qid:'movie',y:2020},
+      {id:'tt2222222',l:'Elena Series',qid:'tvSeries',y:2021}
+    ]});
+    return ok({metas:[]});
+  }});
+  const result=await c.search({type:'series',q:'Elena'});
+  assert.deepEqual(result.metas.map(row=>row.id),['tt2222222']);
+});
