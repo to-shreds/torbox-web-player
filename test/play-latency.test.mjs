@@ -49,7 +49,7 @@ test('Cinemeta uses its prefixed browse route, retries v3 metadata, and diagnost
   assert.ok(runtime.includes("new URL('/' + catalogMatch[1] + path, CATALOG_SECONDARY).href"));
   assert.ok(runtime.includes("label:'cinemeta_meta_retry'"));
   assert.ok(runtime.includes("catalogMetaFlexible"));
-  assert.ok(runtime.includes("probe('cinemeta', 'Cinemeta browse catalog', 'https://cinemeta-catalogs.strem.io/top/catalog/movie/top.json')"));
+  assert.ok(runtime.includes("probe('cinemeta', 'Cinemeta catalog', 'https://cinemeta-catalogs.strem.io/top/catalog/movie/top.json')"));
   assert.ok(runtime.includes("probe('cinemeta_meta', 'Cinemeta metadata', 'https://v3-cinemeta.strem.io/meta/movie/tt0111161.json')"));
   assert.ok(runtime.includes("catalogDirect:byId.cinemeta?.status==='DIRECT_OK'&&byId.cinemeta_meta?.status==='DIRECT_OK'"));
   assert.match(runtime,/network, DNS, TLS, CORS, or another browser policy/);

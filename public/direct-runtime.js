@@ -1099,7 +1099,7 @@ async function probe(id, label, url, { headers = {}, method = 'GET' } = {}) {
 export async function runDirectDiagnostics(overrideKey = '') {
   const key = String(overrideKey || credential || '').trim();
   const tests = [
-    probe('cinemeta', 'Cinemeta browse catalog', 'https://cinemeta-catalogs.strem.io/top/catalog/movie/top.json'),
+    probe('cinemeta', 'Cinemeta catalog', 'https://cinemeta-catalogs.strem.io/top/catalog/movie/top.json'),
     probe('cinemeta_meta', 'Cinemeta metadata', 'https://v3-cinemeta.strem.io/meta/movie/tt0111161.json'),
     probe('zilean', 'Zilean', 'https://zileanfortheweebs.midnightignite.me/dmm/filtered?ImdbId=tt0111161'),
     probe('stremthru_main', 'StremThru Main', SOURCE_ENDPOINTS.stremthruMain + '/stream/movie/tt0111161.json'),
