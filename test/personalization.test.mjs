@@ -24,3 +24,18 @@ test('search history is per viewer, deduplicated, and individually removable',()
   assert.equal(listSearchHistory('viewer-1',store).length,2);assert.equal(listSearchHistory('viewer-2',store)[0].query,'Bluey');
   removeSearch('viewer-1','Animorphs',store);assert.equal(listSearchHistory('viewer-1',store).some(row=>row.query==='Animorphs'),false);
 });
+
+test('source audio and bad-source learning is isolated to the exact file variant',()=>{
+  const store=memoryStore(),hash='c'.repeat(40);
+  const one=source(hash,{filename:'Show.S02E03.720p.AAC-one.mkv',fileIdx:0,group:'ONE'});
+  const two=source(hash,{filename:'Show.S02E03.720p.AAC-two.mkv',fileIdx:1,group:'TWO'});
+  setAudioFeedback(target,one,'bad',store);
+  assert.equal(sourceMemory(target,one,store).audio,'bad');
+  assert.equal(sourceMemory(target,one,store).bad,true);
+  assert.equal(sourceMemory(target,two,store).audio,'unknown');
+  assert.equal(sourceMemory(target,two,store).bad,false);
+  setAudioFeedback(target,two,'good',store);
+  rememberSourceSuccess(target,two,store);
+  assert.equal(sourceMemory(target,two,store).audio,'good');
+  assert.equal(sourceMemory(target,one,store).audio,'bad');
+});
