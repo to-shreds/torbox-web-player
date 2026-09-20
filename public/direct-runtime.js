@@ -21,6 +21,8 @@ const traces = [];
 const tickets = new Map();
 const operations = new Map();
 const catalogCache = new Map();
+const sourceCache = new Map();
+const SOURCE_CACHE_MS = 90000;
 
 function directError(code, message, status = 0) {
   const error = new Error(message);
@@ -356,27 +358,27 @@ function normalizeTorznab(xml, input) {
   return normalizeSources(rows);
 }
 
-async function sourceZilean(target) {
+async function sourceZilean(target, signal) {
   const url = new URL('/dmm/filtered', SOURCE_ENDPOINTS.zilean);
   url.searchParams.set('ImdbId', target.id);
   if (target.type === 'series') {
     url.searchParams.set('Season', target.season);
     url.searchParams.set('Episode', target.episode);
   }
-  const response = await fetchDirect('zilean', url, { headers: { Accept: 'application/json' } }, 35000);
+  const response = await fetchDirect('zilean', url, { headers: { Accept: 'application/json' }, signal }, 5000);
   if (!response.ok) throw directError('SOURCE_HTTP', 'Zilean returned HTTP ' + response.status, response.status);
   return normalizeZilean(await readJson(response, 4 * 1024 * 1024), target);
 }
 
-async function sourceStremthru(target, origin, label, op) {
+async function sourceStremthru(target, origin, label, op, signal) {
   const resourceId = target.type === 'series' ? target.id + ':' + target.season + ':' + target.episode : target.id;
   const url = new URL(origin.replace(/\/+$/, '') + '/stream/' + target.type + '/' + resourceId + '.json');
-  const response = await fetchDirect(op, url, { headers: { Accept: 'application/json' }, redirect: 'follow' }, 30000);
+  const response = await fetchDirect(op, url, { headers: { Accept: 'application/json' }, redirect: 'follow', signal }, 6000);
   if (!response.ok) throw directError('SOURCE_HTTP', label + ' returned HTTP ' + response.status, response.status);
   return normalizeStremio(await readJson(response, 8 * 1024 * 1024), target, label);
 }
 
-async function sourceMediafusion(target) {
+async function sourceMediafusion(target, signal) {
   const url = new URL(SOURCE_ENDPOINTS.mediafusion);
   url.searchParams.set('t', target.type === 'series' ? 'tvsearch' : 'movie');
   url.searchParams.set('imdbid', target.id);
@@ -388,8 +390,8 @@ async function sourceMediafusion(target) {
   const response = await fetchDirect(
     'mediafusion_torznab',
     url,
-    { headers: { Accept: 'application/rss+xml, application/xml, text/xml' }, redirect: 'follow' },
-    30000
+    { headers: { Accept: 'application/rss+xml, application/xml, text/xml' }, redirect: 'follow', signal },
+    6000
   );
   if (!response.ok) throw directError('SOURCE_HTTP', 'MediaFusion returned HTTP ' + response.status, response.status);
   return normalizeTorznab(await readText(response, 4 * 1024 * 1024), target);
@@ -400,34 +402,91 @@ function richness(source) {
     + (source.resolution ? 3 : 0) + (source.videoCodec ? 2 : 0) + (source.audioCodecs?.length ? 2 : 0);
 }
 
-async function directSources(input) {
-  const target = validTarget(input);
-  const jobs = [
-    ['Zilean', () => sourceZilean(target)],
-    ['StremThru Main', () => sourceStremthru(target, SOURCE_ENDPOINTS.stremthruMain, 'StremThru Main', 'stremthru_main')],
-    ['StremThru ElfHosted', () => sourceStremthru(target, SOURCE_ENDPOINTS.stremthruElf, 'StremThru ElfHosted', 'stremthru_elf')],
-    ['MediaFusion Torznab', () => sourceMediafusion(target)]
-  ];
-  const settled = await Promise.allSettled(jobs.map(row => row[1]()));
-  const providers = [];
-  const map = new Map();
-  settled.forEach((result, index) => {
-    if (result.status !== 'fulfilled') return;
-    providers.push(jobs[index][0]);
-    for (const source of result.value) {
-      const old = map.get(source.hash);
-      if (!old || richness(source) > richness(old)) map.set(source.hash, source);
-    }
-  });
-  const sources = [...map.values()].slice(0, 40);
-  if (!sources.length && settled.every(row => row.status === 'rejected')) {
-    throw directError(
-      'DIRECT_SOURCE_UNAVAILABLE',
-      'Every direct source index was blocked or unavailable. Run Browser-only diagnostics and paste the log.',
-      502
-    );
+function sourceTargetKey(target){
+  return target.type==='series'
+    ? `series:${target.id}:${target.season}:${target.episode}`
+    : `movie:${target.id}`;
+}
+async function directSources(input, signal) {
+  const target = validTarget(input), key = sourceTargetKey(target), cached = sourceCache.get(key);
+  if (cached && cached.until > Date.now()) {
+    trace('source_cache','hit',{target:key,count:cached.value.sources.length});
+    return cached.value;
   }
-  return { sources, provider: 'Browser direct', providers, failures: settled.filter(row => row.status === 'rejected').length };
+  const jobs = [
+    ['Zilean', controller => sourceZilean(target, controller.signal)],
+    ['StremThru Main', controller => sourceStremthru(target, SOURCE_ENDPOINTS.stremthruMain, 'StremThru Main', 'stremthru_main', controller.signal)],
+    ['StremThru ElfHosted', controller => sourceStremthru(target, SOURCE_ENDPOINTS.stremthruElf, 'StremThru ElfHosted', 'stremthru_elf', controller.signal)],
+    ['MediaFusion Torznab', controller => sourceMediafusion(target, controller.signal)]
+  ];
+  const controllers = jobs.map(() => new AbortController());
+  const providers = [], map = new Map();
+  let settled = 0, failures = 0, done = false, graceTimer = null, hardTimer = null;
+
+  return await new Promise((resolve, reject) => {
+    const cleanup = () => {
+      if (graceTimer) clearTimeout(graceTimer);
+      if (hardTimer) clearTimeout(hardTimer);
+      for (const controller of controllers) controller.abort();
+    };
+    const finish = () => {
+      if (done) return;
+      done = true; cleanup();
+      const sources = [...map.values()].slice(0, 40);
+      if (!sources.length) {
+        reject(directError('DIRECT_SOURCE_UNAVAILABLE','No direct source index returned a usable source. Try again shortly.',502));
+        return;
+      }
+      const value = { sources, provider:'Browser direct', providers:[...providers], failures };
+      sourceCache.set(key,{value,until:Date.now()+SOURCE_CACHE_MS});
+      trace('source_fan_in','ready',{target:key,count:sources.length,providers:providers.length,settled});
+      resolve(value);
+    };
+    const maybeFinish = () => {
+      if (done) return;
+      if (map.size >= 12 && providers.length >= 2) return finish();
+      if (map.size && !graceTimer) graceTimer = setTimeout(finish, 650);
+      if (settled === jobs.length) finish();
+    };
+    const abort = () => {
+      if (done) return;
+      done = true; cleanup();
+      reject(signal?.reason || new DOMException('Cancelled','AbortError'));
+    };
+    if (signal) {
+      if (signal.aborted) return abort();
+      signal.addEventListener('abort',abort,{once:true});
+    }
+    hardTimer = setTimeout(finish, 5000);
+    jobs.forEach(([name, run], index) => {
+      const controller = controllers[index];
+      const combined = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
+      // Re-wrap so each provider sees both the local fan-in cancellation and caller cancellation.
+      const adapter = { signal: combined };
+      Promise.resolve().then(() => {
+        if(name==='Zilean') return sourceZilean(target,adapter.signal);
+        if(name==='StremThru Main') return sourceStremthru(target,SOURCE_ENDPOINTS.stremthruMain,'StremThru Main','stremthru_main',adapter.signal);
+        if(name==='StremThru ElfHosted') return sourceStremthru(target,SOURCE_ENDPOINTS.stremthruElf,'StremThru ElfHosted','stremthru_elf',adapter.signal);
+        return sourceMediafusion(target,adapter.signal);
+      }).then(sources => {
+        if (done) return;
+        settled += 1;
+        if (sources.length) {
+          providers.push(name);
+          for (const source of sources) {
+            const old = map.get(source.hash);
+            if (!old || richness(source) > richness(old)) map.set(source.hash, source);
+          }
+        }
+        maybeFinish();
+      }, error => {
+        if (done) return;
+        settled += 1; failures += 1;
+        if (error?.name !== 'AbortError') trace('source_provider','failed',{provider:name,error:safeError(error)});
+        maybeFinish();
+      });
+    });
+  });
 }
 
 function requireKey() {
@@ -741,7 +800,7 @@ function pathAndQuery(value) {
   return new URL(value, 'https://direct.invalid');
 }
 
-export async function directApi(path, { method = 'GET', data } = {}) {
+export async function directApi(path, { method = 'GET', data, signal } = {}) {
   const url = pathAndQuery(path);
   const pathname = url.pathname;
 
@@ -828,7 +887,7 @@ export async function directApi(path, { method = 'GET', data } = {}) {
       target.season = Number(url.searchParams.get('season'));
       target.episode = Number(url.searchParams.get('episode'));
     }
-    return directSources(target);
+    return directSources(target, signal);
   }
 
   if (pathname === '/api/discover/sources' && method === 'POST') return registerSources(data || {});
