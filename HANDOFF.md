@@ -38,6 +38,12 @@ The Render backend is live from `browser-key-clone` commit `e6e9bf756ff3400e244f
 
 Version 2.3.0 restored Render as the normal control plane while preserving direct TorBox CDN video and the newer 2.x features. Version 2.2.0 added exact file-variant learning, local recovery snapshots, release gating, production refs, and rollback. Version 2.1.0 added tabbed Settings. Preserve all of them.
 
+## Latest physical Android result
+
+On production **2.3.1**, search for **Elena of Avalor** now returns and opens the correct title/episode list, so the independent search fallback is functioning on the target phone. However, pressing Play fails with the visible error: **“TorBox accepted the request but did not return a usable identifier. Check status before retrying.”** This is now the primary blocker.
+
+That message originates from the Render-side torrent creation/preparation path, not the search UI. A new investigator should trace the exact TorBox `torrents/createtorrent` response shape seen through Render, compare it with the current `Discovery/TorrentGateway` assumptions, inspect Render logs for the failed Play attempt, and confirm whether TorBox changed the returned identifier field or whether an existing-torrent/reconciliation path is being mishandled. Do not change search again unless evidence requires it.
+
 ## Known acceptance boundary
 
 Automated tests verify source contracts, Render routing, state behavior, release gating, and synthetic browser behavior. They do not prove actual Android latency, live-account playback, or a particular torrent's audio codec. The rollback workflow is implemented and statically covered but has not been intentionally exercised against live Pages, because doing so would temporarily replace the current deployment. Physical-device playback remains the final acceptance test for real audio/codec behavior.
@@ -52,22 +58,7 @@ The current user request is to have another agent independently audit the projec
 
 ## Next action
 
-On the physical Android device, confirm 2.3.1 and repeat the exact search **Elena of Avalor**. It must return the Elena title rather than unrelated cards or an empty result. Then open the same episode and test Play latency and actual playback. Do not call search or playback repaired until those physical checks pass. For later substantive changes, work on `release-candidate`, let CI advance `release-approved`, then fast-forward `main` only to that exact approved SHA.
-
-## External-agent access
-
-A different coding agent will not inherit ChatGPT's connected Render/GitHub sessions. Give it repo access and connect Render separately.
-
-Render details that are safe to use as identifiers:
-- Workspace ID: `tea-dakujgmk1f9s73d2v8ng`
-- Service: `torbox-web-player-key`
-- Service ID: `srv-damu91142hec73chb7qg`
-- URL: `https://torbox-web-player-key.onrender.com`
-- Render source branch: `browser-key-clone`
-
-Preferred Claude setup: use Claude Code from a local clone of this repo, authenticate Git/GitHub normally, then install/connect Render's official MCP/plugin with OAuth. Do not put a Render API key, TorBox API key, or other secret in this file or in chat.
-
-The latest physical Android evidence still controls acceptance. Do not infer success from CI or deploy health alone.
+Diagnose the physical 2.3.1 Play failure above from the Render/TorBox path. Search is now physically confirmed far enough to open Elena correctly. Do not rewrite architecture or search while investigating Play. Inspect live Render logs and the real TorBox create/prepare response before changing code.
 
 ## Persistence
 
