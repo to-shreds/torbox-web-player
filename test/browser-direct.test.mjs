@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 
-test('browser-direct experiment uses a local runtime and exposes a sanitized diagnostics lab', async () => {
+test('browser-direct fallback remains available and exposes sanitized diagnostics without being canonical mode', async () => {
   const [html, app, direct, discover, sw, pkg] = await Promise.all([
     read('../public/index.html'),
     read('../public/app.js'),
@@ -12,7 +12,8 @@ test('browser-direct experiment uses a local runtime and exposes a sanitized dia
     read('../public/sw.js'),
     read('../package.json')
   ]);
-  assert.match(html, /name="runtime-mode" content="direct"/);
+  assert.match(html, /name="runtime-mode" content="backend"/);
+  assert.match(html, /name="api-origin" content="https:\/\/torbox-web-player-key\.onrender\.com"/);
   assert.match(html, /id="run-login-diagnostics"/);
   assert.match(html, /id="settings-run-diagnostics"/);
   assert.match(html, /id="diagnostics-dialog"/);
@@ -49,11 +50,11 @@ test('browser-direct CSP permits direct sources plus redundant Render and Cloudf
   assert.ok(csp.includes('https://api.torbox.app'));
 });
 
-test('Render-only optional surfaces are hidden in browser-direct experiment', async () => {
+test('legacy Drive surface stays hidden while backendless transfer remains in canonical UI', async () => {
   const html = await read('../public/index.html');
   assert.match(html, /id="portable-settings-group"/);
   assert.match(html, /id="drive-settings-group"[^>]*hidden/);
-  assert.match(html, /Browser-local player/);
+  assert.match(html, /GitHub Pages hosts the interface/);
 });
 
 test('redundant relay client and Cloudflare Worker share the allowlisted bridge contract', async () => {
