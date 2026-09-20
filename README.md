@@ -1,6 +1,6 @@
 # TorBox Player
 
-Current version: **2.1.0**
+Current version: **2.2.0**
 
 Canonical frontend: `https://to-shreds.github.io/torbox-web-player/`
 
@@ -18,9 +18,9 @@ The working `/key/` backend is still deployed from `browser-key-clone`. Do not r
 
 ## Simple by default
 
-First launch asks only for the user's own TorBox API key. Remembering it is optional and uses the existing encrypted IndexedDB vault. Source selection is automatic. Browser-friendly audio is preferred, but incomplete codec metadata never turns ordinary Play into a torrent-selection workflow. Release integrity is checked across the complete browser module graph so stale leaf-module versions cannot silently mix with a newer UI. Settings opens on a plain-English Basic settings tab. Advanced controls are separated into Playback, Home & history, Discover & sources, Kids, and Devices & app tabs. Full mode exposes technical controls in the main player without cluttering the default experience.
+First launch asks only for the user's own TorBox API key. Remembering it is optional and uses the existing encrypted IndexedDB vault. Source selection is automatic. Browser-friendly audio is preferred, but incomplete codec metadata never turns ordinary Play into a torrent-selection workflow. Release integrity is checked across the complete browser module graph so stale leaf-module versions cannot silently mix with a newer UI. Releases now pass through a verified candidate/approval gate, successful production builds are tagged, and a separate rollback workflow can republish the rollback-stable release without changing main. Settings opens on a plain-English Basic settings tab. Advanced controls are separated into Playback, Home & history, Discover & sources, Kids, and Devices & app tabs. Full mode exposes technical controls in the main player without cluttering the default experience.
 
-Existing features include focused search with Search/Enter keyboard dismissal, Continue Watching with configurable resume rewind, My List, Next Up, auto-next, source recovery, per-title quality, data-saving source preferences, audio/source feedback, sleep timer, Still Watching, and per-viewer Kid Mode with Parent PIN and time/episode/movie limits.
+Local state is automatically backed up before the first launch of a new version and before setup replacement, with up to three local recovery points that never include the TorBox API key. Existing features include focused search with Search/Enter keyboard dismissal, Continue Watching with configurable resume rewind, My List, Next Up, auto-next, source recovery, per-title quality, data-saving source preferences, audio/source feedback, sleep timer, Still Watching, and per-viewer Kid Mode with Parent PIN and time/episode/movie limits.
 
 Parental controls are local application controls, not device management. Clearing browser data or using another unrestricted browser can defeat them. Local encryption does not protect credentials against malicious scripts running on this same origin.
 
