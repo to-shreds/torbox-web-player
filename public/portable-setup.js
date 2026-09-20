@@ -1,11 +1,11 @@
-import { DEFAULT_SETTINGS, normalizeSettings, getSettings } from './settings.js?v=2.0.8';
-import { listRecent } from './history.js?v=2.0.8';
-import { listWatchlist } from './watchlist.js?v=2.0.8';
+import { DEFAULT_SETTINGS, normalizeSettings, getSettings } from './settings.js?v=2.1.0';
+import { listRecent } from './history.js?v=2.1.0';
+import { listWatchlist } from './watchlist.js?v=2.1.0';
 
 // Versioned, deliberately narrow format. No PINs, parental allowances, selected
 // viewer, search history, source learning, provider URLs or relay configuration.
 export const PORTABLE_KEYS = Object.freeze(['torbox-settings-v1','torbox-recent-v1','torbox-watchlist-v1']);
-export const SETTING_NAMES = Object.freeze(['interfaceMode','resolution','resumeRewindSeconds','autoNext','autoNextDelaySeconds','autoRecovery','bufferSeconds','recentLimit','showCompletedRecent','cleanupCompletedEpisodes','pauseOverlay','playbackRate','sleepTimerMinutes','stillWatchingMinutes','keepAwake','keyboardShortcuts','seekSeconds','showEpisodeProgress','rememberBrowse','catalogType','catalogFeed','catalogGenre','sourceSizeProfile','showWatchlist','watchlistLimit','showNextUp','nextUpLimit','showSearchHistory','searchHistoryLimit','longPressShortcuts','showPlaybackHealth','autoLearnSources']);
+export const SETTING_NAMES = Object.freeze(['interfaceMode','resolution','resumeRewindSeconds','autoNext','autoNextDelaySeconds','autoRecovery','bufferSeconds','recentLimit','showCompletedRecent','cleanupCompletedEpisodes','pauseOverlay','playbackRate','sleepTimerMinutes','stillWatchingMinutes','keepAwake','keyboardShortcuts','seekSeconds','showEpisodeProgress','rememberBrowse','catalogType','catalogFeed','catalogGenre','sourceSizeProfile','showWatchlist','watchlistLimit','showNextUp','nextUpLimit','showSearchHistory','searchHistoryLimit','longPressShortcuts','showPlaybackHealth','autoLearnSources','viewer1Name','viewer2Name','rememberViewer','homeDensity','searchDelayMs','preferCachedSources']);
 const MAX_BYTES=131072, MAX_TOKEN=65536, PREFIX='tw2.';
 const encoder=new TextEncoder(), decoder=new TextDecoder('utf-8',{fatal:true});
 const bad=()=>new Error('This is not a valid supported player setup.');
