@@ -36,6 +36,26 @@ export function recommendSource(list, type = 'movie', resolution = 'auto', sizeP
   return [...pool].sort((a,b)=>rank(b)-rank(a)||(a.size??Infinity)-(b.size??Infinity))[0];
 }
 export const preferredSource = list => recommendSource(list, 'movie', 'auto');
+export function automaticPreparedFile(files){
+  if(!Array.isArray(files)||!files.length)return null;
+  return [...files].filter(file=>file&&typeof file.id==='string').sort((a,b)=>{
+    const sizeA=Number.isFinite(a.size)?a.size:-1,sizeB=Number.isFinite(b.size)?b.size:-1;
+    return sizeB-sizeA||String(a.title||'').localeCompare(String(b.title||''))||String(a.id).localeCompare(String(b.id));
+  })[0]||null;
+}
+export function autoNextSourceOrder(list,resolution='auto',sizeProfile=getSettings().sourceSizeProfile,limit=8){
+  const input=Array.isArray(list)?list:[],ordered=[],used=new Set(),resolutions=[resolution||'auto','auto'].filter((value,index,array)=>array.indexOf(value)===index);
+  for(const wanted of resolutions){
+    let remaining=input.filter(source=>!used.has(source.id||source.hash||source.title));
+    while(remaining.length&&ordered.length<limit){
+      const best=recommendSource(remaining,'series',wanted,sizeProfile);if(!best)break;
+      const key=best.id||best.hash||best.title;used.add(key);ordered.push(best);
+      remaining=remaining.filter(source=>(source.id||source.hash||source.title)!==key);
+    }
+    if(ordered.length>=limit)break;
+  }
+  return ordered;
+}
 export function episodeQueue(meta, target, now = Date.now()) {
   if (!meta || target?.type !== 'series' || !Array.isArray(meta.episodes)) return [];
   const released = meta.episodes.filter(e => !e.released || Date.parse(e.released) <= now).sort((a,b)=>a.season-b.season||a.episode-b.episode);
@@ -207,9 +227,9 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     while(Date.now()<deadline){
       if(result.state==='ready')return result;
       if(result.state==='choose_file'){
-        if(!result.files?.length)throw new Error('No matching video file was found.');
-        if(unattended&&result.files.length!==1)throw new Error('This package has multiple possible files and cannot be selected automatically.');
-        result=await api('/api/discover/status?'+new URLSearchParams({source:source.id,file:result.files[0].id}),{signal:signal?AbortSignal.any([signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000)});continue;
+        const selected=unattended?automaticPreparedFile(result.files):result.files?.[0];
+        if(!selected)throw new Error('No matching video file was found.');
+        result=await api('/api/discover/status?'+new URLSearchParams({source:source.id,file:selected.id}),{signal:signal?AbortSignal.any([signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000)});continue;
       }
       if(result.state!=='preparing')throw new Error(result.message||'This source is unavailable.');
       await delay(3500);result=await api('/api/discover/status?'+new URLSearchParams({source:source.id}),{signal:signal?AbortSignal.any([signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000)});
@@ -368,9 +388,15 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     try{
       const meta=await api(`/api/discover/meta?type=series&id=${next.id}`,{signal:AbortSignal.timeout(20000)});
       const registered=await registeredSources(next,AbortSignal.timeout(45000));
-      let best=recommendSource(registered.sources,'series',context.resolution||'auto')||recommendSource(registered.sources,'series','auto');if(!best||best.audioRisk)return false;
-      const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
-      await play(result.file,{...buildContext(meta.meta,next,next.name||'',context.resolution||getResolution(next),best),poster:meta.meta.poster||context.poster,queue:rest});return true;
+      const candidates=autoNextSourceOrder(registered.sources,context.resolution||'auto');
+      for(const source of candidates){
+        try{
+          const result=await readyFile(source,{signal:AbortSignal.timeout(330000),unattended:true});
+          const moved=await play(result.file,{...buildContext(meta.meta,next,next.name||'',context.resolution||getResolution(next),source),poster:meta.meta.poster||context.poster,queue:rest});
+          if(moved)return true;
+        }catch{}
+      }
+      return false;
     }catch{return false;}
   }
 
