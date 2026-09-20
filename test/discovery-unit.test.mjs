@@ -28,11 +28,14 @@ test('catalog validates identities before making requests', async () => {
   for (const id of ['../x', 'https://example.com', 'tt12']) await assert.rejects(c.meta('movie', id));
 });
 test('catalog broad search is encoded and independent of TorBox files', async () => {
-  let path;
-  const c = new Catalog({ fetchFn: async url => { path = url; return response({ metas: [{ id: ID, type: 'movie', name: 'Fixture' }] }); } });
+  const seen = [];
+  const c = new Catalog({ fetchFn: async url => { seen.push(String(url)); return response({ metas: [{ id: ID, type: 'movie', name: 'A & B/?' }] }); } });
   const result = await c.search({ q: 'A & B/?', genre: 'Science Fiction' });
-  assert.ok(path.startsWith('https://v3-cinemeta.strem.io/catalog/movie/top/'));
-  assert.ok(path.includes('search=A%20%26%20B%2F%3F')); assert.ok(path.includes('genre=Science%20Fiction'));
+  assert.ok(seen.some(path => path.startsWith('https://v3-cinemeta.strem.io/catalog/movie/top/')));
+  assert.ok(seen.some(path => path.startsWith('https://cinemeta-catalogs.strem.io/top/catalog/movie/top/')));
+  const cinemeta = seen.filter(path => path.includes('cinemeta'));
+  assert.ok(cinemeta.every(path => path.includes('search=A%20%26%20B%2F%3F')));
+  assert.ok(cinemeta.every(path => path.includes('genre=Science%20Fiction')));
   assert.equal(result.metas.length, 1); assert.equal(result.nextSkip, null);
 });
 test('catalog IMDb search resolves metadata rather than partial text matches', async () => {

@@ -173,7 +173,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     if(!more){metas=[];nextSkip=null;$('catalog-grid').replaceChildren();$('catalog-more').hidden=true;}
     const query=$('search').value.trim();applySearchMode();message('catalog-message',query?'Searching…':'Loading browse…');
     try{
-      const params=new URLSearchParams({type:$('catalog-type').value,q:query,skip:String(offset),genre:$('catalog-genre').value,feed:$('catalog-feed').value});
+      const params=new URLSearchParams({type:query?'all':$('catalog-type').value,q:query,skip:String(offset),genre:query?'':$('catalog-genre').value,feed:query?'popular':$('catalog-feed').value});
       const data=await api('/api/discover/catalog?'+params,{signal:AbortSignal.any([catalogAbort.signal,AbortSignal.timeout(20000)])});
       if(generation!==catalogGeneration||!active||guestMode)return;
       metas=more?[...new Map([...metas,...data.metas].map(m=>[m.id,m])).values()]:data.metas;nextSkip=data.nextSkip;
