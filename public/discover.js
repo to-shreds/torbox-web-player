@@ -82,7 +82,7 @@ function createResolutionSelect(value = getResolution()) {
 
 export function createDiscoveryUI({ api, play, driveTest, guard }) {
   let active=false, guestMode=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0, nextUpGeneration=0;
-  let catalogAbort,titleAbort,sourceAbort,searchTimer,pollTimer,metas=[],nextSkip=null,currentMeta;
+  let catalogAbort,titleAbort,sourceAbort,searchTimer,pollTimer,metas=[],nextSkip=null,currentMeta,playIntentGeneration=0,playIntentKey='',playIntentPromise=null;
 
   function cancelSource(){++preparationGeneration;++sourceGeneration;sourceAbort?.abort();clearTimeout(pollTimer);}
   function cancelTitle(){++titleGeneration;titleAbort?.abort();cancelSource();}
@@ -238,20 +238,40 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
   }
 
   async function quickPlay(meta,target,episodeName='',trigger){
-    const original=trigger?.textContent;if(trigger){trigger.disabled=true;trigger.textContent='Opening…';}
-    message('detail-message','Finding the recommended source…');
-    try{
-      await ensureService();
-      const resolution=getResolution(target),registered=await registeredSources(target,AbortSignal.timeout(45000));
-      const best=recommendSource(registered.sources,target.type,resolution)||recommendSource(registered.sources,target.type,'auto');
-      if(!best)throw new Error('No source matches this resolution.');
-      message('detail-message',best.cached?'Opening cached source…':'Preparing recommended source…');
-      const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
-      const context=buildContext(meta,target,episodeName,resolution,best);
-      if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
-      await play(result.file,context);return true;
-    }catch(e){message('detail-message',e.message,true);return false;}
-    finally{if(trigger&&trigger.isConnected){trigger.disabled=false;trigger.textContent=original;}}
+    const key=target.type==='series'?`series:${target.id}:${target.season}:${target.episode}`:`movie:${target.id}`;
+    const original=trigger?.textContent;
+    if(playIntentPromise&&playIntentKey===key){
+      if(trigger){trigger.disabled=true;trigger.textContent='Opening…';}
+      try{return await playIntentPromise;}
+      finally{if(trigger&&trigger.isConnected){trigger.disabled=false;trigger.textContent=original;}}
+    }
+    const generation=++playIntentGeneration;playIntentKey=key;
+    if(trigger){trigger.disabled=true;trigger.textContent='Opening…';}
+    const run=(async()=>{
+      message('detail-message','Finding the recommended source…');
+      try{
+        await ensureService();if(generation!==playIntentGeneration)return false;
+        const resolution=getResolution(target),registered=await registeredSources(target,AbortSignal.timeout(8000));
+        if(generation!==playIntentGeneration)return false;
+        const best=recommendSource(registered.sources,target.type,resolution)||recommendSource(registered.sources,target.type,'auto');
+        if(!best)throw new Error('No source matches this resolution.');
+        message('detail-message',best.cached?'Opening cached source…':'Preparing recommended source…');
+        const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
+        if(generation!==playIntentGeneration)return false;
+        const context=buildContext(meta,target,episodeName,resolution,best);
+        if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
+        return await play(result.file,context);
+      }catch(e){
+        if(generation===playIntentGeneration)message('detail-message',e.name==='AbortError'?'Opening cancelled.':e.message,true);
+        return false;
+      }
+    })();
+    playIntentPromise=run;
+    try{return await run;}
+    finally{
+      if(playIntentPromise===run){playIntentPromise=null;playIntentKey='';}
+      if(trigger&&trigger.isConnected){trigger.disabled=false;trigger.textContent=original;}
+    }
   }
 
   async function quickDriveShare(meta,target,episodeName='',trigger){
@@ -456,6 +476,6 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       await showTitle({type:scope.type,id:scope.id,name:scope.name||'Shared title',poster:scope.poster||''});
     },
     playNext,recoverPlayback,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
-    suspend(){active=false;guestMode=false;document.body.classList.remove('search-mode');++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
+    suspend(){active=false;guestMode=false;++playIntentGeneration;playIntentPromise=null;playIntentKey='';document.body.classList.remove('search-mode');++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
   };
 }
