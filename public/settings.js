@@ -33,7 +33,13 @@ export const DEFAULT_SETTINGS=Object.freeze({
   searchHistoryLimit:6,
   longPressShortcuts:true,
   showPlaybackHealth:true,
-  autoLearnSources:true
+  autoLearnSources:true,
+  viewer1Name:'',
+  viewer2Name:'',
+  rememberViewer:true,
+  homeDensity:'comfortable',
+  searchDelayMs:350,
+  preferCachedSources:true
 });
 const interfaceModes=new Set(['simple','full']);
 const resolutions=new Set(['auto','480p','720p','1080p','2160p']);
@@ -49,10 +55,13 @@ const driveDelete=new Set([10,20,30,45]);
 const watchlistLimit=new Set([6,12,18,24]);
 const nextUpLimit=new Set([3,6,9,12]);
 const searchHistoryLimit=new Set([3,6,9,12]);
+const searchDelay=new Set([150,350,700]);
 const catalogTypes=new Set(['movie','series']);
 const catalogFeeds=new Set(['popular','featured','new']);
 const sizeProfiles=new Set(['data','balanced','quality']);
+const homeDensities=new Set(['comfortable','compact']);
 const genres=new Set(['','Action','Adventure','Animation','Biography','Comedy','Crime','Documentary','Drama','Family','Fantasy','History','Horror','Mystery','Romance','Sci-Fi','Sport','Thriller','War','Western']);
+const cleanName=value=>typeof value==='string'?value.replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,30):'';
 function store(){try{return localStorage}catch{return null}}
 export function normalizeSettings(raw){
   const s=raw&&typeof raw==='object'?raw:{};
@@ -90,7 +99,13 @@ export function normalizeSettings(raw){
     searchHistoryLimit:searchHistoryLimit.has(Number(s.searchHistoryLimit))?Number(s.searchHistoryLimit):DEFAULT_SETTINGS.searchHistoryLimit,
     longPressShortcuts:s.longPressShortcuts!==false,
     showPlaybackHealth:s.showPlaybackHealth!==false,
-    autoLearnSources:s.autoLearnSources!==false
+    autoLearnSources:s.autoLearnSources!==false,
+    viewer1Name:cleanName(s.viewer1Name),
+    viewer2Name:cleanName(s.viewer2Name),
+    rememberViewer:s.rememberViewer!==false,
+    homeDensity:homeDensities.has(s.homeDensity)?s.homeDensity:DEFAULT_SETTINGS.homeDensity,
+    searchDelayMs:searchDelay.has(Number(s.searchDelayMs))?Number(s.searchDelayMs):DEFAULT_SETTINGS.searchDelayMs,
+    preferCachedSources:s.preferCachedSources!==false
   };
 }
 export function getSettings(storage=store()){
