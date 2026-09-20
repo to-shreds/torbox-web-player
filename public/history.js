@@ -1,4 +1,4 @@
-import { getSettings } from './settings.js?v=2.1.0';
+import { getSettings } from './settings.js?v=2.2.0';
 const STORAGE_KEY = 'torbox-recent-v1';
 const MAX_ITEMS = 20;
 const clean = (value, max = 240) => typeof value === 'string' ? value.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, max) : '';
