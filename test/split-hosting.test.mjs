@@ -48,7 +48,7 @@ test('canonical HTML uses project-relative assets with Render as the API control
   assert.ok(html.includes('name="api-origin" content="https://torbox-web-player-key.onrender.com"'));
   assert.ok(html.includes('https://torbox-web-player-key.onrender.com'));
   assert.ok(html.includes('https://torbox-web-player-relay.jonathanjablon.workers.dev'));
-  assert.ok(html.includes('href="./style.css"')); assert.ok(html.includes('src="./app.js?v=2.3.2"'));
+  assert.ok(html.includes('href="./style.css"')); assert.ok(html.includes('src="./app.js?v=2.3.3"'));
   assert.ok(!html.includes('src="/app.js"')); assert.ok(!html.includes('href="/style.css"'));
 });
 test('GitHub Pages bearer session receives a direct TorBox media URL, never a Render media ticket', async t => {

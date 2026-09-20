@@ -1,9 +1,9 @@
-import { recordDiagnosticEvent } from './direct-runtime.js?v=2.3.2';
-import { getSettings, updateSettings } from './settings.js?v=2.3.2';
-import { listRecent, formatResumeTime } from './history.js?v=2.3.2';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.3.2';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.3.2';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.3.2';
+import { recordDiagnosticEvent } from './direct-runtime.js?v=2.3.3';
+import { getSettings, updateSettings } from './settings.js?v=2.3.3';
+import { listRecent, formatResumeTime } from './history.js?v=2.3.3';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.3.3';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.3.3';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.3.3';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
@@ -25,6 +25,19 @@ export function recommendAutomaticSource(list,type='movie',resolution='auto',siz
   const eligible=(Array.isArray(list)?list:[]).filter(automaticSourceEligible);
   const confirmed=eligible.filter(source=>source.memoryAudio==='good'||(source.browserFriendly===true&&source.audioRisk!==true&&source.videoRisk!==true));
   const unknown=eligible.filter(source=>source.audioRisk!==true&&source.videoRisk!==true);
+  // These tiers are codec-confidence filters, and each one is tried only when the previous is
+  // empty. A browser-friendly uncached source therefore used to win outright, which stripped every
+  // cached source out before recommendSource could prefer one. Cache availability decides whether
+  // Play is instant or a download, so a risk-free cached source is tried at each tier first.
+  // Sources with known-risky audio or video are deliberately not included here, so cached
+  // availability still never outranks a known Dolby/DTS or HEVC risk.
+  if(getSettings().preferCachedSources!==false){
+    for(const tier of [confirmed,unknown]){
+      const available=tier.filter(source=>source.cached===true);
+      const pick=available.length?recommendSource(available,type,resolution,sizeProfile):null;
+      if(pick)return pick;
+    }
+  }
   return recommendSource(confirmed,type,resolution,sizeProfile)
     || recommendSource(unknown,type,resolution,sizeProfile)
     || recommendSource(eligible,type,resolution,sizeProfile);

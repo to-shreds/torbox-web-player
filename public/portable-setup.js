@@ -1,6 +1,6 @@
-import { DEFAULT_SETTINGS, normalizeSettings, getSettings } from './settings.js?v=2.3.2';
-import { listRecent } from './history.js?v=2.3.2';
-import { listWatchlist } from './watchlist.js?v=2.3.2';
+import { DEFAULT_SETTINGS, normalizeSettings, getSettings } from './settings.js?v=2.3.3';
+import { listRecent } from './history.js?v=2.3.3';
+import { listWatchlist } from './watchlist.js?v=2.3.3';
 
 // Versioned, deliberately narrow format. No PINs, parental allowances, selected
 // viewer, search history, source learning, provider URLs or relay configuration.

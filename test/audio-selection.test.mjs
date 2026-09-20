@@ -98,6 +98,23 @@ test('automatic playback falls back to codec-unknown audio before known-risk aud
   assert.equal(recommendAutomaticSource(list,'movie','auto')?.id,'unknown');
 });
 
+test('automatic playback takes a cached codec-unknown source over an uncached browser-friendly one', () => {
+  // Observed live: the cache check reported 7 cached sources and Play still started a download,
+  // because the codec-confidence tiers were applied before cache availability and a browser-friendly
+  // uncached source won the first tier outright.
+  const list=[
+    {id:'cached-unknown',cached:true,audioRisk:false,videoRisk:false,browserFriendly:false,resolution:'720p',score:0,size:400*1024**2},
+    {id:'uncached-aac',cached:false,audioRisk:false,videoRisk:false,browserFriendly:true,resolution:'720p',score:400,size:450*1024**2}
+  ];
+  assert.equal(recommendAutomaticSource(list,'series','auto')?.id,'cached-unknown');
+});
+test('automatic playback still refuses a cached known-risk source in favour of an uncached safe one', () => {
+  const list=[
+    {id:'cached-dolby',cached:true,audioRisk:true,videoRisk:false,browserFriendly:false,resolution:'720p',score:900,size:400*1024**2},
+    {id:'uncached-aac',cached:false,audioRisk:false,videoRisk:false,browserFriendly:true,resolution:'720p',score:0,size:450*1024**2}
+  ];
+  assert.equal(recommendAutomaticSource(list,'series','auto')?.id,'uncached-aac');
+});
 test('automatic playback keeps one-tap behavior even when only a known-risk source remains', () => {
   const risky={id:'dolby-only',cached:true,audioRisk:true,videoRisk:false,browserFriendly:false,resolution:'720p',score:100,size:400*1024**2};
   assert.equal(recommendAutomaticSource([risky],'movie','auto')?.id,'dolby-only');
