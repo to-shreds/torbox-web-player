@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { recommendSource, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder, recoverySourceOrder, boundedRecoverySourceOrder, sourceRecoveryKey, MAX_AUTOMATIC_SOURCE_ATTEMPTS } from '../public/discover.js';
+import { recommendSource, automaticSourceOrder, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder, recoverySourceOrder, boundedRecoverySourceOrder, sourceRecoveryKey, MAX_AUTOMATIC_SOURCE_ATTEMPTS } from '../public/discover.js';
 import { parseSizeBytes } from '../public/source-client.js';
 import { normalizeIndexRows } from '../lib/source-lookup.mjs';
 
@@ -18,6 +18,14 @@ test('show recommendation prefers cached 720p under about 1 GB',()=>{
 test('browser-friendly uncached source beats cached known-silent audio when necessary',()=>{
   const best=recommendSource([src('risky',{audioRisk:true,browserFriendly:false}),src('safe',{cached:false,browserFriendly:true,resolution:'720p'})],'movie','auto');
   assert.equal(best.id,'safe');
+});
+test('known MP4 source beats cached AVI and unsupported containers never enter automatic order',()=>{
+  const avi=src('avi',{cached:true,browserFriendly:false,browserUnsupported:true,browserContainer:false,containerStatus:'unsupported'});
+  const mkv=src('mkv',{cached:true,browserFriendly:false,browserUnsupported:true,browserContainer:false,containerStatus:'unsupported'});
+  const mp4=src('mp4',{cached:false,browserFriendly:false,browserUnsupported:false,browserContainer:true,containerStatus:'supported'});
+  assert.equal(recommendSource([avi,mkv,mp4],'series','auto').id,'mp4');
+  assert.deepEqual(automaticSourceOrder([avi,mkv,mp4],'series','auto').map(source=>source.id),['mp4']);
+  assert.equal(recommendSource([avi,mkv],'series','auto'),null);
 });
 test('resolution filter supports exact 720/1080 and 4K alias',()=>{
   const list=[src('a',{resolution:'720p'}),src('b',{resolution:'1080p'}),src('c',{resolution:'4K'})];
@@ -47,8 +55,9 @@ test('playback recovery tries other safe sources after a 480p source fails',()=>
   const remaining=src('remaining',{hash:'c'.repeat(40),resolution:'720p'});
   const alreadyTried=src('already-tried',{hash:'d'.repeat(40),resolution:'480p'});
   const risky=src('known-risk',{hash:'e'.repeat(40),resolution:'480p',videoRisk:true});
+  const avi=src('known-avi',{hash:'f'.repeat(40),resolution:'480p',browserUnsupported:true});
   const ordered=recoverySourceOrder(
-    [failed,remaining,risky,alreadyTried,sameQuality],
+    [failed,remaining,risky,avi,alreadyTried,sameQuality],
     {resolution:'auto',sourceResolution:'480p',sourceInfo:failed,recoveryTried:[sourceRecoveryKey(alreadyTried)]},
     'series'
   );

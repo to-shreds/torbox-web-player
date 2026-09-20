@@ -50,6 +50,12 @@ test('playback returns only an opaque media ticket and progress resumes', async 
   const save = await call('/api/progress', { ...auth, method: 'PUT', data: { viewer: 'viewer-1', videoId: 'torrents:1:0', leaseId: one.leaseId, seq: 1, position: 45, duration: 100 } });
   assert.equal((await save.json()).saved, true); assert.equal((await start()).progress.position, 45);
 });
+test('playback refuses an actual AVI before creating a browser media ticket',async t=>{
+  const providerExtra={resolveForRelay:async videoId=>({upstreamUrl:'https://store.tb-cdn.io/fixture?token=fixture-secret',file:{id:videoId,title:'Fixture.avi',mime:'video/x-msvideo'}})};
+  const {call,login,mediaTickets}=await fixture(t,{providerExtra}),auth=await login();
+  const response=await call('/api/playback',{...auth,method:'POST',data:{viewer:'viewer-1',videoId:'torrents:1:0'}}),body=await response.json();
+  assert.equal(response.status,415);assert.equal(body.error,'BROWSER_CONTAINER_UNSUPPORTED');assert.equal(mediaTickets.rows.size,0);
+});
 test('media relay forwards one byte range without exposing the upstream URL', async t => {
   let seen;const mediaFetch=async(url,options)=>{seen={url:String(url),range:options.headers.Range};return new Response(Buffer.from('Z'),{status:206,headers:{'content-type':'video/mp4','content-length':'1','accept-ranges':'bytes','content-range':'bytes 0-0/100'}});};
   const {call,login}=await fixture(t,{mediaFetch}),auth=await login();const playback=await (await call('/api/playback',{...auth,method:'POST',data:{viewer:'viewer-1',videoId:'torrents:1:0'}})).json();

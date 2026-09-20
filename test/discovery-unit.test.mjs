@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Catalog, normalizeMeta, posterUrl, jsonFromResponse } from '../lib/catalog.mjs';
 import { Discovery, TorrentGateway, chooseVideo, episodeIdentity } from '../lib/discovery.mjs';
-import { targetOf, normalizeSources, loadPublicSources, sourceHints } from '../public/source-client.js';
+import { targetOf, normalizeSources, loadPublicSources, sourceHints, browserContainerHints } from '../public/source-client.js';
 import { AppError } from '../lib/torbox.mjs';
 const HASH = 'a'.repeat(40), HASH2 = 'b'.repeat(40), ID = 'tt1254207';
 const target = { type: 'movie', id: ID };
@@ -97,7 +97,14 @@ test('source hints identify likely browser-friendly audio without promising univ
   const friendly = sourceHints({ filename: 'Test.H264.AAC.mp4' });
   const risky = sourceHints({ filename: 'Test.HEVC.DTS.mkv' });
   assert.equal(friendly.browserFriendly, true); assert.ok(/browser/i.test(friendly.hint));
-  assert.equal(risky.browserFriendly, false); assert.equal(risky.audioRisk, true); assert.ok(/silent/i.test(risky.hint));
+  assert.equal(risky.browserFriendly, false); assert.equal(risky.audioRisk, true); assert.equal(risky.browserUnsupported,true);assert.ok(/Android Chrome/i.test(risky.hint));
+});
+test('container hints reject AVI and MKV even when codec names look friendly', () => {
+  for (const source of [{ filename: 'Show.H264.AAC.avi' }, { container: 'mkv', title: 'Show H264 AAC' }, { mime: 'video/x-msvideo' }]) {
+    const hints=sourceHints(source);assert.equal(hints.browserUnsupported,true);assert.equal(hints.browserFriendly,false);
+  }
+  assert.equal(browserContainerHints({ title:'Show.mp4' }).containerStatus,'supported');
+  assert.equal(browserContainerHints({ title:'Package without extension' }).containerStatus,'unknown');
 });
 test('source lookup uses the authenticated same-origin website and no TorBox credentials', async () => {
   const result = await loadPublicSources({ type: 'series', id: ID, season: 2, episode: 10 }, { fetchFn: async (url, opts) => {
@@ -156,6 +163,12 @@ test('preparation is idempotent across concurrent sessions for the same hash', a
 test('existing account torrent is reused before a mutation', async () => {
   const { discovery: d, calls } = fixture({ find: async () => item }); const id = await registered(d);
   assert.equal((await d.prepare(id, 's')).state, 'ready'); assert.equal(calls.create, 0);
+});
+test('actual AVI file is rejected before browser playback even when source metadata was unknown', async () => {
+  const aviItem={...item,files:[{id:7,name:'Fixture.avi',size:100,mimetype:'video/x-msvideo'}]};
+  const {discovery:d}=fixture({find:async()=>aviItem,item:async()=>aviItem});
+  const id=await registered(d,{target,sources:[{infoHash:HASH,title:'Unknown package'}]});
+  const result=await d.prepare(id,'s');assert.equal(result.state,'browser_unsupported');assert.equal(result.compatibility.container,'avi');assert.match(result.message,/Android Chrome/);
 });
 test('source tickets are session-bound and revoked on logout', async () => {
   const { discovery: d } = fixture(); const id = await registered(d);

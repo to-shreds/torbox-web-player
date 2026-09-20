@@ -68,12 +68,20 @@ test('fallback is queried only when aggregated primaries do not reach target cou
   assert.equal(fallback,1); assert.equal(result.sources.length,25); assert.equal(result.fallbackUsed,true);
 });
 
-test('fallback is skipped when aggregated primaries already have enough distinct hashes',async()=>{
+test('fallback is skipped when aggregated primaries have enough distinct browser candidates',async()=>{
   let fallback=0;
-  const provider=(name,start)=>({name,lookup:async()=>({sources:Array.from({length:10},(_,i)=>({hash:hash(start+i),title:name+i,score:1,provider:name}))})});
+  const provider=(name,start)=>({name,lookup:async()=>({sources:Array.from({length:10},(_,i)=>({hash:hash(start+i),title:name+i,score:1,provider:name,browserContainer:true}))})});
   const backup={name:'Backup',lookup:async()=>{fallback++;return{sources:[]}}};
   const result=await new MultiSourceLookup({providers:[provider('A',1),provider('B',11),backup],primaryCount:2}).lookup(movie);
   assert.equal(result.sources.length,20); assert.equal(fallback,0); assert.equal(result.fallbackUsed,false);
+});
+
+test('twenty unsupported primary results do not hide a playable fallback',async()=>{
+  let fallback=0;
+  const primary={name:'AVI primary',lookup:async()=>({sources:Array.from({length:20},(_,i)=>({hash:hash(i+1),title:`Show.${i}.avi`,score:-500,provider:'AVI primary',browserUnsupported:true,containerStatus:'unsupported'}))})};
+  const backup={name:'MP4 backup',lookup:async()=>{fallback++;return{sources:Array.from({length:3},(_,i)=>({hash:hash(i+30),title:`Show.${i}.mp4`,score:100,provider:'MP4 backup',browserContainer:true,containerStatus:'supported'}))}}};
+  const result=await new MultiSourceLookup({providers:[primary,backup],primaryCount:1}).lookup(movie);
+  assert.equal(fallback,1);assert.equal(result.fallbackUsed,true);assert.equal(result.sources.filter(source=>source.browserContainer).length,3);
 });
 
 test('provider merge deduplicates the same torrent and keeps richer metadata plus provenance',()=>{

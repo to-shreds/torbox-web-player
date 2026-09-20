@@ -12,6 +12,24 @@ export function targetOf(input) {
   return target;
 }
 export const cleanText = (s, max = 300) => typeof s === 'string' ? s.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, max) : '';
+const BROWSER_CONTAINERS = new Set(['mp4', 'm4v', 'webm']);
+const UNSUPPORTED_BROWSER_CONTAINERS = new Set(['avi', 'mkv', 'wmv', 'ts', 'm2ts', 'mts', 'mpg', 'mpeg', 'mov', 'ogv', 'ogg', 'iso', 'dmg']);
+const containerAlias = value => ({
+  'x-msvideo': 'avi', 'msvideo': 'avi', 'matroska': 'mkv', 'x-matroska': 'mkv',
+  'quicktime': 'mov', 'mp2t': 'ts', 'x-m4v': 'm4v', 'ogg': 'ogv'
+})[value] || value;
+const extensionOf = value => /\.([a-z0-9]{2,6})$/i.exec(cleanText(value, 700).trim())?.[1]?.toLowerCase() || '';
+export function browserContainerHints(source = {}) {
+  const filenameExtension = extensionOf(source.filename);
+  const declared = containerAlias(cleanText(source.container, 40).trim().toLowerCase().replace(/^video\//, ''));
+  const titleExtension = extensionOf(source.title);
+  const mime = cleanText(source.mime, 80).trim().toLowerCase().split(';')[0];
+  const mimeContainer = mime.startsWith('video/') ? containerAlias(mime.slice(6)) : '';
+  const container = filenameExtension || declared || titleExtension || mimeContainer;
+  const browserContainer = BROWSER_CONTAINERS.has(container);
+  const browserUnsupported = UNSUPPORTED_BROWSER_CONTAINERS.has(container);
+  return { container, browserContainer, browserUnsupported, containerStatus: browserContainer ? 'supported' : browserUnsupported ? 'unsupported' : 'unknown' };
+}
 export function parseSizeBytes(value) {
   if (Number.isSafeInteger(value) && value > 0) return value;
   if (typeof value !== 'string') return null;
@@ -34,21 +52,24 @@ export function sourceHints(source) {
   const mp3 = /\b(mp3|mpeg[ ._-]?audio)\b/i.test(name);
   const opus = /\bopus\b/i.test(name);
   const difficultAudio = /\b(dts(?:[ ._-]?hd)?|truehd|e[ ._-]?ac[ ._-]?3|ac[ ._-]?3|ddp|dd\+|dolby[ ._-]?digital(?:[ ._-]?plus)?|dolby[ ._-]?atmos)\b/i.test(name);
+  const containerHints = browserContainerHints(source);
   const quality = cleanText(source.resolution, 20).toUpperCase() || /\b(2160p|1080p|720p|480p|4k)\b/i.exec(name)?.[1].toUpperCase() || '';
-  const browserFriendly = h264 && (aac || mp3) && !difficultAudio;
+  const browserFriendly = h264 && (aac || mp3) && !difficultAudio && !containerHints.browserUnsupported;
   const audioRisk = difficultAudio;
   const videoRisk = hevc || av1;
   const score = (browserFriendly ? 120 : 0) + (h264 ? 35 : 0) + (aac ? 45 : 0) + (mp3 ? 25 : 0) + (opus ? 15 : 0) + (mp4 ? 20 : 0)
+    + (containerHints.browserContainer ? 80 : 0) - (containerHints.browserUnsupported ? 500 : 0)
     - (audioRisk ? 90 : 0) - (hevc ? 55 : 0) - (av1 ? 20 : 0)
     + (['1080P', '720P'].includes(quality) ? 10 : 0) - (['2160P', '4K'].includes(quality) ? 8 : 0);
   let hint = 'Codecs not confirmed';
-  if (browserFriendly) hint = 'Best browser bet · H.264 / AAC';
+  if (containerHints.browserUnsupported) hint = `${containerHints.container.toUpperCase()} container is not supported by Android Chrome`;
+  else if (browserFriendly) hint = 'Best browser bet · H.264 / AAC';
   else if (audioRisk) hint = 'Dolby/DTS audio may be silent in Chrome';
   else if (hevc) hint = 'HEVC/H.265 may not play in Chrome';
   else if (av1) hint = 'AV1 compatibility varies by device';
   else if (aac) hint = 'AAC audio indicated';
   else if (mp4) hint = 'MP4 container · audio codec unconfirmed';
-  return { quality, score, hint, browserFriendly, audioRisk, videoRisk };
+  return { quality, score, hint, browserFriendly, audioRisk, videoRisk, ...containerHints };
 }
 export function normalizeSources(raw) {
   if (!Array.isArray(raw)) throw new Error('The source provider did not return a source list.');

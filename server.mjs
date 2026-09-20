@@ -11,6 +11,7 @@ import { TorBox, AppError, parseVideoId, TORBOX_MEDIA_HOSTS } from './lib/torbox
 import { DriveTransferTests } from './lib/drive-share.mjs';
 import { TorBoxStatusChecker } from './lib/torbox-status.mjs';
 import { SetupTransfers } from './lib/setup-transfer.mjs';
+import { browserContainerHints } from './public/source-client.js';
 const root = dirname(fileURLToPath(import.meta.url));
 const publicFiles = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
@@ -433,6 +434,11 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         const progressViewer = session.guest ? 'guest:' + session.id : data.viewer;
         const intent = progress.beginIntent(progressViewer);
         const stream = await activeProvider.resolveForRelay(data.videoId);
+        const container = browserContainerHints(stream.file);
+        if (container.browserUnsupported) {
+          console.log(JSON.stringify({ event: 'media_playback_rejected', code: 'BROWSER_CONTAINER_UNSUPPORTED', container: container.container }));
+          throw new AppError('BROWSER_CONTAINER_UNSUPPORTED', `${container.container.toUpperCase()} files cannot play in Android Chrome. Choose an MP4 or WebM source.`, 415);
+        }
         if (!progress.isCurrent(progressViewer, intent)) throw new AppError('PLAYBACK_SUPERSEDED', 'A newer playback request replaced this one.', 409);
         if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
         const lease = progress.start(progressViewer, data.videoId, { reset: data.startOver === true, sessionId: session.id });
