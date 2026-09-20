@@ -1,16 +1,16 @@
-import { createDiscoveryUI } from './discover.js?v=2.0.5';
-import { diagnosePlaybackFailure } from './playback-errors.js?v=2.0.5';
-import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode, isDirectRuntime } from './runtime.js?v=2.0.5';
-import { directApi, runDirectDiagnostics, diagnosticText, exportActiveCredential, validateImportedCredential } from './direct-runtime.js?v=2.0.5';
-import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=2.0.5';
-import { installPortableSetupUI } from './portable-setup-ui.js?v=2.0.5';
-import { stagedPortableState, writePortableState, restorePortableState, hydratePortableMetadata } from './portable-setup.js?v=2.0.5';
-import { listRecent, recordRecent, removeRecent, recentForContext, resumePosition, formatResumeTime } from './history.js?v=2.0.5';
-import { getSettings, saveSettings, resetSettings } from './settings.js?v=2.0.5';
-import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=2.0.5';
-import { clearSearchHistory } from './search-history.js?v=2.0.5';
-import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=2.0.5';
-const APP_VERSION='2.0.5';
+import { createDiscoveryUI } from './discover.js?v=2.0.6';
+import { diagnosePlaybackFailure } from './playback-errors.js?v=2.0.6';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode, isDirectRuntime } from './runtime.js?v=2.0.6';
+import { directApi, runDirectDiagnostics, diagnosticText, exportActiveCredential, validateImportedCredential, recordDiagnosticEvent } from './direct-runtime.js?v=2.0.6';
+import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=2.0.6';
+import { installPortableSetupUI } from './portable-setup-ui.js?v=2.0.6';
+import { stagedPortableState, writePortableState, restorePortableState, hydratePortableMetadata } from './portable-setup.js?v=2.0.6';
+import { listRecent, recordRecent, removeRecent, recentForContext, resumePosition, formatResumeTime } from './history.js?v=2.0.6';
+import { getSettings, saveSettings, resetSettings } from './settings.js?v=2.0.6';
+import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=2.0.6';
+import { clearSearchHistory } from './search-history.js?v=2.0.6';
+import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=2.0.6';
+const APP_VERSION='2.0.6';
 const $ = id => document.getElementById(id);
 let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '';
 let discoveryUI;
@@ -408,7 +408,7 @@ async function resumeAfterKidParentAction(){
 
 async function detachPlayback() {
   const old = active;if(old)tickKidUsage(old,true); active = null; hidePauseCard();clearNextCountdown();await releaseWakeLock();
-  if (old) { clearInterval(old.timer);clearInterval(old.kidTimer);clearTimeout(old.bufferTimer);clearTimeout(old.sleepTimer);clearTimeout(old.healthyTimer); const saving = saveProgress(old, true); old.video.pause(); old.video.removeAttribute('src'); old.video.load(); old.video.remove(); await saving; }
+  if (old) { clearInterval(old.timer);clearInterval(old.kidTimer);clearTimeout(old.bufferTimer);clearTimeout(old.sleepTimer);clearTimeout(old.healthyTimer);clearTimeout(old.audioProbeTimer); const saving = saveProgress(old, true); old.video.pause(); old.video.removeAttribute('src'); old.video.load(); old.video.remove(); await saving; }
 }
 async function stopPlayback() { playGeneration++; clearStillWatchingTimer(); hideStillWatchingPrompt(); await detachPlayback(); }
 async function startPlayback(file, playbackContext = null, retryCount = 0) {
@@ -424,7 +424,7 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
     const result = await api('/api/playback', { method: 'POST', data: { viewer: selectedViewer, videoId: file.id, startOver: playbackContext?.forceStartOver===true } });
     if (generation !== playGeneration || !$('player').open || selectedViewer !== viewer) return false;
     const video = document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.playbackRate=getSettings().playbackRate;
-    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, retryCount, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, sourceLearned:false, lastTime:0 };
+    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, retryCount, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, audioProbeTimer:null, audioProbeDone:false, sourceLearned:false, lastTime:0 };
     active = context; $('video-slot').replaceChildren(video);setHealthSource(context);
     const clearBuffer = () => { clearTimeout(context.bufferTimer); context.bufferTimer = null; };
     const recover = async reason => {
@@ -443,6 +443,29 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
       if (!context.started || video.paused || video.ended || context.recovering) return;
       setPlaybackHealth('Buffering','Waiting for the current stream…');clearBuffer(); context.bufferTimer = setTimeout(() => recover('buffer'), getSettings().bufferSeconds * 1000);
     };
+    const armAudioProbe=()=>{
+      clearTimeout(context.audioProbeTimer);context.audioProbeTimer=null;
+      if(context.audioProbeDone||!playbackContext?.sourceInfo||!('webkitAudioDecodedByteCount' in video))return;
+      const startBytes=Number(video.webkitAudioDecodedByteCount)||0,startTime=Number(video.currentTime)||0;
+      context.audioProbeTimer=setTimeout(async()=>{
+        context.audioProbeTimer=null;
+        if(active!==context||video.paused||video.ended||context.recovering)return;
+        const decoded=Number(video.webkitAudioDecodedByteCount)||0,advanced=(Number(video.currentTime)||0)-startTime;
+        if(advanced<4)return;
+        context.audioProbeDone=true;
+        if(decoded<=startBytes){
+          recordDiagnosticEvent('audio_decode_watchdog','no_decoded_audio',{provider:playbackContext.sourceInfo.provider||'',resolution:playbackContext.sourceInfo.resolution||''});
+          setPlaybackHealth('No decoded audio','Trying another browser-compatible source…');
+          await rejectCurrentSource('audio');
+          return;
+        }
+        if(getSettings().autoLearnSources){
+          setAudioFeedback(playbackContext.current,playbackContext.sourceInfo,'good');
+          rememberSourceSuccess(playbackContext.current,playbackContext.sourceInfo);
+          context.sourceLearned=true;setHealthSource(context);
+        }
+      },8000);
+    };
     video.addEventListener('loadedmetadata', () => {
       if (active !== context) return;
       const local = playbackContext ? recentForContext(playbackContext) : null;
@@ -456,7 +479,7 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
       video.play().catch(error => { if (active === context && error.name === 'NotAllowedError') text('player-message', 'Tap play'); });
     });
     video.addEventListener('playing', () => { if (active === context) {
-      context.started = true; context.recovering = false; clearBuffer(); hidePauseCard(); clearNextCountdown(); acquireWakeLock(); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); context.kidLastAt=Date.now();context.kidLastPosition=Number.isFinite(video.currentTime)?video.currentTime:0;if(!context.kidTimer)context.kidTimer=setInterval(()=>tickKidUsage(context),5000); setPlaybackHealth('Playing','Stream is advancing normally.'); text('player-message', '');
+      context.started = true; context.recovering = false; clearBuffer(); hidePauseCard(); clearNextCountdown(); armAudioProbe(); acquireWakeLock(); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); context.kidLastAt=Date.now();context.kidLastPosition=Number.isFinite(video.currentTime)?video.currentTime:0;if(!context.kidTimer)context.kidTimer=setInterval(()=>tickKidUsage(context),5000); setPlaybackHealth('Playing','Stream is advancing normally.'); text('player-message', '');
       clearTimeout(context.healthyTimer);if(getSettings().autoLearnSources&&playbackContext?.sourceInfo&&!context.sourceLearned)context.healthyTimer=setTimeout(()=>{if(active===context&&!video.paused&&video.currentTime>5){rememberSourceSuccess(playbackContext.current,playbackContext.sourceInfo);context.sourceLearned=true;setHealthSource(context);}},15000);
     } });
     video.addEventListener('canplay',()=>{clearBuffer();if(active===context&&context.started&&!video.paused)setPlaybackHealth('Playing','Stream is ready.');});

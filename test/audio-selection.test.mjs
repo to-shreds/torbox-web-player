@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { sourceHints, normalizeSources } from '../public/source-client.js';
-import { preferredSource } from '../public/discover.js';
+import { preferredSource, recommendAutomaticSource } from '../public/discover.js';
 import { normalizeIndexRows } from '../lib/source-lookup.mjs';
 import { Discovery } from '../lib/discovery.mjs';
 
@@ -77,4 +77,23 @@ test('ready risky source is identified before silent playback', async () => {
   const registered=await d.register({target:{type:'movie',id:ID},sources:[{hash:H1,title:'Dolby',videoCodec:'H264',audioCodecs:['EAC3']}]},'s');
   const status=await d.prepare(registered.sources[0].id,'s');
   assert.equal(status.state,'ready'); assert.equal(status.compatibility.audioRisk,true); assert.ok(/silently/i.test(status.message));
+});
+
+test('automatic playback refuses codec-unknown and known-risk audio when no H.264/AAC source is available', () => {
+  const list=[
+    {id:'unknown',cached:true,audioRisk:false,videoRisk:false,browserFriendly:false,resolution:'720p',score:500,size:400*1024**2},
+    {id:'dolby',cached:true,audioRisk:true,videoRisk:false,browserFriendly:false,resolution:'720p',score:900,size:350*1024**2}
+  ];
+  assert.equal(recommendAutomaticSource(list,'movie','auto'),null);
+});
+test('automatic playback accepts a locally sound-confirmed source with incomplete provider codec metadata', () => {
+  const source={id:'confirmed',cached:true,audioRisk:false,videoRisk:false,browserFriendly:false,memoryAudio:'good',resolution:'720p',score:0,size:500*1024**2};
+  assert.equal(recommendAutomaticSource([source],'movie','auto')?.id,'confirmed');
+});
+test('Chrome decoded-audio watchdog is wired to no-sound recovery', async () => {
+  const {readFile}=await import('node:fs/promises');
+  const app=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
+  assert.match(app,/webkitAudioDecodedByteCount/);
+  assert.match(app,/audio_decode_watchdog/);
+  assert.match(app,/rejectCurrentSource\('audio'\)/);
 });

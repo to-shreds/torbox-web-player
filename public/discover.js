@@ -1,9 +1,9 @@
-import { recordDiagnosticEvent } from './direct-runtime.js?v=2.0.5';
-import { getSettings, updateSettings } from './settings.js?v=2.0.5';
-import { listRecent, formatResumeTime } from './history.js?v=2.0.5';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.0.5';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.0.5';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.0.5';
+import { recordDiagnosticEvent } from './direct-runtime.js?v=2.0.6';
+import { getSettings, updateSettings } from './settings.js?v=2.0.6';
+import { listRecent, formatResumeTime } from './history.js?v=2.0.6';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.0.6';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.0.6';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.0.6';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
@@ -18,6 +18,13 @@ export function sourceMatchesResolution(source, resolution = 'auto') {
   return value.includes(resolution.replace('p', ''));
 }
 export const filterSourcesByResolution = (list, resolution = 'auto') => list.filter(s => sourceMatchesResolution(s, resolution));
+export function automaticSourceEligible(source){
+  return !!source&&source.memoryBad!==true&&source.memoryAudio!=='bad'
+    && (source.memoryAudio==='good'||(source.browserFriendly===true&&source.audioRisk!==true&&source.videoRisk!==true));
+}
+export function recommendAutomaticSource(list,type='movie',resolution='auto',sizeProfile=getSettings().sourceSizeProfile){
+  return recommendSource((Array.isArray(list)?list:[]).filter(automaticSourceEligible),type,resolution,sizeProfile);
+}
 export function recommendSource(list, type = 'movie', resolution = 'auto', sizeProfile = getSettings().sourceSizeProfile) {
   const visible = filterSourcesByResolution(list, resolution).filter(source=>source.memoryBad!==true&&source.memoryAudio!=='bad'); if (!visible.length) return null;
   const cachedFriendly = visible.filter(s => s.cached === true && s.browserFriendly && !s.audioRisk && !s.videoRisk);
@@ -49,7 +56,7 @@ export function autoNextSourceOrder(list,resolution='auto',sizeProfile=getSettin
   for(const wanted of resolutions){
     let remaining=input.filter(source=>!used.has(source.id||source.hash||source.title));
     while(remaining.length&&ordered.length<limit){
-      const best=recommendSource(remaining,'series',wanted,sizeProfile);if(!best)break;
+      const best=recommendAutomaticSource(remaining,'series',wanted,sizeProfile);if(!best)break;
       const key=best.id||best.hash||best.title;used.add(key);ordered.push(best);
       remaining=remaining.filter(source=>(source.id||source.hash||source.title)!==key);
     }
@@ -254,8 +261,13 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
         await ensureService();if(generation!==playIntentGeneration)return false;
         const resolution=getResolution(target),registered=await registeredSources(target,AbortSignal.timeout(8000));
         if(generation!==playIntentGeneration)return false;
-        const best=recommendSource(registered.sources,target.type,resolution)||recommendSource(registered.sources,target.type,'auto');
-        if(!best)throw new Error('No source matches this resolution.');
+        const best=recommendAutomaticSource(registered.sources,target.type,resolution)||recommendAutomaticSource(registered.sources,target.type,'auto');
+        if(!best){
+          recordDiagnosticEvent('source_selected','no_confirmed_audio',{});
+          message('detail-message','No source with confirmed browser-compatible audio was found automatically. Choose a version.');
+          await openOptions(meta,target,episodeName);
+          return false;
+        }
         recordDiagnosticEvent('source_selected','ok',{provider:best.provider||'',resolution:best.resolution||best.quality||'',videoCodec:best.videoCodec||'',audioCodecs:best.audioCodecs||[],cached:best.cached===true,browserFriendly:best.browserFriendly===true,audioRisk:best.audioRisk===true,videoRisk:best.videoRisk===true});
         message('detail-message',best.cached?'Opening cached source…':'Preparing recommended source…');
         const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
@@ -428,7 +440,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     try{
       const registered=await registeredSources(context.current,AbortSignal.timeout(45000));
       for(const resolution of lowerResolutionOrder(context.sourceResolution,context.resolution)){
-        const best=recommendSource(registered.sources,context.current.type,resolution);if(!best||best.audioRisk||best.videoRisk)continue;
+        const best=recommendAutomaticSource(registered.sources,context.current.type,resolution);if(!best)continue;
         try{
           const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
           await play(result.file,{...context,...buildContext({name:context.title,poster:context.poster,episodes:[]},context.current,context.episodeName||'',resolution,best),queue:context.queue||[]});return true;
@@ -447,7 +459,8 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       const target=entry.type==='series'?{type:'series',id:entry.id,season:entry.season,episode:entry.episode}:{type:'movie',id:entry.id};
       const name=entry.type==='series'?(meta.episodes.find(e=>e.season===entry.season&&e.episode===entry.episode)?.name||entry.episodeName):'';
       const registered=await registeredSources(target,AbortSignal.timeout(45000)),resolution=entry.resolution||getResolution(target);
-      const best=recommendSource(registered.sources,target.type,resolution)||recommendSource(registered.sources,target.type,'auto');if(!best)throw new Error('No source is available to resume.');
+      const best=recommendAutomaticSource(registered.sources,target.type,resolution)||recommendAutomaticSource(registered.sources,target.type,'auto');
+      if(!best){await openOptions(meta,target,name);throw new Error('No source with confirmed browser-compatible audio is available to resume automatically. Choose a version.');}
       const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
       const context=buildContext(meta,target,name,resolution,best);context.forceStartOver=startOver;context.rewindOnResumeSeconds=startOver?0:getSettings().resumeRewindSeconds;
       await play(result.file,context);message('catalog-message','');return true;

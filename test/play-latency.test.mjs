@@ -57,3 +57,10 @@ test('Cinemeta uses its prefixed browse route, retries v3 metadata, and diagnost
   assert.match(runtime,/network, DNS, TLS, CORS, or another browser policy/);
   assert.doesNotMatch(runtime,/This is commonly caused by CORS/);
 });
+
+test('source fan-in ranks browser-friendly variants before the forty-source cap',async()=>{
+  const runtime=await read('../public/direct-runtime.js');
+  assert.match(runtime,/sourceFanInKey/);
+  assert.match(runtime,/sourceFanInRank/);
+  assert.match(runtime,/sort\(\(a,b\)=>sourceFanInRank\(b\)-sourceFanInRank\(a\)\)\.slice\(0, 40\)/);
+});

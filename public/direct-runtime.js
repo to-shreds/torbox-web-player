@@ -1,7 +1,7 @@
-import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js?v=2.0.5';
-import { isTrustedDirectMediaUrl } from './runtime.js?v=2.0.5';
+import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js?v=2.0.6';
+import { isTrustedDirectMediaUrl } from './runtime.js?v=2.0.6';
 
-export const DIRECT_BUILD = 'browser-local-2.0.5';
+export const DIRECT_BUILD = 'browser-local-2.0.6';
 
 const CATALOG_PRIMARY = 'https://v3-cinemeta.strem.io';
 const CATALOG_SECONDARY = 'https://cinemeta-catalogs.strem.io';
@@ -545,6 +545,16 @@ function richness(source) {
   return (source.filename ? 5 : 0) + (source.size ? 4 : 0) + (source.seeders != null ? 3 : 0)
     + (source.resolution ? 3 : 0) + (source.videoCodec ? 2 : 0) + (source.audioCodecs?.length ? 2 : 0);
 }
+function sourceFanInKey(source){
+  return [source.hash,String(source.filename||'').toLowerCase(),Number.isSafeInteger(source.fileIdx)?source.fileIdx:''].join(':');
+}
+function sourceFanInRank(source){
+  return (source.browserFriendly===true?100000:0)
+    - (source.audioRisk===true?50000:0)
+    - (source.videoRisk===true?20000:0)
+    + (Number(source.score)||0)*100
+    + richness(source);
+}
 
 function sourceTargetKey(target){
   return target.type==='series'
@@ -584,13 +594,13 @@ async function directSources(input, signal) {
     const finish = () => {
       if (done) return;
       done = true; cleanup();
-      const sources = [...map.values()].slice(0, 40);
+      const sources = [...map.values()].sort((a,b)=>sourceFanInRank(b)-sourceFanInRank(a)).slice(0, 40);
       if (!sources.length) {
         reject(directError('DIRECT_SOURCE_UNAVAILABLE','No direct source index returned a usable source. Try again shortly.',502));
         return;
       }
       const value = { sources, provider:'Browser direct', providers:[...providers], failures };
-      sourceCache.set(key,{value,until:Date.now()+SOURCE_CACHE_MS});
+      if(sources.some(source=>source.browserFriendly===true))sourceCache.set(key,{value,until:Date.now()+SOURCE_CACHE_MS});else sourceCache.delete(key);
       trace('source_fan_in','ready',{target:key,count:sources.length,safe:sources.filter(source=>source.browserFriendly===true).length,risky:sources.filter(source=>source.audioRisk===true).length,providers:providers.length,settled});
       resolve(value);
     };
@@ -599,7 +609,6 @@ async function directSources(input, signal) {
       const safe=safeCount();
       if (safe && providers.length >= 2) return scheduleGrace(450);
       if (safe) return scheduleGrace(900);
-      if (providers.length >= 2 && map.size) return scheduleGrace(2200);
       if (settled === jobs.length) finish();
     };
     const abort = () => {
@@ -611,7 +620,7 @@ async function directSources(input, signal) {
       if (signal.aborted) return abort();
       signal.addEventListener('abort',abort,{once:true});
     }
-    hardTimer = setTimeout(finish, 5000);
+    hardTimer = setTimeout(finish, 6500);
     jobs.forEach(([name, run], index) => {
       const controller = controllers[index];
       const combined = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
@@ -628,8 +637,8 @@ async function directSources(input, signal) {
         if (sources.length) {
           providers.push(name);
           for (const source of sources) {
-            const old = map.get(source.hash);
-            if (!old || richness(source) > richness(old)) map.set(source.hash, source);
+            const sourceKey=sourceFanInKey(source),old=map.get(sourceKey);
+            if (!old || sourceFanInRank(source) > sourceFanInRank(old)) map.set(sourceKey, source);
           }
         }
         maybeFinish();

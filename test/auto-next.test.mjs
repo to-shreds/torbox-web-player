@@ -36,12 +36,12 @@ test('unattended pack selection deterministically chooses the largest matching e
   assert.equal(picked.id,'torrents:1:3');
 });
 
-test('auto-next prefers safe sources but still keeps risky audio as a last-resort fallback',()=>{
+test('auto-next never silently falls back to known-risk audio',()=>{
   const safe=source('s',{resolution:'720p',browserFriendly:true,audioRisk:false,score:10});
   const risky=source('r',{resolution:'720p',browserFriendly:false,audioRisk:true,score:200});
   const ordered=autoNextSourceOrder([risky,safe],'720p','balanced');
   assert.equal(ordered[0].id,'s');
-  assert.ok(ordered.some(row=>row.id==='r'),'risky source should remain available when safer attempts fail');
+  assert.equal(ordered.some(row=>row.id==='r'),false);
 });
 
 test('auto-next falls back from a fixed quality to other available qualities',()=>{

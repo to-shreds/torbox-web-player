@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { recommendSource, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder } from '../public/discover.js';
+import { recommendSource, recommendAutomaticSource, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder } from '../public/discover.js';
 import { parseSizeBytes } from '../public/source-client.js';
 import { normalizeIndexRows } from '../lib/source-lookup.mjs';
 
@@ -50,4 +50,9 @@ test('source size profile can favor a smaller data-saver source or a larger qual
 test('memory-blacklisted and known-no-sound sources are not auto-selected',()=>{
   assert.equal(recommendSource([src('bad',{memoryBad:true}),src('good')],'movie','auto').id,'good');
   assert.equal(recommendSource([src('silent',{memoryAudio:'bad'}),src('good')],'movie','auto').id,'good');
+});
+
+test('automatic recommendation returns null rather than autoplaying unknown audio',()=>{
+  const unknown=src('unknown',{browserFriendly:false,audioRisk:false,videoRisk:false,memoryAudio:'unknown'});
+  assert.equal(recommendAutomaticSource([unknown],'movie','auto'),null);
 });
