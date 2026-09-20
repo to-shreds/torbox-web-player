@@ -52,7 +52,7 @@ jobs:
           const fs=require('fs');
           const pkg=JSON.parse(fs.readFileSync('main-src/package.json'));
           const html=fs.readFileSync('site/index.html','utf8');
-          if(pkg.version!=='2.0.0'||!html.includes('id="portable-settings-group"')||html.includes('Household password'))throw Error('Wrong primary tree');
+          if(pkg.version!=='2.0.1'||!html.includes('id="portable-settings-group"')||html.includes('Household password'))throw Error('Wrong primary tree');
           const fallback=fs.readFileSync('site/key/index.html','utf8');
           if(!fallback.includes('<span class="tag">KEY</span>'))throw Error('Wrong fallback tree');
           if(!fs.readFileSync('site/direct/redirect.js','utf8').includes('location.replace'))throw Error('Old direct address is not migrated');
