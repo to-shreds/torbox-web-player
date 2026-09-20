@@ -16,9 +16,9 @@ If this file conflicts with the repo, the repo controls substance. If it conflic
 - Canonical repo: `to-shreds/torbox-web-player`
 - Canonical branch: `main`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
-- Current production version: **2.3.1**
-- Current production source: `f0dc5a4596f579d0e8810269963342300c655f9a`
-- Runtime marker: `browser-local-2.3.1`
+- Current production version: **2.3.2** (released; not yet physically accepted)
+- Current production source: `0dc37b52086bc3d997b2f41225eb8e545ec71233`
+- Runtime marker: `browser-local-2.3.2`
 - Pinned legacy fallback: `/key/` from `d5dd3bd71ee2679178e66440c5240a80eaba41f2`
 - `/direct/` redirects to the canonical root.
 
@@ -66,6 +66,20 @@ Verified: `npm run check` clean, suite 337 tests / 331 pass / 0 fail / 6 optiona
 
 **Not yet physically verified.** Physical Android Play remains the acceptance test.
 
+## 2.3.2: the actual Play regression
+
+The second physical retest produced the decisive evidence: **TorBox-cached titles play; uncached ones sit in "Preparing" indefinitely.** Uncached is not a failure state, it is TorBox downloading the torrent before it can serve it. The real defect was therefore that ordinary one-tap Play was choosing uncached sources at all.
+
+Commit `2aba8733` ("Prefer known browser-safe audio over cached unknown sources") moved `browserSafe` ahead of `cachedSafe` in the `preferCached` pool in `public/discover.js`. `browserSafe` does not require cached availability, so whenever no cached browser-friendly source existed, Play selected an uncached one and stalled. 2.3.2 restores the pre-`2aba8733` ordering: cached availability is screened first, audio preference decides within it.
+
+Audio protection is intact. Every cached tier still excludes known-risky Dolby/DTS audio, so a cached risky source never beats an uncached safe one. Only a cached codec-unknown source now outranks an uncached browser-friendly one, on the reasoning that imperfect audio beats never starting. The test that encoded the old ordering was replaced by a pair that fails against it.
+
+Preparation is no longer silent: an uncached choice says so explicitly and reports download progress while polling.
+
+Note for the next investigator: repeated failed attempts populate the **device-local** source blocklist (`memoryBad` / `memoryAudio === 'bad'`). When every source is blocked, `recommendAutomaticSource` returns nothing and Play reports "No usable source matches this resolution", which looks like a lookup failure but is local state. Settings → source-learning reset clears it. The resolution advice in that message is also a dead end: the control writes global settings, not per-title quality. Unfixed.
+
+Released as 2.3.2 from `0dc37b52086bc3d997b2f41225eb8e545ec71233`. Candidate run `35521626002` passed and approved that exact SHA; production run `35521650440` published it and its public-version check passed. Suite 338 tests, 332 pass, 0 fail, 6 optional skips.
+
 ## Deployment state
 
 The repair is **live on Render**. `browser-key-clone` commit `070a62342d200f3cb6ae6911d0e1daea681d6beb`, deploy `dep-danvr0mk1f9s73a5js90`, live at 2026-09-20T15:37:02Z. Render ran its own `npm ci && npm run check && npm test` during that build and it passed.
@@ -94,8 +108,9 @@ The current user request is to have another agent independently audit the projec
 
 ## Next action
 
-1. ~~Land the `create()` reconciliation repair on `browser-key-clone`.~~ Done: deploy `dep-danvr0mk1f9s73a5js90` is live.
-2. Retest Play for **Elena of Avalor** on the physical Android device. That is the acceptance evidence; a green suite is not.
+1. ~~Land the `create()` reconciliation repair on `browser-key-clone`.~~ Done; instrumentation followed in `dep-dao0050ae00c73a9fsug`.
+2. ~~Ship the cached-first selection repair.~~ Done: 2.3.2 is published and publicly verified.
+3. On the device: **Settings → source-learning reset first**, then reload and confirm the footer reads 2.3.2, then retest Play for **Elena of Avalor** and **Salute Your Shorts**. That is the acceptance evidence; a green suite is not.
 3. If Play still fails, read the new `torbox_create_identifier_missing` line in the Render logs. It names the fields TorBox actually returned, which settles the response shape without another speculative change.
 4. Only once Play succeeds, retest audio, seeking, resume, auto-next, pause overlay, and recovery on the same device.
 
