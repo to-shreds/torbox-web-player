@@ -41,13 +41,13 @@ test('text search spans movies and shows instead of inheriting hidden browse fil
   assert.ok(discover.includes("feed:query?'popular':$('catalog-feed').value"));
 });
 
-test('stable browser release metadata is 2.0.7',async()=>{
-  const [pkg,app,html,sw,readme]=await Promise.all([
+test('stable browser release metadata agrees with package version',async()=>{
+  const [pkgText,app,html,sw,readme]=await Promise.all([
     read('../package.json'),read('../public/app.js'),read('../public/index.html'),read('../public/sw.js'),read('../README.md')
   ]);
-  assert.equal(JSON.parse(pkg).version,'2.0.7');
-  assert.match(app,/const APP_VERSION='2\.0\.7'/);
-  assert.match(html,/src="\.\/app\.js\?v=2\.0\.7"/);
-  assert.match(sw,/torbox-main-v2\.0\.7/);
-  assert.match(readme,/Current version: \*\*2\.0\.7\*\*/);
+  const version=JSON.parse(pkgText).version;
+  assert.ok(app.includes("const APP_VERSION='"+version+"'"));
+  assert.ok(html.includes('src="./app.js?v='+version+'"'));
+  assert.ok(sw.includes('torbox-main-v'+version));
+  assert.ok(readme.includes('Current version: **'+version+'**'));
 });
