@@ -1,10 +1,11 @@
-import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js?v=2.0.3';
-import { isTrustedDirectMediaUrl } from './runtime.js?v=2.0.3';
+import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js?v=2.0.4';
+import { isTrustedDirectMediaUrl } from './runtime.js?v=2.0.4';
 
-export const DIRECT_BUILD = 'browser-local-2.0.3';
+export const DIRECT_BUILD = 'browser-local-2.0.4';
 
-const CATALOG_BASES = Object.freeze(['https://v3-cinemeta.strem.io','https://cinemeta-catalogs.strem.io']);
-const CATALOG_ORIGINS = new Set(CATALOG_BASES.map(value=>new URL(value).hostname));
+const CATALOG_PRIMARY = 'https://v3-cinemeta.strem.io';
+const CATALOG_SECONDARY = 'https://cinemeta-catalogs.strem.io';
+const CATALOG_ORIGINS = new Set([CATALOG_PRIMARY,CATALOG_SECONDARY].map(value=>new URL(value).hostname));
 const SOURCE_ENDPOINTS = Object.freeze({
   zilean: 'https://zileanfortheweebs.midnightignite.me',
   stremthruMain: 'https://stremthru.13377001.xyz/stremio/torz/eyJzdG9yZXMiOlt7ImMiOiJwMnAiLCJ0IjoiIn1dfQ==',
@@ -172,30 +173,50 @@ function normalizeMeta(raw, type, id) {
 async function catalogRequest(path) {
   const cached = catalogCache.get(path);
   if (cached && cached.until > Date.now()) return cached.value;
+  const catalogMatch = /^\/catalog\/(?:movie|series)\/([A-Za-z0-9_-]+)(?:\/|\.json$)/.exec(path || '');
+  const secondaryUrl = catalogMatch ? new URL('/' + catalogMatch[1] + path, CATALOG_SECONDARY).href : '';
+  const primaryUrl = new URL(path, CATALOG_PRIMARY).href;
+  const metadata = path.startsWith('/meta/');
+  const searchCatalog = !!secondaryUrl && path.includes('/search=');
+  const targets = secondaryUrl
+    ? (searchCatalog
+        ? [
+            { label:'cinemeta_search', url:primaryUrl, delayMs:0 },
+            { label:'cinemeta_search_fallback', url:secondaryUrl, delayMs:0 }
+          ]
+        : [
+            { label:'cinemeta_catalog', url:secondaryUrl, delayMs:0 },
+            { label:'cinemeta_catalog_fallback', url:primaryUrl, delayMs:0 }
+          ])
+    : [
+        { label:'cinemeta_meta', url:primaryUrl, delayMs:0 },
+        { label:'cinemeta_meta_retry', url:primaryUrl, delayMs:150 }
+      ];
   const failures=[];
-  for (let index=0;index<CATALOG_BASES.length;index++) {
-    const base=CATALOG_BASES[index];
+  for (const target of targets) {
+    if (target.delayMs) await new Promise(resolve=>setTimeout(resolve,target.delayMs));
     try {
       const response = await fetchDirect(
-        index ? 'cinemeta_fallback' : 'cinemeta',
-        new URL(path, base).href,
+        target.label,
+        target.url,
         { headers: { Accept: 'application/json' }, redirect: 'follow' },
         8000
       );
-      const finalUrl = new URL(response.url || base);
+      const finalUrl = new URL(response.url || target.url);
       if (!CATALOG_ORIGINS.has(finalUrl.hostname)) throw directError('CATALOG_REDIRECT', 'Cinemeta redirected to an unexpected host.');
       if (!response.ok) throw directError('CATALOG_UNAVAILABLE', 'Cinemeta returned HTTP ' + response.status, response.status);
       const value = await readJson(response, 4 * 1024 * 1024);
       catalogCache.set(path, { value, until: Date.now() + 300000 });
-      if(index)trace('cinemeta_fallback','ok',{host:finalUrl.hostname});
       return value;
     } catch (error) {
       failures.push(error);
-      trace('cinemeta_origin','failed',{host:new URL(base).hostname,error:safeError(error)});
+      trace('cinemeta_origin','failed',{host:new URL(target.url).hostname,httpStatus:error?.status||undefined,error:safeError(error)});
+      if (metadata && error?.status === 404) break;
     }
   }
   const last=failures.at(-1);
-  throw directError('CATALOG_UNAVAILABLE','Cinemeta could not be reached from this browser after trying both catalog hosts. '+(last?.status?('Last HTTP status: '+last.status+'.'):'Check diagnostics if this persists.'),last?.status||502);
+  const kind=secondaryUrl?'catalog':'metadata';
+  throw directError('CATALOG_UNAVAILABLE','Cinemeta '+kind+' is temporarily unavailable. '+(last?.status?('Last HTTP status: '+last.status+'.'):'Check diagnostics if this persists.'),last?.status||502);
 }
 
 async function catalogMeta(type, id) {
@@ -203,13 +224,18 @@ async function catalogMeta(type, id) {
   return normalizeMeta((await catalogRequest('/meta/' + type + '/' + id + '.json'))?.meta, type, id);
 }
 
-async function catalogSearch({ type = 'movie', q = '', skip = 0, genre = '', feed = 'popular' } = {}) {
-  if (!['movie', 'series'].includes(type)) throw directError('INVALID_SEARCH', 'Choose Movies or Shows.', 400);
-  q = String(q || '').trim();
-  skip = Number(skip) || 0;
-  if (/^tt[0-9]{5,12}$/.test(q)) {
-    return { metas: skip ? [] : [await catalogMeta(type, q)], nextSkip: null, provider: 'Cinemeta', feed: 'search' };
+async function catalogMetaFlexible(type,id) {
+  try {
+    return await catalogMeta(type,id);
+  } catch (error) {
+    if (error?.status !== 404 || !['movie','series'].includes(type)) throw error;
+    const alternate=type==='movie'?'series':'movie';
+    trace('cinemeta_type_recovery','retry',{requested:type,alternate});
+    return catalogMeta(alternate,id);
   }
+}
+
+async function catalogSearchType({ type, q = '', skip = 0, genre = '', feed = 'popular' } = {}) {
   const ids = { popular: 'top', featured: 'imdbRating', new: 'year' };
   const selected = ids[feed] || 'top';
   const params = [];
@@ -242,7 +268,62 @@ async function catalogSearch({ type = 'movie', q = '', skip = 0, genre = '', fee
     metas,
     nextSkip: data.metas.length >= 100 ? skip + Math.min(data.metas.length, 200) : null,
     provider: 'Cinemeta',
-    feed
+    feed: q ? 'search' : feed
+  };
+}
+
+function catalogCardScore(meta) {
+  return (meta.poster?8:0)+(meta.year?2:0)+(meta.runtime?1:0)+(meta.description?2:0)+Math.min(meta.genres?.length||0,4);
+}
+
+async function mergeCatalogTypes(results,q) {
+  const grouped=new Map();
+  for (const result of results) for (const meta of result.metas || []) {
+    if(!grouped.has(meta.id))grouped.set(meta.id,[]);
+    grouped.get(meta.id).push(meta);
+  }
+  const metas=[];
+  for (const [id,candidates] of grouped) {
+    let selected=[...candidates].sort((a,b)=>catalogCardScore(b)-catalogCardScore(a))[0];
+    const types=[...new Set(candidates.map(meta=>meta.type))];
+    if(types.length>1){
+      const checked=await Promise.allSettled(types.map(type=>catalogMeta(type,id)));
+      const valid=checked.filter(row=>row.status==='fulfilled').map(row=>({...row.value,episodes:[]}));
+      if(valid.length)selected=valid.sort((a,b)=>catalogCardScore(b)-catalogCardScore(a))[0];
+    }
+    metas.push(selected);
+  }
+  const needle=String(q||'').trim().toLowerCase();
+  metas.sort((a,b)=>{
+    const aName=a.name.toLowerCase(),bName=b.name.toLowerCase();
+    return Number(bName===needle)-Number(aName===needle)
+      || Number(bName.startsWith(needle))-Number(aName.startsWith(needle));
+  });
+  return metas;
+}
+
+async function catalogSearch({ type = 'movie', q = '', skip = 0, genre = '', feed = 'popular' } = {}) {
+  q = String(q || '').trim();
+  skip = Number(skip) || 0;
+  if (!['movie', 'series', 'all'].includes(type) || (type === 'all' && !q)) throw directError('INVALID_SEARCH', 'Choose Movies or Shows.', 400);
+  const types=type==='all'?['movie','series']:[type];
+  if (/^tt[0-9]{5,12}$/.test(q)) {
+    if(skip)return {metas:[],nextSkip:null,provider:'Cinemeta',feed:'search'};
+    const checked=await Promise.allSettled(types.map(kind=>catalogMeta(kind,q)));
+    const metas=checked.filter(row=>row.status==='fulfilled').map(row=>row.value);
+    if(!metas.length)throw checked.find(row=>row.status==='rejected')?.reason||directError('CATALOG_UNAVAILABLE','Cinemeta metadata is temporarily unavailable.',502);
+    return { metas: await mergeCatalogTypes([{metas}],q), nextSkip:null, provider:'Cinemeta', feed:'search' };
+  }
+  if(type!=='all')return catalogSearchType({type,q,skip,genre,feed});
+  const checked=await Promise.allSettled(types.map(kind=>catalogSearchType({type:kind,q,skip,genre:'',feed:'popular'})));
+  const results=checked.filter(row=>row.status==='fulfilled').map(row=>row.value);
+  if(!results.length)throw checked.find(row=>row.status==='rejected')?.reason||directError('CATALOG_UNAVAILABLE','Cinemeta search is temporarily unavailable.',502);
+  const nextValues=results.map(row=>row.nextSkip).filter(value=>Number.isFinite(value));
+  return {
+    metas:await mergeCatalogTypes(results,q),
+    nextSkip:nextValues.length?Math.max(...nextValues):null,
+    provider:'Cinemeta',
+    feed:'search'
   };
 }
 
@@ -910,7 +991,7 @@ export async function directApi(path, { method = 'GET', data, signal } = {}) {
   }
 
   if (pathname === '/api/discover/meta') {
-    return { meta: await catalogMeta(url.searchParams.get('type'), url.searchParams.get('id')) };
+    return { meta: await catalogMetaFlexible(url.searchParams.get('type'), url.searchParams.get('id')) };
   }
 
   if (pathname === '/api/discover/lookup') {
@@ -1018,7 +1099,8 @@ async function probe(id, label, url, { headers = {}, method = 'GET' } = {}) {
 export async function runDirectDiagnostics(overrideKey = '') {
   const key = String(overrideKey || credential || '').trim();
   const tests = [
-    probe('cinemeta', 'Cinemeta catalog', 'https://v3-cinemeta.strem.io/meta/movie/tt0111161.json'),
+    probe('cinemeta', 'Cinemeta browse catalog', 'https://cinemeta-catalogs.strem.io/top/catalog/movie/top.json'),
+    probe('cinemeta_meta', 'Cinemeta metadata', 'https://v3-cinemeta.strem.io/meta/movie/tt0111161.json'),
     probe('zilean', 'Zilean', 'https://zileanfortheweebs.midnightignite.me/dmm/filtered?ImdbId=tt0111161'),
     probe('stremthru_main', 'StremThru Main', SOURCE_ENDPOINTS.stremthruMain + '/stream/movie/tt0111161.json'),
     probe('stremthru_elf', 'StremThru ElfHosted', SOURCE_ENDPOINTS.stremthruElf + '/stream/movie/tt0111161.json'),
@@ -1052,7 +1134,7 @@ export async function runDirectDiagnostics(overrideKey = '') {
   const directSourceIds=['stremthru_main','stremthru_elf','mediafusion'];
   const sourceProvidersDirect=directSourceIds.filter(id=>byId[id]?.status==='DIRECT_OK');
   const architecture={
-    catalogDirect:byId.cinemeta?.status==='DIRECT_OK',
+    catalogDirect:byId.cinemeta?.status==='DIRECT_OK'&&byId.cinemeta_meta?.status==='DIRECT_OK',
     sourceProvidersDirect,
     renderBridge:byId.bridge_render_health?.status==='DIRECT_OK',
     cloudflareBridge:byId.bridge_cloudflare_health?.status==='DIRECT_OK'

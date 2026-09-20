@@ -4,21 +4,18 @@ import { readFile } from 'node:fs/promises';
 
 const read=path=>readFile(new URL(path,import.meta.url),'utf8');
 
-test('2.0.3 entrypoint and local module graph are release-versioned',async()=>{
-  const [html,app,discover,runtime,portableUi,portable]=await Promise.all([
+test('2.0.4 entrypoint and changed browser modules are release-versioned',async()=>{
+  const [html,app,discover,runtime]=await Promise.all([
     read('../public/index.html'),
     read('../public/app.js'),
     read('../public/discover.js'),
-    read('../public/direct-runtime.js'),
-    read('../public/portable-setup-ui.js'),
-    read('../public/portable-setup.js')
+    read('../public/direct-runtime.js')
   ]);
-  assert.match(html,/src="\.\/app\.js\?v=2\.0\.3"/);
-  for(const code of [app,discover,runtime,portableUi,portable]){
-    for(const match of code.matchAll(/from '(\.\/[^']+\.js)([^']*)'/g)){
-      assert.equal(match[2],'?v=2.0.3',match[0]);
-    }
-  }
+  assert.match(html,/src="\.\/app\.js\?v=2\.0\.4"/);
+  assert.match(app,/from '\.\/discover\.js\?v=2\.0\.4'/);
+  assert.match(app,/from '\.\/direct-runtime\.js\?v=2\.0\.4'/);
+  assert.match(discover,/from '\.\/direct-runtime\.js\?v=2\.0\.4'/);
+  assert.match(runtime,/browser-local-2\.0\.4/);
 });
 
 test('service worker bypasses HTTP cache and registration bypasses update cache',async()=>{

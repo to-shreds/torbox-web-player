@@ -1,9 +1,9 @@
-import { recordDiagnosticEvent } from './direct-runtime.js?v=2.0.3';
-import { getSettings, updateSettings } from './settings.js?v=2.0.3';
-import { listRecent, formatResumeTime } from './history.js?v=2.0.3';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.0.3';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.0.3';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.0.3';
+import { recordDiagnosticEvent } from './direct-runtime.js?v=2.0.4';
+import { getSettings, updateSettings } from './settings.js?v=2.0.4';
+import { listRecent, formatResumeTime } from './history.js?v=2.0.4';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.0.4';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.0.4';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.0.4';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
@@ -193,7 +193,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     if(!more){metas=[];nextSkip=null;$('catalog-grid').replaceChildren();$('catalog-more').hidden=true;}
     const query=$('search').value.trim();applySearchMode();message('catalog-message',query?'Searching…':'Loading browse…');
     try{
-      const params=new URLSearchParams({type:$('catalog-type').value,q:query,skip:String(offset),genre:$('catalog-genre').value,feed:$('catalog-feed').value});
+      const params=new URLSearchParams({type:query?'all':$('catalog-type').value,q:query,skip:String(offset),genre:query?'':$('catalog-genre').value,feed:query?'popular':$('catalog-feed').value});
       const data=await api('/api/discover/catalog?'+params,{signal:AbortSignal.any([catalogAbort.signal,AbortSignal.timeout(20000)])});
       if(generation!==catalogGeneration||!active||guestMode)return;
       metas=more?[...new Map([...metas,...data.metas].map(m=>[m.id,m])).values()]:data.metas;nextSkip=data.nextSkip;

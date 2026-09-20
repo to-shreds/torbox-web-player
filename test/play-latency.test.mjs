@@ -42,11 +42,16 @@ test('interactive source lookup has an 8 second UI deadline while provider fan-i
   assert.match(discover,/registeredSources\(target,AbortSignal\.timeout\(8000\)\)/);
 });
 
-test('Cinemeta retries both known catalog hosts and does not mislabel every browser fetch failure as CORS',async()=>{
+test('Cinemeta uses its prefixed browse route, retries v3 metadata, and diagnostics check both paths',async()=>{
   const runtime=await read('../public/direct-runtime.js');
-  assert.match(runtime,/CATALOG_BASES = Object\.freeze\(\['https:\/\/v3-cinemeta\.strem\.io','https:\/\/cinemeta-catalogs\.strem\.io'\]\)/);
-  assert.match(runtime,/for \(let index=0;index<CATALOG_BASES\.length;index\+\+\)/);
-  assert.match(runtime,/cinemeta_fallback/);
+  assert.ok(runtime.includes("const CATALOG_PRIMARY = 'https://v3-cinemeta.strem.io'"));
+  assert.ok(runtime.includes("const CATALOG_SECONDARY = 'https://cinemeta-catalogs.strem.io'"));
+  assert.ok(runtime.includes("new URL('/' + catalogMatch[1] + path, CATALOG_SECONDARY).href"));
+  assert.ok(runtime.includes("label:'cinemeta_meta_retry'"));
+  assert.ok(runtime.includes("catalogMetaFlexible"));
+  assert.ok(runtime.includes("probe('cinemeta', 'Cinemeta browse catalog', 'https://cinemeta-catalogs.strem.io/top/catalog/movie/top.json')"));
+  assert.ok(runtime.includes("probe('cinemeta_meta', 'Cinemeta metadata', 'https://v3-cinemeta.strem.io/meta/movie/tt0111161.json')"));
+  assert.ok(runtime.includes("catalogDirect:byId.cinemeta?.status==='DIRECT_OK'&&byId.cinemeta_meta?.status==='DIRECT_OK'"));
   assert.match(runtime,/network, DNS, TLS, CORS, or another browser policy/);
   assert.doesNotMatch(runtime,/This is commonly caused by CORS/);
 });
