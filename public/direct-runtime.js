@@ -1,7 +1,7 @@
 import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js';
 import { isTrustedDirectMediaUrl } from './runtime.js';
 
-export const DIRECT_BUILD = 'browser-local-2.0.2';
+export const DIRECT_BUILD = 'browser-local-2.0.3';
 
 const CATALOG_BASES = Object.freeze(['https://v3-cinemeta.strem.io','https://cinemeta-catalogs.strem.io']);
 const CATALOG_ORIGINS = new Set(CATALOG_BASES.map(value=>new URL(value).hostname));
@@ -35,6 +35,16 @@ function directError(code, message, status = 0) {
 function trace(op, status, detail = {}) {
   traces.push({ at: new Date().toISOString(), op, status, ...detail });
   if (traces.length > MAX_TRACE) traces.splice(0, traces.length - MAX_TRACE);
+}
+
+export function recordDiagnosticEvent(op,status='ok',detail={}){
+  const safe={};
+  for(const [key,value] of Object.entries(detail||{})){
+    if(['provider','resolution','videoCodec'].includes(key)&&typeof value==='string')safe[key]=cleanText(value,80);
+    else if(key==='audioCodecs'&&Array.isArray(value))safe[key]=value.filter(v=>typeof v==='string').slice(0,4).map(v=>cleanText(v,40));
+    else if(['cached','browserFriendly','audioRisk','videoRisk'].includes(key)&&typeof value==='boolean')safe[key]=value;
+  }
+  trace(cleanText(op,80),cleanText(status,40),safe);
 }
 
 function safeError(error) {
