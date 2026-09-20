@@ -93,3 +93,13 @@ test('2.x product contract: PWA, diagnostics, repair, and intentional exclusions
   assert.ok(!html.includes('Replay last 30'));
   assert.ok(!html.includes('Recommended because:'));
 });
+
+test('2.1 settings contract: Basic first, advanced tabs, optional user names, and basic tooltips remain',async()=>{
+  const [html,app,settings]=await Promise.all([read('../public/index.html'),read('../public/app.js'),read('../public/settings.js')]);
+  assert.ok(html.indexOf('data-settings-tab="basic"')<html.indexOf('data-settings-tab="playback"'));
+  for(const tab of ['basic','playback','home','discover','kids','devices'])assert.ok(html.includes('data-settings-tab="'+tab+'"'),tab);
+  for(const id of ['setting-viewer-1-name','setting-viewer-2-name','setting-remember-viewer','setting-home-density','setting-search-delay','setting-prefer-cached'])assert.ok(html.includes('id="'+id+'"'),id);
+  const basic=html.slice(html.indexOf('id="settings-panel-basic"'),html.indexOf('id="settings-panel-playback"'));
+  assert.equal((basic.match(/class="setting-tip"/g)||[]).length,(basic.match(/class="basic-setting(?: |")/g)||[]).length,'every Basic setting needs a tooltip');
+  assert.ok(app.includes("activateSettingsTab('basic')"));assert.ok(settings.includes("viewer1Name:''"));assert.ok(settings.includes('searchDelayMs:350'));assert.ok(settings.includes('preferCachedSources:true'));
+});
