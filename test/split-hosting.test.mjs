@@ -7,7 +7,8 @@ const hash = await hashPassword(password);
 const page = 'https://to-shreds.github.io';
 async function fixture(t) {
   const provider = { list: async () => ({ files: [], stale: false }), account: async () => ({ valid: true }), resolveForRelay: async videoId => ({ upstreamUrl: 'https://store.tb-cdn.io/file?token=secret', file: { id: videoId } }) };
-  const app = createApp({ env: { HOUSEHOLD_PASSWORD_HASH: hash, PUBLIC_ORIGIN: 'https://torbox-web-player.onrender.com', FRONTEND_ORIGINS: page, NODE_ENV: 'production' }, provider });
+  const mediaFetch=async(_url,options={})=>new Response(Buffer.from('P'),{status:options.headers?.Range?206:200,headers:{'content-type':'video/mp4','content-length':'1','accept-ranges':'bytes',...(options.headers?.Range?{'content-range':'bytes 0-0/100'}:{})}});
+  const app = createApp({ env: { HOUSEHOLD_PASSWORD_HASH: hash, PUBLIC_ORIGIN: 'https://torbox-web-player.onrender.com', FRONTEND_ORIGINS: page, NODE_ENV: 'production' }, provider, mediaFetch });
   await new Promise(r => app.server.listen(0, '127.0.0.1', r));
   t.after(() => { app.server.closeAllConnections(); app.server.close(); });
   const base = `http://127.0.0.1:${app.server.address().port}`;
@@ -48,21 +49,22 @@ test('published HTML uses project-relative assets and the public Render API orig
   assert.ok(html.includes('href="./style.css"')); assert.ok(html.includes('src="./app.js"'));
   assert.ok(!html.includes('src="/app.js"')); assert.ok(!html.includes('href="/style.css"'));
 });
-test('GitHub Pages bearer session receives a direct TorBox media URL, never a Render media ticket', async t => {
+test('GitHub Pages bearer session receives an opaque Render media ticket', async t => {
   const { call }=await fixture(t);
   const token=(await (await call('/api/login',{method:'POST',data:{password}})).json()).sessionToken;
   const play=await (await call('/api/playback',{method:'POST',token,data:{viewer:'viewer-1',videoId:'torrents:1:0'}})).json();
-  assert.equal(play.delivery,'direct'); assert.equal(play.exposesTorBoxToken,true);
-  assert.match(play.mediaUrl,/^https:\/\/store\.tb-cdn\.io\/file\?token=secret$/);
-  assert.ok(!play.mediaUrl.includes('/media/'));
+  assert.equal(play.delivery,'relay'); assert.equal(play.exposesTorBoxToken,false);assert.match(play.mediaUrl,/^\/media\/[A-Za-z0-9_-]{43}$/);assert.ok(!JSON.stringify(play).includes('secret'));
+  const media=await call(play.mediaUrl,{headers:{Range:'bytes=0-0'}});assert.equal(media.status,206);assert.equal(await media.text(),'P');assert.equal(media.headers.get('access-control-allow-origin'),page);
 });
-test('Render has no media relay route in split hosting', async t => {
+test('an invented Render media ticket cannot be used', async t => {
   const { call }=await fixture(t);
-  assert.equal((await call('/media/'+'a'.repeat(43),{headers:{Range:'bytes=0-0'}})).status,404);
+  assert.equal((await call('/media/'+'a'.repeat(43),{headers:{Range:'bytes=0-0'}})).status,401);
 });
-test('bearer logout revokes API access but direct TorBox media is independent of Render', async t => {
+test('bearer logout revokes both API access and the opaque media ticket', async t => {
   const { call }=await fixture(t);
   const token=(await (await call('/api/login',{method:'POST',data:{password}})).json()).sessionToken;
+  const play=await (await call('/api/playback',{method:'POST',token,data:{viewer:'viewer-1',videoId:'torrents:1:0'}})).json();
   assert.equal((await call('/api/logout',{method:'POST',token,data:{}})).status,200);
   assert.equal((await call('/api/library',{token})).status,401);
+  assert.equal((await call(play.mediaUrl,{headers:{Range:'bytes=0-0'}})).status,401);
 });

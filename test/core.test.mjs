@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { hashPassword, verifyPassword, validHash, Sessions, Limiter } from '../lib/auth.mjs';
 import { ProgressStore } from '../lib/progress.mjs';
+import { MediaTickets, fallbackMediaType, validatedRange } from '../lib/media.mjs';
 import { TorBox, AppError, normalizeItem, availability, parseVideoId, safePlaybackUrl, validatedPlaybackUrl } from '../lib/torbox.mjs';
 const ready = { id: 1, name: 'Fixture Show', download_finished: true, download_present: true, files: [{ id: 0, short_name: 'Fixture.Show.S01E02.mp4', name: 'Fixture.Show.S01E02.mp4', size: 1000, mimetype: 'video/mp4' }] };
 const reply = data => new Response(JSON.stringify({ success: true, data }), { headers: { 'content-type': 'application/json' } });
@@ -43,6 +44,16 @@ test('URL checks block master-key leaks and unverified destinations', () => {
 test('direct browser URL validation accepts TorBox CDN key-bearing URLs but not unrelated hosts', () => {
   assert.equal(validatedPlaybackUrl('https://store-034.wnam.tb-cdn.io/file?token=master-key'), 'https://store-034.wnam.tb-cdn.io/file?token=master-key');
   assert.throws(() => validatedPlaybackUrl('https://example.test/file?token=master-key'));
+});
+test('media tickets are opaque, session-bound, expiring and revocable', () => {
+  let now=0;const tickets=new MediaTickets(()=>now,{ttlMs:10});const raw=tickets.create('session-a','torrents:1:0','https://store.tb-cdn.io/file?token=secret',{title:'Fixture.mp4'});
+  assert.match(raw,/^[A-Za-z0-9_-]{43}$/);assert.ok(!tickets.rows.has(raw));assert.ok(tickets.read(raw,'session-a'));assert.equal(tickets.read(raw,'session-b'),null);
+  tickets.revokeSession('session-a');assert.equal(tickets.readAny(raw),null);
+  const expiring=tickets.create('session-a','torrents:1:0','https://store.tb-cdn.io/file');now=11;assert.equal(tickets.readAny(expiring),null);
+});
+test('media range and safe content-type fallbacks are narrowly constrained',()=>{
+  assert.equal(validatedRange('bytes=0-'),'bytes=0-');assert.equal(validatedRange('bytes=-500'),'bytes=-500');assert.throws(()=>validatedRange('bytes=0-1,4-5'),error=>error.code==='BAD_RANGE');
+  assert.equal(fallbackMediaType('Episode.MP4'),'video/mp4');assert.equal(fallbackMediaType('Episode.webm'),'video/webm');assert.equal(fallbackMediaType('Episode.mkv'),'');
 });
 test('TorBox account output is whitelist-only', async () => {
   const api = new TorBox({ key: 'fixture-secret', fetchFn: async () => reply({ plan: 2, api_token: 'fixture-secret', email: 'private@example.test' }) });

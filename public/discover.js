@@ -56,6 +56,7 @@ export function sourceRecoveryKey(source) {
   const fallback=[source?.provider,source?.filename||source?.title,source?.resolution||source?.quality].map(value=>String(value||'').trim().toLowerCase()).filter(Boolean).join('|');
   return fallback?`source:${fallback}`:'';
 }
+export const MAX_AUTOMATIC_SOURCE_ATTEMPTS = 3;
 export function recoverySourceOrder(list, context = {}, type = context?.current?.type || 'movie', sizeProfile = 'balanced') {
   const attempted=new Set(Array.isArray(context?.recoveryTried)?context.recoveryTried:[]),currentKey=sourceRecoveryKey(context?.sourceInfo);if(currentKey)attempted.add(currentKey);
   let remaining=(Array.isArray(list)?list:[]).filter(source=>{const key=sourceRecoveryKey(source);return key&&!attempted.has(key)&&source.audioRisk!==true&&source.videoRisk!==true;});
@@ -71,6 +72,11 @@ export function recoverySourceOrder(list, context = {}, type = context?.current?
     }
   }
   return ordered;
+}
+export function boundedRecoverySourceOrder(list, context = {}, type = context?.current?.type || 'movie', sizeProfile = 'balanced') {
+  const attempted=new Set(Array.isArray(context?.recoveryTried)?context.recoveryTried:[]),currentKey=sourceRecoveryKey(context?.sourceInfo);if(currentKey)attempted.add(currentKey);
+  if(attempted.size>=MAX_AUTOMATIC_SOURCE_ATTEMPTS)return [];
+  return recoverySourceOrder(list,context,type,sizeProfile).slice(0,MAX_AUTOMATIC_SOURCE_ATTEMPTS-attempted.size);
 }
 const formatBytes = value => Number.isFinite(value) && value > 0 ? (value >= GB ? `${(value / GB).toFixed(value >= 10*GB ? 1 : 2)} GB` : `${Math.max(1,Math.round(value/1024**2))} MB`) : '—';
 const qualityText = s => [s.resolution || s.quality, s.releaseQuality, s.videoCodec, ...(s.audioCodecs || []).slice(0,2), s.container].filter(Boolean).join(' · ') || 'Unknown';
@@ -401,7 +407,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     try{
       const registered=await registeredSources(context.current,AbortSignal.timeout(45000));
       const failedKey=sourceRecoveryKey(context.sourceInfo),attempted=new Set(Array.isArray(context.recoveryTried)?context.recoveryTried:[]);if(failedKey)attempted.add(failedKey);context.recoveryTried=[...attempted];
-      const candidates=recoverySourceOrder(registered.sources,context,context.current.type,getSettings().sourceSizeProfile);
+      const candidates=boundedRecoverySourceOrder(registered.sources,context,context.current.type,getSettings().sourceSizeProfile);
       for(const best of candidates){
         const candidateKey=sourceRecoveryKey(best);if(candidateKey)attempted.add(candidateKey);context.recoveryTried=[...attempted];
         try{

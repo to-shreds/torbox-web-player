@@ -21,6 +21,12 @@ export function clearSessionToken() {
 }
 
 export const TORBOX_MEDIA_SUFFIXES = Object.freeze(['torbox.app','tb-cdn.cx','tb-cdn.io','tb-cdn.pw','tb-cdn.sh','tb-cdn.st','tb-cdn.to','tb-cdn.earth']);
+export function isTrustedRelayMediaUrl(value) {
+  try {
+    const url = new URL(value, API_ORIGIN);
+    return url.origin === API_ORIGIN && !url.username && !url.password && !url.search && !url.hash && /^\/media\/[A-Za-z0-9_-]{43}$/.test(url.pathname);
+  } catch { return false; }
+}
 export function isTrustedDirectMediaUrl(value) {
   try {
     const url = new URL(value);
@@ -29,3 +35,4 @@ export function isTrustedDirectMediaUrl(value) {
       && TORBOX_MEDIA_SUFFIXES.some(suffix => host === suffix || host.endsWith('.' + suffix));
   } catch { return false; }
 }
+export const isTrustedMediaUrl = value => isTrustedRelayMediaUrl(value) || isTrustedDirectMediaUrl(value);

@@ -16,6 +16,6 @@ The API key is still necessarily present in the browser briefly when the user ty
 
 A read-only GitHub Actions CORS probe on 2026-09-19 tested a normal browser preflight to TorBox user/me with an Authorization header. TorBox responded with HTTP 400 and allowed methods/Authorization headers but did not send Access-Control-Allow-Origin. A browser would therefore block the authenticated API request. The fully static version cannot perform the required TorBox account/control calls directly.
 
-Accordingly this clone keeps a minimal Render control bridge. Render receives the user-supplied key transiently and calls TorBox server-to-server. Video remains direct TorBox CDN -> browser, never through Render.
+Accordingly this clone keeps a Render bridge. Render receives the user-supplied key transiently and calls TorBox server-to-server. Playback uses an opaque, expiring ticket and a byte-range relay, so the TorBox CDN URL and API key do not reach the browser.
 
 The working main project remains unchanged.

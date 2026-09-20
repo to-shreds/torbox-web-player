@@ -26,6 +26,7 @@ function fakeProvider(value){
   };
 }
 async function fixture(t){
+  const mediaRequests=[];
   const discoveryFetch=async url=>{
     const u=new URL(url);
     if(u.hostname==='v3-cinemeta.strem.io'&&u.pathname.includes('/meta/')){
@@ -37,13 +38,14 @@ async function fixture(t){
   const sourceLookupService={lookup:async()=>({sources:[],provider:'fixture'}),diagnostics:()=>[]};
   const app=createApp({
     env:{AUTH_MODE:'api-key',SOURCE_PROVIDER:'multi',PUBLIC_ORIGIN:'https://torbox-web-player-key.onrender.com',FRONTEND_ORIGINS:page,NODE_ENV:'production'},
-    providerFactory:fakeProvider,discoveryFetch,sourceLookupService
+    providerFactory:fakeProvider,discoveryFetch,sourceLookupService,
+    mediaFetch:async url=>{mediaRequests.push(String(url));return new Response(Buffer.from('G'),{status:200,headers:{'content-type':'video/mp4','content-length':'1','accept-ranges':'bytes'}});}
   });
   await new Promise(r=>app.server.listen(0,'127.0.0.1',r));
   t.after(()=>{app.server.closeAllConnections();app.server.close();});
   const base='http://127.0.0.1:'+app.server.address().port;
   const call=(path,{method='GET',data,token,origin=page}={})=>fetch(base+path,{method,headers:{Origin:origin,...(data?{'Content-Type':'application/json'}:{}),...(token?{Authorization:'Bearer '+token}:{})},body:data?JSON.stringify(data):undefined});
-  return {...app,call};
+  return {...app,call,mediaRequests};
 }
 async function owner(call){
   const r=await call('/api/login',{method:'POST',data:{apiKey:key}}); assert.equal(r.status,200); return (await r.json()).sessionToken;
@@ -92,13 +94,13 @@ test('owner sign-out invalidates existing guest sessions and invitation links',a
   assert.equal((await call('/api/guest/accept',{method:'POST',data:{token:invite.token}})).status,401);
 });
 
-test('guest playback uses the safe direct-link resolver rather than the owner direct resolver',async t=>{
-  const {call,sessions}=await fixture(t),ownerToken=await owner(call);
+test('guest playback uses an opaque relay ticket and never exposes the owner key',async t=>{
+  const {call,sessions,mediaRequests}=await fixture(t),ownerToken=await owner(call);
   const invite=await (await call('/api/share/create',{method:'POST',token:ownerToken,data:{type:'series',id:show,hours:2}})).json();
   const accepted=await (await call('/api/guest/accept',{method:'POST',data:{token:invite.token}})).json();
   const row=sessions.read(accepted.sessionToken),videoId='torrents:7:3'; row.allowedVideos.add(videoId);
   const playback=await call('/api/playback',{method:'POST',token:accepted.sessionToken,data:{viewer:'viewer-1',videoId}});
   assert.equal(playback.status,200); const body=await playback.json();
-  assert.equal(body.guestSafeLink,true); assert.equal(body.mediaUrl,'https://store.tb-cdn.io/file?token=temporary-file-token');
-  assert.ok(!body.mediaUrl.includes(key));
+  assert.equal(body.guestSafeLink,true);assert.equal(body.delivery,'relay');assert.match(body.mediaUrl,/^\/media\/[A-Za-z0-9_-]{43}$/);assert.ok(!JSON.stringify(body).includes(key));
+  const media=await call(body.mediaUrl);assert.equal(media.status,200);assert.equal(await media.text(),'G');assert.ok(mediaRequests[0].includes(key));
 });

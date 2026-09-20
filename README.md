@@ -26,11 +26,11 @@ Settings now includes **Sync & devices → Transfer this setup**. It creates a o
 
 Transferred state includes the selected viewer, general settings, Continue Watching history, My list, search history, and Kid Mode/PIN/allowance state. Device-specific source/audio compatibility learning is intentionally not transferred. If the API key is not remembered on the source device, Settings asks for it once and verifies it against the current session before creating the encrypted package. Opening a transfer link on the destination device validates the debrid credential before applying the imported state and stores the credential using the destination browser's existing encrypted vault. This transfer does not yet enable ongoing cloud synchronization.
 
-Video does not pass through Render.
+Video passes through the protected Render relay restored from the last known-good pre-direct architecture. The browser receives only an opaque, expiring media ticket. The TorBox CDN URL and API key remain server-side.
 
 Owner playback path:
 
-`TorBox CDN -> browser`
+`TorBox CDN -> Render relay -> browser`
 
 Render handles control/API operations such as catalog and source lookup, cache checks, preparation, playback-link generation, TorBox status checks, Drive control, and temporary progress leases.
 
@@ -78,7 +78,7 @@ Long-pressing a poster opens quick actions. Play, My list, and Details remain us
 
 Automatic next episode uses a cancellable countdown. The countdown can be immediate or 5, 8, 10, or 15 seconds.
 
-If a stream buffers continuously or fails, automatic recovery can select a safer lower-resolution source and then request a fresh TorBox link if necessary. The buffering threshold is configurable.
+If a stream buffers continuously or fails, automatic recovery can try at most two alternatives, for no more than three sources total. The Render relay renews an expired TorBox link once without rebuilding the player again. The buffering threshold is configurable.
 
 Full mode includes a playback-health panel that distinguishes states such as Opening, Ready, Playing, Buffering, Stalled, Recovering, Paused, Finished, and failure. It also exposes Sound works, No sound, and Bad source feedback for the current source.
 

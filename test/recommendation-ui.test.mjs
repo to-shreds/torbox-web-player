@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { recommendSource, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder, recoverySourceOrder, sourceRecoveryKey } from '../public/discover.js';
+import { recommendSource, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder, recoverySourceOrder, boundedRecoverySourceOrder, sourceRecoveryKey, MAX_AUTOMATIC_SOURCE_ATTEMPTS } from '../public/discover.js';
 import { parseSizeBytes } from '../public/source-client.js';
 import { normalizeIndexRows } from '../lib/source-lookup.mjs';
 
@@ -53,6 +53,13 @@ test('playback recovery tries other safe sources after a 480p source fails',()=>
     'series'
   );
   assert.deepEqual(ordered.map(source=>source.id),['same-quality','remaining']);
+});
+test('automatic playback recovery can open at most three sources total',()=>{
+  const failed=src('failed',{hash:'a'.repeat(40),resolution:'480p'});
+  const candidates=['b','c','d','e','f'].map(letter=>src(letter,{hash:letter.repeat(40),resolution:'480p'}));
+  assert.equal(MAX_AUTOMATIC_SOURCE_ATTEMPTS,3);
+  assert.deepEqual(boundedRecoverySourceOrder([failed,...candidates],{sourceInfo:failed,resolution:'auto'},'series').map(row=>row.id),['b','c']);
+  assert.deepEqual(boundedRecoverySourceOrder([failed,...candidates],{sourceInfo:candidates[1],recoveryTried:[sourceRecoveryKey(failed),sourceRecoveryKey(candidates[0])]},'series'),[]);
 });
 
 test('source size profile can favor a smaller data-saver source or a larger quality source',()=>{

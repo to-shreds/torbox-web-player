@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { Sessions, Limiter, GuestInvites, verifyPassword, validHash } from './lib/auth.mjs';
 import { ProgressStore, VIEWERS, validViewer } from './lib/progress.mjs';
+import { MediaTickets, relayMedia } from './lib/media.mjs';
 import { TorBox, AppError, parseVideoId, TORBOX_MEDIA_HOSTS } from './lib/torbox.mjs';
 import { DriveTransferTests } from './lib/drive-share.mjs';
 import { TorBoxStatusChecker } from './lib/torbox-status.mjs';
@@ -134,7 +135,7 @@ function sendRelay(response,result){
   if(result.retryAfter)response.setHeader('Retry-After',result.retryAfter);
   response.end(Buffer.from(result.body));
 }
-export function createApp({ env = process.env, provider, providerFactory, discoveryFetch = fetch, discoveryService, sourceLookupService, driveTransferService, now = Date.now } = {}) {
+export function createApp({ env = process.env, provider, providerFactory, mediaFetch = fetch, discoveryFetch = fetch, discoveryService, sourceLookupService, driveTransferService, now = Date.now } = {}) {
   const production = env.NODE_ENV === 'production';
   const origin = env.PUBLIC_ORIGIN || env.RENDER_EXTERNAL_URL || `http://localhost:${env.PORT || 10000}`;
   const passwordHash = env.HOUSEHOLD_PASSWORD_HASH || '';
@@ -152,7 +153,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
     response.setHeader('Access-Control-Expose-Headers', 'Content-Type, Content-Length, Content-Range, Accept-Ranges, ETag, Last-Modified, Retry-After, X-TorBox-Bridge');
     return true;
   };
-  const sessions = new Sessions(now), progress = new ProgressStore(), guestInvites = new GuestInvites(now), driveTransfers = driveTransferService || new DriveTransferTests({ now }), torboxStatus = new TorBoxStatusChecker({ fetchFn: discoveryFetch, now }), setupTransfers = new SetupTransfers({ now });
+  const sessions = new Sessions(now), progress = new ProgressStore(), mediaTickets = new MediaTickets(now), guestInvites = new GuestInvites(now), driveTransfers = driveTransferService || new DriveTransferTests({ now }), torboxStatus = new TorBoxStatusChecker({ fetchFn: discoveryFetch, now }), setupTransfers = new SetupTransfers({ now });
   const loginRate = new Limiter(15, 15 * 60000, now), operationRate = new Limiter(30, 60000, now), progressRate = new Limiter(120, 60000, now), transferCreateRate = new Limiter(6, 60000, now), transferRedeemRate = new Limiter(30, 60000, now);
   let activeLogins = 0;
   const mediaHosts = (env.MEDIA_HOST_SUFFIXES || TORBOX_MEDIA_HOSTS.join(',')).split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
@@ -174,7 +175,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
     response.setHeader('X-Frame-Options', 'DENY');
     response.setHeader('X-Robots-Tag', 'noindex, nofollow');
     response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://images.metahub.space https://image.tmdb.org https://m.media-amazon.com; media-src https://torbox.app https://*.torbox.app https://*.tb-cdn.cx https://*.tb-cdn.io https://*.tb-cdn.pw https://*.tb-cdn.sh https://*.tb-cdn.st https://*.tb-cdn.to https://*.tb-cdn.earth; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://images.metahub.space https://image.tmdb.org https://m.media-amazon.com; media-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
     if (production) response.setHeader('Strict-Transport-Security', 'max-age=31536000');
     try {
       const url = new URL(request.url || '/', origin), path = url.pathname, method = request.method;
@@ -203,6 +204,43 @@ export function createApp({ env = process.env, provider, providerFactory, discov
       const bearer = bearerId(request), cookie = cookieId(request), sessionToken = bearer || cookie;
       const session = configured ? sessions.read(sessionToken) : null;
       const bearerSession = !!bearer && !!session;
+      if (path.startsWith('/media/')) {
+        if (!['GET', 'HEAD'].includes(method)) throw new AppError('METHOD_NOT_ALLOWED', 'This media request method is not allowed.', 405);
+        const mediaId = path.slice('/media/'.length);
+        const ticket = session ? mediaTickets.read(mediaId, session.id) : mediaTickets.readAny(mediaId);
+        sessions.prune();
+        const ticketSession = ticket ? sessions.rows.get(ticket.sessionId) : null;
+        if (!ticket || !ticketSession) {
+          if (ticket && !ticketSession) mediaTickets.revokeSession(ticket.sessionId);
+          if (!session) throw new AppError('LOGIN_REQUIRED', 'This playback ticket is no longer available. Reopen the video.', 401);
+          throw new AppError('MEDIA_NOT_FOUND', 'This playback session is no longer available. Reopen the video.', 404);
+        }
+        const ticketProvider = ticketSession.provider || torbox;
+        let failureReported = false;
+        try {
+          return await relayMedia({
+            request,
+            response,
+            ticket,
+            provider: ticketProvider,
+            fetchFn: mediaFetch,
+            onEvent: event => {
+              if (event.event === 'media_relay_failed') failureReported = true;
+              console.log(JSON.stringify({
+                event: event.event,
+                ...(Number.isInteger(event.upstreamStatus) ? { upstreamStatus: event.upstreamStatus } : {}),
+                ...(typeof event.ranged === 'boolean' ? { ranged: event.ranged } : {}),
+                ...(event.renewed === true ? { renewed: true } : {}),
+                ...(event.code ? { code: event.code } : {}),
+                ...(event.contentType ? { contentType: String(event.contentType).slice(0, 100) } : {})
+              }));
+            }
+          });
+        } catch (error) {
+          if (!failureReported && error instanceof AppError && error.code !== 'MEDIA_INTERRUPTED') console.error(JSON.stringify({ event: 'media_relay_failed', code: error.code }));
+          throw error;
+        }
+      }
       if (!path.startsWith('/api/')) throw new AppError('NOT_FOUND', 'Page not found.', 404);
       if (!['GET', 'HEAD'].includes(method) && !trustedOrigin(request.headers.origin)) throw new AppError('BAD_ORIGIN', 'Reload the website before trying again.', 403);
       if (path === '/api/session' && method === 'GET') return json(response, 200, { authenticated: !!session, setupRequired: !configured, authMode: apiKeyMode ? 'api-key' : 'household', ...(session ? { csrf: session.csrf, viewers: VIEWERS, durable: false, guest: session.guest === true, scope: session.guest ? session.scope : undefined, keyConfigured: session.guest ? true : (apiKeyMode ? !!session.provider : !!(env.TORBOX_API_KEY || provider)) } : {}) });
@@ -233,7 +271,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         const created = sessions.create();
         if (!created) throw new AppError('SESSION_LIMIT', 'The session limit was reached. Restart the service to revoke old sessions.', 429);
         if (apiKeyMode) { created.row.provider = sessionProvider; created.row.discovery = sessionDiscovery; }
-        if (session) { (session.discovery || discovery).revoke(session.id); sessions.revoke(session.id); }
+        if (session) { (session.discovery || discovery).revoke(session.id); mediaTickets.revokeSession(session.id); sessions.revoke(session.id); }
         setCookie(response, created.id); return json(response, 200, { ok: true, csrf: created.row.csrf, sessionToken: created.id, authMode: apiKeyMode ? 'api-key' : 'household' });
       }
       if (path === '/api/guest/accept' && method === 'POST') {
@@ -277,10 +315,10 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         activeDiscovery.revoke(session.id);
         if (!session.guest) {
           guestInvites.revokeOwner(session.id);
-          for (const [id, row] of sessions.rows) if (row.guest && row.ownerId === session.id) { row.discovery?.revokeAll(); sessions.rows.delete(id); }
+          for (const [id, row] of sessions.rows) if (row.guest && row.ownerId === session.id) { row.discovery?.revokeAll(); mediaTickets.revokeSession(id); sessions.rows.delete(id); }
           if (session.provider) session.provider.key = '';
         }
-        sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true });
+        mediaTickets.revokeSession(session.id); sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true });
       }
       if (path === '/api/torbox-status' && method === 'GET') {
         const cached = session.torboxStatus;
@@ -338,11 +376,11 @@ export function createApp({ env = process.env, provider, providerFactory, discov
       }
       if (path.startsWith('/api/owner/')) {
         if (session.ownerUntil <= now()) throw new AppError('OWNER_REAUTH_REQUIRED', 'Re-enter your TorBox API key to open owner tools.', 403);
-        if (path === '/api/owner/revoke' && method === 'POST') { discovery.revokeAll(); guestInvites.rows.clear(); for (const row of sessions.rows.values()) { row.discovery?.revokeAll(); if (row.provider && !row.guest) row.provider.key = ''; } sessions.revokeAll(); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
+        if (path === '/api/owner/revoke' && method === 'POST') { discovery.revokeAll(); mediaTickets.revokeAll(); guestInvites.rows.clear(); for (const row of sessions.rows.values()) { row.discovery?.revokeAll(); if (row.provider && !row.guest) row.provider.key = ''; } sessions.revokeAll(); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
         if (path === '/api/owner/diagnostics' && method === 'POST') {
           if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before checking again.', 429);
           const account = await activeProvider.account();
-          return json(response, 200, { account, authMode: apiKeyMode ? 'api-key' : 'household', apiKeyPersistence: apiKeyMode ? 'Render process memory only' : 'Render environment', directMedia: true, proxyEnabled: false, mediaRelayEnabled: false, credentialProtection: apiKeyMode ? 'The API key is supplied by the browser and retained only in this process session.' : 'The signed-in browser intentionally receives the temporary TorBox media URL/token.', discoveryConfigured: true, catalogProvider: 'Cinemeta', sourceProvider: sourceMode === 'multi' ? 'Zilean + MediaFusion Torznab, with StremThru Main/ElfHosted fallbacks' : 'Zilean (server-side)', sourceProviders: sourceLookup.diagnostics?.() || [], progressStorage: 'temporary server memory plus browser-local canonical resume history', automaticNextEnabled: true });
+          return json(response, 200, { account, authMode: apiKeyMode ? 'api-key' : 'household', apiKeyPersistence: apiKeyMode ? 'Render process memory only' : 'Render environment', directMedia: false, proxyEnabled: true, mediaRelayEnabled: true, credentialProtection: 'The API key and temporary TorBox media URL remain in the Render process. The browser receives an opaque, expiring playback ticket.', discoveryConfigured: true, catalogProvider: 'Cinemeta', sourceProvider: sourceMode === 'multi' ? 'Zilean + MediaFusion Torznab, with StremThru Main/ElfHosted fallbacks' : 'Zilean (server-side)', sourceProviders: sourceLookup.diagnostics?.() || [], progressStorage: 'temporary server memory plus browser-local canonical resume history', automaticNextEnabled: true });
         }
       }
       if (path.startsWith('/api/discover/')) {
@@ -394,11 +432,12 @@ export function createApp({ env = process.env, provider, providerFactory, discov
         if (session.guest && !session.allowedVideos?.has(data.videoId)) throw new AppError('GUEST_FORBIDDEN', 'This file was not selected through the shared title.', 403);
         const progressViewer = session.guest ? 'guest:' + session.id : data.viewer;
         const intent = progress.beginIntent(progressViewer);
-        const stream = session.guest ? await activeProvider.resolveGuest(data.videoId) : await activeProvider.resolveForRelay(data.videoId);
+        const stream = await activeProvider.resolveForRelay(data.videoId);
         if (!progress.isCurrent(progressViewer, intent)) throw new AppError('PLAYBACK_SUPERSEDED', 'A newer playback request replaced this one.', 409);
         if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
         const lease = progress.start(progressViewer, data.videoId, { reset: data.startOver === true, sessionId: session.id });
-        return json(response, 200, { file: stream.file, mediaUrl: session.guest ? stream.url : stream.upstreamUrl, delivery: 'direct', conversion: false, exposesTorBoxToken: true, guestSafeLink: session.guest === true, ...lease });
+        const mediaToken = mediaTickets.create(session.id, data.videoId, stream.upstreamUrl, stream.file);
+        return json(response, 200, { file: stream.file, mediaUrl: `/media/${mediaToken}`, delivery: 'relay', conversion: false, exposesTorBoxToken: false, guestSafeLink: session.guest === true, ...lease });
       }
       if (path === '/api/progress' && method === 'PUT') {
         if (!progressRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Progress is being saved too frequently.', 429);
@@ -416,7 +455,7 @@ export function createApp({ env = process.env, provider, providerFactory, discov
     }
   });
   server.requestTimeout = 25000; server.headersTimeout = 15000; server.keepAliveTimeout = 5000;
-  return { server, sessions, progress, discovery, sourceLookup, guestInvites, driveTransfers, torboxStatus };
+  return { server, sessions, progress, mediaTickets, discovery, sourceLookup, guestInvites, driveTransfers, torboxStatus };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();

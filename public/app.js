@@ -419,7 +419,7 @@ async function resumeAfterKidParentAction(){
   updateKidLimitDialog();applyInterfaceMode();
   const retry=pendingKidPlayback;pendingKidPlayback=null;kidLimitReason='';
   if($('kid-limit-dialog').open)$('kid-limit-dialog').close();
-  if(retry)return startPlayback(retry.file,retry.playbackContext,retry.retryCount||0);
+  if(retry)return startPlayback(retry.file,retry.playbackContext);
   if(active?.video?.paused){
     const block=canStartKidPlayback(viewer,active.playbackContext);
     if(!block.allowed){showKidLimit(block);return false;}
@@ -433,10 +433,10 @@ async function detachPlayback() {
   if (old) { clearInterval(old.timer);clearInterval(old.kidTimer);clearTimeout(old.bufferTimer);clearTimeout(old.sleepTimer);clearTimeout(old.healthyTimer); const saving = saveProgress(old, true); old.video.pause(); old.video.removeAttribute('src'); old.video.load(); old.video.remove(); await saving; }
 }
 async function stopPlayback() { playGeneration++; clearStillWatchingTimer(); hideStillWatchingPrompt(); await detachPlayback(); }
-async function startPlayback(file, playbackContext = null, retryCount = 0) {
+async function startPlayback(file, playbackContext = null) {
   if(!guestMode){
     const block=canStartKidPlayback(viewer,playbackContext);
-    if(!block.allowed){showKidLimit(block,{file,playbackContext,retryCount});return false;}
+    if(!block.allowed){showKidLimit(block,{file,playbackContext});return false;}
   }
   const generation = ++playGeneration, selectedViewer = viewer;
   await detachPlayback(); if (generation !== playGeneration) return false;
@@ -446,20 +446,20 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
     const result = await api('/api/playback', { method: 'POST', data: { viewer: selectedViewer, videoId: file.id, startOver: playbackContext?.forceStartOver===true } });
     if (generation !== playGeneration || !$('player').open || selectedViewer !== viewer) return false;
     const video = document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.playbackRate=getSettings().playbackRate;
-    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, retryCount, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, sourceLearned:false, lastTime:0 };
+    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, sourceLearned:false, lastTime:0 };
     active = context; $('video-slot').replaceChildren(video);setHealthSource(context);
     const clearBuffer = () => { clearTimeout(context.bufferTimer); context.bufferTimer = null; };
-    const recover = async reason => {
+    const recover = async (reason, diagnosis = null) => {
       if (active !== context || context.recovering || video.ended || (reason === 'buffer' && (!context.started || video.paused))) return;
-      if (!getSettings().autoRecovery) { setPlaybackHealth(reason==='buffer'?'Buffering':'Playback problem','Automatic recovery is off.'); text('player-message', reason === 'buffer' ? 'Playback is buffering. Automatic recovery is off in Settings.' : 'Playback failed. Automatic recovery is off in Settings.', true); return; }
+      if (!getSettings().autoRecovery) { setPlaybackHealth(reason==='buffer'?'Buffering':'Playback problem','Automatic recovery is off.'); text('player-message', reason === 'buffer' ? 'Playback is buffering. Automatic recovery is off in Settings.' : (diagnosis?.message||'Playback failed. Automatic recovery is off in Settings.'), true); return; }
       context.recovering = true; clearBuffer();clearTimeout(context.healthyTimer); hidePauseCard(); await saveProgress(context); video.pause();
       setPlaybackHealth('Recovering',reason==='buffer'?'Switching to a lower-resolution source…':'Finding another source…');
-      text('player-message', reason === 'buffer' ? 'Buffering · switching to a lower resolution…' : 'Stream failed · finding a lower-resolution source…');
+      text('player-message', reason === 'buffer' ? 'Buffering · trying another source (maximum 3 total)…' : 'Stream failed · trying another source (maximum 3 total)…');
       const moved = playbackContext ? await discoveryUI.recoverPlayback(playbackContext) : false;
       if (moved) return;
       if (active !== context) return;
-      if (retryCount < 1) { text('player-message', 'Refreshing the TorBox link…'); await startPlayback(file, playbackContext, retryCount + 1); return; }
-      context.recovering = false; setPlaybackHealth('Likely failed','Automatic recovery could not find a working alternative.'); text('player-message', 'Playback could not recover automatically. Close the player and choose another source.', true);
+      const attempts=Math.max(1,new Set(playbackContext?.recoveryTried||[]).size);
+      context.recovering = false; setPlaybackHealth('Could not play',diagnosis?.message||'Automatic recovery could not find a working alternative.'); text('player-message', `${diagnosis?.message||'Playback failed.'} Automatic recovery stopped after ${attempts} source${attempts===1?'':'s'}.`, true);
     };
     const armBuffer = () => {
       if (!context.started || video.paused || video.ended || context.recovering) return;
@@ -495,7 +495,7 @@ async function startPlayback(file, playbackContext = null, retryCount = 0) {
       if (active !== context || context.diagnosing) return; context.diagnosing = true; clearBuffer();
       setPlaybackHealth('Playback error','Diagnosing the failed stream…');const diagnosis = await diagnosePlaybackFailure(context.mediaUrl, video.error?.code);
       if (active !== context || generation !== playGeneration) return;
-      if (diagnosis.kind !== 'cancelled') { await recover('error'); return; }
+      if (diagnosis.kind !== 'cancelled') { await recover('error',diagnosis); return; }
       text('player-message', diagnosis.message, true);
     });
     context.timer=setInterval(()=>{if(active===context&&!video.paused)saveProgress(context);},10000);

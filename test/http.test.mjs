@@ -38,19 +38,32 @@ test('arbitrary URL proxy and directory traversal are not exposed', async t => {
   const { call, login } = await fixture(t), auth = await login(); assert.equal((await call('/api/proxy?url=http://127.0.0.1', auth)).status, 404); assert.equal((await call('/media?url=http://127.0.0.1', auth)).status, 404); assert.equal((await call('/lib/auth.mjs')).status, 404); assert.equal((await call('/.env')).status, 404);
 });
 test('private responses disable caching and frames', async t => {
-  const { call } = await fixture(t), response = await call('/api/session'); assert.equal(response.headers.get('cache-control'), 'no-store, private'); assert.equal(response.headers.get('x-frame-options'), 'DENY'); assert.ok(response.headers.get('content-security-policy').includes("frame-ancestors 'none'")); assert.ok(response.headers.get('content-security-policy').includes('tb-cdn.io'));
+  const { call } = await fixture(t), response = await call('/api/session'); const policy=response.headers.get('content-security-policy');assert.equal(response.headers.get('cache-control'), 'no-store, private'); assert.equal(response.headers.get('x-frame-options'), 'DENY'); assert.ok(policy.includes("frame-ancestors 'none'")); assert.ok(policy.includes("media-src 'self'"));assert.ok(!policy.includes('tb-cdn.io'));
 });
 
-test('playback returns the TorBox CDN URL directly and progress resumes', async t => {
+test('playback returns only an opaque media ticket and progress resumes', async t => {
   const { call, login } = await fixture(t), auth = await login();
   const start = async () => (await call('/api/playback', { ...auth, method: 'POST', data: { viewer: 'viewer-1', videoId: 'torrents:1:0' } })).json();
   const one = await start();
-  assert.equal(one.delivery, 'direct'); assert.equal(one.exposesTorBoxToken, true);
-  assert.match(one.mediaUrl, /^https:\/\/store\.tb-cdn\.io\/fixture\?token=fixture-secret$/);
+  assert.equal(one.delivery, 'relay'); assert.equal(one.exposesTorBoxToken, false);
+  assert.match(one.mediaUrl, /^\/media\/[A-Za-z0-9_-]{43}$/);assert.ok(!JSON.stringify(one).includes('fixture-secret'));assert.ok(!JSON.stringify(one).includes('tb-cdn'));
   const save = await call('/api/progress', { ...auth, method: 'PUT', data: { viewer: 'viewer-1', videoId: 'torrents:1:0', leaseId: one.leaseId, seq: 1, position: 45, duration: 100 } });
   assert.equal((await save.json()).saved, true); assert.equal((await start()).progress.position, 45);
 });
-test('Render exposes no media relay endpoint', async t => {
-  const { call, login } = await fixture(t), auth = await login();
-  assert.equal((await call('/media/' + 'a'.repeat(43), { cookie: auth.cookie, headers: { Range: 'bytes=0-0' } })).status, 404);
+test('media relay forwards one byte range without exposing the upstream URL', async t => {
+  let seen;const mediaFetch=async(url,options)=>{seen={url:String(url),range:options.headers.Range};return new Response(Buffer.from('Z'),{status:206,headers:{'content-type':'video/mp4','content-length':'1','accept-ranges':'bytes','content-range':'bytes 0-0/100'}});};
+  const {call,login}=await fixture(t,{mediaFetch}),auth=await login();const playback=await (await call('/api/playback',{...auth,method:'POST',data:{viewer:'viewer-1',videoId:'torrents:1:0'}})).json();
+  const media=await call(playback.mediaUrl,{headers:{Range:'bytes=0-0'}});assert.equal(media.status,206);assert.equal(await media.text(),'Z');assert.equal(media.headers.get('content-range'),'bytes 0-0/100');assert.equal(media.headers.get('cross-origin-resource-policy'),'cross-origin');assert.equal(seen.range,'bytes=0-0');assert.ok(seen.url.includes('fixture-secret'));assert.ok(!media.url.includes('tb-cdn'));
+});
+test('media tickets reject another signed-in session and malformed ranges',async t=>{
+  let fetches=0;const {call,login}=await fixture(t,{mediaFetch:async()=>{fetches++;return defaultMediaFetch('',{headers:{Range:'bytes=0-0'}});}}),a=await login(),b=await login();
+  const playback=await (await call('/api/playback',{...a,method:'POST',data:{viewer:'viewer-1',videoId:'torrents:1:0'}})).json();
+  assert.equal((await call(playback.mediaUrl,{cookie:b.cookie,headers:{Range:'bytes=0-0'}})).status,404);
+  assert.equal((await call(playback.mediaUrl,{headers:{Range:'bytes=0-1,4-5'}})).status,416);assert.equal(fetches,0);
+});
+test('expired upstream link is renewed once with the ticket session provider',async t=>{
+  let resolves=0,fetches=0;const providerExtra={resolveForRelay:async videoId=>({upstreamUrl:`https://store.tb-cdn.io/${++resolves===1?'expired':'fresh'}?token=fixture-secret`,file:{id:videoId,title:'Fixture.mp4'}})};
+  const mediaFetch=async url=>{fetches++;if(String(url).includes('/expired'))return new Response('expired',{status:403});return new Response(Buffer.from('R'),{status:206,headers:{'content-type':'application/octet-stream','content-length':'1','accept-ranges':'bytes','content-range':'bytes 0-0/100'}});};
+  const {call,login}=await fixture(t,{providerExtra,mediaFetch}),auth=await login();const playback=await (await call('/api/playback',{...auth,method:'POST',data:{viewer:'viewer-1',videoId:'torrents:1:0'}})).json();const media=await call(playback.mediaUrl,{headers:{Range:'bytes=0-0'}});
+  assert.equal(media.status,206);assert.equal(await media.text(),'R');assert.equal(media.headers.get('content-type'),'video/mp4');assert.equal(resolves,2);assert.equal(fetches,2);
 });
