@@ -8,7 +8,7 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: torbox-player-pages-v2
+  group: torbox-player-pages-v3
   cancel-in-progress: true
 jobs:
   deploy:
