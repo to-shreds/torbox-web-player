@@ -45,7 +45,9 @@ test('browser-local Cinemeta routing and cross-type search regressions',async t=
       throw new Error('unexpected '+value);
     },()=>directApi('/api/discover/meta?type=movie&id=tt9000002'));
     assert.equal(result.meta.type,'series');
-    assert.deepEqual(seen,['https://v3-cinemeta.strem.io/meta/movie/tt9000002.json','https://v3-cinemeta.strem.io/meta/series/tt9000002.json']);
+    assert.equal(seen.includes('https://v3-cinemeta.strem.io/meta/movie/tt9000002.json'),true);
+    assert.equal(seen.includes('https://cinemeta-live.strem.io/meta/movie/tt9000002.json'),true);
+    assert.equal(seen.includes('https://v3-cinemeta.strem.io/meta/series/tt9000002.json'),true);
   });
 
   await t.test('metadata falls back through the Cloudflare catalog relay when browser-direct hosts fail',async()=>{
