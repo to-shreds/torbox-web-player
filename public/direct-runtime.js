@@ -1,7 +1,7 @@
 import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js';
 import { isTrustedDirectMediaUrl } from './runtime.js';
 
-export const DIRECT_BUILD = 'browser-local-2.0.1';
+export const DIRECT_BUILD = 'browser-local-2.0.2';
 
 const CATALOG_BASES = Object.freeze(['https://v3-cinemeta.strem.io','https://cinemeta-catalogs.strem.io']);
 const CATALOG_ORIGINS = new Set(CATALOG_BASES.map(value=>new URL(value).hostname));
