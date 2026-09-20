@@ -2,9 +2,16 @@ name: Verify and publish TorBox Player
 on:
   push:
     branches: [main]
+    paths:
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'server.mjs'
+      - 'entry.mjs'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 concurrency:
@@ -23,7 +30,20 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.sha }}
+          fetch-depth: 0
           path: main-src
+      - name: Require verified release candidate
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git -C main-src fetch origin release-approved --depth=1
+          APPROVED_SHA="$(git -C main-src rev-parse FETCH_HEAD)"
+          test "$APPROVED_SHA" = "$RELEASE_SHA" || {
+            echo "Refusing to deploy unapproved main commit $RELEASE_SHA"
+            echo "Current release-approved commit is $APPROVED_SHA"
+            exit 1
+          }
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
@@ -88,6 +108,7 @@ jobs:
                   assert 'location.replace' in get('direct/redirect.js')
                   assert '<span class="tag">KEY</span>' in get('key/index.html')
                   assert 'encodePortableSetup' in get('portable-setup.js')
+                  assert 'snapshotForVersion' in get('state-snapshots.js')
                   print('LIVE_VERIFIED',json.dumps(version))
                   break
               except Exception as error:
@@ -95,3 +116,23 @@ jobs:
                   print('Publication not yet visible:',type(error).__name__)
                   time.sleep(5)
           PY
+      - name: Record verified production ref
+        working-directory: main-src
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./package.json').version")"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          TAG="production-v$VERSION"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/tmp/tagref 2>/dev/null; then
+            EXISTING="$(cut -f1 /tmp/tagref)"
+            test "$EXISTING" = "$RELEASE_SHA" || { echo "$TAG already points to $EXISTING"; exit 1; }
+          else
+            git tag "$TAG" "$RELEASE_SHA"
+            git push origin "refs/tags/$TAG"
+          fi
+          git tag -f production-current "$RELEASE_SHA"
+          git push --force origin refs/tags/production-current
+          git push --force origin "$RELEASE_SHA:refs/heads/production-current"
