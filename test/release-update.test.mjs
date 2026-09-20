@@ -24,12 +24,12 @@ test('service worker bypasses HTTP cache and registration bypasses update cache'
   assert.match(app,/await registration\.update\(\)/);
   assert.match(sw,/fetch\(event\.request,\{cache:'no-store'\}\)/);
   assert.match(sw,/new Request\(path,\{cache:'reload'\}\)/);
-  assert.match(sw,/torbox-main-v2\.0\.3/);
+  assert.match(sw,/torbox-main-v2\.0\.4/);
 });
 
 test('stale app detects a newer published version and routes through repair',async()=>{
   const app=await read('../public/app.js');
-  assert.match(app,/const APP_VERSION='2\.0\.3'/);
+  assert.match(app,/const APP_VERSION='2\.0\.4'/);
   assert.match(app,/version\.json\?check=/);
   assert.match(app,/version!==APP_VERSION/);
   assert.match(app,/location\.replace\('\.\/repair\/\?published='/);
