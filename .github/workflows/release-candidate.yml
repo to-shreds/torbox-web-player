@@ -6,7 +6,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: torbox-release-candidate
+  group: torbox-release-candidate-v2
   cancel-in-progress: true
 jobs:
   verify:
