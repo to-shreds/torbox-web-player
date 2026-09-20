@@ -16,9 +16,9 @@ If this file conflicts with the repo, the repo controls substance. If it conflic
 - Canonical repo: `to-shreds/torbox-web-player`
 - Canonical branch: `main`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
-- Current production version: **2.3.2** (released; not yet physically accepted)
-- Current production source: `0dc37b52086bc3d997b2f41225eb8e545ec71233`
-- Runtime marker: `browser-local-2.3.2`
+- Current production version: **2.3.4** (released; Elena plays, audio and 480p recovery not yet re-tested)
+- Current production source: `efa8989` (2.3.4)
+- Runtime marker: `browser-local-2.3.4`
 - Pinned legacy fallback: `/key/` from `d5dd3bd71ee2679178e66440c5240a80eaba41f2`
 - `/direct/` redirects to the canonical root.
 
@@ -38,51 +38,29 @@ The Render backend is live from `browser-key-clone` commit `e6e9bf756ff3400e244f
 
 Version 2.3.0 restored Render as the normal control plane while preserving direct TorBox CDN video and the newer 2.x features. Version 2.2.0 added exact file-variant learning, local recovery snapshots, release gating, production refs, and rollback. Version 2.1.0 added tabbed Settings. Preserve all of them.
 
-## Latest physical Android result
+## Physical Android findings: five defects on the one Play path
 
-On production **2.3.1**, search for **Elena of Avalor** returns and opens the correct title/episode list, so the independent search fallback is functioning on the target phone. Pressing Play failed with: **“TorBox accepted the request but did not return a usable identifier. Check status before retrying.”**
+Physical Android testing drove all of these. Each one hid the next, which is why the earlier rounds looked like unrelated random failures. In the order they were found:
 
-## Diagnosed root cause of the Play blocker
+1. **Uncached adds were reported as failures** (`lib/discovery.mjs`, live on Render). `TorrentGateway.create()` accepted only the identifier shape a *cached* add returns. An uncached add is accepted by TorBox in a different shape, so a successful addition surfaced as "TorBox accepted the request but did not return a usable identifier". Now reconciles by hash. Never had any test coverage.
+2. **Cache availability was read with an exact key** (`lib/discovery.mjs`, live on Render). Source hashes are lowercased before being sent; the returned map was indexed with an exact key, so any other casing matched nothing and **every source was reported uncached**, silently. Every other hash comparison in that file already normalized case. Now case-insensitive.
+3. **Source selection preferred uncached** (2.3.2). Commit `2aba8733` put `browserSafe` ahead of `cachedSafe` in the `preferCached` pool, so an uncached browser-friendly source beat a cached risk-free one. Restored to cached-first.
+4. **Codec tiers discarded cached sources before selection ran** (2.3.3). `recommendAutomaticSource` filters into codec-confidence tiers and only falls through when a tier is *empty*, so one uncached browser-friendly source removed all cached candidates before `recommendSource` could prefer one. This is why fix 3 appeared to do nothing: the live log showed `{"requested":15,"returned":7,"cached":7}` while Play still downloaded. A risk-free cached source is now tried at each tier first.
+5. **Recovery could not reach any alternative, and the audio watchdog stopped running** (2.3.4). `recoverPlayback` iterated only `lowerResolutionOrder()`, which is **empty** for a 480p source, so a title whose sources are all 480p reported "Playback could not recover automatically" without trying a second source. Separately, the silent-audio watchdog is armed once at playback start and abandoned itself permanently if media time had not advanced four seconds inside its window, which is the normal case for a slow start on a phone — so a Dolby/DTS source played silently with no automatic switch. Recovery now tries the requested quality, then lower tiers, then `auto`; the watchdog re-arms, bounded.
 
-`TorrentGateway.create()` in `lib/discovery.mjs` accepted exactly one success shape: a non-negative integer `data.torrent_id`. That is the shape a **cached** add returns. Ordinary one-tap Play sends `onlyCached: source.cached === true` (`public/discover.js`), so whenever the automatically chosen source is **not already cached**, Render calls `createtorrent` with `add_only_if_cached=false`. TorBox accepts that request (`success: true`), but it does not answer with the cached-add identifier, so `validId(data.torrent_id)` was false and an addition that had actually succeeded was reported to the phone as a failure.
+Cached-first selection (3 and 4) is only safe **because** the watchdog in 5 catches an unplayable cached source and moves on. Those changes belong together.
 
-This was latent from the first implementation — `create()` is byte-identical across the entire Git history. What changed is how often ordinary Play reaches the uncached branch:
+Known remaining limit: browser playback needs H.264 with AAC/MP3. Disney-style WEB-DL releases are commonly EAC3 and will never decode in Chrome, so for some titles the correct outcome is switching sources, not decoding. If no browser-playable version is cached anywhere, the experience is still poor. A native player (Stremio) does not have this constraint.
 
-- `de38821d` (v2.0.7) made Play unattended, so no human sees or overrides the automatic choice.
-- `2aba8733` (“Prefer known browser-safe audio over cached unknown sources”) moved `browserSafe` ahead of `cachedSafe` in the `preferCached` pool, so an **uncached** H.264/AAC source now outranks a **cached** risk-free one.
-- The register-side cached bonus was also reduced from `+20` to `+8`.
-
-None of that is wrong on its own — the audio-safety preference is a deliberate, tested feature (`test/audio-selection.test.mjs`). It simply routes ordinary Play into a branch that never worked.
-
-CI stayed green because the only `createtorrent` test mocked `add_only_if_cached='true'` and returned `{ torrent_id: 0 }`. **The uncached branch had zero test coverage**, which is exactly the class of failure this project keeps hitting: green suite, failing phone.
-
-## Repair applied
-
-`create()` now reconciles by hash through the existing `find()` when TorBox reports success without a usable `torrent_id`, and only reports `CREATE_UNCERTAIN` when reconciliation also cannot confirm the addition. The reconciliation is a read, so an unconfirmed addition still never becomes a duplicate write — any failure inside it falls through to the original error. Source selection and the audio-safety preference were deliberately **not** changed: they are the trigger, not the defect.
-
-The fix is deliberately shape-independent. Egress to `api.torbox.app` is blocked from the investigating environment, so the exact uncached response body could not be observed directly; reconciling by hash avoids guessing TorBox field names. A `torbox_create_identifier_missing` diagnostic now records the response's **field names only** (never values, so neither the infohash nor the account's activity is logged) so the next occurrence is conclusive rather than inferred.
-
-Verified: `npm run check` clean, suite 337 tests / 331 pass / 0 fail / 6 optional skips (was 335/329). The new reconciliation test was confirmed to **fail** against the pre-fix `lib/discovery.mjs` and pass after it.
-
-**Not yet physically verified.** Physical Android Play remains the acceptance test.
-
-## 2.3.2: the actual Play regression
-
-The second physical retest produced the decisive evidence: **TorBox-cached titles play; uncached ones sit in "Preparing" indefinitely.** Uncached is not a failure state, it is TorBox downloading the torrent before it can serve it. The real defect was therefore that ordinary one-tap Play was choosing uncached sources at all.
-
-Commit `2aba8733` ("Prefer known browser-safe audio over cached unknown sources") moved `browserSafe` ahead of `cachedSafe` in the `preferCached` pool in `public/discover.js`. `browserSafe` does not require cached availability, so whenever no cached browser-friendly source existed, Play selected an uncached one and stalled. 2.3.2 restores the pre-`2aba8733` ordering: cached availability is screened first, audio preference decides within it.
-
-Audio protection is intact. Every cached tier still excludes known-risky Dolby/DTS audio, so a cached risky source never beats an uncached safe one. Only a cached codec-unknown source now outranks an uncached browser-friendly one, on the reasoning that imperfect audio beats never starting. The test that encoded the old ordering was replaced by a pair that fails against it.
-
-Preparation is no longer silent: an uncached choice says so explicitly and reports download progress while polling.
-
-Note for the next investigator: repeated failed attempts populate the **device-local** source blocklist (`memoryBad` / `memoryAudio === 'bad'`). When every source is blocked, `recommendAutomaticSource` returns nothing and Play reports "No usable source matches this resolution", which looks like a lookup failure but is local state. Settings → source-learning reset clears it. The resolution advice in that message is also a dead end: the control writes global settings, not per-title quality. Unfixed.
-
-Released as 2.3.2 from `0dc37b52086bc3d997b2f41225eb8e545ec71233`. Candidate run `35521626002` passed and approved that exact SHA; production run `35521650440` published it and its public-version check passed. Suite 338 tests, 332 pass, 0 fail, 6 optional skips.
+Also unfixed: repeated failures populate the **device-local** source blocklist (`memoryBad` / `memoryAudio === 'bad'`). Once everything is blocked, Play reports "No usable source matches this resolution", which looks like a lookup failure but is local state — Settings → source-learning reset clears it. That message also suggests choosing a lower resolution, but the control writes global settings rather than per-title quality.
 
 ## Deployment state
 
-The repair is **live on Render**. `browser-key-clone` commit `070a62342d200f3cb6ae6911d0e1daea681d6beb`, deploy `dep-danvr0mk1f9s73a5js90`, live at 2026-09-20T15:37:02Z. Render ran its own `npm ci && npm run check && npm test` during that build and it passed.
+Pages **2.3.4** from `efa8989` is published and publicly verified (production run for that SHA passed its public-version check).
+
+The Render control plane runs `browser-key-clone`. Latest deploy `dep-dao0ivbm8hqs73crb45g` from `9292b5f`, carrying the uncached-identifier reconciliation, the case-insensitive cache read, and the diagnostics. Render runs its own `npm ci && npm run check && npm test` on every build.
+
+`lib/` is shared by both branches, so a backend change must be landed on `browser-key-clone` **and** on `main`; only `browser-key-clone` reaches the live service.
 
 ## Deployment facts that previous rounds missed
 
@@ -108,14 +86,14 @@ The current user request is to have another agent independently audit the projec
 
 ## Next action
 
-1. ~~Land the `create()` reconciliation repair on `browser-key-clone`.~~ Done; instrumentation followed in `dep-dao0050ae00c73a9fsug`.
-2. ~~Ship the cached-first selection repair.~~ Done: 2.3.2 is published and publicly verified.
-3. On the device: **Settings → source-learning reset first**, then reload and confirm the footer reads 2.3.2, then retest Play for **Elena of Avalor** and **Salute Your Shorts**. That is the acceptance evidence; a green suite is not.
-3. If Play still fails, read the new `torbox_create_identifier_missing` line in the Render logs. It names the fields TorBox actually returned, which settles the response shape without another speculative change.
-4. Only once Play succeeds, retest audio, seeking, resume, auto-next, pause overlay, and recovery on the same device.
+Retest on the physical device after **Settings → source-learning reset**, with the footer confirmed at 2.3.4:
 
-Do not rewrite search or the architecture. Search is physically confirmed to open Elena correctly.
+1. **Elena of Avalor** — it played on 2.3.3 but with no audio. Confirm the re-armed watchdog now switches away from the silent source instead of staying on it.
+2. **Salute Your Shorts** — recovery previously had an empty candidate list because its sources are 480p. Confirm it now reaches a second source.
+3. If either still fails, read the Render log first. `torbox_cache_checked` gives requested/returned/cached counts, `torbox_episode_unmatched` gives the wanted episode and what parsed, and `torbox_call_failed` gives TorBox's own status and error. Diagnose from those before changing code.
+4. Once Play and audio are accepted, retest seeking, resume, auto-next, pause overlay, and Kid Mode on the same device.
 
+Do not rewrite search or the architecture. Search is physically confirmed to open titles correctly.
 ## Persistence
 
 After meaningful work:
