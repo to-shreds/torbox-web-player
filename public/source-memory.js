@@ -14,10 +14,16 @@ export function sourceIdentity(source){
   if(!source||typeof source!=='object')return null;
   const hash=/^[a-f0-9]{40}$/i.test(source.hash||'')?source.hash.toLowerCase():'';
   const id=clean(source.id,160),group=releaseGroup(source),provider=clean(source.provider,60).toLowerCase(),resolution=clean(source.resolution||source.quality,20).toLowerCase();
+  const filename=clean(source.filename||source.title||source.label,350).replace(/\\/g,'/').split('/').pop().toLowerCase();
+  const fileIdx=Number.isSafeInteger(source.fileIdx)&&source.fileIdx>=0?source.fileIdx:null;
   if(!hash&&!id&&!group)return null;
-  return {hash,id,group,provider,resolution,label:clean(source.filename||source.title||source.label,180)};
+  return {hash,id,group,provider,resolution,filename,fileIdx,label:clean(source.filename||source.title||source.label,180)};
 }
-function sourceKey(source){const i=sourceIdentity(source);return i?(i.hash||i.id||[i.group,i.provider,i.resolution].join(':')):'';}
+function sourceKey(source){
+  const i=sourceIdentity(source);if(!i)return'';
+  if(i.hash)return ['v2',i.hash,i.fileIdx===null?'':i.fileIdx,i.filename].join(':');
+  return i.id?'id:'+i.id:[i.group,i.provider,i.resolution].join(':');
+}
 function load(store=storage()){if(!store)return{titles:{}};try{const d=JSON.parse(store.getItem(KEY)||'{}');return d&&typeof d==='object'&&d.titles&&typeof d.titles==='object'?d:{titles:{}};}catch{return{titles:{}};}}
 function save(data,store=storage()){try{store?.setItem(KEY,JSON.stringify(data));}catch{}}
 function titleRow(data,target,create=false){const key=titleKey(target);if(!key)return null;if(!data.titles[key]&&create)data.titles[key]={quality:'',sources:{}};return data.titles[key]||null;}
@@ -27,12 +33,14 @@ export function setTitleQuality(target,quality,store=storage()){
 }
 export function sourceMemory(target,source,store=storage()){
   const data=load(store),row=titleRow(data,target),key=sourceKey(source),identity=sourceIdentity(source);if(!identity)return{bad:false,audio:'unknown',successes:0,bonus:0};
-  const exact=row?.sources?.[key]||null;let bonus=0;
+  const exact=row?.sources?.[key]||null,legacy=identity.hash?row?.sources?.[identity.hash]||null:null;let bonus=0;
   if(exact?.successes)bonus+=Math.min(260,100+exact.successes*35);
   if(exact?.audio==='good')bonus+=180;
+  if(!exact&&legacy?.successes)bonus+=Math.min(70,20+legacy.successes*10);
+  if(!exact&&legacy?.audio==='good')bonus+=40;
   const peers=Object.values(row?.sources||{});
-  if(identity.group&&peers.some(item=>item.group===identity.group&&item.successes>0))bonus+=90;
-  if(identity.provider&&peers.some(item=>item.provider===identity.provider&&item.successes>1))bonus+=20;
+  if(identity.group&&peers.some(item=>item!==legacy&&item.group===identity.group&&item.successes>0))bonus+=90;
+  if(identity.provider&&peers.some(item=>item!==legacy&&item.provider===identity.provider&&item.successes>1))bonus+=20;
   return {bad:exact?.bad===true,audio:exact?.audio||'unknown',successes:Number(exact?.successes)||0,bonus};
 }
 export function applySourceMemory(target,sources,store=storage()){
