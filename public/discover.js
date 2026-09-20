@@ -1,9 +1,9 @@
-import { recordDiagnosticEvent } from './direct-runtime.js?v=2.0.6';
-import { getSettings, updateSettings } from './settings.js?v=2.0.6';
-import { listRecent, formatResumeTime } from './history.js?v=2.0.6';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.0.6';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.0.6';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.0.6';
+import { recordDiagnosticEvent } from './direct-runtime.js?v=2.0.7';
+import { getSettings, updateSettings } from './settings.js?v=2.0.7';
+import { listRecent, formatResumeTime } from './history.js?v=2.0.7';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.0.7';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.0.7';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.0.7';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };

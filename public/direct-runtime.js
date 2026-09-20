@@ -1,7 +1,7 @@
-import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js?v=2.0.6';
-import { isTrustedDirectMediaUrl } from './runtime.js?v=2.0.6';
+import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js?v=2.0.7';
+import { isTrustedDirectMediaUrl } from './runtime.js?v=2.0.7';
 
-export const DIRECT_BUILD = 'browser-local-2.0.6';
+export const DIRECT_BUILD = 'browser-local-2.0.7';
 
 const CATALOG_PRIMARY = 'https://v3-cinemeta.strem.io';
 const CATALOG_SECONDARY = 'https://cinemeta-catalogs.strem.io';

@@ -4,18 +4,18 @@ import { readFile } from 'node:fs/promises';
 
 const read=path=>readFile(new URL(path,import.meta.url),'utf8');
 
-test('2.0.6 entrypoint and changed browser modules are release-versioned',async()=>{
+test('2.0.7 entrypoint and changed browser modules are release-versioned',async()=>{
   const [html,app,discover,runtime]=await Promise.all([
     read('../public/index.html'),
     read('../public/app.js'),
     read('../public/discover.js'),
     read('../public/direct-runtime.js')
   ]);
-  assert.match(html,/src="\.\/app\.js\?v=2\.0\.6"/);
-  assert.match(app,/from '\.\/discover\.js\?v=2\.0\.6'/);
-  assert.match(app,/from '\.\/direct-runtime\.js\?v=2\.0\.6'/);
-  assert.match(discover,/from '\.\/direct-runtime\.js\?v=2\.0\.6'/);
-  assert.match(runtime,/browser-local-2\.0\.6/);
+  assert.match(html,/src="\.\/app\.js\?v=2\.0\.7"/);
+  assert.match(app,/from '\.\/discover\.js\?v=2\.0\.7'/);
+  assert.match(app,/from '\.\/direct-runtime\.js\?v=2\.0\.7'/);
+  assert.match(discover,/from '\.\/direct-runtime\.js\?v=2\.0\.7'/);
+  assert.match(runtime,/browser-local-2\.0\.7/);
 });
 
 test('service worker bypasses HTTP cache and registration bypasses update cache',async()=>{
@@ -24,12 +24,12 @@ test('service worker bypasses HTTP cache and registration bypasses update cache'
   assert.match(app,/await registration\.update\(\)/);
   assert.match(sw,/fetch\(event\.request,\{cache:'no-store'\}\)/);
   assert.match(sw,/new Request\(path,\{cache:'reload'\}\)/);
-  assert.match(sw,/torbox-main-v2\.0\.6/);
+  assert.match(sw,/torbox-main-v2\.0\.7/);
 });
 
 test('stale app detects a newer published version and routes through repair',async()=>{
   const app=await read('../public/app.js');
-  assert.match(app,/const APP_VERSION='2\.0\.6'/);
+  assert.match(app,/const APP_VERSION='2\.0\.7'/);
   assert.match(app,/version\.json\?check=/);
   assert.match(app,/version!==APP_VERSION/);
   assert.match(app,/location\.replace\('\.\/repair\/\?published='/);
