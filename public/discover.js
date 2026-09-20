@@ -23,7 +23,7 @@ export function recommendSource(list, type = 'movie', resolution = 'auto', sizeP
   const cachedSafe = visible.filter(s => s.cached === true && !s.audioRisk && !s.videoRisk);
   const browserSafe = visible.filter(s => s.browserFriendly && !s.audioRisk);
   const cached = visible.filter(s => s.cached === true && !s.audioRisk);
-  const pool = cachedFriendly.length ? cachedFriendly : cachedSafe.length ? cachedSafe : browserSafe.length ? browserSafe : cached.length ? cached : visible;
+  const pool = cachedFriendly.length ? cachedFriendly : browserSafe.length ? browserSafe : cachedSafe.length ? cachedSafe : cached.length ? cached : visible;
   const profile = ['data','balanced','quality'].includes(sizeProfile) ? sizeProfile : 'balanced';
   const limits = profile === 'data' ? { movie:1.5 * GB, series:.6 * GB } : profile === 'quality' ? { movie:6 * GB, series:2 * GB } : { movie:3 * GB, series:1 * GB };
   const limit = limits[type === 'series' ? 'series' : 'movie'];
