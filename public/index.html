@@ -1,15 +1,15 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="runtime-mode" content="direct"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; worker-src 'self'; manifest-src 'self'; style-src 'self'; img-src 'self' https://images.metahub.space https://image.tmdb.org https://m.media-amazon.com; connect-src 'self' https://torbox-web-player-key.onrender.com https://torbox-web-player-relay.jonathanjablon.workers.dev https://api.torbox.app https://relay.torbox.app https://v3-cinemeta.strem.io https://cinemeta-catalogs.strem.io https://cinemeta-live.strem.io https://zileanfortheweebs.midnightignite.me https://stremthru.13377001.xyz https://stremthru.elfhosted.com https://mediafusion.elfhosted.com https://comet.elfhosted.com; media-src https://torbox.app https://*.torbox.app https://*.tb-cdn.cx https://*.tb-cdn.io https://*.tb-cdn.pw https://*.tb-cdn.sh https://*.tb-cdn.st https://*.tb-cdn.to https://*.tb-cdn.earth; object-src 'none'; base-uri 'none'; form-action 'self'"><title>TorBox Player</title><meta name="theme-color" content="#101925"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./discover.css"><link rel="stylesheet" href="./portable-setup.css"><script type="module" src="./app.js?v=2.0.8"></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="runtime-mode" content="direct"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; worker-src 'self'; manifest-src 'self'; style-src 'self'; img-src 'self' https://images.metahub.space https://image.tmdb.org https://m.media-amazon.com; connect-src 'self' https://torbox-web-player-key.onrender.com https://torbox-web-player-relay.jonathanjablon.workers.dev https://api.torbox.app https://relay.torbox.app https://v3-cinemeta.strem.io https://cinemeta-catalogs.strem.io https://cinemeta-live.strem.io https://zileanfortheweebs.midnightignite.me https://stremthru.13377001.xyz https://stremthru.elfhosted.com https://mediafusion.elfhosted.com https://comet.elfhosted.com; media-src https://torbox.app https://*.torbox.app https://*.tb-cdn.cx https://*.tb-cdn.io https://*.tb-cdn.pw https://*.tb-cdn.sh https://*.tb-cdn.st https://*.tb-cdn.to https://*.tb-cdn.earth; object-src 'none'; base-uri 'none'; form-action 'self'"><title>TorBox Player</title><meta name="theme-color" content="#101925"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./discover.css"><link rel="stylesheet" href="./portable-setup.css"><script type="module" src="./app.js?v=2.1.0"></script></head>
 <body class="mode-simple">
-<header class="top"><a class="brand" href="./">TorBox</a><span class="tag">2.0.8</span></header>
+<header class="top"><a class="brand" href="./">TorBox</a><span class="tag">2.1.0</span></header>
 <main>
 <section id="loading" class="panel narrow"><h1>Opening</h1><p>Checking this session.</p></section>
 <section id="setup-needed" class="panel narrow" hidden><h1>Backend unavailable</h1><p>This clone is not configured correctly.</p></section>
 <section id="login" class="panel narrow" hidden><p class="eyebrow">THIS DEVICE</p><h1>Connect TorBox</h1><p class="muted">Browser-local player. Catalog, source discovery, ranking, settings, and playback state run in this browser. TorBox API calls use a stateless Render bridge with automatic Cloudflare backup; neither bridge stores your API key.</p><form id="login-form"><label for="api-key">TorBox API key</label><input id="api-key" type="password" autocapitalize="none" spellcheck="false" autocomplete="off" maxlength="512" required><label class="remember-key"><input id="remember-key" type="checkbox"> Remember encrypted on this device</label><button class="primary" type="submit">Connect</button></form><button id="forget-key" class="text-button" type="button">Forget saved key</button><button id="run-login-diagnostics" class="text-button direct-only" type="button">Run browser-only connection test</button><button id="portable-login-receive" class="text-button" type="button">Receive existing setup</button><p id="login-message" role="status"></p></section>
 <section id="workspace" hidden>
 <h1 id="page-title" class="sr-only">Discover</h1>
-<div class="workspace-bar"><strong class="workspace-title">Discover</strong><span id="kid-mode-badge" class="kid-mode-badge" hidden>Kid Mode</span><div class="compact-actions"><label class="sr-only" for="viewer">Viewer</label><select id="viewer" aria-label="Viewer"><option value="viewer-1">Viewer 1</option><option value="viewer-2">Viewer 2</option></select><button id="open-settings" class="text-button" type="button">Settings</button><button id="logout" class="text-button">Sign out</button></div></div>
+<div class="workspace-bar"><strong class="workspace-title">Discover</strong><span id="kid-mode-badge" class="kid-mode-badge" hidden>Kid Mode</span><div class="compact-actions"><label class="sr-only" for="viewer">Viewer</label><select id="viewer" aria-label="User"><option value="viewer-1">User 1</option><option value="viewer-2">User 2</option></select><button id="open-settings" class="text-button" type="button">Settings</button><button id="logout" class="text-button">Sign out</button></div></div>
 <label class="search-label global-search" for="search"><span class="sr-only">Search</span><input id="search" type="search" placeholder="Search movies and shows" autocomplete="off" enterkeyhint="search" inputmode="search" maxlength="150"></label>
 <section id="search-history-section" class="search-history-section" hidden><div class="section-head"><strong>Recent searches</strong></div><div id="search-history-list" class="search-history-list"></div></section>
 <aside id="torbox-status-banner" class="service-banner" hidden><span id="torbox-status-text"></span><div class="service-banner-actions"><button id="retry-torbox-status" class="text-button" type="button">Retry</button><a href="https://status.torbox.app/" target="_blank" rel="noreferrer">TorBox status</a></div></aside>
@@ -50,66 +50,97 @@
 </dialog>
 <dialog id="settings-dialog"><div class="dialog-bar"><h2>Settings</h2><button id="close-settings" class="icon-button" aria-label="Close settings">×</button></div>
 <form id="settings-form" class="settings-grid">
-<fieldset class="settings-group"><legend>Interface</legend>
-<label>Interface mode<select id="setting-interface-mode"><option value="simple">Simple · family/kid friendly</option><option value="full">Full · advanced controls</option></select></label>
-<p class="setting-help">Simple keeps the normal experience to posters, episodes, Play, My list, resume, and automatic recovery. Full reveals source controls, per-title tuning, sharing, playback health, and technical feedback.</p>
-<label class="setting-check"><input id="setting-long-press" type="checkbox"> Enable long-press poster shortcuts</label>
-</fieldset>
-<fieldset class="settings-group"><legend>Parental controls</legend>
-<p class="setting-help">Kid Mode is stored on this device for <strong id="kid-viewer-label">this viewer</strong>. It survives reloads and browser restarts. Leaving a restricted viewer, opening Settings, or signing out requires the Parent PIN.</p>
-<label class="setting-check"><input id="setting-kid-mode" type="checkbox"> Enable Kid Mode for this viewer and force the Simple interface</label>
-<label>Playback allowance<div class="kid-time-row"><input id="setting-kid-time" type="number" min="0" max="1440" step="1" inputmode="numeric" value="0"><select id="setting-kid-time-unit"><option value="minutes">minutes</option><option value="hours">hours</option></select></div></label>
-<label>Episode allowance<input id="setting-kid-episodes" type="number" min="0" max="100" step="1" inputmode="numeric" value="0"></label>
-<label>Movie allowance<input id="setting-kid-movies" type="number" min="0" max="50" step="1" inputmode="numeric" value="0"></label>
-<label>Allowance reset<select id="setting-kid-reset"><option value="daily">Every day</option><option value="manual">Only when a parent resets it</option></select></label>
-<p id="kid-usage-summary" class="kid-usage-summary">No allowance limits</p>
-<div class="setting-inline-actions"><button id="parent-pin-change" type="button">Set Parent PIN</button><button id="kid-reset-allowance" type="button">Reset allowance</button></div>
-<p class="setting-help">An episode counts after 5 actual watched minutes or 20% of its runtime, whichever comes first. A movie counts after 10 actual watched minutes. Once an episode or movie counts, that same item can still be finished or resumed. A time allowance stops immediately when its minutes run out. Enter 0 to leave any limit unlimited.</p>
-</fieldset>
+<nav id="settings-tabs" class="settings-tabs" role="tablist" aria-label="Settings sections">
+<button id="settings-tab-basic" class="settings-tab active" type="button" role="tab" aria-selected="true" aria-controls="settings-panel-basic" data-settings-tab="basic">Basic settings</button>
+<span class="settings-tabs-label" aria-hidden="true">Advanced</span>
+<button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-panel-playback" data-settings-tab="playback">Playback</button>
+<button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-panel-home" data-settings-tab="home">Home &amp; history</button>
+<button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-panel-discover" data-settings-tab="discover">Discover &amp; sources</button>
+<button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-panel-kids" data-settings-tab="kids">Kids</button>
+<button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-panel-devices" data-settings-tab="devices">Devices &amp; app</button>
+</nav>
+<section id="settings-panel-basic" class="settings-panel" role="tabpanel" aria-labelledby="settings-tab-basic" data-settings-panel="basic">
+<div class="settings-panel-intro"><strong>Basic settings</strong><span>These are the only settings most people need. Tap any ? for a plain-English explanation.</span></div>
+<div class="basic-settings-grid">
+<div class="basic-setting"><div class="setting-label-row"><label for="setting-viewer-1-name">User 1 name <span class="optional">(optional)</span></label><button type="button" class="setting-tip" aria-label="Give User 1 a name so the user menu shows a real name instead of User 1. Leaving it blank keeps User 1." data-tooltip="Give User 1 a name so the user menu shows a real name instead of User 1. Leaving it blank keeps User 1.">?</button></div><input id="setting-viewer-1-name" type="text" maxlength="30" autocomplete="off" placeholder="User 1"></div>
+<div class="basic-setting"><div class="setting-label-row"><label for="setting-viewer-2-name">User 2 name <span class="optional">(optional)</span></label><button type="button" class="setting-tip" aria-label="Give User 2 a name so each person can keep separate Continue Watching, My List, and searches. Leaving it blank keeps User 2." data-tooltip="Give User 2 a name so each person can keep separate Continue Watching, My List, and searches. Leaving it blank keeps User 2.">?</button></div><input id="setting-viewer-2-name" type="text" maxlength="30" autocomplete="off" placeholder="User 2"></div>
+<div class="basic-setting basic-setting-check"><label class="setting-check"><input id="setting-remember-viewer" type="checkbox"> Remember the last active user</label><button type="button" class="setting-tip" aria-label="When this is on, the player opens to whichever user was active last. Turn it off to start with User 1 after a reload." data-tooltip="When this is on, the player opens to whichever user was active last. Turn it off to start with User 1 after a reload.">?</button></div>
+<div class="basic-setting"><div class="setting-label-row"><label for="setting-interface-mode">Interface mode</label><button type="button" class="setting-tip" aria-label="Simple keeps the everyday screen uncluttered. Full adds technical source controls, sharing, and playback diagnostics." data-tooltip="Simple keeps the everyday screen uncluttered. Full adds technical source controls, sharing, and playback diagnostics.">?</button></div><select id="setting-interface-mode"><option value="simple">Simple</option><option value="full">Full</option></select></div>
+<div class="basic-setting"><div class="setting-label-row"><label for="setting-resolution">Default quality</label><button type="button" class="setting-tip" aria-label="Sets the quality the player tries first. Auto usually favors 720p because it is fast and broadly compatible." data-tooltip="Sets the quality the player tries first. Auto usually favors 720p because it is fast and broadly compatible.">?</button></div><select id="setting-resolution"><option value="auto">Auto · prefer 720p</option><option value="480p">480p</option><option value="720p">720p</option><option value="1080p">1080p</option><option value="2160p">4K</option></select></div>
+<div class="basic-setting basic-setting-check"><label class="setting-check"><input id="setting-auto-next" type="checkbox"> Automatically play the next episode</label><button type="button" class="setting-tip" aria-label="When an episode ends, the player automatically prepares and starts the next released episode after the countdown." data-tooltip="When an episode ends, the player automatically prepares and starts the next released episode after the countdown.">?</button></div>
+<div class="basic-setting"><div class="setting-label-row"><label for="setting-rewind">Resume rewind</label><button type="button" class="setting-tip" aria-label="When you resume something, the player backs up a few seconds so you hear the line or scene you stopped on." data-tooltip="When you resume something, the player backs up a few seconds so you hear the line or scene you stopped on.">?</button></div><select id="setting-rewind"><option value="0">No rewind</option><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option><option value="30">30 seconds</option></select></div>
+<div class="basic-setting"><div class="setting-label-row"><label for="setting-still-watching">Still watching check</label><button type="button" class="setting-tip" aria-label="Pauses after a long stretch of unattended viewing so episodes do not keep playing all night. The default is 90 minutes." data-tooltip="Pauses after a long stretch of unattended viewing so episodes do not keep playing all night. The default is 90 minutes.">?</button></div><select id="setting-still-watching"><option value="0">Off</option><option value="60">60 minutes</option><option value="75">75 minutes</option><option value="90">90 minutes</option><option value="120">120 minutes</option></select></div>
+</div>
+</section>
+<section id="settings-panel-playback" class="settings-panel" role="tabpanel" data-settings-panel="playback" hidden>
 <fieldset class="settings-group"><legend>Playback</legend>
-<label>Default quality<select id="setting-resolution"><option value="auto">Auto · prefer 720p</option><option value="480p">480p</option><option value="720p">720p</option><option value="1080p">1080p</option><option value="2160p">4K</option></select></label>
-<label>Automatic source size<select id="setting-size-profile"><option value="data">Data saver</option><option value="balanced">Balanced</option><option value="quality">Prefer larger files</option></select></label>
 <label>Playback speed<select id="setting-playback-rate"><option value="0.75">0.75×</option><option value="1">1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="1.75">1.75×</option><option value="2">2×</option></select></label>
 <label>Sleep timer<select id="setting-sleep-timer"><option value="0">Off</option><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option></select></label>
-<label>Still watching check<select id="setting-still-watching"><option value="0">Off</option><option value="60">60 minutes</option><option value="75">75 minutes</option><option value="90">90 minutes</option><option value="120">120 minutes</option></select></label>
-<p class="setting-help">Pauses playback and asks “Still watching?” after the selected viewing period. The clock carries across auto-next episodes, so a short show cannot run all night by continually restarting it.</p>
+<label>Next episode countdown<select id="setting-auto-next-delay"><option value="0">Immediately</option><option value="5">5 seconds</option><option value="8">8 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option></select></label>
 <label>Buffering before recovery<select id="setting-buffer"><option value="8">8 seconds</option><option value="12">12 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option></select></label>
 <label>Keyboard seek step<select id="setting-seek"><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option><option value="30">30 seconds</option></select></label>
-<label class="setting-check"><input id="setting-auto-recovery" type="checkbox"> Automatically switch to another/lower-resolution source after playback failure</label>
+<label class="setting-check"><input id="setting-auto-recovery" type="checkbox"> Automatically recover from a failed or badly buffering source</label>
 <label class="setting-check"><input id="setting-pause-overlay" type="checkbox"> Show title and time on the pause screen</label>
 <label class="setting-check"><input id="setting-keep-awake" type="checkbox"> Keep the screen awake while video is playing when supported</label>
 <label class="setting-check"><input id="setting-keyboard-shortcuts" type="checkbox"> Enable J/L and arrow-key seeking while the player is open</label>
 <label class="setting-check"><input id="setting-playback-health" type="checkbox"> Show playback-health controls in Full mode</label>
 <label class="setting-check"><input id="setting-auto-learn-sources" type="checkbox"> Learn from sources that play successfully on this device</label>
 </fieldset>
-<fieldset class="settings-group"><legend>Episodes and history</legend>
-<label>Recently Played rewind<select id="setting-rewind"><option value="0">No rewind</option><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option><option value="30">30 seconds</option></select></label>
+</section>
+<section id="settings-panel-home" class="settings-panel" role="tabpanel" data-settings-panel="home" hidden>
+<fieldset class="settings-group"><legend>Home, history, and shortcuts</legend>
+<label>Home poster spacing<select id="setting-home-density"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
 <label>Continue Watching items<select id="setting-recent-limit"><option value="4">4</option><option value="6">6</option><option value="8">8</option><option value="10">10</option><option value="12">12</option><option value="16">16</option></select></label>
-<label>Next episode countdown<select id="setting-auto-next-delay"><option value="0">Immediately</option><option value="5">5 seconds</option><option value="8">8 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option></select></label>
 <label>Next Up items<select id="setting-next-up-limit"><option value="3">3</option><option value="6">6</option><option value="9">9</option><option value="12">12</option></select></label>
-<label class="setting-check"><input id="setting-auto-next" type="checkbox"> Automatically play the next released episode</label>
+<label>My List items<select id="setting-watchlist-limit"><option value="6">6</option><option value="12">12</option><option value="18">18</option><option value="24">24</option></select></label>
+<label>Recent searches<select id="setting-search-history-limit"><option value="3">3</option><option value="6">6</option><option value="9">9</option><option value="12">12</option></select></label>
 <label class="setting-check"><input id="setting-show-episode-progress" type="checkbox"> Show watched/resume progress in episode lists</label>
 <label class="setting-check"><input id="setting-cleanup-completed" type="checkbox"> Remove a finished episode from history after the next episode starts</label>
 <label class="setting-check"><input id="setting-show-completed-recent" type="checkbox"> Include finished titles in Recently Played</label>
 <label class="setting-check"><input id="setting-show-next-up" type="checkbox"> Show Next Up for shows whose last episode was finished</label>
-</fieldset>
-<fieldset class="settings-group"><legend>Discover, My list, and search</legend>
-<label>My list items<select id="setting-watchlist-limit"><option value="6">6</option><option value="12">12</option><option value="18">18</option><option value="24">24</option></select></label>
-<label>Recent searches<select id="setting-search-history-limit"><option value="3">3</option><option value="6">6</option><option value="9">9</option><option value="12">12</option></select></label>
-<label class="setting-check"><input id="setting-show-watchlist" type="checkbox"> Show My list on Discover</label>
+<label class="setting-check"><input id="setting-show-watchlist" type="checkbox"> Show My List on Discover</label>
 <label class="setting-check"><input id="setting-show-search-history" type="checkbox"> Show removable search history</label>
-<label class="setting-check"><input id="setting-remember-browse" type="checkbox"> Remember movie/show, browse feed, and genre choices</label>
+<label class="setting-check"><input id="setting-long-press" type="checkbox"> Enable long-press poster shortcuts</label>
 </fieldset>
+</section>
+<section id="settings-panel-discover" class="settings-panel" role="tabpanel" data-settings-panel="discover" hidden>
+<fieldset class="settings-group"><legend>Discover and source selection</legend>
+<label>Starting browse type<select id="setting-catalog-type"><option value="movie">Movies</option><option value="series">Shows</option></select></label>
+<label>Starting browse feed<select id="setting-catalog-feed"><option value="popular">Popular</option><option value="featured">Featured</option><option value="new">New</option></select></label>
+<label>Starting genre<select id="setting-catalog-genre"><option value="">All</option><option>Action</option><option>Adventure</option><option>Animation</option><option>Biography</option><option>Comedy</option><option>Crime</option><option>Documentary</option><option>Drama</option><option>Family</option><option>Fantasy</option><option>History</option><option>Horror</option><option>Mystery</option><option>Romance</option><option>Sci-Fi</option><option>Sport</option><option>Thriller</option><option>War</option><option>Western</option></select></label>
+<label>Automatic source size<select id="setting-size-profile"><option value="data">Data saver</option><option value="balanced">Balanced</option><option value="quality">Prefer larger files</option></select></label>
+<label>Search responsiveness<select id="setting-search-delay"><option value="150">Fast</option><option value="350">Balanced</option><option value="700">Relaxed</option></select></label>
+<label class="setting-check"><input id="setting-prefer-cached" type="checkbox"> Prefer sources already cached in TorBox when quality and compatibility are otherwise reasonable</label>
+<label class="setting-check"><input id="setting-remember-browse" type="checkbox"> Remember browse type, feed, and genre as you change them</label>
+<p class="setting-help">The starting browse controls are also used when Remember browse is off. If Remember browse is on, your choices on the Discover screen become the next starting values.</p>
+</fieldset>
+</section>
+<section id="settings-panel-kids" class="settings-panel" role="tabpanel" data-settings-panel="kids" hidden>
+<fieldset class="settings-group"><legend>Parental controls</legend>
+<p class="setting-help">Kid Mode is stored on this device for <strong id="kid-viewer-label">this user</strong>. Leaving a restricted user, opening Settings, or signing out requires the Parent PIN.</p>
+<label class="setting-check"><input id="setting-kid-mode" type="checkbox"> Enable Kid Mode for this user and force the Simple interface</label>
+<label>Playback allowance<div class="kid-time-row"><input id="setting-kid-time" type="number" min="0" max="1440" step="1" inputmode="numeric" value="0"><select id="setting-kid-time-unit"><option value="minutes">minutes</option><option value="hours">hours</option></select></div></label>
+<label>Episode allowance<input id="setting-kid-episodes" type="number" min="0" max="100" step="1" inputmode="numeric" value="0"></label>
+<label>Movie allowance<input id="setting-kid-movies" type="number" min="0" max="50" step="1" inputmode="numeric" value="0"></label>
+<label>Allowance reset<select id="setting-kid-reset"><option value="daily">Every day</option><option value="manual">Only when a parent resets it</option></select></label>
+<p id="kid-usage-summary" class="kid-usage-summary">No allowance limits</p>
+<div class="setting-inline-actions"><button id="parent-pin-change" type="button">Set Parent PIN</button><button id="kid-reset-allowance" type="button">Reset allowance</button></div>
+<p class="setting-help">An episode counts after 5 actual watched minutes or 20% of its runtime, whichever comes first. A movie counts after 10 actual watched minutes. Enter 0 to leave any limit unlimited.</p>
+</fieldset>
+</section>
+<section id="settings-panel-devices" class="settings-panel" role="tabpanel" data-settings-panel="devices" hidden>
 <fieldset id="portable-settings-group" class="settings-group"><legend>Sync &amp; devices</legend>
 <p class="setting-help">Copy your API key, ordinary settings, Continue Watching, and My List directly to another device. Parent PINs, Kid Mode, allowances, searches, and source learning stay on each device. This is a copy, not ongoing sync.</p>
 <div class="setting-inline-actions"><button id="portable-open-send" type="button">Transfer this setup</button><button id="portable-open-receive" type="button">Receive setup</button></div>
 <p class="setting-help">Save any changed settings before creating a transfer.</p></fieldset>
-<fieldset id="drive-settings-group" class="settings-group" hidden><legend>Drive sharing and app</legend>
+<fieldset id="drive-settings-group" class="settings-group" hidden><legend>Drive sharing</legend>
 <label>Default Drive cleanup<select id="setting-drive-delete"><option value="10">10 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option><option value="45">45 minutes</option></select></label>
-<label class="setting-check"><input id="setting-drive-watch-only" type="checkbox"> Default Drive shares to watch-only</label>
-
+<label class="setting-check"><input id="setting-drive-watch-only" type="checkbox"> Disable download/copy on temporary Drive shares</label>
 </fieldset>
-<fieldset class="settings-group"><legend>App and maintenance</legend><div class="setting-inline-actions"><button id="settings-install-app" type="button">Install app</button><button id="settings-check-status" type="button">Check TorBox status</button><button id="settings-clear-learning" type="button">Clear source learning</button><button id="settings-clear-searches" type="button">Clear this viewer's searches</button></div></fieldset><fieldset class="settings-group direct-only"><legend>Connection diagnostics</legend><p class="setting-help">Runs direct CORS/access tests against Cinemeta, source indexes, and the authenticated TorBox API. It does not create a torrent or change your account.</p><div class="setting-inline-actions"><button id="settings-run-diagnostics" type="button">Run direct-access test</button><button id="settings-open-diagnostics" type="button">Open last log</button></div><p class="setting-help">The exported log contains statuses, timings, browser details, and a sanitized operation trace. It never includes your API key, playback URL, TorBox token, magnet hash, or response body.</p></fieldset><div class="settings-actions"><button class="primary" type="submit">Save settings</button><button id="reset-settings" type="button">Reset defaults</button></div>
+<fieldset class="settings-group"><legend>App and maintenance</legend><div class="setting-inline-actions"><button id="settings-install-app" type="button">Install app</button><button id="settings-check-status" type="button">Check TorBox status</button><button id="settings-clear-learning" type="button">Clear source learning</button><button id="settings-clear-searches" type="button">Clear this user's searches</button></div></fieldset>
+<fieldset class="settings-group direct-only"><legend>Connection diagnostics</legend><p class="setting-help">Runs direct access tests against Cinemeta, source indexes, and the authenticated TorBox API. It does not create a torrent or change your account.</p><div class="setting-inline-actions"><button id="settings-run-diagnostics" type="button">Run direct-access test</button><button id="settings-open-diagnostics" type="button">Open last log</button></div><p class="setting-help">The exported log contains statuses, timings, browser details, and a sanitized operation trace. It never includes your API key, playback URL, TorBox token, magnet hash, or response body.</p></fieldset>
+</section>
+<div class="settings-actions"><button class="primary" type="submit">Save settings</button><button id="reset-settings" type="button">Reset defaults</button></div>
 <p id="settings-message" class="status compact-status" role="status"></p>
 </form>
 </dialog>
@@ -137,5 +168,5 @@
 <div id="still-watching-card" class="still-watching-card" hidden><strong>Still watching?</strong><span>Playback was paused so it does not keep running unattended.</span><button id="keep-watching" class="primary" type="button">Keep watching</button></div>
 <div id="playback-health" class="playback-health advanced-only" hidden><div class="health-line"><span class="health-dot"></span><strong id="health-state">Opening</strong><span id="health-detail"></span></div><span id="health-source" class="health-source"></span><div class="health-actions"><button id="health-sound-good" type="button">Sound works</button><button id="health-sound-bad" type="button">No sound</button><button id="health-source-bad" type="button">Bad source</button></div></div>
 <div id="up-next-card" class="up-next-card" hidden><strong id="up-next-title">Up next</strong><span id="up-next-time"></span><button id="cancel-auto-next" type="button">Stay here</button></div></div><p id="player-message" class="player-status" role="status" aria-live="polite"></p></dialog>
-<footer>Browser-local player 2.0 · Your own TorBox account · <a href="./key/">Previous player</a></footer>
+<footer>Browser-local player · Your own TorBox account · <a href="./key/">Previous player</a></footer>
 </body></html>
