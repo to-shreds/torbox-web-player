@@ -41,3 +41,12 @@ test('interactive source lookup has an 8 second UI deadline while provider fan-i
   const discover=await read('../public/discover.js');
   assert.match(discover,/registeredSources\(target,AbortSignal\.timeout\(8000\)\)/);
 });
+
+test('Cinemeta retries both known catalog hosts and does not mislabel every browser fetch failure as CORS',async()=>{
+  const runtime=await read('../public/direct-runtime.js');
+  assert.match(runtime,/CATALOG_BASES = Object\.freeze\(\['https:\/\/v3-cinemeta\.strem\.io','https:\/\/cinemeta-catalogs\.strem\.io'\]\)/);
+  assert.match(runtime,/for \(let index=0;index<CATALOG_BASES\.length;index\+\+\)/);
+  assert.match(runtime,/cinemeta_fallback/);
+  assert.match(runtime,/network, DNS, TLS, CORS, or another browser policy/);
+  assert.doesNotMatch(runtime,/This is commonly caused by CORS/);
+});
