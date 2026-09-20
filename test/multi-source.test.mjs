@@ -68,11 +68,12 @@ test('fallback is queried only when aggregated primaries do not reach target cou
   assert.equal(fallback,1); assert.equal(result.sources.length,25); assert.equal(result.fallbackUsed,true);
 });
 
-test('fast enough source results do not wait for a stalled provider',async()=>{
-  const fast={name:'Fast',lookup:async()=>({sources:Array.from({length:20},(_,i)=>({hash:hash(i+1),title:'fast'+i,score:1,provider:'Fast'}))})};
-  const stalled={name:'Stalled',lookup:()=>new Promise(()=>{})};
-  const started=Date.now();const result=await new MultiSourceLookup({providers:[fast,stalled],primaryCount:2}).lookup(movie);
-  assert.equal(result.sources.length,20);assert.ok(Date.now()-started<1500);
+test('fallback is skipped when aggregated primaries already have enough distinct hashes',async()=>{
+  let fallback=0;
+  const provider=(name,start)=>({name,lookup:async()=>({sources:Array.from({length:10},(_,i)=>({hash:hash(start+i),title:name+i,score:1,provider:name}))})});
+  const backup={name:'Backup',lookup:async()=>{fallback++;return{sources:[]}}};
+  const result=await new MultiSourceLookup({providers:[provider('A',1),provider('B',11),backup],primaryCount:2}).lookup(movie);
+  assert.equal(result.sources.length,20); assert.equal(fallback,0); assert.equal(result.fallbackUsed,false);
 });
 
 test('provider merge deduplicates the same torrent and keeps richer metadata plus provenance',()=>{

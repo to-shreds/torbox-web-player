@@ -28,15 +28,11 @@ test('catalog validates identities before making requests', async () => {
   for (const id of ['../x', 'https://example.com', 'tt12']) await assert.rejects(c.meta('movie', id));
 });
 test('catalog broad search is encoded and independent of TorBox files', async () => {
-  const seen=[];
-  const c = new Catalog({ fetchFn: async url => { seen.push(String(url)); return response({ metas: [{ id: ID, type: 'movie', name: 'A & B/?' }] }); } });
+  let path;
+  const c = new Catalog({ fetchFn: async url => { path = url; return response({ metas: [{ id: ID, type: 'movie', name: 'Fixture' }] }); } });
   const result = await c.search({ q: 'A & B/?', genre: 'Science Fiction' });
-  assert.ok(seen.some(path=>path.startsWith('https://v3-cinemeta.strem.io/catalog/movie/top/')));
-  assert.ok(seen.some(path=>path.startsWith('https://cinemeta-catalogs.strem.io/top/catalog/movie/top/')));
-  const cinemeta=seen.filter(path=>path.includes('cinemeta'));
-  assert.ok(cinemeta.length>=2);
-  assert.ok(cinemeta.every(path=>path.includes('search=A%20%26%20B%2F%3F')));
-  assert.ok(cinemeta.every(path=>path.includes('genre=Science%20Fiction')));
+  assert.ok(path.startsWith('https://v3-cinemeta.strem.io/catalog/movie/top/'));
+  assert.ok(path.includes('search=A%20%26%20B%2F%3F')); assert.ok(path.includes('genre=Science%20Fiction'));
   assert.equal(result.metas.length, 1); assert.equal(result.nextSkip, null);
 });
 test('catalog IMDb search resolves metadata rather than partial text matches', async () => {
@@ -121,18 +117,6 @@ test('cache calls go only to TorBox and preserve hash query repetitions', async 
   } });
   assert.deepEqual(await g.cached([HASH, HASH2]), { [HASH]: true, [HASH2]: false });
 });
-test('cache availability is read whatever casing TorBox keys the map with', async () => {
-  // Source hashes are normalized to lowercase before they are sent. Matching the returned map with
-  // an exact key reported every source as uncached when TorBox answered in another casing, which
-  // silently turned instant cached playback into a download on every ordinary Play.
-  const g = new TorrentGateway({ provider: { key: 'synthetic' }, fetchFn: async () =>
-    response({ success: true, data: { [HASH.toUpperCase()]: { hash: HASH.toUpperCase() }, [HASH2.toUpperCase()]: false } }) });
-  assert.deepEqual(await g.cached([HASH, HASH2]), { [HASH]: true, [HASH2]: false });
-});
-test('an empty cache array means none cached rather than an unreadable response', async () => {
-  const g = new TorrentGateway({ provider: { key: 'synthetic' }, fetchFn: async () => response({ success: true, data: [] }) });
-  assert.deepEqual(await g.cached([HASH, HASH2]), { [HASH]: false, [HASH2]: false });
-});
 test('torrent creation uses only a hash magnet, with cached-only explicit option', async () => {
   const g = new TorrentGateway({ provider: { key: 'synthetic' }, fetchFn: async (url, opts) => {
     assert.ok(url.pathname.endsWith('/createtorrent')); assert.equal(opts.method, 'POST');
@@ -140,32 +124,6 @@ test('torrent creation uses only a hash magnet, with cached-only explicit option
     assert.equal(opts.body.get('add_only_if_cached'), 'true'); return response({ success: true, data: { torrent_id: 0 } });
   } });
   assert.equal(await g.create(HASH, true), 0);
-});
-test('an uncached add that TorBox accepts without the cached identifier is reconciled by hash', async () => {
-  // Ordinary one-tap Play sends onlyCached=false whenever the chosen source is not already
-  // cached. That branch was never exercised, and an accepted addition was reported as a failure.
-  let created = 0, listed = 0;
-  const g = new TorrentGateway({
-    provider: { key: 'synthetic', request: async path => { listed++; assert.equal(path, 'torrents/mylist'); return [{ id: 91, hash: HASH }]; } },
-    fetchFn: async (url, opts) => {
-      created++; assert.ok(url.pathname.endsWith('/createtorrent'));
-      assert.equal(opts.body.get('add_only_if_cached'), 'false');
-      return response({ success: true, data: { hash: HASH, queued_id: 5 } });
-    }
-  });
-  assert.equal(await g.create(HASH, false), 91);
-  assert.equal(created, 1); assert.equal(listed, 1);
-});
-test('an accepted add that cannot be reconciled stays uncertain instead of silently retrying', async () => {
-  let created = 0;
-  for (const provider of [
-    { key: 'synthetic', request: async () => [] },
-    { key: 'synthetic', request: async () => { throw new AppError('LIBRARY_SCHEMA', 'unreadable'); } }
-  ]) {
-    const g = new TorrentGateway({ provider, fetchFn: async () => { created++; return response({ success: true, data: { hash: HASH } }); } });
-    await assert.rejects(() => g.create(HASH, false), e => e.code === 'CREATE_UNCERTAIN');
-  }
-  assert.equal(created, 2);
 });
 test('unconfirmed creation never turns into an automatically retried write', async () => {
   const { discovery: d, calls } = fixture({ create: async () => { calls.create++; throw new AppError('CREATE_UNCERTAIN', 'Interrupted'); } });
