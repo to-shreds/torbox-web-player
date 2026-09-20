@@ -28,5 +28,5 @@ test('PWA shell is installable and refuses to intercept APIs video fallback or o
     let intercepted=false;handlers.fetch({request:{method:'GET',url,mode:'navigate'},respondWith:()=>{intercepted=true;},waitUntil:()=>{}});assert.equal(intercepted,false,url);
   }
   let response;const pending=[];handlers.fetch({request:{method:'GET',url:scope+'app.js',mode:'cors'},respondWith:p=>{response=p;},waitUntil:p=>pending.push(p)});assert.ok(response);assert.equal(await (await response).text(),'static fixture');await Promise.all(pending);
-  let activated;handlers.activate({waitUntil:p=>{activated=p;}});await activated;assert.deepEqual(deleted,['torbox-main-v1.9']);
+  let activated;handlers.activate({waitUntil:p=>{activated=p;}});await activated;assert.deepEqual(deleted,['torbox-main-v1.9','torbox-main-v2.0.0']);
 });
