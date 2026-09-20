@@ -1,9 +1,9 @@
-import { recordDiagnosticEvent } from './direct-runtime.js?v=2.0.8';
-import { getSettings, updateSettings } from './settings.js?v=2.0.8';
-import { listRecent, formatResumeTime } from './history.js?v=2.0.8';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.0.8';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.0.8';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.0.8';
+import { recordDiagnosticEvent } from './direct-runtime.js?v=2.1.0';
+import { getSettings, updateSettings } from './settings.js?v=2.1.0';
+import { listRecent, formatResumeTime } from './history.js?v=2.1.0';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.1.0';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.1.0';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.1.0';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
@@ -31,18 +31,22 @@ export function recommendAutomaticSource(list,type='movie',resolution='auto',siz
 }
 export function recommendSource(list, type = 'movie', resolution = 'auto', sizeProfile = getSettings().sourceSizeProfile) {
   const visible = filterSourcesByResolution(list, resolution).filter(source=>source.memoryBad!==true&&source.memoryAudio!=='bad'); if (!visible.length) return null;
+  const preferences=getSettings(),preferCached=preferences.preferCachedSources!==false;
   const cachedFriendly = visible.filter(s => s.cached === true && s.browserFriendly && !s.audioRisk && !s.videoRisk);
   const cachedSafe = visible.filter(s => s.cached === true && !s.audioRisk && !s.videoRisk);
   const browserSafe = visible.filter(s => s.browserFriendly && !s.audioRisk);
+  const safe = visible.filter(s => !s.audioRisk && !s.videoRisk);
   const cached = visible.filter(s => s.cached === true && !s.audioRisk);
-  const pool = cachedFriendly.length ? cachedFriendly : browserSafe.length ? browserSafe : cachedSafe.length ? cachedSafe : cached.length ? cached : visible;
+  const pool = preferCached
+    ? (cachedFriendly.length ? cachedFriendly : browserSafe.length ? browserSafe : cachedSafe.length ? cachedSafe : cached.length ? cached : visible)
+    : (browserSafe.length ? browserSafe : safe.length ? safe : visible);
   const profile = ['data','balanced','quality'].includes(sizeProfile) ? sizeProfile : 'balanced';
   const limits = profile === 'data' ? { movie:1.5 * GB, series:.6 * GB } : profile === 'quality' ? { movie:6 * GB, series:2 * GB } : { movie:3 * GB, series:1 * GB };
   const limit = limits[type === 'series' ? 'series' : 'movie'];
   const rank = s => {
     const r = resolutionOf(s), sizeScore = s.size == null ? 15 : s.size <= limit ? 110 : -Math.min(140, (s.size / limit - 1) * 90);
     const seedScore = Number.isSafeInteger(s.seeders) ? Math.min(35, Math.log2(s.seeders + 1) * 5) : 0;
-    return (s.score || 0) + (s.memoryBonus || 0) + (s.cached === true ? 260 : 0) + (s.browserFriendly ? 100 : 0) - (s.audioRisk ? 180 : 0) - (s.videoRisk ? 100 : 0)
+    return (s.score || 0) + (s.memoryBonus || 0) + (s.cached === true ? (preferCached?260:20) : 0) + (s.browserFriendly ? 100 : 0) - (s.audioRisk ? 180 : 0) - (s.videoRisk ? 100 : 0)
       + (r.includes('720') ? 135 : r.includes('1080') ? 55 : 0) + sizeScore + seedScore;
   };
   return [...pool].sort((a,b)=>rank(b)-rank(a)||(a.size??Infinity)-(b.size??Infinity))[0];
@@ -100,7 +104,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
   function cancelTitle(){++titleGeneration;titleAbort?.abort();cancelSource();}
   function message(id,text,error=false){$(id).textContent=text;$(id).classList.toggle('error',error);}
   function applyBrowsePreferences(){
-    const settings=getSettings();if(!settings.rememberBrowse)return;
+    const settings=getSettings();
     $('catalog-type').value=settings.catalogType;$('catalog-feed').value=settings.catalogFeed;$('catalog-genre').value=settings.catalogGenre;
   }
   function persistBrowsePreferences(){
@@ -471,7 +475,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
   $('search').addEventListener('input',()=>{
     clearTimeout(searchTimer);applySearchMode();renderSearchHistory();if(guestMode)return;++catalogGeneration;catalogAbort?.abort();
     if(!$('search').value.trim()){browse();return;}
-    searchTimer=setTimeout(()=>browse(),350);
+    searchTimer=setTimeout(()=>browse(),getSettings().searchDelayMs);
   });
   $('search').addEventListener('keydown',event=>{
     if(event.key!=='Enter')return;
@@ -490,7 +494,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       guestMode=true;active=true;
       await showTitle({type:scope.type,id:scope.id,name:scope.name||'Shared title',poster:scope.poster||''});
     },
-    playNext,recoverPlayback,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
+    playNext,recoverPlayback,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){applyBrowsePreferences();renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
     suspend(){active=false;guestMode=false;++playIntentGeneration;playIntentPromise=null;playIntentKey='';document.body.classList.remove('search-mode');++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
   };
 }
