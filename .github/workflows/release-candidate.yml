@@ -32,6 +32,12 @@ jobs:
           CANDIDATE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
+          git fetch origin release-candidate --depth=1
+          CURRENT_SHA="$(git rev-parse FETCH_HEAD)"
+          if [ "$CURRENT_SHA" != "$CANDIDATE_SHA" ]; then
+            echo "Candidate advanced to $CURRENT_SHA while this run tested $CANDIDATE_SHA; refusing stale approval."
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git push --force origin "$CANDIDATE_SHA:refs/heads/release-approved"
