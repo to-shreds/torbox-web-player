@@ -129,6 +129,35 @@ function posterUrl(value) {
   }
 }
 
+function searchText(value){
+  return String(value||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+}
+const SEARCH_STOPWORDS=new Set(['a','an','and','at','by','for','from','in','of','on','or','the','to','with']);
+function searchTokens(value){
+  return searchText(value).split(' ').filter(token=>token.length>=2&&!SEARCH_STOPWORDS.has(token));
+}
+function catalogSearchQuery(path){
+  const match=/\/search=([^&]+?)(?:&|\.json$)/.exec(String(path||''));
+  if(!match)return'';
+  try{return decodeURIComponent(match[1]);}catch{return match[1];}
+}
+function searchTitleRelevant(name,query){
+  const title=searchText(name),needle=searchText(query);if(!title||!needle)return false;
+  if(title===needle||title.includes(needle)||needle.includes(title))return true;
+  const wanted=searchTokens(needle),have=searchTokens(title);
+  if(!wanted.length)return title.includes(needle);
+  let matched=0;
+  for(const token of wanted){
+    if(have.some(candidate=>candidate===token||(token.length>=3&&candidate.startsWith(token))||(candidate.length>=3&&token.startsWith(candidate))))matched++;
+  }
+  return matched>=Math.max(1,Math.ceil(wanted.length*.5));
+}
+function filterSearchPayload(value,query){
+  if(!Array.isArray(value?.metas))return null;
+  return {...value,metas:value.metas.filter(row=>searchTitleRelevant(row?.name,query))};
+}
+
+
 function normalizeMeta(raw, type, id) {
   const rawId = raw?.id || raw?.imdb_id;
   if (!raw || rawId !== id || (raw.type && raw.type !== type) || typeof raw.name !== 'string') {
@@ -195,8 +224,7 @@ async function catalogRequest(path) {
   const catalogMatch = /^\/catalog\/(?:movie|series)\/([A-Za-z0-9_-]+)(?:\/|\.json$)/.exec(path || '');
   const secondaryUrl = catalogMatch ? new URL('/' + catalogMatch[1] + path, CATALOG_SECONDARY).href : '';
   const primaryUrl = new URL(path, CATALOG_PRIMARY).href;
-  const metadata = path.startsWith('/meta/');
-  const searchCatalog = !!secondaryUrl && path.includes('/search=');
+  const searchCatalog = !!secondaryUrl && path.includes('/search='),searchQuery=searchCatalog?catalogSearchQuery(path):'';
   const targets = secondaryUrl
     ? (searchCatalog
         ? [
@@ -212,7 +240,7 @@ async function catalogRequest(path) {
         { label:'cinemeta_meta_live', url:new URL(path,CATALOG_LIVE).href, delayMs:100 },
         { label:'cinemeta_meta_retry', url:primaryUrl, delayMs:350 }
       ];
-  const failures=[];
+  const failures=[];let sawValidSearchPayload=false;
   for (const target of targets) {
     if (target.delayMs) await new Promise(resolve=>setTimeout(resolve,target.delayMs));
     try {
@@ -225,7 +253,17 @@ async function catalogRequest(path) {
       const finalUrl = new URL(response.url || target.url);
       if (!CATALOG_ORIGINS.has(finalUrl.hostname)) throw directError('CATALOG_REDIRECT', 'Cinemeta redirected to an unexpected host.');
       if (!response.ok) throw directError('CATALOG_UNAVAILABLE', 'Cinemeta returned HTTP ' + response.status, response.status);
-      const value = await readJson(response, 4 * 1024 * 1024);
+      let value = await readJson(response, 4 * 1024 * 1024);
+      if(searchCatalog){
+        const filtered=filterSearchPayload(value,searchQuery);
+        if(!filtered)throw directError('INVALID_CATALOG','Cinemeta did not return a title list.');
+        sawValidSearchPayload=true;
+        if(!filtered.metas.length){
+          trace('cinemeta_search','irrelevant',{host:finalUrl.hostname,returned:value.metas.length});
+          continue;
+        }
+        value=filtered;
+      }
       catalogCache.set(path, { value, until: Date.now() + 300000 });
       return value;
     } catch (error) {
@@ -234,7 +272,18 @@ async function catalogRequest(path) {
     }
   }
   const bridged=await catalogBridgeRequest(path);
-  if(bridged){catalogCache.set(path,{value:bridged,until:Date.now()+300000});return bridged;}
+  if(bridged){
+    if(searchCatalog){
+      const filtered=filterSearchPayload(bridged,searchQuery);
+      if(filtered){
+        sawValidSearchPayload=true;
+        if(filtered.metas.length){catalogCache.set(path,{value:filtered,until:Date.now()+300000});return filtered;}
+      }
+    }else{catalogCache.set(path,{value:bridged,until:Date.now()+300000});return bridged;}
+  }
+  if(searchCatalog&&sawValidSearchPayload){
+    const empty={metas:[]};catalogCache.set(path,{value:empty,until:Date.now()+60000});return empty;
+  }
   const last=failures.at(-1);
   const kind=secondaryUrl?'catalog':'metadata';
   throw directError('CATALOG_UNAVAILABLE','Cinemeta '+kind+' is temporarily unavailable directly and through the backup relay. '+(last?.status?('Last HTTP status: '+last.status+'.'):'Check diagnostics if this persists.'),last?.status||502);
