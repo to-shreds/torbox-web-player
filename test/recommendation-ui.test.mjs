@@ -52,7 +52,14 @@ test('memory-blacklisted and known-no-sound sources are not auto-selected',()=>{
   assert.equal(recommendSource([src('silent',{memoryAudio:'bad'}),src('good')],'movie','auto').id,'good');
 });
 
-test('automatic recommendation returns null rather than autoplaying unknown audio',()=>{
+test('automatic recommendation preserves one-tap playback when codec metadata is unknown',()=>{
   const unknown=src('unknown',{browserFriendly:false,audioRisk:false,videoRisk:false,memoryAudio:'unknown'});
-  assert.equal(recommendAutomaticSource([unknown],'movie','auto'),null);
+  assert.equal(recommendAutomaticSource([unknown],'movie','auto')?.id,'unknown');
+});
+
+test('normal episode Play never opens Options merely because audio metadata is incomplete',async()=>{
+  const {readFile}=await import('node:fs/promises');
+  const discover=await readFile(new URL('../public/discover.js',import.meta.url),'utf8');
+  assert.doesNotMatch(discover,/no_confirmed_audio[\s\S]{0,300}openOptions\(/);
+  assert.doesNotMatch(discover,/No source with confirmed browser-compatible audio was found automatically/);
 });

@@ -19,11 +19,15 @@ export function sourceMatchesResolution(source, resolution = 'auto') {
 }
 export const filterSourcesByResolution = (list, resolution = 'auto') => list.filter(s => sourceMatchesResolution(s, resolution));
 export function automaticSourceEligible(source){
-  return !!source&&source.memoryBad!==true&&source.memoryAudio!=='bad'
-    && (source.memoryAudio==='good'||(source.browserFriendly===true&&source.audioRisk!==true&&source.videoRisk!==true));
+  return !!source&&source.memoryBad!==true&&source.memoryAudio!=='bad';
 }
 export function recommendAutomaticSource(list,type='movie',resolution='auto',sizeProfile=getSettings().sourceSizeProfile){
-  return recommendSource((Array.isArray(list)?list:[]).filter(automaticSourceEligible),type,resolution,sizeProfile);
+  const eligible=(Array.isArray(list)?list:[]).filter(automaticSourceEligible);
+  const confirmed=eligible.filter(source=>source.memoryAudio==='good'||(source.browserFriendly===true&&source.audioRisk!==true&&source.videoRisk!==true));
+  const unknown=eligible.filter(source=>source.audioRisk!==true&&source.videoRisk!==true);
+  return recommendSource(confirmed,type,resolution,sizeProfile)
+    || recommendSource(unknown,type,resolution,sizeProfile)
+    || recommendSource(eligible,type,resolution,sizeProfile);
 }
 export function recommendSource(list, type = 'movie', resolution = 'auto', sizeProfile = getSettings().sourceSizeProfile) {
   const visible = filterSourcesByResolution(list, resolution).filter(source=>source.memoryBad!==true&&source.memoryAudio!=='bad'); if (!visible.length) return null;
@@ -262,12 +266,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
         const resolution=getResolution(target),registered=await registeredSources(target,AbortSignal.timeout(8000));
         if(generation!==playIntentGeneration)return false;
         const best=recommendAutomaticSource(registered.sources,target.type,resolution)||recommendAutomaticSource(registered.sources,target.type,'auto');
-        if(!best){
-          recordDiagnosticEvent('source_selected','no_confirmed_audio',{});
-          message('detail-message','No source with confirmed browser-compatible audio was found automatically. Choose a version.');
-          await openOptions(meta,target,episodeName);
-          return false;
-        }
+        if(!best)throw new Error('No usable source matches this resolution. Open Options to choose a blocked source manually.');
         recordDiagnosticEvent('source_selected','ok',{provider:best.provider||'',resolution:best.resolution||best.quality||'',videoCodec:best.videoCodec||'',audioCodecs:best.audioCodecs||[],cached:best.cached===true,browserFriendly:best.browserFriendly===true,audioRisk:best.audioRisk===true,videoRisk:best.videoRisk===true});
         message('detail-message',best.cached?'Opening cached source…':'Preparing recommended source…');
         const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
@@ -460,7 +459,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       const name=entry.type==='series'?(meta.episodes.find(e=>e.season===entry.season&&e.episode===entry.episode)?.name||entry.episodeName):'';
       const registered=await registeredSources(target,AbortSignal.timeout(45000)),resolution=entry.resolution||getResolution(target);
       const best=recommendAutomaticSource(registered.sources,target.type,resolution)||recommendAutomaticSource(registered.sources,target.type,'auto');
-      if(!best){await openOptions(meta,target,name);throw new Error('No source with confirmed browser-compatible audio is available to resume automatically. Choose a version.');}
+      if(!best)throw new Error('No usable source is available to resume automatically. Open Options to choose a blocked source manually.');
       const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
       const context=buildContext(meta,target,name,resolution,best);context.forceStartOver=startOver;context.rewindOnResumeSeconds=startOver?0:getSettings().resumeRewindSeconds;
       await play(result.file,context);message('catalog-message','');return true;

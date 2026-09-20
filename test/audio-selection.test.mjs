@@ -79,12 +79,17 @@ test('ready risky source is identified before silent playback', async () => {
   assert.equal(status.state,'ready'); assert.equal(status.compatibility.audioRisk,true); assert.ok(/silently/i.test(status.message));
 });
 
-test('automatic playback refuses codec-unknown and known-risk audio when no H.264/AAC source is available', () => {
+test('automatic playback falls back to codec-unknown audio before known-risk audio', () => {
   const list=[
     {id:'unknown',cached:true,audioRisk:false,videoRisk:false,browserFriendly:false,resolution:'720p',score:500,size:400*1024**2},
     {id:'dolby',cached:true,audioRisk:true,videoRisk:false,browserFriendly:false,resolution:'720p',score:900,size:350*1024**2}
   ];
-  assert.equal(recommendAutomaticSource(list,'movie','auto'),null);
+  assert.equal(recommendAutomaticSource(list,'movie','auto')?.id,'unknown');
+});
+
+test('automatic playback keeps one-tap behavior even when only a known-risk source remains', () => {
+  const risky={id:'dolby-only',cached:true,audioRisk:true,videoRisk:false,browserFriendly:false,resolution:'720p',score:100,size:400*1024**2};
+  assert.equal(recommendAutomaticSource([risky],'movie','auto')?.id,'dolby-only');
 });
 test('automatic playback accepts a locally sound-confirmed source with incomplete provider codec metadata', () => {
   const source={id:'confirmed',cached:true,audioRisk:false,videoRisk:false,browserFriendly:false,memoryAudio:'good',resolution:'720p',score:0,size:500*1024**2};
