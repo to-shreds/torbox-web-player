@@ -103,3 +103,18 @@ test('2.1 settings contract: Basic first, advanced tabs, optional user names, an
   assert.equal((basic.match(/class="setting-tip"/g)||[]).length,(basic.match(/class="basic-setting(?: |")/g)||[]).length,'every Basic setting needs a tooltip');
   assert.ok(app.includes("activateSettingsTab('basic')"));assert.ok(settings.includes("viewer1Name:''"));assert.ok(settings.includes('searchDelayMs:350'));assert.ok(settings.includes('preferCachedSources:true'));
 });
+
+test('2.2 protection contract: exact-variant learning, local recovery, and release gates remain',async()=>{
+  const [memory,snapshots,app,html,pages,rollback]=await Promise.all([
+    read('../public/source-memory.js'),read('../public/state-snapshots.js'),read('../public/app.js'),read('../public/index.html'),read('../.github/workflows/pages.yml'),read('../.github/workflows/rollback.yml')
+  ]);
+  assert.ok(memory.includes("['v2',i.hash"));
+  assert.ok(memory.includes("fileIdx=Number.isSafeInteger(source.fileIdx)"));
+  assert.ok(snapshots.includes("MAX_SNAPSHOTS=3"));
+  assert.ok(snapshots.includes("'torbox-parental-controls-v1'"));
+  assert.ok(!snapshots.includes("'torbox-api-key'"));
+  assert.ok(app.includes("captureStateSnapshot('Before setup import'"));
+  for(const id of ['state-snapshot-now','state-restore-open','state-restore-dialog'])assert.ok(html.includes('id="'+id+'"'),id);
+  assert.ok(pages.includes('release-approved'));
+  assert.ok(rollback.includes("default: 'rollback-stable'"));
+});
