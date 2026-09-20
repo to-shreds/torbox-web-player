@@ -1,17 +1,17 @@
-import { createDiscoveryUI } from './discover.js?v=2.3.0';
-import { diagnosePlaybackFailure } from './playback-errors.js?v=2.3.0';
-import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode, isDirectRuntime } from './runtime.js?v=2.3.0';
-import { directApi, runDirectDiagnostics, diagnosticText, exportActiveCredential, validateImportedCredential, recordDiagnosticEvent } from './direct-runtime.js?v=2.3.0';
-import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=2.3.0';
-import { installPortableSetupUI } from './portable-setup-ui.js?v=2.3.0';
-import { stagedPortableState, writePortableState, restorePortableState, hydratePortableMetadata } from './portable-setup.js?v=2.3.0';
-import { listRecent, recordRecent, removeRecent, recentForContext, resumePosition, formatResumeTime } from './history.js?v=2.3.0';
-import { getSettings, saveSettings, resetSettings } from './settings.js?v=2.3.0';
-import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=2.3.0';
-import { clearSearchHistory } from './search-history.js?v=2.3.0';
-import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=2.3.0';
-import { snapshotForVersion, captureStateSnapshot, listStateSnapshots, restoreStateSnapshot } from './state-snapshots.js?v=2.3.0';
-const APP_VERSION='2.3.0';
+import { createDiscoveryUI } from './discover.js?v=2.3.1';
+import { diagnosePlaybackFailure } from './playback-errors.js?v=2.3.1';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode, isDirectRuntime } from './runtime.js?v=2.3.1';
+import { directApi, runDirectDiagnostics, diagnosticText, exportActiveCredential, validateImportedCredential, recordDiagnosticEvent } from './direct-runtime.js?v=2.3.1';
+import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=2.3.1';
+import { installPortableSetupUI } from './portable-setup-ui.js?v=2.3.1';
+import { stagedPortableState, writePortableState, restorePortableState, hydratePortableMetadata } from './portable-setup.js?v=2.3.1';
+import { listRecent, recordRecent, removeRecent, recentForContext, resumePosition, formatResumeTime } from './history.js?v=2.3.1';
+import { getSettings, saveSettings, resetSettings } from './settings.js?v=2.3.1';
+import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=2.3.1';
+import { clearSearchHistory } from './search-history.js?v=2.3.1';
+import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=2.3.1';
+import { snapshotForVersion, captureStateSnapshot, listStateSnapshots, restoreStateSnapshot } from './state-snapshots.js?v=2.3.1';
+const APP_VERSION='2.3.1';
 try{snapshotForVersion(APP_VERSION);}catch{}
 const $ = id => document.getElementById(id);
 function viewerDisplayName(id,settings=getSettings()){
