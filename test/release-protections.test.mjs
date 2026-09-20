@@ -40,3 +40,11 @@ test('local recovery module is in the checked and cached browser graph',async()=
   assert.match(app,/snapshotForVersion\(APP_VERSION\)/);
   for(const id of ['state-snapshot-now','state-restore-open','state-restore-dialog','state-snapshot-list'])assert.ok(html.includes('id="'+id+'"'),id);
 });
+
+test('stale candidate runs cannot rewind release-approved',async()=>{
+  const workflow=await read('../.github/workflows/release-candidate.yml');
+  assert.match(workflow,/git fetch origin release-candidate --depth=1/);
+  assert.match(workflow,/CURRENT_SHA="\$\(git rev-parse FETCH_HEAD\)"/);
+  assert.match(workflow,/if \[ "\$CURRENT_SHA" != "\$CANDIDATE_SHA" \]/);
+  assert.match(workflow,/refusing stale approval/);
+});
