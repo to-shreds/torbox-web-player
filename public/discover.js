@@ -495,7 +495,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:AbortSignal.timeout(330000)});
       const context=buildContext(meta,target,name,resolution,best);context.forceStartOver=startOver;context.rewindOnResumeSeconds=startOver?0:getSettings().resumeRewindSeconds;
       await play(result.file,context);message('catalog-message','');return true;
-    }catch(e){message('catalog-message',e.message,true);if(e?.code==='NO_CACHED_BROWSER_SOURCE'&&meta&&target)await openOptions(meta,target,name);return false;}
+    }catch(e){message('catalog-message',e.message,true);return false;}
   }
 
   for(const id of ['catalog-type','catalog-feed','catalog-genre'])$(id).addEventListener('change',()=>{persistBrowsePreferences();browse();});

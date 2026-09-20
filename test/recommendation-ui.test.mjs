@@ -80,6 +80,7 @@ test('automatic playback stays bounded and never opens the technical source pick
   assert.ok(source.includes('unattended:true,waitForPreparation:false'));
   assert.ok(source.includes('unattended?selectAutomaticVideoFile(result.files):result.files[0]'));
   assert.ok(!source.includes("if(e?.code==='NO_CACHED_BROWSER_SOURCE')await openOptions(meta,target,episodeName)"));
+  assert.ok(!source.includes('await openOptions('));
   assert.equal(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS,8000);
 });
 test('automatic package selection prefers a browser-playable episode file and rejects all-unsupported choices',()=>{
