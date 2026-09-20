@@ -1,6 +1,6 @@
 # TorBox Player
 
-Current version: **2.2.1**
+Current version: **2.3.0**
 
 Canonical frontend: `https://to-shreds.github.io/torbox-web-player/`
 
@@ -8,17 +8,19 @@ Canonical frontend: `https://to-shreds.github.io/torbox-web-player/`
 
 ## What runs where
 
-The primary product is a static browser application. Cinemeta search/browse, source discovery, normalization, ranking, playback selection, settings, Continue Watching, My List, parental limits, and source learning run in the user's browser. Video streams directly from TorBox's CDN to the browser. If direct Cinemeta metadata/catalog access fails on a device, the player can use a narrow stateless Cloudflare catalog relay as a fallback; it carries no TorBox credential and does not relay video.
+The canonical interface is still served statically from GitHub Pages, and browser-local settings, Continue Watching, My List, parental limits, setup recovery, and source-learning state remain on the device. **Render is again the normal control plane** for catalog/search, source discovery, TorBox cache checks, torrent preparation/status, and playback-link generation. This restores the architecture that previously gave the user near-instant search and reliable playback while keeping the newer UI and local-state features.
 
-The required TorBox API operations use a narrow stateless bridge: Render first, Cloudflare backup. Both are configured in `public/relay-config.json`. The bridges receive the user's TorBox credential for each request. They do not provide the player with a database, cloud profile, or shared history. Neither bridge relays the video.
+Video never passes through Render. After Render returns the authorized temporary TorBox media URL, the browser streams video directly from TorBox's CDN.
 
-A fast primary-read timeout allows fallback without subjecting the backup and write operations to the same two-second deadline. An upstream TorBox rate-limit response is not treated as permission to bypass the account's quota by switching hosts. Ordinary authentication/validation errors do not fail over. An ambiguous torrent-create failure is reconciled against the account before replay; this reduces duplicate requests but is not a provider-supported exactly-once guarantee.
+The Render service is `https://torbox-web-player-key.onrender.com`, deployed from `browser-key-clone`. Its API-key sessions hold the credential only in process memory. If the user chooses Remember encrypted on this device, the browser separately keeps the encrypted local copy used for automatic sign-in.
 
-The working `/key/` backend is still deployed from `browser-key-clone`. Do not repoint or delete that Render service when publishing the static main player. Its stateless bridge is also used by the new player. Cloudflare deployment uses the already-existing Arcade GitHub Actions secrets; never commit those secrets or a real TorBox API key.
+The browser-direct Cinemeta/source/TorBox bridge implementation and Cloudflare Worker remain in the repository for diagnostics, fallback engineering, and redundancy work, but they are **not the normal canonical request path**. Do not move ordinary search or playback back into sequential browser-direct provider/bridge requests without physical latency and playback evidence.
+
+The pinned `/key/` frontend still uses the same Render backend as its legacy fallback. Do not repoint or delete that Render service.
 
 ## Simple by default
 
-First launch asks only for the user's own TorBox API key. Remembering it is optional and uses the existing encrypted IndexedDB vault. Source selection is automatic. Browser-friendly audio is preferred, but incomplete codec metadata never turns ordinary Play into a torrent-selection workflow. Release integrity is checked across the complete browser module graph so stale leaf-module versions cannot silently mix with a newer UI. Releases now pass through a verified candidate/approval gate, successful production builds are tagged, and a separate rollback workflow can republish the rollback-stable release without changing main. Settings opens on a plain-English Basic settings tab. Advanced controls are separated into Playback, Home & history, Discover & sources, Kids, and Devices & app tabs. Full mode exposes technical controls in the main player without cluttering the default experience.
+First launch asks only for the user's own TorBox API key. Remembering it is optional and uses the existing encrypted IndexedDB vault. The normal session and media-control requests now go through Render again. Source selection is automatic. Browser-friendly audio is preferred, but incomplete codec metadata never turns ordinary Play into a torrent-selection workflow. Release integrity is checked across the complete browser module graph so stale leaf-module versions cannot silently mix with a newer UI. Releases now pass through a verified candidate/approval gate, successful production builds are tagged, and a separate rollback workflow can republish the rollback-stable release without changing main. Settings opens on a plain-English Basic settings tab. Advanced controls are separated into Playback, Home & history, Discover & sources, Kids, and Devices & app tabs. Full mode exposes technical controls in the main player without cluttering the default experience.
 
 Local state is automatically backed up before the first launch of a new version and before setup replacement, with up to three local recovery points that never include the TorBox API key. Existing features include focused search with Search/Enter keyboard dismissal, Continue Watching with configurable resume rewind, My List, Next Up, auto-next, source recovery, per-title quality, data-saving source preferences, audio/source feedback, sleep timer, Still Watching, and per-viewer Kid Mode with Parent PIN and time/episode/movie limits.
 
