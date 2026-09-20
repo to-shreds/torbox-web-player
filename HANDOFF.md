@@ -13,7 +13,7 @@ The failed 2.x line is no longer a production candidate. The restored browser-ke
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- PWA cache: `torbox-player-v1.1-restored2`
+- PWA cache: `torbox-player-v1.1-restored3`
 
 The Render service is still configured by Render to auto-deploy `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the Render service can be repointed to `main`.
 
@@ -46,13 +46,14 @@ The relay transports original bytes. There is no transcoding, remuxing, or hidde
 
 ## Current benchmark
 
-The code change represented by this handoff adds three narrow repairs:
+The code change represented by this handoff adds four narrow repairs:
 
-1. Simple-mode automatic playback no longer opens the technical source picker.
-2. Cached multi-file packages can choose a browser-compatible candidate automatically instead of failing solely because more than one matching file exists.
-3. IMDb fallback results are metadata-validated before display, and missing Cinemeta metadata is reported as “This title is not available in the catalog.”
+1. Simple-mode Play no longer opens the technical source picker.
+2. Resume no longer opens the technical source picker either; the production source contains zero automatic `await openOptions(...)` calls and only the two explicit Full-mode Options callbacks remain.
+3. Cached multi-file packages can choose a browser-compatible candidate automatically instead of failing solely because more than one matching file exists.
+4. IMDb fallback results are metadata-validated before display, and missing Cinemeta metadata is reported as “This title is not available in the catalog.”
 
-GitHub Actions CI for code commit `a40215eddfaee6474d361f8328f4a5e9e3c3a2a5` completed successfully in Browser-key clone CI run 141. The documentation benchmark commit `4c74761df048bc8e7d5cd1e7e07661ba72ed5eb7` also passed Browser-key clone CI run 142 with 288 tests registered, 282 passed, 0 failed, and 6 optional live checks skipped. GitHub Pages run 125 succeeded from the same restored v1.1 tree. Render deploy `dep-dao3cp6k1f9s73agv570` is live from `4c74761df048bc8e7d5cd1e7e07661ba72ed5eb7`.
+GitHub Actions CI run 143 passed for the final runtime mirror commit `cdc9ced5d19ed76e7e169aee6bf85a9297209ba5` with 288 tests registered, 282 passed, 0 failed, and 6 optional live checks skipped. GitHub Pages run 126 succeeded from the equivalent main runtime commit `2caf75b9a026ad3c6eca5ec5b9cd23546f28db20`. Render deploy `dep-dao3ecugekts73ao8leg` is live from `cdc9ced5d19ed76e7e169aee6bf85a9297209ba5`. The runtime files checked on `main` and `browser-key-clone` are byte-identical by Git blob SHA for `public/discover.js`, `lib/catalog.mjs`, `public/sw.js`, and `server.mjs`.
 
 `main` was force-replaced with the restored v1.1 tree. The obsolete failed 2.x refs `audit-2.0.8`, `browser-direct-experiment`, `browser-local-release`, `settings-tabs-2.1.0`, `production-current`, `release-approved`, `release-candidate`, and both `archive/pre-v1-rollback-*` refs were moved to the restored v1.1 commit so they no longer expose the failed 2.x code. The available GitHub connector does not provide branch-ref deletion, so those obsolete branch names remain as aliases rather than retaining 2.x content.
 
@@ -70,4 +71,4 @@ Physical Android acceptance remains required for the Elena of Avalor S2E3 case t
 
 ## Immediate next action
 
-Fully close and reopen the installed site or Chrome tab so the `torbox-player-v1.1-restored2` shell activates. Retest Elena of Avalor S2E3 with one normal Play press. The technical source picker must not appear automatically. If a compatible cached file in the package can be resolved, playback should open directly; otherwise the title view should report that no cached browser-compatible source could be opened. Also repeat the Salute Your Shorts search and confirm the unopenable commercial card is no longer surfaced.
+Fully close and reopen the installed site or Chrome tab so the `torbox-player-v1.1-restored3` shell activates. Retest Elena of Avalor S2E3 with one normal Play press. The technical source picker must not appear automatically. If a compatible cached file in the package can be resolved, playback should open directly; otherwise the title view should report that no cached browser-compatible source could be opened. Also repeat the Salute Your Shorts search and confirm the unopenable commercial card is no longer surfaced.
