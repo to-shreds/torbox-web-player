@@ -16,9 +16,9 @@ If this file conflicts with the repo, the repo controls substance. If it conflic
 - Canonical repo: `to-shreds/torbox-web-player`
 - Canonical branch: `main`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
-- Current production version: **2.2.0**
-- Current production source: `6311a18d9fa48a3d6ac3a03d6c78fb815bc63bf2`
-- Runtime marker: `browser-local-2.2.0`
+- Current production version: **2.2.1**
+- Current production source: `545197241c7a5053b1ae6558c4977c5c8d93729b`
+- Runtime marker: `browser-local-2.2.1`
 - Pinned legacy fallback: `/key/` from `d5dd3bd71ee2679178e66440c5240a80eaba41f2`
 - `/direct/` redirects to the canonical root.
 
@@ -29,6 +29,8 @@ The normal experience is browser-local, simple by default, and one-tap for playb
 Preserve: browse/search, title and episode UI, automatic source choice, direct TorBox CDN playback, audio-aware source ranking, Continue Watching with individual removal and resume rewind, My List, Next Up, auto-next, recovery, per-title quality, source learning, pause overlay, Still Watching, sleep timer, Kid Mode, backendless setup transfer, diagnostics, PWA/update repair, Render/Cloudflare bridge redundancy, and the pinned `/key/` fallback.
 
 ## Recent work
+
+Version 2.2.1 fixes a real search failure exposed by physical Android use: Cinemeta's v3 search URL could return an HTTP-200 Popular catalog that ignored the search term, and the player accepted that payload before trying the prefixed catalog fallback. The browser runtime now rejects search payloads whose titles are unrelated to the query, continues through the alternate Cinemeta target/relay, and returns an empty search instead of unrelated Popular cards if every search origin ignores the query. Regression coverage reproduces the exact “Elena of Avalor” screenshot pattern. Candidate run `35515505124` and production run `35515547798` both passed 325 tests (319 pass, 0 fail, 6 optional skips); Pages publicly verified source `545197241c7a5053b1ae6558c4977c5c8d93729b`.
 
 Version 2.2.0 added four protection layers:
 
@@ -51,7 +53,7 @@ Preserve completed work. Make the smallest reliable change. Before fixing a regr
 
 ## Next action
 
-Use the user's newest request as the next task. For substantive code changes, work on `release-candidate`, let CI advance `release-approved`, then fast-forward `main` only to that exact approved SHA. After 2.2.0 is physically accepted, consider moving `rollback-stable` forward from 2.1.0 to the accepted release.
+Use the user's newest request as the next task. For substantive code changes, work on `release-candidate`, let CI advance `release-approved`, then fast-forward `main` only to that exact approved SHA. After 2.2.1 is physically accepted, consider moving `rollback-stable` forward from 2.1.0 to the accepted release.
 
 ## Persistence
 
