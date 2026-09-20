@@ -93,7 +93,7 @@ test('browser-local Cinemeta routing and cross-type search regressions',async t=
       if(value.includes('/catalog/movie/'))return json({metas:junk.map(row=>({...row,type:'movie'}))});
       if(value.includes('/catalog/series/'))return json({metas:junk});
       throw new Error('unexpected '+value);
-    },()=>directApi('/api/discover/catalog?type=all&q=Elena%20of%20avalor&skip=0&genre=&feed=popular'));
+    },()=>directApi('/api/discover/catalog?type=all&q=No%20Such%20Avalor%20Title&skip=0&genre=&feed=popular'));
     assert.deepEqual(result.metas,[]);
   });
 
