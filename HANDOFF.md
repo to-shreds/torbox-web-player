@@ -16,9 +16,9 @@ If this file conflicts with the repo, the repo controls substance. If it conflic
 - Canonical repo: `to-shreds/torbox-web-player`
 - Canonical branch: `main`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
-- Current production version: **2.3.0**
-- Current production source: `c509af762cec1492437a23565fee5f8a0b1803d1`
-- Runtime marker: `browser-local-2.3.0`
+- Current production version: **2.3.1**
+- Current production source: `f0dc5a4596f579d0e8810269963342300c655f9a`
+- Runtime marker: `browser-local-2.3.1`
 - Pinned legacy fallback: `/key/` from `d5dd3bd71ee2679178e66440c5240a80eaba41f2`
 - `/direct/` redirects to the canonical root.
 
@@ -30,18 +30,13 @@ Preserve: browse/search, title and episode UI, automatic source choice, direct T
 
 ## Recent work
 
-Version 2.3.0 restores the proven Render-backed control path after physical Android testing showed the browser-direct architecture had become unusably slow: searches took about 20 seconds and Play could wait about 30 seconds before reporting that the TorBox bridge could not be reached.
+Version 2.3.1 repairs the failed 2.3.0 search result shown on physical Android. Restoring Render fixed the architecture/latency path, but the search backend still depended on two Cinemeta search endpoints. On the real service, both could return no relevant result or ignore the query. The earlier test had mocked the secondary Cinemeta endpoint as if it reliably returned Elena, so it did not prove the live search would work.
 
-- Canonical Pages now calls the Render API for catalog/search, source lookup, TorBox cache checks, preparation/status, and playback-link generation.
-- Video still goes directly from TorBox CDN to the browser. Render does not relay video.
-- Current Settings, local history/My List/Kid Mode, source learning, recovery snapshots, and backendless setup transfer remain.
-- Setup transfer now retains the active API credential in memory for export and validates imported credentials through a temporary Render session instead of depending on the stateless TorBox bridge.
-- The legacy Drive-sharing experiment remains disabled in the canonical UI.
-- Render backend `browser-key-clone` was hardened at `56eb946162b31502e46f94d662d384cc81de96bb`: cross-type search and query relevance run server-side, primary/secondary Cinemeta searches race in parallel, and anonymous source provider fan-in returns after useful results instead of waiting for stragglers. Render deploy `dep-danutv942hec73fr22u0` is live.
-- Candidate run `35516939056` passed 333 tests (327 pass, 0 fail, 6 optional skips) and approved `c509af762cec1492437a23565fee5f8a0b1803d1`. Production run `35516974562` repeated the same green suite and publicly verified 2.3.0 from that SHA.
-- Candidate approval now refuses to move `release-approved` if a newer candidate commit appeared while an older CI run was executing, preventing the approval pointer from being rewound.
+The Render catalog now races three server-side search sources: Cinemeta primary, the prefixed Cinemeta catalog endpoint, and IMDb's public title-suggestion service. Every result is still filtered for the actual query and requested movie/show type. IMDb suggestion results contribute only IMDb IDs/basic card data; authoritative title details still come from the normal Cinemeta metadata endpoint when a result is opened. This gives search an independent title-index fallback without moving search back into the browser.
 
-Version 2.2.0 added exact-variant source learning, local state snapshots, candidate/approval gating, production refs, and rollback workflow. Version 2.1.0 introduced tabbed Settings. Version 2.0.8 added the full product-contract audit. Preserve all of them.
+The Render backend is live from `browser-key-clone` commit `e6e9bf756ff3400e244fb221a676109827ee8328`, deploy `dep-danv5smk1f9s73a34mhg`. Candidate run `35517730565` passed 335 tests (329 pass, 0 fail, 6 optional skips) and approved `f0dc5a4596f579d0e8810269963342300c655f9a`. Production run `35517804175` repeated the same green suite and publicly verified Pages version 2.3.1 from that SHA.
+
+Version 2.3.0 restored Render as the normal control plane while preserving direct TorBox CDN video and the newer 2.x features. Version 2.2.0 added exact file-variant learning, local recovery snapshots, release gating, production refs, and rollback. Version 2.1.0 added tabbed Settings. Preserve all of them.
 
 ## Known acceptance boundary
 
@@ -53,7 +48,7 @@ Preserve completed work. Make the smallest reliable change. Before fixing a regr
 
 ## Next action
 
-On the physical Android device, confirm 2.3.0 and retest the same search and episode that were slow/broken. Search should return through Render promptly and ordinary Play should no longer enter the browser-direct bridge timeout path. Do not call this repaired until that physical retest passes. For later substantive changes, work on `release-candidate`, let CI advance `release-approved`, then fast-forward `main` only to that exact approved SHA.
+On the physical Android device, confirm 2.3.1 and repeat the exact search **Elena of Avalor**. It must return the Elena title rather than unrelated cards or an empty result. Then open the same episode and test Play latency and actual playback. Do not call search or playback repaired until those physical checks pass. For later substantive changes, work on `release-candidate`, let CI advance `release-approved`, then fast-forward `main` only to that exact approved SHA.
 
 ## Persistence
 
