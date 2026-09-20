@@ -46,9 +46,28 @@ Automated tests verify source contracts, Render routing, state behavior, release
 
 Preserve completed work. Make the smallest reliable change. Before fixing a regression, identify the root cause and check that the proposed fix does not undo prior product behavior. Run the existing regression suite and keep the full product-contract tests intact. Do not call a physical-device issue solved solely because CI passes.
 
+## Claude takeover note
+
+The current user request is to have another agent independently audit the project because repeated search/playback regressions have made the current build untrustworthy. The new agent should diagnose from the repo, live Render service, logs, and physical Android evidence before changing architecture again. It should not assume the latest attempted search fixes are correct merely because their tests passed.
+
 ## Next action
 
 On the physical Android device, confirm 2.3.1 and repeat the exact search **Elena of Avalor**. It must return the Elena title rather than unrelated cards or an empty result. Then open the same episode and test Play latency and actual playback. Do not call search or playback repaired until those physical checks pass. For later substantive changes, work on `release-candidate`, let CI advance `release-approved`, then fast-forward `main` only to that exact approved SHA.
+
+## External-agent access
+
+A different coding agent will not inherit ChatGPT's connected Render/GitHub sessions. Give it repo access and connect Render separately.
+
+Render details that are safe to use as identifiers:
+- Workspace ID: `tea-dakujgmk1f9s73d2v8ng`
+- Service: `torbox-web-player-key`
+- Service ID: `srv-damu91142hec73chb7qg`
+- URL: `https://torbox-web-player-key.onrender.com`
+- Render source branch: `browser-key-clone`
+
+Preferred Claude setup: use Claude Code from a local clone of this repo, authenticate Git/GitHub normally, then install/connect Render's official MCP/plugin with OAuth. Do not put a Render API key, TorBox API key, or other secret in this file or in chat.
+
+The latest physical Android evidence still controls acceptance. Do not infer success from CI or deploy health alone.
 
 ## Persistence
 
