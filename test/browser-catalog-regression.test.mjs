@@ -32,7 +32,8 @@ test('browser-local Cinemeta routing and cross-type search regressions',async t=
     },()=>directApi('/api/discover/meta?type=movie&id=tt9000001'));
     assert.equal(result.meta.name,'Retry Fixture');
     assert.equal(attempts,2);
-    assert.equal(seen.every(value=>value.startsWith('https://v3-cinemeta.strem.io/meta/')),true);
+    assert.equal(seen.includes('https://cinemeta-live.strem.io/meta/movie/tt9000001.json'),true);
+    assert.equal(seen.filter(value=>value==='https://v3-cinemeta.strem.io/meta/movie/tt9000001.json').length,2);
   });
 
   await t.test('a misclassified result recovers the opposite title type after a 404',async()=>{

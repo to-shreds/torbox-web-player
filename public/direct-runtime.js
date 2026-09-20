@@ -649,16 +649,17 @@ function requireKey() {
 }
 
 const DEFAULT_RELAY_PRIMARY='https://torbox-web-player-key.onrender.com';
+const DEFAULT_RELAY_SECONDARY='https://torbox-web-player-relay.jonathanjablon.workers.dev';
 let relayConfigCache=null,relayConfigAt=0,primaryCooldownUntil=0;
 async function relayConfig(){
   if(relayConfigCache&&Date.now()-relayConfigAt<300000)return relayConfigCache;
-  let value={primary:DEFAULT_RELAY_PRIMARY,secondary:''};
+  let value={primary:DEFAULT_RELAY_PRIMARY,secondary:DEFAULT_RELAY_SECONDARY};
   try{
     const response=await fetch('./relay-config.json',{cache:'no-store',credentials:'same-origin',signal:AbortSignal.timeout(5000)});
     if(response.ok){const data=await response.json();for(const name of ['primary','secondary'])if(typeof data?.[name]==='string')value[name]=data[name].replace(/\/+$/,'');}
   }catch{}
   const valid=url=>{try{const u=new URL(url);return u.protocol==='https:'&&!u.username&&!u.password?u.origin:''}catch{return''}};
-  value={primary:valid(value.primary)||DEFAULT_RELAY_PRIMARY,secondary:valid(value.secondary)};
+  value={primary:valid(value.primary)||DEFAULT_RELAY_PRIMARY,secondary:valid(value.secondary)||DEFAULT_RELAY_SECONDARY};
   relayConfigCache=value;relayConfigAt=Date.now();return value;
 }
 function bridgeRetryable(status){return status===408||status===429||status>=500}
