@@ -162,8 +162,9 @@ async function checkTorBoxStatus(force=false) {
   }
 }
 async function ensureTorBoxReady() {
-  const ok=await checkTorBoxStatus(false);
-  if (!ok) throw new Error(torboxStatusCache?.message || 'TorBox is currently unavailable. Try again after the outage clears.');
+  // Status is advisory. The real cache/preparation/playback request is authoritative
+  // and already has Render -> Cloudflare failover. Never block Play on a separate probe.
+  if (!torboxStatusCache || Date.now()-torboxStatusCache.localAt >= 60000) void checkTorBoxStatus(false);
   return true;
 }
 function show(section) { if (section !== 'workspace') discoveryUI?.suspend(); for (const id of ['loading', 'setup-needed', 'login', 'workspace']) $(id).hidden = id !== section; }
@@ -251,7 +252,7 @@ async function bootstrap() {
       await discoveryUI.activateGuest(session.scope);
       return;
     }
-    leaveGuestUi(); await checkTorBoxStatus(true); renderRecent(); await discoveryUI.activate(); refreshPortableMetadata();
+    leaveGuestUi(); void checkTorBoxStatus(true); renderRecent(); await discoveryUI.activate(); refreshPortableMetadata();
   } catch (error) { show('loading'); $('loading').querySelector('p').textContent = error.message; }
 }
 $('login-form').addEventListener('submit', async event => {
