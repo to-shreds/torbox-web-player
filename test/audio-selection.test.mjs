@@ -41,6 +41,15 @@ test('preferred source chooses cached browser-friendly audio over cached Dolby a
   assert.equal(preferredSource(list).id,'aac');
 });
 
+
+test('known H.264/AAC beats cached codec-unknown audio', () => {
+  const list=[
+    {id:'unknown-cached',cached:true,audioRisk:false,videoRisk:false,browserFriendly:false,resolution:'720p',score:200,size:500*1024**2},
+    {id:'aac-uncached',cached:false,audioRisk:false,videoRisk:false,browserFriendly:true,resolution:'720p',score:0,size:600*1024**2}
+  ];
+  assert.equal(preferredSource(list).id,'aac-uncached');
+});
+
 test('preferred source chooses browser-friendly source even when it needs preparation', () => {
   const list=[
     {id:'risky',cached:true,audioRisk:true,browserFriendly:false},
