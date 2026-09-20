@@ -40,3 +40,27 @@ test('browse rejects redirects outside the Cinemeta allowlist',async()=>{
   const c=new Catalog({fetchFn:async()=>new Response(null,{status:307,headers:{location:'https://evil.test/catalog.json'}})});
   await assert.rejects(c.search({type:'movie',feed:'popular'}),e=>e.code==='CATALOG_UNAVAILABLE');
 });
+
+test('server search rejects query-ignoring Popular payloads and races the real prefixed search fallback',async()=>{
+  const junk=[{imdb_id:'tt13210838',type:'series',name:'The Gentlemen'},{imdb_id:'tt14688458',type:'series',name:'Silo'}];
+  const seen=[];
+  const c=new Catalog({fetchFn:async url=>{
+    const value=String(url);seen.push(value);
+    if(value==='https://v3-cinemeta.strem.io/catalog/series/top/search=Elena%20of%20Avalor.json')return ok({metas:junk});
+    if(value==='https://cinemeta-catalogs.strem.io/top/catalog/series/top/search=Elena%20of%20Avalor.json')return ok({metas:[{imdb_id:'tt4549142',type:'series',name:'Elena of Avalor'}]});
+    throw new Error('unexpected '+value);
+  }});
+  const result=await c.search({type:'series',q:'Elena of Avalor'});
+  assert.deepEqual(result.metas.map(row=>row.name),['Elena of Avalor']);
+  assert.ok(seen.some(value=>value.includes('cinemeta-catalogs.strem.io')));
+});
+test('server cross-type search returns movies and series from one request',async()=>{
+  const c=new Catalog({fetchFn:async url=>{
+    const value=String(url);
+    if(value.includes('/catalog/movie/top/search=Shared%20Title.json'))return ok({metas:[{imdb_id:'tt1111111',type:'movie',name:'Shared Title Movie'}]});
+    if(value.includes('/catalog/series/top/search=Shared%20Title.json'))return ok({metas:[{imdb_id:'tt2222222',type:'series',name:'Shared Title Series'}]});
+    return ok({metas:[]});
+  }});
+  const result=await c.search({type:'all',q:'Shared Title'});
+  assert.deepEqual(new Set(result.metas.map(row=>row.type)),new Set(['movie','series']));
+});
