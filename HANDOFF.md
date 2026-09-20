@@ -30,18 +30,16 @@ Preserve: browse/search, title and episode UI, automatic source choice, direct T
 
 ## Recent work
 
-Version 2.2.1 fixes a real search failure exposed by physical Android use: Cinemeta's v3 search URL could return an HTTP-200 Popular catalog that ignored the search term, and the player accepted that payload before trying the prefixed catalog fallback. The browser runtime now rejects search payloads whose titles are unrelated to the query, continues through the alternate Cinemeta target/relay, and returns an empty search instead of unrelated Popular cards if every search origin ignores the query. Regression coverage reproduces the exact “Elena of Avalor” screenshot pattern. Candidate run `35515505124` and production run `35515547798` both passed 325 tests (319 pass, 0 fail, 6 optional skips); Pages publicly verified source `545197241c7a5053b1ae6558c4977c5c8d93729b`.
+Version 2.2.1 fixes a search-integrity failure exposed by a physical Android screenshot: searching “Elena of avalor” displayed a generic Popular catalog (The Gentlemen, Silo, Lanterns, Reacher, Ted Lasso, Lioness, etc.) while still labeling it “Search results.” The root cause was that a Cinemeta search host could return HTTP 200 with a structurally valid but query-ignoring payload, and the player trusted the first 200 response.
 
-Version 2.2.0 added four protection layers:
+Search responses are now relevance-validated before acceptance. A search payload with no reasonable title overlap is rejected and the next Cinemeta origin is tried; if every search origin ignores the query, the player returns an empty search rather than displaying unrelated browse cards. The same guard is implemented in the Cloudflare Cinemeta relay. Dedicated regressions reproduce the Elena screenshot pattern.
 
-- Source feedback is keyed to the exact torrent file variant (hash + filename/file index), so “sound works,” “no sound,” or bad-source learning for one file no longer hard-blocks another file under the same torrent hash. Legacy hash-only success data is only a soft hint.
-- Local state snapshots keep up to three backups of settings, Continue Watching, My List, searches, source learning, Kid Mode/Parent PIN state, and selected user. The TorBox API key is excluded. A backup is attempted before the first launch of a new version, setup import, settings reset, and manual Restore; Settings → Devices & app also exposes manual backup/restore.
-- Releases now use `release-candidate` → full CI → machine-managed `release-approved`. Production Pages refuses to publish a main commit unless it exactly matches `release-approved`.
-- Successful production releases create immutable `production-v<version>` and movable `production-current` refs. `rollback-stable` remains pinned to the pre-2.2.0 2.1.0 release at `24f8f7a2ac55a52e58982fac29ddd242b2647f68`. The manual **Roll back TorBox Player** workflow defaults to that ref, reruns tests, republishes it without rewriting main, and moves `production-current`.
+Verification:
+- release-candidate run `35515505124`: 325 tests, 319 pass, 0 fail, 6 optional skips; approved `545197241c7a5053b1ae6558c4977c5c8d93729b`.
+- production run `35515547798`: same green suite; Pages publicly verified 2.2.1 from that SHA and created `production-v2.2.1`.
+- Cloudflare relay deployment run `35515640808`: successful, including live health, metadata, browse, and Elena search verification.
 
-Verification: candidate run `35491888111` passed 321 tests (315 pass, 0 fail, 6 optional skips) and approved source `6311a18d9fa48a3d6ac3a03d6c78fb815bc63bf2`. Production run `35491912729` repeated the same green suite, passed the release-approved gate, publicly verified 2.2.0, and created `production-v2.2.0` plus `production-current`.
-
-Version 2.1.0 introduced the tabbed Basic/Advanced Settings UI. Version 2.0.8 added the full product-contract audit and complete browser-module version scan. Preserve both.
+Version 2.2.0 added exact file-variant source learning, bounded local recovery snapshots, verified candidate gating, production refs, and one-click rollback. Version 2.1.0 added tabbed Settings. Version 2.0.8 added the full product-contract audit and module-version guard. Preserve all of these.
 
 ## Known acceptance boundary
 
