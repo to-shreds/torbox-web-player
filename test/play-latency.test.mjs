@@ -64,3 +64,10 @@ test('source fan-in ranks browser-friendly variants before the forty-source cap'
   assert.match(runtime,/sourceFanInRank/);
   assert.match(runtime,/sort\(\(a,b\)=>sourceFanInRank\(b\)-sourceFanInRank\(a\)\)\.slice\(0, 40\)/);
 });
+
+test('canonical user path does not run browser-direct provider or bridge timeouts',async()=>{
+  const [html,app]=await Promise.all([read('../public/index.html'),read('../public/app.js')]);
+  assert.match(html,/name="runtime-mode" content="backend"/);
+  assert.match(html,/name="api-origin" content="https:\/\/torbox-web-player-key\.onrender\.com"/);
+  assert.match(app,/if\(isDirectRuntime\(\)\)return directApi/);
+});
