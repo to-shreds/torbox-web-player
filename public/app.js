@@ -10,6 +10,7 @@ import { getSettings, saveSettings, resetSettings } from './settings.js?v=2.0.3'
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=2.0.3';
 import { clearSearchHistory } from './search-history.js?v=2.0.3';
 import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=2.0.3';
+const APP_VERSION='2.0.3';
 const $ = id => document.getElementById(id);
 let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '';
 let discoveryUI;
@@ -762,5 +763,26 @@ installPortableSetupUI({
   },
   refresh:async()=>{if($('settings-dialog').open)$('settings-dialog').close();applyInterfaceMode();await bootstrap();}
 });
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-bootstrap();
+async function ensureCurrentRelease(){
+  try{
+    const response=await fetch('./version.json?check='+Date.now(),{cache:'no-store',credentials:'same-origin'});
+    if(!response.ok)return true;
+    const published=await response.json(),version=String(published?.version||'');
+    if(/^\d+\.\d+\.\d+$/.test(version)&&version!==APP_VERSION){
+      location.replace('./repair/?published='+encodeURIComponent(version)+'&from='+encodeURIComponent(APP_VERSION)+'&t='+Date.now());
+      return false;
+    }
+  }catch{}
+  return true;
+}
+async function startApp(){
+  if(!(await ensureCurrentRelease()))return;
+  if('serviceWorker' in navigator)window.addEventListener('load',async()=>{
+    try{
+      const registration=await navigator.serviceWorker.register('./sw.js?v='+APP_VERSION,{updateViaCache:'none'});
+      await registration.update();
+    }catch{}
+  });
+  await bootstrap();
+}
+startApp();
