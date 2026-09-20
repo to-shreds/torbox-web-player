@@ -1,5 +1,5 @@
-import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js';
-import { isTrustedDirectMediaUrl } from './runtime.js';
+import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js?v=2.0.3';
+import { isTrustedDirectMediaUrl } from './runtime.js?v=2.0.3';
 
 export const DIRECT_BUILD = 'browser-local-2.0.3';
 
