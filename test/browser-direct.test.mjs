@@ -37,6 +37,7 @@ test('browser-direct CSP permits direct sources plus redundant Render and Cloudf
     'relay.torbox.app',
     'v3-cinemeta.strem.io',
     'cinemeta-catalogs.strem.io',
+    'cinemeta-live.strem.io',
     'zileanfortheweebs.midnightignite.me',
     'stremthru.13377001.xyz',
     'stremthru.elfhosted.com',
@@ -65,6 +66,10 @@ test('redundant relay client and Cloudflare Worker share the allowlisted bridge 
   assert.match(direct,/bridgeRetryable/);
   assert.match(direct,/primaryCooldownUntil/);
   assert.match(direct,/bridge_cloudflare_health/);
+  assert.match(direct,/bridge_cloudflare_cinemeta/);
+  assert.match(direct,/catalogBridge/);
+  assert.match(worker,/CINEMETA_ROUTE='\/relay\/cinemeta'/);
+  assert.match(worker,/CINEMETA_LIVE/);
   assert.match(direct,/timeoutMs=2000/);
   assert.match(direct,/torbox-browser-direct-diagnostics-v2/);
   assert.match(direct,/expectedDirectLimitations/);

@@ -47,19 +47,33 @@ test('browser-local Cinemeta routing and cross-type search regressions',async t=
     assert.deepEqual(seen,['https://v3-cinemeta.strem.io/meta/movie/tt9000002.json','https://v3-cinemeta.strem.io/meta/series/tt9000002.json']);
   });
 
+  await t.test('metadata falls back through the Cloudflare catalog relay when browser-direct hosts fail',async()=>{
+    const result=await withFetch(async url=>{
+      const value=String(url);
+      if(value==='https://v3-cinemeta.strem.io/meta/series/tt9000004.json'||value==='https://cinemeta-live.strem.io/meta/series/tt9000004.json')throw new TypeError('browser blocked');
+      if(value==='./relay-config.json')return json({primary:'https://torbox-web-player-key.onrender.com',secondary:'https://torbox-web-player-relay.jonathanjablon.workers.dev'});
+      if(value.startsWith('https://torbox-web-player-relay.jonathanjablon.workers.dev/relay/cinemeta?'))return json({meta:{id:'tt9000004',type:'series',name:'Relay Fixture',videos:[]}});
+      throw new Error('unexpected '+value);
+    },()=>directApi('/api/discover/meta?type=series&id=tt9000004'));
+    assert.equal(result.meta.name,'Relay Fixture');
+  });
+
   await t.test('Family Guy style search queries movies and series and keeps the verified series identity',async()=>{
     const seen=[];
     const result=await withFetch(async url=>{
       const value=String(url);seen.push(value);
-      if(value==='https://v3-cinemeta.strem.io/catalog/movie/top/search=Family%20Guy.json')return json({metas:[{id:'tt0182576',name:'Family Guy'},{id:'tt9000003',type:'movie',name:'Family Guy Plush: Peter Is Afraid',year:'2024'}]});
+      if(value==='https://v3-cinemeta.strem.io/catalog/movie/top/search=Family%20Guy.json')return json({metas:[{id:'tt9000005',type:'movie',name:'Family Guy'},{id:'tt9000003',type:'movie',name:'Family Guy Plush: Peter Is Afraid',year:'2024'}]});
       if(value==='https://v3-cinemeta.strem.io/catalog/series/top/search=Family%20Guy.json')return json({metas:[{id:'tt0182576',type:'series',name:'Family Guy',poster:'https://images.metahub.space/poster/medium/tt0182576/img'}]});
-      if(value==='https://v3-cinemeta.strem.io/meta/movie/tt0182576.json')return json({},404);
+      if(value==='https://v3-cinemeta.strem.io/meta/movie/tt9000005.json'||value==='https://cinemeta-live.strem.io/meta/movie/tt9000005.json')return json({},404);
+      if(value==='https://v3-cinemeta.strem.io/meta/series/tt9000005.json'||value==='https://cinemeta-live.strem.io/meta/series/tt9000005.json')return json({},404);
       if(value==='https://v3-cinemeta.strem.io/meta/series/tt0182576.json')return json({meta:{id:'tt0182576',type:'series',name:'Family Guy',poster:'https://images.metahub.space/poster/medium/tt0182576/img',videos:[]}});
       throw new Error('unexpected '+value);
     },()=>directApi('/api/discover/catalog?type=all&q=Family%20Guy&skip=0&genre=&feed=popular'));
     const family=result.metas.find(meta=>meta.id==='tt0182576');
     assert.equal(family?.type,'series');
     assert.ok(family?.poster);
+    assert.equal(result.metas.filter(meta=>meta.name==='Family Guy').length,1);
+    assert.equal(result.metas.some(meta=>meta.id==='tt9000005'),false);
     assert.equal(result.metas.some(meta=>meta.id==='tt9000003'&&meta.type==='movie'),true);
     assert.equal(seen.includes('https://v3-cinemeta.strem.io/catalog/movie/top/search=Family%20Guy.json'),true);
     assert.equal(seen.includes('https://v3-cinemeta.strem.io/catalog/series/top/search=Family%20Guy.json'),true);

@@ -1,11 +1,12 @@
-import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js?v=2.0.4';
-import { isTrustedDirectMediaUrl } from './runtime.js?v=2.0.4';
+import { normalizeSources, targetOf, cleanText, parseSizeBytes } from './source-client.js?v=2.0.5';
+import { isTrustedDirectMediaUrl } from './runtime.js?v=2.0.5';
 
-export const DIRECT_BUILD = 'browser-local-2.0.4';
+export const DIRECT_BUILD = 'browser-local-2.0.5';
 
 const CATALOG_PRIMARY = 'https://v3-cinemeta.strem.io';
 const CATALOG_SECONDARY = 'https://cinemeta-catalogs.strem.io';
-const CATALOG_ORIGINS = new Set([CATALOG_PRIMARY,CATALOG_SECONDARY].map(value=>new URL(value).hostname));
+const CATALOG_LIVE = 'https://cinemeta-live.strem.io';
+const CATALOG_ORIGINS = new Set([CATALOG_PRIMARY,CATALOG_SECONDARY,CATALOG_LIVE].map(value=>new URL(value).hostname));
 const SOURCE_ENDPOINTS = Object.freeze({
   zilean: 'https://zileanfortheweebs.midnightignite.me',
   stremthruMain: 'https://stremthru.13377001.xyz/stremio/torz/eyJzdG9yZXMiOlt7ImMiOiJwMnAiLCJ0IjoiIn1dfQ==',
@@ -170,6 +171,24 @@ function normalizeMeta(raw, type, id) {
   return meta;
 }
 
+async function catalogBridgeRequest(path) {
+  const cfg=await relayConfig();
+  const origins=[cfg.secondary,cfg.primary].filter((value,index,array)=>value&&array.indexOf(value)===index);
+  for(const origin of origins){
+    const url=new URL('/relay/cinemeta',origin);url.searchParams.set('path',path);
+    const started=performance.now();
+    try{
+      const response=await fetch(url,{headers:{Accept:'application/json'},credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(12000)});
+      trace('cinemeta_bridge',response.ok?'ok':'http_error',{backend:origin.includes('workers.dev')?'cloudflare':'render',httpStatus:response.status,durationMs:Math.round(performance.now()-started)});
+      if(!response.ok)continue;
+      return await readJson(response,4*1024*1024);
+    }catch(error){
+      trace('cinemeta_bridge','fetch_error',{backend:origin.includes('workers.dev')?'cloudflare':'render',error:safeError(error),durationMs:Math.round(performance.now()-started)});
+    }
+  }
+  return null;
+}
+
 async function catalogRequest(path) {
   const cached = catalogCache.get(path);
   if (cached && cached.until > Date.now()) return cached.value;
@@ -190,7 +209,8 @@ async function catalogRequest(path) {
           ])
     : [
         { label:'cinemeta_meta', url:primaryUrl, delayMs:0 },
-        { label:'cinemeta_meta_retry', url:primaryUrl, delayMs:150 }
+        { label:'cinemeta_meta_live', url:new URL(path,CATALOG_LIVE).href, delayMs:100 },
+        { label:'cinemeta_meta_retry', url:primaryUrl, delayMs:350 }
       ];
   const failures=[];
   for (const target of targets) {
@@ -211,12 +231,13 @@ async function catalogRequest(path) {
     } catch (error) {
       failures.push(error);
       trace('cinemeta_origin','failed',{host:new URL(target.url).hostname,httpStatus:error?.status||undefined,error:safeError(error)});
-      if (metadata && error?.status === 404) break;
     }
   }
+  const bridged=await catalogBridgeRequest(path);
+  if(bridged){catalogCache.set(path,{value:bridged,until:Date.now()+300000});return bridged;}
   const last=failures.at(-1);
   const kind=secondaryUrl?'catalog':'metadata';
-  throw directError('CATALOG_UNAVAILABLE','Cinemeta '+kind+' is temporarily unavailable. '+(last?.status?('Last HTTP status: '+last.status+'.'):'Check diagnostics if this persists.'),last?.status||502);
+  throw directError('CATALOG_UNAVAILABLE','Cinemeta '+kind+' is temporarily unavailable directly and through the backup relay. '+(last?.status?('Last HTTP status: '+last.status+'.'):'Check diagnostics if this persists.'),last?.status||502);
 }
 
 async function catalogMeta(type, id) {
@@ -282,21 +303,40 @@ async function mergeCatalogTypes(results,q) {
     if(!grouped.has(meta.id))grouped.set(meta.id,[]);
     grouped.get(meta.id).push(meta);
   }
+  const needle=String(q||'').trim().toLowerCase();
   const metas=[];
   for (const [id,candidates] of grouped) {
     let selected=[...candidates].sort((a,b)=>catalogCardScore(b)-catalogCardScore(a))[0];
     const types=[...new Set(candidates.map(meta=>meta.type))];
-    if(types.length>1){
-      const checked=await Promise.allSettled(types.map(type=>catalogMeta(type,id)));
-      const valid=checked.filter(row=>row.status==='fulfilled').map(row=>({...row.value,episodes:[]}));
+    const exact=candidates.some(meta=>meta.name.toLowerCase()===needle);
+    if(types.length>1||exact){
+      const checked=await Promise.allSettled(candidates.map(meta=>catalogMetaFlexible(meta.type,id)));
+      const valid=[];
+      const seen=new Set();
+      for(const row of checked){
+        if(row.status!=='fulfilled')continue;
+        const key=row.value.type+':'+row.value.id;
+        if(seen.has(key))continue;
+        seen.add(key);valid.push({...row.value,episodes:[]});
+      }
       if(valid.length)selected=valid.sort((a,b)=>catalogCardScore(b)-catalogCardScore(a))[0];
+      else if(exact)continue;
     }
     metas.push(selected);
   }
-  const needle=String(q||'').trim().toLowerCase();
+  const exactRows=metas.filter(meta=>meta.name.toLowerCase()===needle);
+  if(exactRows.length>1){
+    const best=[...exactRows].sort((a,b)=>catalogCardScore(b)-catalogCardScore(a))[0];
+    const bestScore=catalogCardScore(best);
+    for(let index=metas.length-1;index>=0;index--){
+      const meta=metas[index];
+      if(meta!==best&&meta.name.toLowerCase()===needle&&catalogCardScore(meta)<bestScore-2)metas.splice(index,1);
+    }
+  }
   metas.sort((a,b)=>{
     const aName=a.name.toLowerCase(),bName=b.name.toLowerCase();
     return Number(bName===needle)-Number(aName===needle)
+      || catalogCardScore(b)-catalogCardScore(a)
       || Number(bName.startsWith(needle))-Number(aName.startsWith(needle));
   });
   return metas;
@@ -666,6 +706,18 @@ async function bridgeHealth(origin,label){
   const started=performance.now();
   try{const r=await fetch(new URL('/relay/health',origin),{cache:'no-store',credentials:'omit',signal:AbortSignal.timeout(7000)});return{id:label,label,status:r.ok?'DIRECT_OK':'HTTP_ERROR',httpStatus:r.status,durationMs:Math.round(performance.now()-started),corsReadable:true,note:r.ok?'Relay health endpoint is reachable.':'Relay health endpoint returned HTTP '+r.status+'.'};}
   catch(e){return{id:label,label,status:['TimeoutError','AbortError'].includes(e?.name)?'TIMEOUT':'NETWORK_ERROR',httpStatus:null,durationMs:Math.round(performance.now()-started),corsReadable:false,note:'Relay health endpoint could not be reached.'};}
+}
+
+async function bridgeCinemetaHealth(origin,label){
+  if(!origin)return{id:label,label,status:'NOT_CONFIGURED',httpStatus:null,durationMs:0,corsReadable:false,note:'No catalog relay URL is configured.'};
+  const url=new URL('/relay/cinemeta',origin);url.searchParams.set('path','/meta/series/tt0182576.json');
+  const started=performance.now();
+  try{
+    const r=await fetch(url,{headers:{Accept:'application/json'},cache:'no-store',credentials:'omit',signal:AbortSignal.timeout(12000)});
+    return{id:label,label,status:r.ok?'DIRECT_OK':'HTTP_ERROR',httpStatus:r.status,durationMs:Math.round(performance.now()-started),corsReadable:true,note:r.ok?'Catalog relay returned readable metadata.':'Catalog relay returned HTTP '+r.status+'.'};
+  }catch(e){
+    return{id:label,label,status:['TimeoutError','AbortError'].includes(e?.name)?'TIMEOUT':'NETWORK_ERROR',httpStatus:null,durationMs:Math.round(performance.now()-started),corsReadable:false,note:'Catalog relay could not be reached.'};
+  }
 }
 
 async function torboxFetch(path,{params={},method='GET',body,label}={}){
@@ -1101,6 +1153,7 @@ export async function runDirectDiagnostics(overrideKey = '') {
   const tests = [
     probe('cinemeta', 'Cinemeta catalog', 'https://cinemeta-catalogs.strem.io/top/catalog/movie/top.json'),
     probe('cinemeta_meta', 'Cinemeta metadata', 'https://v3-cinemeta.strem.io/meta/movie/tt0111161.json'),
+    probe('cinemeta_meta_live', 'Cinemeta live metadata', 'https://cinemeta-live.strem.io/meta/movie/tt0111161.json'),
     probe('zilean', 'Zilean', 'https://zileanfortheweebs.midnightignite.me/dmm/filtered?ImdbId=tt0111161'),
     probe('stremthru_main', 'StremThru Main', SOURCE_ENDPOINTS.stremthruMain + '/stream/movie/tt0111161.json'),
     probe('stremthru_elf', 'StremThru ElfHosted', SOURCE_ENDPOINTS.stremthruElf + '/stream/movie/tt0111161.json'),
@@ -1128,21 +1181,23 @@ export async function runDirectDiagnostics(overrideKey = '') {
   }
 
   const cfg=await relayConfig();
-  tests.push(bridgeHealth(cfg.primary,'bridge_render_health'),bridgeHealth(cfg.secondary,'bridge_cloudflare_health'));
+  tests.push(bridgeHealth(cfg.primary,'bridge_render_health'),bridgeHealth(cfg.secondary,'bridge_cloudflare_health'),bridgeCinemetaHealth(cfg.secondary,'bridge_cloudflare_cinemeta'));
   const results = await Promise.all(tests);
   const byId=Object.fromEntries(results.map(row=>[row.id,row]));
   const directSourceIds=['stremthru_main','stremthru_elf','mediafusion'];
   const sourceProvidersDirect=directSourceIds.filter(id=>byId[id]?.status==='DIRECT_OK');
   const architecture={
-    catalogDirect:byId.cinemeta?.status==='DIRECT_OK'&&byId.cinemeta_meta?.status==='DIRECT_OK',
+    catalogDirect:byId.cinemeta?.status==='DIRECT_OK'&&(byId.cinemeta_meta?.status==='DIRECT_OK'||byId.cinemeta_meta_live?.status==='DIRECT_OK'),
+    catalogBridge:byId.bridge_cloudflare_cinemeta?.status==='DIRECT_OK',
     sourceProvidersDirect,
     renderBridge:byId.bridge_render_health?.status==='DIRECT_OK',
     cloudflareBridge:byId.bridge_cloudflare_health?.status==='DIRECT_OK'
   };
   architecture.torboxBridgeAvailable=architecture.renderBridge||architecture.cloudflareBridge;
   architecture.redundantTorboxReady=architecture.renderBridge&&architecture.cloudflareBridge;
+  architecture.catalogAvailable=architecture.catalogDirect||architecture.catalogBridge;
   const blockers=[];
-  if(!architecture.catalogDirect)blockers.push('catalog');
+  if(!architecture.catalogAvailable)blockers.push('catalog');
   if(!sourceProvidersDirect.length)blockers.push('source_discovery');
   if(!architecture.torboxBridgeAvailable)blockers.push('torbox_bridge');
   const expectedDirectLimitations=['torbox_user','torbox_mylist','torbox_relay_status_public','torbox_relay_status_auth'].filter(id=>byId[id]&&byId[id].status!=='DIRECT_OK');

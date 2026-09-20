@@ -1,4 +1,4 @@
-const CACHE='torbox-main-v2.0.4';
+const CACHE='torbox-main-v2.0.5';
 const SHELL=['./','./index.html','./style.css','./discover.css','./portable-setup.css','./app.js','./runtime.js','./vault.js','./history.js','./settings.js','./watchlist.js','./search-history.js','./source-memory.js','./parental-controls.js','./direct-runtime.js','./portable-setup.js','./portable-setup-ui.js','./vendor/qrcode.js','./vendor/jsqr.js','./playback-errors.js','./discover.js','./source-client.js','./manifest.webmanifest','./icon.svg','./relay-config.json'];
 const shellUrls=new Set(SHELL.map(p=>new URL(p,self.registration.scope).href));
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL.map(path=>new Request(path,{cache:'reload'})))).then(()=>self.skipWaiting())));
