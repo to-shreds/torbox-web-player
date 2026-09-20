@@ -1,4 +1,4 @@
-import { loadPublicSources } from './source-client.js';
+import { loadPublicSources, browserContainerHints } from './source-client.js';
 import { getSettings, updateSettings } from './settings.js';
 import { listRecent, formatResumeTime } from './history.js';
 import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js';
@@ -49,7 +49,7 @@ export function automaticSourceOrder(list, type = 'movie', resolution = 'auto', 
   }
   return ordered;
 }
-export const NO_CACHED_BROWSER_SOURCE_MESSAGE = 'Could not open a cached browser-compatible source automatically. More Options is open; choose Prepare to download one.';
+export const NO_CACHED_BROWSER_SOURCE_MESSAGE = 'No cached browser-compatible source could be opened automatically.';
 export const AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS = 8000;
 export function isAutomaticCandidateFailure(error) {
   if (['BROWSER_CONTAINER_UNSUPPORTED','CACHED_SOURCE_NOT_READY','PREPARED_ITEM_MISSING'].includes(error?.code)) return true;
@@ -57,6 +57,12 @@ export function isAutomaticCandidateFailure(error) {
 }
 export function automaticCachedSourceOrder(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
   return automaticSourceOrder((Array.isArray(list)?list:[]).filter(source=>source.cached===true),type,resolution,sizeProfile);
+}
+export function selectAutomaticVideoFile(files = []) {
+  const rows=(Array.isArray(files)?files:[]).filter(file=>file&&file.id);
+  const supported=rows.find(file=>browserContainerHints(file).browserContainer);
+  if(supported)return supported;
+  return rows.find(file=>!browserContainerHints(file).browserUnsupported)||null;
 }
 function automaticBudgetError(){const error=new Error('Cached source checks took too long.');error.code='CACHED_SOURCE_NOT_READY';return error;}
 async function withinAutomaticBudget(action,signal){
@@ -284,8 +290,9 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       }
       if(result.state==='choose_file'){
         if(!result.files?.length)throw new Error('No matching video file was found.');
-        if(unattended&&result.files.length!==1){const error=new Error('This package has multiple possible files and cannot be selected automatically.');if(!waitForPreparation)error.code='CACHED_SOURCE_NOT_READY';throw error;}
-        result=await request('/api/discover/status?'+new URLSearchParams({source:source.id,file:result.files[0].id}),{},waitForPreparation?30000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS);continue;
+        const selected=unattended?selectAutomaticVideoFile(result.files):result.files[0];
+        if(!selected){const error=new Error('This cached source contains only file formats Android Chrome cannot play.');error.code='BROWSER_CONTAINER_UNSUPPORTED';throw error;}
+        result=await request('/api/discover/status?'+new URLSearchParams({source:source.id,file:selected.id}),{},waitForPreparation?30000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS);continue;
       }
       if(result.state!=='preparing'){const error=new Error(result.message||'This source is unavailable.');if(!waitForPreparation)error.code='CACHED_SOURCE_NOT_READY';throw error;}
       if(!waitForPreparation){const error=new Error('This cached source is not immediately ready.');error.code='CACHED_SOURCE_NOT_READY';throw error;}
@@ -310,7 +317,6 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       return await play(result.file,context);
     }catch(e){
       message('detail-message',e.message,true);
-      if(e?.code==='NO_CACHED_BROWSER_SOURCE')await openOptions(meta,target,episodeName);
       return false;
     }
     finally{if(trigger&&trigger.isConnected){trigger.disabled=false;trigger.textContent=original;}}

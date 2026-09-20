@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { recommendSource, automaticSourceOrder, automaticCachedSourceOrder, resolveAutomaticCachedSource, isAutomaticCandidateFailure, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder, recoverySourceOrder, boundedRecoverySourceOrder, sourceRecoveryKey, MAX_AUTOMATIC_SOURCE_ATTEMPTS, AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } from '../public/discover.js';
+import { recommendSource, automaticSourceOrder, automaticCachedSourceOrder, resolveAutomaticCachedSource, isAutomaticCandidateFailure, selectAutomaticVideoFile, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder, recoverySourceOrder, boundedRecoverySourceOrder, sourceRecoveryKey, MAX_AUTOMATIC_SOURCE_ATTEMPTS, AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } from '../public/discover.js';
 import { parseSizeBytes } from '../public/source-client.js';
 import { normalizeIndexRows } from '../lib/source-lookup.mjs';
 
@@ -38,7 +38,7 @@ test('cached plausible source is tried before an uncached MP4',()=>{
 test('automatic playback never prepares an uncached source',async()=>{
   const calls=[];
   const uncached=src('uncached-mp4',{cached:false,browserContainer:true,containerStatus:'supported'});
-  await assert.rejects(resolveAutomaticCachedSource([uncached],{type:'series'},'auto',{prepare:async source=>{calls.push(source.id);return{state:'ready'};}}),error=>error.code==='NO_CACHED_BROWSER_SOURCE'&&/More Options/.test(error.message)&&/Prepare/.test(error.message));
+  await assert.rejects(resolveAutomaticCachedSource([uncached],{type:'series'},'auto',{prepare:async source=>{calls.push(source.id);return{state:'ready'};}}),error=>error.code==='NO_CACHED_BROWSER_SOURCE'&&!/More Options|Prepare/i.test(error.message));
   assert.deepEqual(calls,[]);
 });
 test('automatic playback skips a cached source whose real file is AVI',async()=>{
@@ -72,14 +72,20 @@ test('automatic cached checks share one total timeout budget',async()=>{
   await assert.rejects(resolveAutomaticCachedSource(sources,{type:'series'},'auto',{totalTimeoutMs:30,prepare:async(_source,{signal})=>{calls++;await new Promise((_resolve,reject)=>signal.addEventListener('abort',()=>reject(new Error('aborted')),{once:true}));}}),error=>error.code==='NO_CACHED_BROWSER_SOURCE');
   assert.ok(Date.now()-started<150);assert.equal(calls,1);
 });
-test('automatic playback does not poll a stale cached source and direct actions open More Options',async()=>{
+test('automatic playback stays bounded and never opens the technical source picker',async()=>{
   const source=await readFile(new URL('../public/discover.js',import.meta.url),'utf8');
   const stop=source.indexOf("if(!waitForPreparation)");
   const poll=source.indexOf('await delay(3500)',stop);
   assert.ok(stop>0&&poll>stop);
   assert.ok(source.includes('unattended:true,waitForPreparation:false'));
-  assert.ok(source.includes("if(e?.code==='NO_CACHED_BROWSER_SOURCE')await openOptions(meta,target,episodeName)"));
+  assert.ok(source.includes('unattended?selectAutomaticVideoFile(result.files):result.files[0]'));
+  assert.ok(!source.includes("if(e?.code==='NO_CACHED_BROWSER_SOURCE')await openOptions(meta,target,episodeName)"));
   assert.equal(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS,8000);
+});
+test('automatic package selection prefers a browser-playable episode file and rejects all-unsupported choices',()=>{
+  const files=[{id:'mkv',title:'Elena.of.Avalor.S02E03.mkv'},{id:'mp4',title:'Elena.of.Avalor.S02E03.mp4'},{id:'avi',title:'Elena.of.Avalor.S02E03.avi'}];
+  assert.equal(selectAutomaticVideoFile(files)?.id,'mp4');
+  assert.equal(selectAutomaticVideoFile(files.filter(file=>file.id!=='mp4')),null);
 });
 test('resolution filter supports exact 720/1080 and 4K alias',()=>{
   const list=[src('a',{resolution:'720p'}),src('b',{resolution:'1080p'}),src('c',{resolution:'4K'})];

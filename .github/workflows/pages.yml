@@ -1,11 +1,10 @@
-name: Deploy frontends to GitHub Pages
+name: Deploy restored v1.1 to GitHub Pages
 on:
   push:
     branches: [main]
     paths:
       - 'public/**'
       - '.github/workflows/pages.yml'
-      - '.github/clone-revision'
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,22 +20,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main player
+      - name: Checkout production player
         uses: actions/checkout@v6
         with:
           ref: main
           path: main-src
-      - name: Checkout browser-key clone
-        uses: actions/checkout@v6
-        with:
-          ref: browser-key-clone
-          path: clone-src
-      - name: Assemble Pages site
+      - name: Assemble root and legacy key path from the same source
         shell: bash
         run: |
           mkdir -p site/key
           cp -a main-src/public/. site/
-          cp -a clone-src/public/. site/key/
+          cp -a main-src/public/. site/key/
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload combined frontend

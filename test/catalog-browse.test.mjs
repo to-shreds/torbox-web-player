@@ -89,6 +89,7 @@ test('IMDb suggestion fallback recovers Elena when Cinemeta ignores the query',a
     const value=String(url);seen.push(value);
     if(value.includes('v3.sg.media-imdb.com/suggestion/'))return ok({d:[{id:'tt4549142',l:'Elena of Avalor',qid:'tvSeries',y:2016}]});
     if(value.includes('/catalog/series/top/search=Elena%20of%20Avalor.json'))return ok(junk);
+    if(value===`https://v3-cinemeta.strem.io/meta/series/tt4549142.json`)return ok({meta:{id:'tt4549142',type:'series',name:'Elena of Avalor',releaseInfo:'2016',videos:[]}});
     throw new Error('unexpected '+value);
   }});
   const result=await c.search({type:'series',q:'Elena of Avalor'});
@@ -179,8 +180,28 @@ test('IMDb suggestions ignore people and the wrong media type',async()=>{
       {id:'tt1111111',l:'Elena Movie',qid:'movie',y:2020},
       {id:'tt2222222',l:'Elena Series',qid:'tvSeries',y:2021}
     ]});
+    if(value===`https://v3-cinemeta.strem.io/meta/series/tt2222222.json`)return ok({meta:{id:'tt2222222',type:'series',name:'Elena Series',releaseInfo:'2021',videos:[]}});
     return ok({metas:[]});
   }});
   const result=await c.search({type:'series',q:'Elena'});
   assert.deepEqual(result.metas.map(row=>row.id),['tt2222222']);
+});
+
+
+test('IMDb fallback does not surface cards that Cinemeta cannot open',async()=>{
+  const missing='tt3333333',valid='tt4444444';
+  const c=new Catalog({fetchFn:async url=>{
+    const value=String(url);
+    if(value.includes('/catalog/movie/top/search=Salute%20your%20Shorts.json'))return ok({metas:[{id:'tt5555555',type:'movie',name:'Unrelated'}]});
+    if(value.includes('v3.sg.media-imdb.com/suggestion/'))return ok({d:[
+      {id:missing,l:'Salute Your Shorts 1993 Commercial',qid:'video',y:1993},
+      {id:valid,l:'Salute Your Shorts Documentary',qid:'movie',y:1994}
+    ]});
+    if(value===`https://v3-cinemeta.strem.io/meta/movie/${missing}.json`)return new Response('{}',{status:404,headers:{'content-type':'application/json'}});
+    if(value===`https://v3-cinemeta.strem.io/meta/movie/${valid}.json`)return ok({meta:{id:valid,type:'movie',name:'Salute Your Shorts Documentary',releaseInfo:'1994'}});
+    throw new Error('unexpected '+value);
+  }});
+  const result=await c.search({type:'movie',q:'Salute your Shorts'});
+  assert.deepEqual(result.metas.map(row=>row.id),[valid]);
+  await assert.rejects(c.meta('movie',missing),error=>error.code==='CATALOG_NOT_FOUND'&&error.message==='This title is not available in the catalog.');
 });

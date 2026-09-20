@@ -1,10 +1,10 @@
-# TorBox Browser-Key Player
+# TorBox Web Player
 
-This branch is the browser-key clone of the household TorBox web player. The original player on `main` remains separate and is not modified by this branch.
+The restored browser-key v1.1 player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same v1.1 code rather than as a separate product line.
 
 Current version: **1.1.0**
 
-Frontend: `https://to-shreds.github.io/torbox-web-player/key/`
+Frontend: `https://to-shreds.github.io/torbox-web-player/` (legacy mirror: `/key/`)
 
 Backend: `https://torbox-web-player-key.onrender.com`
 
@@ -40,7 +40,9 @@ Cinemeta supplies catalog metadata. Browse supports Popular, Featured, New, genr
 
 Source discovery aggregates Zilean and MediaFusion Torznab, with StremThru fallbacks when needed. Results are deduplicated before TorBox cache checks.
 
-Automatic source selection continues to prioritize browser-friendly cached sources and penalize known risky audio/video formats. It now also supports:
+Automatic source selection continues to prioritize browser-friendly cached sources and penalize known risky audio/video formats. In Simple mode, Play never opens the technical torrent/source picker. Cached multi-file packages are resolved to a browser-compatible matching episode file automatically when that can be done safely; otherwise Play reports that no cached browser-compatible source could be opened. The source picker remains an explicit Full-mode Options tool only.
+
+Automatic selection also supports:
 
 - Data saver, Balanced, and Prefer larger files size profiles.
 - Per-title quality overrides.
@@ -148,4 +150,4 @@ Physical-device acceptance is still required for touch feel, long-press behavior
 - The zero-setup Google Drive timing/share path remains limited by the short-lived TorBox-issued Google credential.
 - The first real Drive export/deletion acceptance test is still outstanding.
 
-Implementation source on this branch is authoritative. Current readiness and next steps are tracked in `to-shreds/ProjectStatus/projects/torbox-web-player-browser-key/STATUS.md`.
+Implementation source on `main` is authoritative. Current readiness and next steps are tracked in `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md`.
