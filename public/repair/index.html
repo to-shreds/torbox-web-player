@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Refreshing TorBox Player</title><style>body{font-family:system-ui,sans-serif;background:#090d13;color:#eef4fb;display:grid;place-items:center;min-height:100vh;margin:0}main{max-width:32rem;padding:2rem}p{color:#b8c5d3}</style></head><body><main><h1>Refreshing TorBox Player</h1><p id="status">Removing the stale player cache…</p></main><script>
+(async()=>{
+ const status=document.getElementById('status');
+ try{
+   if('serviceWorker'in navigator){
+     const regs=await navigator.serviceWorker.getRegistrations();
+     for(const reg of regs)if(reg.scope.includes('/torbox-web-player/'))await reg.unregister();
+   }
+   if('caches'in window){
+     const keys=await caches.keys();
+     await Promise.all(keys.filter(k=>k.startsWith('torbox-main-v')).map(k=>caches.delete(k)));
+   }
+   status.textContent='Opening the current player…';
+ }catch{status.textContent='Opening the current player…';}
+ location.replace('../?release=2.0.3&repair='+Date.now());
+})();
+</script></body></html>
