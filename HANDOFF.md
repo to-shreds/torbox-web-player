@@ -52,7 +52,7 @@ The code change represented by this handoff adds three narrow repairs:
 2. Cached multi-file packages can choose a browser-compatible candidate automatically instead of failing solely because more than one matching file exists.
 3. IMDb fallback results are metadata-validated before display, and missing Cinemeta metadata is reported as “This title is not available in the catalog.”
 
-Automated CI and Render verification must be recorded in ProjectStatus after this commit deploys. Physical Android acceptance remains required for the Elena of Avalor S2E3 case that exposed the multi-file fallback behavior.
+GitHub Actions CI for code commit `a40215eddfaee6474d361f8328f4a5e9e3c3a2a5` completed successfully in Browser-key clone CI run 141. Render deployment and the final branch-consolidation state are recorded in ProjectStatus after deployment verification. Physical Android acceptance remains required for the Elena of Avalor S2E3 case that exposed the multi-file fallback behavior.
 
 ## Do not break
 
