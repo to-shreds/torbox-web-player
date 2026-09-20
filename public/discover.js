@@ -50,6 +50,28 @@ export function lowerResolutionOrder(current, selected = 'auto') {
   const order = ['2160p','1080p','720p','480p']; const index = order.indexOf(tier);
   return index >= 0 ? order.slice(index + 1) : ['720p','480p'];
 }
+export function sourceRecoveryKey(source) {
+  const hash=String(source?.hash||'').trim().toLowerCase();if(hash)return `hash:${hash}`;
+  const id=String(source?.id||'').trim();if(id)return `id:${id}`;
+  const fallback=[source?.provider,source?.filename||source?.title,source?.resolution||source?.quality].map(value=>String(value||'').trim().toLowerCase()).filter(Boolean).join('|');
+  return fallback?`source:${fallback}`:'';
+}
+export function recoverySourceOrder(list, context = {}, type = context?.current?.type || 'movie', sizeProfile = 'balanced') {
+  const attempted=new Set(Array.isArray(context?.recoveryTried)?context.recoveryTried:[]),currentKey=sourceRecoveryKey(context?.sourceInfo);if(currentKey)attempted.add(currentKey);
+  let remaining=(Array.isArray(list)?list:[]).filter(source=>{const key=sourceRecoveryKey(source);return key&&!attempted.has(key)&&source.audioRisk!==true&&source.videoRisk!==true;});
+  const current=String(context?.sourceResolution||context?.sourceInfo?.resolution||'').toLowerCase();
+  const currentTier=current.includes('2160')||current.includes('4k')?'2160p':current.includes('1080')?'1080p':current.includes('720')?'720p':current.includes('480')?'480p':'';
+  const requested=context?.resolution&&context.resolution!=='auto'?context.resolution:currentTier||'auto';
+  const tiers=[...new Set([requested,...lowerResolutionOrder(currentTier||context?.sourceResolution,context?.resolution||'auto'),'auto'])];
+  const ordered=[];
+  for(const resolution of tiers){
+    while(true){
+      const best=recommendSource(remaining,type,resolution,sizeProfile);if(!best)break;
+      ordered.push(best);const key=sourceRecoveryKey(best);remaining=remaining.filter(source=>source!==best&&sourceRecoveryKey(source)!==key);
+    }
+  }
+  return ordered;
+}
 const formatBytes = value => Number.isFinite(value) && value > 0 ? (value >= GB ? `${(value / GB).toFixed(value >= 10*GB ? 1 : 2)} GB` : `${Math.max(1,Math.round(value/1024**2))} MB`) : '—';
 const qualityText = s => [s.resolution || s.quality, s.releaseQuality, s.videoCodec, ...(s.audioCodecs || []).slice(0,2), s.container].filter(Boolean).join(' · ') || 'Unknown';
 const feedNames = { popular:'Popular', featured:'Featured', new:'New' };
@@ -378,11 +400,14 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     if(!active||!context?.current)return false;
     try{
       const registered=await registeredSources(context.current,AbortSignal.timeout(45000));
-      for(const resolution of lowerResolutionOrder(context.sourceResolution,context.resolution)){
-        const best=recommendSource(registered.sources,context.current.type,resolution);if(!best||best.audioRisk||best.videoRisk)continue;
+      const failedKey=sourceRecoveryKey(context.sourceInfo),attempted=new Set(Array.isArray(context.recoveryTried)?context.recoveryTried:[]);if(failedKey)attempted.add(failedKey);context.recoveryTried=[...attempted];
+      const candidates=recoverySourceOrder(registered.sources,context,context.current.type,getSettings().sourceSizeProfile);
+      for(const best of candidates){
+        const candidateKey=sourceRecoveryKey(best);if(candidateKey)attempted.add(candidateKey);context.recoveryTried=[...attempted];
         try{
           const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
-          await play(result.file,{...context,...buildContext({name:context.title,poster:context.poster,episodes:[]},context.current,context.episodeName||'',resolution,best),queue:context.queue||[]});return true;
+          const nextContext={...context,...buildContext({name:context.title,poster:context.poster,episodes:[]},context.current,context.episodeName||'',context.resolution||'auto',best),queue:context.queue||[],recoveryTried:[...attempted]};
+          const moved=await play(result.file,nextContext);if(moved)return true;
         }catch{}
       }
     }catch{}

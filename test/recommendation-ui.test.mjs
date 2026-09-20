@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { recommendSource, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder } from '../public/discover.js';
+import { recommendSource, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder, recoverySourceOrder, sourceRecoveryKey } from '../public/discover.js';
 import { parseSizeBytes } from '../public/source-client.js';
 import { normalizeIndexRows } from '../lib/source-lookup.mjs';
 
@@ -40,6 +40,19 @@ test('playback recovery walks strictly down the resolution ladder',()=>{
   assert.deepEqual(lowerResolutionOrder('2160p','auto'),['1080p','720p','480p']);
   assert.deepEqual(lowerResolutionOrder('1080p','auto'),['720p','480p']);
   assert.deepEqual(lowerResolutionOrder('720p','auto'),['480p']);
+});
+test('playback recovery tries other safe sources after a 480p source fails',()=>{
+  const failed=src('failed',{hash:'a'.repeat(40),resolution:'480p'});
+  const sameQuality=src('same-quality',{hash:'b'.repeat(40),resolution:'480p'});
+  const remaining=src('remaining',{hash:'c'.repeat(40),resolution:'720p'});
+  const alreadyTried=src('already-tried',{hash:'d'.repeat(40),resolution:'480p'});
+  const risky=src('known-risk',{hash:'e'.repeat(40),resolution:'480p',videoRisk:true});
+  const ordered=recoverySourceOrder(
+    [failed,remaining,risky,alreadyTried,sameQuality],
+    {resolution:'auto',sourceResolution:'480p',sourceInfo:failed,recoveryTried:[sourceRecoveryKey(alreadyTried)]},
+    'series'
+  );
+  assert.deepEqual(ordered.map(source=>source.id),['same-quality','remaining']);
 });
 
 test('source size profile can favor a smaller data-saver source or a larger quality source',()=>{
