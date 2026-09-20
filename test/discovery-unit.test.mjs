@@ -121,6 +121,18 @@ test('cache calls go only to TorBox and preserve hash query repetitions', async 
   } });
   assert.deepEqual(await g.cached([HASH, HASH2]), { [HASH]: true, [HASH2]: false });
 });
+test('cache availability is read whatever casing TorBox keys the map with', async () => {
+  // Source hashes are normalized to lowercase before they are sent. Matching the returned map with
+  // an exact key reported every source as uncached when TorBox answered in another casing, which
+  // silently turned instant cached playback into a download on every ordinary Play.
+  const g = new TorrentGateway({ provider: { key: 'synthetic' }, fetchFn: async () =>
+    response({ success: true, data: { [HASH.toUpperCase()]: { hash: HASH.toUpperCase() }, [HASH2.toUpperCase()]: false } }) });
+  assert.deepEqual(await g.cached([HASH, HASH2]), { [HASH]: true, [HASH2]: false });
+});
+test('an empty cache array means none cached rather than an unreadable response', async () => {
+  const g = new TorrentGateway({ provider: { key: 'synthetic' }, fetchFn: async () => response({ success: true, data: [] }) });
+  assert.deepEqual(await g.cached([HASH, HASH2]), { [HASH]: false, [HASH2]: false });
+});
 test('torrent creation uses only a hash magnet, with cached-only explicit option', async () => {
   const g = new TorrentGateway({ provider: { key: 'synthetic' }, fetchFn: async (url, opts) => {
     assert.ok(url.pathname.endsWith('/createtorrent')); assert.equal(opts.method, 'POST');
