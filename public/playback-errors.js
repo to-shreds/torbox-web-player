@@ -1,5 +1,5 @@
 // Direct TorBox playback only. No Render media relay exists.
-import { isTrustedDirectMediaUrl } from './runtime.js?v=2.3.3';
+import { isTrustedDirectMediaUrl } from './runtime.js?v=2.3.4';
 export function matchesFormat(file, format = 'all') {
   return format !== 'mp4' || /\.mp4$/i.test(file.title || '');
 }

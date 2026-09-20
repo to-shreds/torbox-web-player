@@ -1,6 +1,6 @@
 {
   "name": "torbox-web-player",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "private": true,
   "type": "module",
   "engines": { "node": ">=22 <25" },

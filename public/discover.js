@@ -1,9 +1,9 @@
-import { recordDiagnosticEvent } from './direct-runtime.js?v=2.3.3';
-import { getSettings, updateSettings } from './settings.js?v=2.3.3';
-import { listRecent, formatResumeTime } from './history.js?v=2.3.3';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.3.3';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.3.3';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.3.3';
+import { recordDiagnosticEvent } from './direct-runtime.js?v=2.3.4';
+import { getSettings, updateSettings } from './settings.js?v=2.3.4';
+import { listRecent, formatResumeTime } from './history.js?v=2.3.4';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.3.4';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.3.4';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.3.4';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
@@ -458,7 +458,12 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     if(!active||!context?.current)return false;
     try{
       const registered=await registeredSources(context.current,AbortSignal.timeout(45000));
-      for(const resolution of lowerResolutionOrder(context.sourceResolution,context.resolution)){
+      // The rejected source is already excluded by source memory, so the first tier here means
+      // "another source at the quality that was asked for". Recovery used to iterate only LOWER
+      // resolutions, so a title whose sources are all 480p produced an empty list and reported that
+      // recovery was impossible without ever trying a second source. Ending on 'auto' guarantees
+      // every remaining candidate is tried before giving up.
+      for(const resolution of [...new Set([context.resolution||'auto',...lowerResolutionOrder(context.sourceResolution,context.resolution),'auto'])]){
         const best=recommendAutomaticSource(registered.sources,context.current.type,resolution);if(!best)continue;
         try{
           const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});

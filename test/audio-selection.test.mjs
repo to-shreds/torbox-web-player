@@ -129,4 +129,10 @@ test('Chrome decoded-audio watchdog is wired to no-sound recovery', async () => 
   assert.match(app,/webkitAudioDecodedByteCount/);
   assert.match(app,/audio_decode_watchdog/);
   assert.match(app,/rejectCurrentSource\('audio'\)/);
+  // The probe is armed once, when playback starts. A stream that has not advanced four seconds of
+  // media time inside the probe window used to abandon the check permanently, so a slow start meant
+  // a Dolby/DTS source played silently forever with no automatic recovery. It must re-arm, and it
+  // must be bounded so a stalled stream cannot loop.
+  assert.match(app,/audioProbeTries/);
+  assert.match(app,/if\(advanced<4\)\{[^}]*armAudioProbe\(\);return;\}/);
 });

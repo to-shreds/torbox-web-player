@@ -40,6 +40,18 @@ test('playback recovery walks strictly down the resolution ladder',()=>{
   assert.deepEqual(lowerResolutionOrder('2160p','auto'),['1080p','720p','480p']);
   assert.deepEqual(lowerResolutionOrder('1080p','auto'),['720p','480p']);
   assert.deepEqual(lowerResolutionOrder('720p','auto'),['480p']);
+  // Nothing is below the bottom tier. Recovery that iterates only this list therefore has no
+  // candidates at all for a title whose sources are all 480p, which is why a 480p-only show
+  // reported that playback could not recover without a second source ever being tried.
+  assert.deepEqual(lowerResolutionOrder('480p','auto'),[]);
+});
+test('recovery tries the requested quality and then every remaining source, not only lower tiers',async()=>{
+  const {readFile}=await import('node:fs/promises');
+  const discover=await readFile(new URL('../public/discover.js',import.meta.url),'utf8');
+  const loop=/for\(const resolution of \[\.\.\.new Set\(\[([^\]]*)\]\)\]\)/.exec(discover);
+  assert.ok(loop,'recovery should iterate a deduplicated resolution list');
+  assert.match(loop[1],/^context\.resolution\|\|'auto'/,'the requested quality is tried first');
+  assert.match(loop[1],/'auto'\]?$/,'auto is tried last so no candidate is left untried');
 });
 
 test('source size profile can favor a smaller data-saver source or a larger quality source',()=>{

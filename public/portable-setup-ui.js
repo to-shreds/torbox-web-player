@@ -1,4 +1,4 @@
-import { collectPortableSetup, encodePortableSetup, decodePortableSetup, portableSummary, makeSetupUrl, tokenFromText, isProtectedSetup, splitSetupFrames, SetupFrameCollector } from './portable-setup.js?v=2.3.3';
+import { collectPortableSetup, encodePortableSetup, decodePortableSetup, portableSummary, makeSetupUrl, tokenFromText, isProtectedSetup, splitSetupFrames, SetupFrameCollector } from './portable-setup.js?v=2.3.4';
 
 const BASE=new URL('./',import.meta.url).href;
 const loads=new Map();
