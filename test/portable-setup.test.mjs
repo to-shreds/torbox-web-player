@@ -50,3 +50,9 @@ test('actual static QR encoder and decoder recover the entire import URL',async(
 test('maximum current list and history limits survive file and animated QR transfer with no truncation',async()=>{
  const v=collectPortableSetup(fixtureKey,sample());v[5]=[0,1].map(offset=>Array.from({length:100},(_,i)=>[i%2,String(100000000000+offset*1000+i*137)]));v[4]=Array.from({length:20},(_,i)=>[0,String(100000000000+i),0,0,100+i,6000,0,1800000000000-i]);const token=await encodePortableSetup(v),frames=await splitSetupFrames(token),collector=new SetupFrameCollector();let result;for(const f of [...frames].reverse())result=await collector.accept(f);const decoded=await decodePortableSetup(result.token);assert.deepEqual(decoded,v);assert.equal(portableSummary(decoded).myList,200);console.log('Maximum-limits fixture: '+token.length+' characters; '+frames.length+' animated frames.');
 });
+
+test('portable ordinary settings include optional user names and new non-parent preferences',()=>{
+ const source=sample(),raw=JSON.parse(source.getItem('torbox-settings-v1'));Object.assign(raw,{viewer1Name:'Logan',viewer2Name:'Scarlett',rememberViewer:false,homeDensity:'compact',searchDelayMs:700,preferCachedSources:false});source.setItem('torbox-settings-v1',JSON.stringify(raw));
+ const staged=stagedPortableState(collectPortableSetup(fixtureKey,source)),settings=JSON.parse(staged['torbox-settings-v1']);
+ assert.equal(settings.viewer1Name,'Logan');assert.equal(settings.viewer2Name,'Scarlett');assert.equal(settings.rememberViewer,false);assert.equal(settings.homeDensity,'compact');assert.equal(settings.searchDelayMs,700);assert.equal(settings.preferCachedSources,false);
+});
