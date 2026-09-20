@@ -1,6 +1,6 @@
 # TorBox Player
 
-Current version: **2.0.8**
+Current version: **2.1.0**
 
 Canonical frontend: `https://to-shreds.github.io/torbox-web-player/`
 
@@ -18,7 +18,7 @@ The working `/key/` backend is still deployed from `browser-key-clone`. Do not r
 
 ## Simple by default
 
-First launch asks only for the user's own TorBox API key. Remembering it is optional and uses the existing encrypted IndexedDB vault. Source selection is automatic. Browser-friendly audio is preferred, but incomplete codec metadata never turns ordinary Play into a torrent-selection workflow. Release integrity is checked across the complete browser module graph so stale leaf-module versions cannot silently mix with a newer UI. Full mode in Settings exposes technical controls without cluttering the default experience.
+First launch asks only for the user's own TorBox API key. Remembering it is optional and uses the existing encrypted IndexedDB vault. Source selection is automatic. Browser-friendly audio is preferred, but incomplete codec metadata never turns ordinary Play into a torrent-selection workflow. Release integrity is checked across the complete browser module graph so stale leaf-module versions cannot silently mix with a newer UI. Settings opens on a plain-English Basic settings tab. Advanced controls are separated into Playback, Home & history, Discover & sources, Kids, and Devices & app tabs. Full mode exposes technical controls in the main player without cluttering the default experience.
 
 Existing features include focused search with Search/Enter keyboard dismissal, Continue Watching with configurable resume rewind, My List, Next Up, auto-next, source recovery, per-title quality, data-saving source preferences, audio/source feedback, sleep timer, Still Watching, and per-viewer Kid Mode with Parent PIN and time/episode/movie limits.
 
