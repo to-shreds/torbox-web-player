@@ -12,6 +12,6 @@
    }
    status.textContent='Opening the current player…';
  }catch{status.textContent='Opening the current player…';}
- location.replace('../?release=2.0.3&repair='+Date.now());
+ let version='latest';try{const response=await fetch('../version.json?repair='+Date.now(),{cache:'no-store'});if(response.ok)version=(await response.json()).version||version;}catch{}location.replace('../?release='+encodeURIComponent(version)+'&repair='+Date.now());
 })();
 </script></body></html>
