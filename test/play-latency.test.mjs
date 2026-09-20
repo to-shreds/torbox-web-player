@@ -7,9 +7,11 @@ const read=path=>readFile(new URL(path,import.meta.url),'utf8');
 test('source discovery is bounded and returns after useful providers instead of waiting for every index',async()=>{
   const runtime=await read('../public/direct-runtime.js');
   assert.match(runtime,/const SOURCE_CACHE_MS = 90000/);
-  assert.match(runtime,/setTimeout\(finish, 650\)/);
+  assert.match(runtime,/scheduleGrace\(450\)/);
+  assert.match(runtime,/scheduleGrace\(900\)/);
+  assert.match(runtime,/scheduleGrace\(2200\)/);
   assert.match(runtime,/hardTimer = setTimeout\(finish, 5000\)/);
-  assert.match(runtime,/map\.size >= 12 && providers\.length >= 2/);
+  assert.match(runtime,/safeCount=\(\)=>/);
   assert.match(runtime,/sourceCache\.set\(key/);
   assert.match(runtime,/return directSources\(target, signal\)/);
   assert.doesNotMatch(runtime,/Promise\.allSettled\(jobs\.map/);
