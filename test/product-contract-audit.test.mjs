@@ -53,10 +53,14 @@ test('2.x product contract: automatic source ranking, audio learning, fan-in, au
   for(const marker of ['rememberSourceSuccess','setAudioFeedback','setSourceBad']) assert.ok(memory.includes(marker),marker);
 });
 
-test('2.x product contract: TorBox status, redundant bridges, and direct CDN playback remain',async()=>{
+test('2.x product contract: Render control plane, bridge fallback code, and direct CDN playback remain',async()=>{
   const [html,app,direct,runtime]=await Promise.all([read('../public/index.html'),read('../public/app.js'),read('../public/direct-runtime.js'),read('../public/runtime.js')]);
   assert.ok(html.includes('id="torbox-status-banner"'));
+  assert.ok(html.includes('name="runtime-mode" content="backend"'));
+  assert.ok(html.includes('name="api-origin" content="https://torbox-web-player-key.onrender.com"'));
   assert.ok(app.includes('Never block Play on a separate probe'));
+  assert.ok(app.includes('driveTest: null'));
+  assert.ok(app.includes('validateCredentialForImport'));
   assert.ok(direct.includes('DEFAULT_RELAY_PRIMARY'));
   assert.ok(direct.includes('DEFAULT_RELAY_SECONDARY'));
   assert.ok(direct.includes("torrents/requestdl"));
