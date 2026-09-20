@@ -1,0 +1,104 @@
+name: Roll back TorBox Player
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Git ref or SHA to republish'
+        required: true
+        default: 'rollback-stable'
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: torbox-player-pages-v3
+  cancel-in-progress: false
+jobs:
+  rollback:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout requested rollback target
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.target }}
+          fetch-depth: 0
+          path: rollback-src
+      - name: Resolve rollback source
+        id: source
+        working-directory: rollback-src
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Verify rollback source
+        working-directory: rollback-src
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run check
+          npm test
+      - name: Checkout pinned v1.1 fallback
+        uses: actions/checkout@v6
+        with:
+          ref: d5dd3bd71ee2679178e66440c5240a80eaba41f2
+          path: fallback-src
+      - name: Assemble rollback site
+        env:
+          TARGET_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p site/key
+          cp -a rollback-src/public/. site/
+          cp -a fallback-src/public/. site/key/
+          touch site/.nojekyll
+          node - <<'NODE'
+          const fs=require('fs');
+          const pkg=JSON.parse(fs.readFileSync('rollback-src/package.json'));
+          const html=fs.readFileSync('site/index.html','utf8');
+          if(!html.includes('src="./app.js?v='+pkg.version+'"')||!html.includes('<span class="tag">'+pkg.version+'</span>'))throw Error('Wrong rollback tree');
+          fs.writeFileSync('site/version.json',JSON.stringify({version:pkg.version,source:process.env.TARGET_SHA,runtime:'browser-local',rollback:true,fallback:'d5dd3bd71ee2679178e66440c5240a80eaba41f2'})+'\n');
+          NODE
+          cmp site/key/app.js fallback-src/public/app.js
+          cmp site/key/index.html fallback-src/public/index.html
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload rollback site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+      - name: Deploy rollback
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Verify rollback is live
+        env:
+          TARGET_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          python3 - <<'PY'
+          import json, os, time, urllib.request
+          base='https://to-shreds.github.io/torbox-web-player/'
+          sha=os.environ['TARGET_SHA']
+          for attempt in range(12):
+              try:
+                  with urllib.request.urlopen(base+'version.json?rollback='+sha, timeout=15) as response:
+                      version=json.loads(response.read().decode('utf-8'))
+                  assert version['source']==sha and version.get('rollback') is True
+                  print('ROLLBACK_LIVE',json.dumps(version))
+                  break
+              except Exception as error:
+                  if attempt==11: raise
+                  print('Rollback not yet visible:',type(error).__name__)
+                  time.sleep(5)
+          PY
+      - name: Move production-current pointer
+        working-directory: rollback-src
+        env:
+          TARGET_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f production-current "$TARGET_SHA"
+          git push --force origin refs/tags/production-current
+          git push --force origin "$TARGET_SHA:refs/heads/production-current"
