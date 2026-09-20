@@ -10,7 +10,9 @@ import { getSettings, saveSettings, resetSettings } from './settings.js?v=2.1.0'
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=2.1.0';
 import { clearSearchHistory } from './search-history.js?v=2.1.0';
 import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=2.1.0';
+import { snapshotForVersion, captureStateSnapshot, listStateSnapshots, restoreStateSnapshot } from './state-snapshots.js?v=2.1.0';
 const APP_VERSION='2.1.0';
+try{snapshotForVersion(APP_VERSION);}catch{}
 const $ = id => document.getElementById(id);
 function viewerDisplayName(id,settings=getSettings()){
   const custom=id==='viewer-2'?settings.viewer2Name:settings.viewer1Name;
@@ -52,6 +54,32 @@ function setHealthSource(context=active){
   for(const id of ['health-sound-good','health-sound-bad','health-source-bad'])$(id).disabled=!source;
 }
 function text(id, value, error = false) { $(id).textContent = value; $(id).classList.toggle('error', error); }
+function snapshotTime(value){try{return new Date(value).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}catch{return 'Saved backup';}}
+function updateSnapshotSummary(){
+  const rows=listStateSnapshots(),summary=$('state-snapshot-summary');if(!summary)return;
+  summary.textContent=rows.length?rows.length+' local backup'+(rows.length===1?'':'s')+' available · newest '+snapshotTime(rows[0].createdAt):'No local backups yet.';
+}
+function renderSnapshotRestore(){
+  const rows=listStateSnapshots(),list=$('state-snapshot-list');if(!list)return;
+  const fragment=document.createDocumentFragment();
+  if(!rows.length){const p=document.createElement('p');p.className='muted';p.textContent='No local backups are available yet.';fragment.append(p);}
+  for(const row of rows){
+    const item=document.createElement('div');item.className='state-snapshot-row';
+    const copy=document.createElement('div');copy.className='state-snapshot-copy';
+    const title=document.createElement('strong');title.textContent=row.reason||'Local backup';
+    const meta=document.createElement('span');meta.textContent=[snapshotTime(row.createdAt),row.version?'from '+row.version:''].filter(Boolean).join(' · ');
+    copy.append(title,meta);
+    const restore=document.createElement('button');restore.type='button';restore.textContent='Restore';
+    restore.addEventListener('click',()=>{
+      if(!confirm('Restore this local backup? Current local app state will be backed up first when possible.'))return;
+      try{restoreStateSnapshot(row.id,{version:APP_VERSION});location.reload();}
+      catch(error){text('state-restore-message',error.message,true);}
+    });
+    item.append(copy,restore);fragment.append(item);
+  }
+  list.replaceChildren(fragment);text('state-restore-message','');
+}
+function openStateRestore(){renderSnapshotRestore();if(!$('state-restore-dialog').open)$('state-restore-dialog').showModal();}
 function requestParentPin(message,onSuccess){
   if(!hasParentPin()){if(typeof onSuccess==='function')onSuccess();return;}
   parentPinCallback=onSuccess;$('parent-pin-prompt').textContent=message||'Enter the Parent PIN.';
@@ -646,7 +674,7 @@ function loadSettingsForm(){
   $('setting-auto-next').checked=settings.autoNext;$('setting-auto-recovery').checked=settings.autoRecovery;$('setting-pause-overlay').checked=settings.pauseOverlay;$('setting-drive-watch-only').checked=settings.driveWatchOnly;$('setting-show-completed-recent').checked=settings.showCompletedRecent;
   $('setting-keep-awake').checked=settings.keepAwake;$('setting-keyboard-shortcuts').checked=settings.keyboardShortcuts;$('setting-show-episode-progress').checked=settings.showEpisodeProgress;$('setting-remember-browse').checked=settings.rememberBrowse;$('setting-prefer-cached').checked=settings.preferCachedSources;
   $('setting-show-watchlist').checked=settings.showWatchlist;$('setting-cleanup-completed').checked=settings.cleanupCompletedEpisodes;$('setting-show-next-up').checked=settings.showNextUp;$('setting-show-search-history').checked=settings.showSearchHistory;$('setting-long-press').checked=settings.longPressShortcuts;$('setting-playback-health').checked=settings.showPlaybackHealth;$('setting-auto-learn-sources').checked=settings.autoLearnSources;
-  updateInstallButton();text('settings-message','');
+  updateInstallButton();updateSnapshotSummary();text('settings-message','');
 }
 function activateSettingsTab(name='basic',focus=false){
   const tabs=[...document.querySelectorAll('[data-settings-tab]')],panels=[...document.querySelectorAll('[data-settings-panel]')],selected=tabs.some(tab=>tab.dataset.settingsTab===name)?name:'basic';
@@ -715,7 +743,7 @@ $('settings-form').addEventListener('submit',event=>{
   if(active?.video){active.video.playbackRate=savedSettings.playbackRate;if(active.video.paused)updatePauseCard(active);else hidePauseCard();setHealthSource(active);setPlaybackHealth(active.video.paused?'Paused':'Playing','Settings updated.');}
   text('settings-message','Saved.');
 });
-$('reset-settings').addEventListener('click',()=>{const defaults=resetSettings();try{sessionStorage.removeItem('tw-source-resolution')}catch{}applyViewerNames(defaults);$('viewer').value=viewer;syncViewerPersistence(defaults);applyInterfaceMode();loadSettingsForm();activateSettingsTab('basic');renderRecent();discoveryUI.settingsChanged();resetStillWatchingTimer();});
+$('reset-settings').addEventListener('click',()=>{captureStateSnapshot('Before resetting settings',APP_VERSION);const defaults=resetSettings();try{sessionStorage.removeItem('tw-source-resolution')}catch{}applyViewerNames(defaults);$('viewer').value=viewer;syncViewerPersistence(defaults);applyInterfaceMode();loadSettingsForm();activateSettingsTab('basic');renderRecent();discoveryUI.settingsChanged();resetStillWatchingTimer();updateSnapshotSummary();});
 $('kid-reset-allowance').addEventListener('click',()=>{resetKidAllowance(viewer);loadKidSettings();applyInterfaceMode();text('settings-message','Kid allowance reset.');});
 function openParentPinChange(){
   const existing=hasParentPin();$('parent-pin-change-title').textContent=existing?'Change Parent PIN':'Set Parent PIN';
@@ -738,6 +766,9 @@ $('parent-pin-change-form').addEventListener('submit',async event=>{
 });
 $('settings-clear-learning').addEventListener('click',()=>{if(confirm('Clear learned source preferences, audio feedback, bad-source blocks, and per-title quality choices on this device?')){clearSourceMemory();text('settings-message','Source learning cleared.');}});
 $('settings-clear-searches').addEventListener('click',()=>{if(confirm('Clear search history for this viewer on this device?')){clearSearchHistory(viewer);discoveryUI.settingsChanged();text('settings-message','Search history cleared.');}});
+$('state-snapshot-now').addEventListener('click',()=>{const made=captureStateSnapshot('Manual backup',APP_VERSION);updateSnapshotSummary();text('settings-message',made?'Local backup created.':'Nothing was backed up. Browser storage may be unavailable.',!made);});
+$('state-restore-open').addEventListener('click',openStateRestore);
+$('state-restore-close').addEventListener('click',()=>$('state-restore-dialog').close());
 $('settings-install-app').addEventListener('click',async()=>{if(!deferredInstallPrompt){text('settings-message',window.matchMedia?.('(display-mode: standalone)').matches?'The app is already installed.':'Use Chrome’s Add to Home screen / Install app command if the install prompt is not available.');return;}const prompt=deferredInstallPrompt;deferredInstallPrompt=null;await prompt.prompt();await prompt.userChoice.catch(()=>{});updateInstallButton();});
 $('settings-check-status').addEventListener('click',async()=>{text('settings-message','Checking TorBox…');const ok=await checkTorBoxStatus(true);text('settings-message',ok?(torboxStatusCache?.official==='issue'?'TorBox API is reachable, but its status page reports an issue.':'TorBox API is reachable.'):(torboxStatusCache?.message||'TorBox is unavailable.'),!ok);});
 $('retry-torbox-status').addEventListener('click',()=>checkTorBoxStatus(true));
@@ -752,7 +783,7 @@ installPortableSetupUI({
   getCredential:exportActiveCredential,
   authorize:action=>{if(hasParentPin())requestParentPin('Enter this device’s Parent PIN to transfer or replace its setup.',action);else action();},
   importSetup:async value=>{
-    const staged=stagedPortableState(value);await validateImportedCredential(value[2]);
+    const staged=stagedPortableState(value);await validateImportedCredential(value[2]);captureStateSnapshot('Before setup import',APP_VERSION);
     await stopPlayback();if($('player').open)$('player').close();
     const priorKey=await loadRememberedApiKey();let before=null,vaultChanged=false;
     try{
