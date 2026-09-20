@@ -32,17 +32,37 @@ function cinemetaTargets(path){
   const prefixed=match?new URL('/'+match[1]+path,CINEMETA_CATALOGS):null;
   return path.includes('/search=')?[new URL(path,CINEMETA_PRIMARY),prefixed].filter(Boolean):[prefixed,new URL(path,CINEMETA_PRIMARY)].filter(Boolean);
 }
+function searchText(value){return String(value||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+const SEARCH_STOPWORDS=new Set(['a','an','and','at','by','for','from','in','of','on','or','the','to','with']);
+function searchTokens(value){return searchText(value).split(' ').filter(token=>token.length>=2&&!SEARCH_STOPWORDS.has(token))}
+function searchQuery(path){const match=/\/search=([^&]+?)(?:&|\.json$)/.exec(String(path||''));if(!match)return'';try{return decodeURIComponent(match[1])}catch{return match[1]}}
+function titleRelevant(name,query){
+  const title=searchText(name),needle=searchText(query);if(!title||!needle)return false;
+  if(title===needle||title.includes(needle)||needle.includes(title))return true;
+  const wanted=searchTokens(needle),have=searchTokens(title);if(!wanted.length)return title.includes(needle);
+  let matched=0;for(const token of wanted)if(have.some(candidate=>candidate===token||(token.length>=3&&candidate.startsWith(token))||(candidate.length>=3&&token.startsWith(candidate))))matched++;
+  return matched>=Math.max(1,Math.ceil(wanted.length*.5));
+}
 async function relayCinemeta(path,origin){
   if(!validCinemetaPath(path))return json(400,{error:'CINEMETA_PATH_NOT_ALLOWED'},origin,{'X-TorBox-Bridge':'cloudflare'});
-  let lastStatus=502;
+  const query=path.includes('/search=')?searchQuery(path):'';let lastStatus=502,sawValidSearch=false;
   for(const upstream of cinemetaTargets(path)){
     try{
       const response=await fetch(upstream,{method:'GET',headers:{Accept:'application/json'},redirect:'follow'});
       lastStatus=response.status;
       if(!response.ok)continue;
+      if(query){
+        let data;try{data=await response.json()}catch{continue}
+        if(!Array.isArray(data?.metas))continue;
+        sawValidSearch=true;
+        const metas=data.metas.filter(row=>titleRelevant(row?.name,query));
+        if(!metas.length)continue;
+        return json(200,{...data,metas},origin,{'X-TorBox-Bridge':'cloudflare'});
+      }
       return new Response(response.body,{status:response.status,headers:{'Content-Type':response.headers.get('content-type')||'application/json; charset=utf-8','Cache-Control':'no-store','X-TorBox-Bridge':'cloudflare',...cors(origin)}});
     }catch{}
   }
+  if(query&&sawValidSearch)return json(200,{metas:[]},origin,{'X-TorBox-Bridge':'cloudflare'});
   return json(lastStatus||502,{error:'CINEMETA_UPSTREAM_UNAVAILABLE'},origin,{'X-TorBox-Bridge':'cloudflare'});
 }
 export default{
