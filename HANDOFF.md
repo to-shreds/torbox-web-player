@@ -16,9 +16,9 @@ If this file conflicts with the repo, the repo controls substance. If it conflic
 - Canonical repo: `to-shreds/torbox-web-player`
 - Canonical branch: `main`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
-- Current production version: **2.1.0**
-- Current production source: `673d3f8847c7b8554f134a8a8214cbb2e21dd929`
-- Runtime marker: `browser-local-2.1.0`
+- Current production version: **2.2.0**
+- Current production source: `6311a18d9fa48a3d6ac3a03d6c78fb815bc63bf2`
+- Runtime marker: `browser-local-2.2.0`
 - Pinned legacy fallback: `/key/` from `d5dd3bd71ee2679178e66440c5240a80eaba41f2`
 - `/direct/` redirects to the canonical root.
 
@@ -30,22 +30,20 @@ Preserve: browse/search, title and episode UI, automatic source choice, direct T
 
 ## Recent work
 
-Version 2.1.0 redesigned Settings:
+Version 2.2.0 added four protection layers:
 
-- Settings opens on **Basic settings**.
-- Optional User 1 and User 2 display names.
-- Every Basic setting has a plain-English tooltip.
-- Advanced tabs: Playback, Home & history, Discover & sources, Kids, Devices & app.
-- New advanced controls: home density, starting browse type/feed/genre, search responsiveness, and cached-source preference.
-- User names remain display labels only; internal identities remain `viewer-1` and `viewer-2`.
-- New ordinary settings are included in backendless setup transfer.
-- Final publication run `35490298695`: 309 tests, 303 pass, 0 fail, 6 optional skips; public 2.1.0 verification succeeded.
+- Source feedback is keyed to the exact torrent file variant (hash + filename/file index), so “sound works,” “no sound,” or bad-source learning for one file no longer hard-blocks another file under the same torrent hash. Legacy hash-only success data is only a soft hint.
+- Local state snapshots keep up to three backups of settings, Continue Watching, My List, searches, source learning, Kid Mode/Parent PIN state, and selected user. The TorBox API key is excluded. A backup is attempted before the first launch of a new version, setup import, settings reset, and manual Restore; Settings → Devices & app also exposes manual backup/restore.
+- Releases now use `release-candidate` → full CI → machine-managed `release-approved`. Production Pages refuses to publish a main commit unless it exactly matches `release-approved`.
+- Successful production releases create immutable `production-v<version>` and movable `production-current` refs. `rollback-stable` remains pinned to the pre-2.2.0 2.1.0 release at `24f8f7a2ac55a52e58982fac29ddd242b2647f68`. The manual **Roll back TorBox Player** workflow defaults to that ref, reruns tests, republishes it without rewriting main, and moves `production-current`.
 
-Version 2.0.8 was a full feature-preservation audit. It added a central product-contract test and fixed stale leaf-module cache-busting imports. Do not undo those release-integrity protections.
+Verification: candidate run `35491888111` passed 321 tests (315 pass, 0 fail, 6 optional skips) and approved source `6311a18d9fa48a3d6ac3a03d6c78fb815bc63bf2`. Production run `35491912729` repeated the same green suite, passed the release-approved gate, publicly verified 2.2.0, and created `production-v2.2.0` plus `production-current`.
+
+Version 2.1.0 introduced the tabbed Basic/Advanced Settings UI. Version 2.0.8 added the full product-contract audit and complete browser-module version scan. Preserve both.
 
 ## Known acceptance boundary
 
-Automated tests verify source contracts, routing, state behavior, and synthetic browser behavior. They do not prove that a particular real torrent's audio codec works on the user's physical Android device. Physical-device playback remains the final acceptance test for real audio/codec behavior.
+Automated tests verify source contracts, routing, state behavior, release gating, and synthetic browser behavior. They do not prove that a particular real torrent's audio codec works on the user's physical Android device. The rollback workflow is implemented and statically covered but has not been intentionally exercised against live Pages, because doing so would temporarily replace the current deployment. Physical-device playback remains the final acceptance test for real audio/codec behavior.
 
 ## Working rules
 
@@ -53,7 +51,7 @@ Preserve completed work. Make the smallest reliable change. Before fixing a regr
 
 ## Next action
 
-Use the user's newest request as the next task. Before editing, inspect the exact current implementation involved and check ProjectStatus for any newer unresolved item.
+Use the user's newest request as the next task. For substantive code changes, work on `release-candidate`, let CI advance `release-approved`, then fast-forward `main` only to that exact approved SHA. After 2.2.0 is physically accepted, consider moving `rollback-stable` forward from 2.1.0 to the accepted release.
 
 ## Persistence
 
