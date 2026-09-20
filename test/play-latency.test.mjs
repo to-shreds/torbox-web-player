@@ -9,8 +9,8 @@ test('source discovery is bounded and returns after useful providers instead of 
   assert.match(runtime,/const SOURCE_CACHE_MS = 90000/);
   assert.match(runtime,/scheduleGrace\(450\)/);
   assert.match(runtime,/scheduleGrace\(900\)/);
-  assert.match(runtime,/scheduleGrace\(2200\)/);
-  assert.match(runtime,/hardTimer = setTimeout\(finish, 5000\)/);
+  assert.doesNotMatch(runtime,/scheduleGrace\(2200\)/);
+  assert.match(runtime,/hardTimer = setTimeout\(finish, 6500\)/);
   assert.match(runtime,/safeCount=\(\)=>/);
   assert.match(runtime,/sourceCache\.set\(key/);
   assert.match(runtime,/return directSources\(target, signal\)/);
@@ -37,7 +37,7 @@ test('duplicate Play taps coalesce and stale intents cannot replace a newer play
   assert.match(discover,/suspend\(\)\{active=false;guestMode=false;\+\+playIntentGeneration;playIntentPromise=null;playIntentKey=''/);
 });
 
-test('interactive source lookup has an 8 second UI deadline while provider fan-in has a 5 second hard ceiling',async()=>{
+test('interactive source lookup has an 8 second UI deadline while provider fan-in has a 6.5 second hard ceiling',async()=>{
   const discover=await read('../public/discover.js');
   assert.match(discover,/registeredSources\(target,AbortSignal\.timeout\(8000\)\)/);
 });
