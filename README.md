@@ -1,6 +1,6 @@
 # TorBox Player
 
-Current version: **2.0.4**
+Current version: **2.0.5**
 
 Canonical frontend: `https://to-shreds.github.io/torbox-web-player/`
 
@@ -8,9 +8,9 @@ Canonical frontend: `https://to-shreds.github.io/torbox-web-player/`
 
 ## What runs where
 
-The primary product is a static browser application. Cinemeta metadata, source discovery, normalization, ranking, playback selection, settings, Continue Watching, My List, parental limits, and source learning run in the user's browser. Video streams directly from TorBox's CDN to the browser.
+The primary product is a static browser application. Cinemeta search/browse, source discovery, normalization, ranking, playback selection, settings, Continue Watching, My List, parental limits, and source learning run in the user's browser. Video streams directly from TorBox's CDN to the browser. If direct Cinemeta metadata/catalog access fails on a device, the player can use a narrow stateless Cloudflare catalog relay as a fallback; it carries no TorBox credential and does not relay video.
 
-Only the required TorBox API operations use a narrow stateless bridge: Render first, Cloudflare backup. Both are configured in `public/relay-config.json`. The bridges receive the user's TorBox credential for each request. They do not provide the player with a database, cloud profile, or shared history. Neither bridge relays the video.
+The required TorBox API operations use a narrow stateless bridge: Render first, Cloudflare backup. Both are configured in `public/relay-config.json`. The bridges receive the user's TorBox credential for each request. They do not provide the player with a database, cloud profile, or shared history. Neither bridge relays the video.
 
 A fast primary-read timeout allows fallback without subjecting the backup and write operations to the same two-second deadline. An upstream TorBox rate-limit response is not treated as permission to bypass the account's quota by switching hosts. Ordinary authentication/validation errors do not fail over. An ambiguous torrent-create failure is reconciled against the account before replay; this reduces duplicate requests but is not a provider-supported exactly-once guarantee.
 
