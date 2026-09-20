@@ -1,17 +1,17 @@
-import { createDiscoveryUI } from './discover.js?v=2.2.1';
-import { diagnosePlaybackFailure } from './playback-errors.js?v=2.2.1';
-import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode, isDirectRuntime } from './runtime.js?v=2.2.1';
-import { directApi, runDirectDiagnostics, diagnosticText, exportActiveCredential, validateImportedCredential, recordDiagnosticEvent } from './direct-runtime.js?v=2.2.1';
-import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=2.2.1';
-import { installPortableSetupUI } from './portable-setup-ui.js?v=2.2.1';
-import { stagedPortableState, writePortableState, restorePortableState, hydratePortableMetadata } from './portable-setup.js?v=2.2.1';
-import { listRecent, recordRecent, removeRecent, recentForContext, resumePosition, formatResumeTime } from './history.js?v=2.2.1';
-import { getSettings, saveSettings, resetSettings } from './settings.js?v=2.2.1';
-import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=2.2.1';
-import { clearSearchHistory } from './search-history.js?v=2.2.1';
-import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=2.2.1';
-import { snapshotForVersion, captureStateSnapshot, listStateSnapshots, restoreStateSnapshot } from './state-snapshots.js?v=2.2.1';
-const APP_VERSION='2.2.1';
+import { createDiscoveryUI } from './discover.js?v=2.3.0';
+import { diagnosePlaybackFailure } from './playback-errors.js?v=2.3.0';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode, isDirectRuntime } from './runtime.js?v=2.3.0';
+import { directApi, runDirectDiagnostics, diagnosticText, exportActiveCredential, validateImportedCredential, recordDiagnosticEvent } from './direct-runtime.js?v=2.3.0';
+import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=2.3.0';
+import { installPortableSetupUI } from './portable-setup-ui.js?v=2.3.0';
+import { stagedPortableState, writePortableState, restorePortableState, hydratePortableMetadata } from './portable-setup.js?v=2.3.0';
+import { listRecent, recordRecent, removeRecent, recentForContext, resumePosition, formatResumeTime } from './history.js?v=2.3.0';
+import { getSettings, saveSettings, resetSettings } from './settings.js?v=2.3.0';
+import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=2.3.0';
+import { clearSearchHistory } from './search-history.js?v=2.3.0';
+import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=2.3.0';
+import { snapshotForVersion, captureStateSnapshot, listStateSnapshots, restoreStateSnapshot } from './state-snapshots.js?v=2.3.0';
+const APP_VERSION='2.3.0';
 try{snapshotForVersion(APP_VERSION);}catch{}
 const $ = id => document.getElementById(id);
 function viewerDisplayName(id,settings=getSettings()){
@@ -28,7 +28,7 @@ function syncViewerPersistence(settings=getSettings()){
     else{localStorage.removeItem('tw-viewer');sessionStorage.removeItem('tw-viewer');}
   }catch{}
 }
-let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '';
+let csrf = '', sessionToken = getSessionToken(), activeCredential = '', playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '';
 let discoveryUI;
 let viewer = 'viewer-1';
 try {
@@ -270,9 +270,23 @@ async function connectWithKey(apiKey, remember = false) {
   const result = await api('/api/login', { method: 'POST', data: { apiKey } });
   sessionToken = result.sessionToken || '';
   if (!sessionToken || !setSessionToken(sessionToken)) throw new Error('The browser could not save the private session.');
-  csrf = result.csrf;
+  csrf = result.csrf;activeCredential=apiKey;
   if (remember) await rememberApiKey(apiKey);
   return result;
+}
+async function validateCredentialForImport(apiKey){
+  if(isDirectRuntime())return validateImportedCredential(apiKey);
+  const url=apiUrl('/api/login');
+  let response;
+  try{
+    response=await fetch(url,{method:'POST',mode:apiMode(),headers:{'Content-Type':'application/json'},body:JSON.stringify({apiKey}),credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(30000)});
+  }catch{throw new Error('The Render service could not validate the imported TorBox connection. Try again.');}
+  let result;try{result=await response.json();}catch{throw new Error('The Render service could not validate the imported TorBox connection.');}
+  if(!response.ok||!result?.sessionToken)throw new Error(result?.message||'The imported TorBox connection was rejected.');
+  try{
+    await fetch(apiUrl('/api/logout'),{method:'POST',mode:apiMode(),headers:{Authorization:'Bearer '+result.sessionToken,'Content-Type':'application/json'},body:'{}',credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(10000)});
+  }catch{}
+  return true;
 }
 async function bootstrap() {
   try {
@@ -292,7 +306,9 @@ async function bootstrap() {
       }
       return show('login');
     }
-    csrf = session.csrf;applyViewerNames();$('viewer').value=viewer; show('workspace');
+    csrf = session.csrf;
+    if(!activeCredential){try{activeCredential=await loadRememberedApiKey()||'';}catch{}}
+    applyViewerNames();$('viewer').value=viewer; show('workspace');
     if (session.guest) {
       enterGuestUi();
       $('recent-section').hidden = true;
@@ -316,7 +332,7 @@ async function performLogout(){
   await stopPlayback();
   try {
     await api('/api/logout', { method: 'POST', data: {} });
-    clearSessionToken(); sessionToken = ''; csrf = ''; torboxStatusCache = null;
+    clearSessionToken(); sessionToken = ''; csrf = ''; activeCredential=''; torboxStatusCache = null;
     if (guestMode) {
       let backup = ''; try { backup = sessionStorage.getItem('torbox-owner-session-backup') || ''; sessionStorage.removeItem('torbox-owner-session-backup'); } catch {}
       leaveGuestUi();
@@ -773,17 +789,17 @@ $('settings-install-app').addEventListener('click',async()=>{if(!deferredInstall
 $('settings-check-status').addEventListener('click',async()=>{text('settings-message','Checking TorBox…');const ok=await checkTorBoxStatus(true);text('settings-message',ok?(torboxStatusCache?.official==='issue'?'TorBox API is reachable, but its status page reports an issue.':'TorBox API is reachable.'):(torboxStatusCache?.message||'TorBox is unavailable.'),!ok);});
 $('retry-torbox-status').addEventListener('click',()=>checkTorBoxStatus(true));
 document.body.classList.toggle('direct-runtime',isDirectRuntime());
-discoveryUI = createDiscoveryUI({ api, play: startPlayback, driveTest: isDirectRuntime()?null:openDriveTest, guard: ensureTorBoxReady });
+discoveryUI = createDiscoveryUI({ api, play: startPlayback, driveTest: null, guard: ensureTorBoxReady });
 let portableHydration=null;
 function refreshPortableMetadata(){
   if(portableHydration)return;
   portableHydration=hydratePortableMetadata(async(type,id)=>(await api('/api/discover/meta?'+new URLSearchParams({type,id}))).meta,localStorage,()=>{renderRecent();discoveryUI?.settingsChanged();}).catch(()=>{}).finally(()=>{portableHydration=null;});
 }
 installPortableSetupUI({
-  getCredential:exportActiveCredential,
+  getCredential:()=>activeCredential||exportActiveCredential(),
   authorize:action=>{if(hasParentPin())requestParentPin('Enter this device’s Parent PIN to transfer or replace its setup.',action);else action();},
   importSetup:async value=>{
-    const staged=stagedPortableState(value);await validateImportedCredential(value[2]);captureStateSnapshot('Before setup import',APP_VERSION);
+    const staged=stagedPortableState(value);await validateCredentialForImport(value[2]);captureStateSnapshot('Before setup import',APP_VERSION);
     await stopPlayback();if($('player').open)$('player').close();
     const priorKey=await loadRememberedApiKey();let before=null,vaultChanged=false;
     try{
