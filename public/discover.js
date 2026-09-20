@@ -1,3 +1,4 @@
+import { recordDiagnosticEvent } from './direct-runtime.js';
 import { getSettings, updateSettings } from './settings.js';
 import { listRecent, formatResumeTime } from './history.js';
 import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js';
@@ -255,6 +256,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
         if(generation!==playIntentGeneration)return false;
         const best=recommendSource(registered.sources,target.type,resolution)||recommendSource(registered.sources,target.type,'auto');
         if(!best)throw new Error('No source matches this resolution.');
+        recordDiagnosticEvent('source_selected','ok',{provider:best.provider||'',resolution:best.resolution||best.quality||'',videoCodec:best.videoCodec||'',audioCodecs:best.audioCodecs||[],cached:best.cached===true,browserFriendly:best.browserFriendly===true,audioRisk:best.audioRisk===true,videoRisk:best.videoRisk===true});
         message('detail-message',best.cached?'Opening cached source…':'Preparing recommended source…');
         const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
         if(generation!==playIntentGeneration)return false;
@@ -411,6 +413,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       const candidates=autoNextSourceOrder(registered.sources,context.resolution||'auto');
       for(const source of candidates){
         try{
+          recordDiagnosticEvent('auto_next_source','trying',{provider:source.provider||'',resolution:source.resolution||source.quality||'',videoCodec:source.videoCodec||'',audioCodecs:source.audioCodecs||[],cached:source.cached===true,browserFriendly:source.browserFriendly===true,audioRisk:source.audioRisk===true,videoRisk:source.videoRisk===true});
           const result=await readyFile(source,{signal:AbortSignal.timeout(330000),unattended:true});
           const moved=await play(result.file,{...buildContext(meta.meta,next,next.name||'',context.resolution||getResolution(next),source),poster:meta.meta.poster||context.poster,queue:rest});
           if(moved)return true;
