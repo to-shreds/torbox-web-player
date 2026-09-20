@@ -1,6 +1,6 @@
 # TorBox Player
 
-Current version: **2.3.1**
+Current version: **2.3.2**
 
 Canonical frontend: `https://to-shreds.github.io/torbox-web-player/`
 

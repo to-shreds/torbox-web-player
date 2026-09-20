@@ -42,9 +42,20 @@ test('preferred source chooses cached browser-friendly audio over cached Dolby a
 });
 
 
-test('known H.264/AAC beats cached codec-unknown audio', () => {
+test('a cached risk-free source beats an uncached H.264/AAC source', () => {
+  // Physical Android evidence: cached sources play, uncached sources sit in "Preparing" because
+  // TorBox has to download them first. Preferring an uncached source for better expected audio
+  // trades working playback for a codec guess, so cached availability is screened first and audio
+  // preference decides within it. Known-risky audio is still excluded from every cached tier.
   const list=[
     {id:'unknown-cached',cached:true,audioRisk:false,videoRisk:false,browserFriendly:false,resolution:'720p',score:200,size:500*1024**2},
+    {id:'aac-uncached',cached:false,audioRisk:false,videoRisk:false,browserFriendly:true,resolution:'720p',score:0,size:600*1024**2}
+  ];
+  assert.equal(preferredSource(list).id,'unknown-cached');
+});
+test('cached availability never outranks known-risky audio', () => {
+  const list=[
+    {id:'dolby-cached',cached:true,audioRisk:true,videoRisk:false,browserFriendly:false,resolution:'720p',score:900,size:400*1024**2},
     {id:'aac-uncached',cached:false,audioRisk:false,videoRisk:false,browserFriendly:true,resolution:'720p',score:0,size:600*1024**2}
   ];
   assert.equal(preferredSource(list).id,'aac-uncached');

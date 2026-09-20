@@ -1,9 +1,9 @@
-import { recordDiagnosticEvent } from './direct-runtime.js?v=2.3.1';
-import { getSettings, updateSettings } from './settings.js?v=2.3.1';
-import { listRecent, formatResumeTime } from './history.js?v=2.3.1';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.3.1';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.3.1';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.3.1';
+import { recordDiagnosticEvent } from './direct-runtime.js?v=2.3.2';
+import { getSettings, updateSettings } from './settings.js?v=2.3.2';
+import { listRecent, formatResumeTime } from './history.js?v=2.3.2';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=2.3.2';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=2.3.2';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=2.3.2';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
@@ -38,7 +38,7 @@ export function recommendSource(list, type = 'movie', resolution = 'auto', sizeP
   const safe = visible.filter(s => !s.audioRisk && !s.videoRisk);
   const cached = visible.filter(s => s.cached === true && !s.audioRisk);
   const pool = preferCached
-    ? (cachedFriendly.length ? cachedFriendly : browserSafe.length ? browserSafe : cachedSafe.length ? cachedSafe : cached.length ? cached : visible)
+    ? (cachedFriendly.length ? cachedFriendly : cachedSafe.length ? cachedSafe : browserSafe.length ? browserSafe : cached.length ? cached : visible)
     : (browserSafe.length ? browserSafe : safe.length ? safe : visible);
   const profile = ['data','balanced','quality'].includes(sizeProfile) ? sizeProfile : 'balanced';
   const limits = profile === 'data' ? { movie:1.5 * GB, series:.6 * GB } : profile === 'quality' ? { movie:6 * GB, series:2 * GB } : { movie:3 * GB, series:1 * GB };
@@ -248,6 +248,9 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
         result=await api('/api/discover/status?'+new URLSearchParams({source:source.id,file:selected.id}),{signal:signal?AbortSignal.any([signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000)});continue;
       }
       if(result.state!=='preparing')throw new Error(result.message||'This source is unavailable.');
+      // An uncached version has to be downloaded by TorBox before it can play. Without this the
+      // screen sits on one unchanging line for minutes and looks indistinguishable from a hang.
+      message('detail-message',typeof result.progress==='number'?`TorBox is downloading this version… ${Math.round(result.progress*100)}%`:'TorBox is preparing this version…');
       await delay(3500);result=await api('/api/discover/status?'+new URLSearchParams({source:source.id}),{signal:signal?AbortSignal.any([signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000)});
     }
     throw new Error('TorBox is still preparing this source. Try again shortly.');
@@ -272,7 +275,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
         const best=recommendAutomaticSource(registered.sources,target.type,resolution)||recommendAutomaticSource(registered.sources,target.type,'auto');
         if(!best)throw new Error('No usable source matches this resolution. Open Options to choose a blocked source manually.');
         recordDiagnosticEvent('source_selected','ok',{provider:best.provider||'',resolution:best.resolution||best.quality||'',videoCodec:best.videoCodec||'',audioCodecs:best.audioCodecs||[],cached:best.cached===true,browserFriendly:best.browserFriendly===true,audioRisk:best.audioRisk===true,videoRisk:best.videoRisk===true});
-        message('detail-message',best.cached?'Opening cached source…':'Preparing recommended source…');
+        message('detail-message',best.cached?'Opening cached source…':'No cached version was available. TorBox has to download this one first, which can take a while…');
         const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
         if(generation!==playIntentGeneration)return false;
         const context=buildContext(meta,target,episodeName,resolution,best);
