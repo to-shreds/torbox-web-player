@@ -22,6 +22,7 @@ const publicFiles = new Map([
   ['/watchlist.js', ['watchlist.js', 'text/javascript; charset=utf-8']],
   ['/search-history.js', ['search-history.js', 'text/javascript; charset=utf-8']],
   ['/source-memory.js', ['source-memory.js', 'text/javascript; charset=utf-8']],
+  ['/state-snapshots.js', ['state-snapshots.js', 'text/javascript; charset=utf-8']],
   ['/parental-controls.js', ['parental-controls.js', 'text/javascript; charset=utf-8']],
   ['/device-transfer.js', ['device-transfer.js', 'text/javascript; charset=utf-8']],
   ['/portable-setup.js', ['portable-setup.js', 'text/javascript; charset=utf-8']],
