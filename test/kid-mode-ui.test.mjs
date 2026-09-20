@@ -52,6 +52,6 @@ test('Kid Mode module is served and included in the static PWA shell',async()=>{
   const [server,sw,pkg]=await Promise.all([read('../server.mjs'),read('../public/sw.js'),read('../package.json')]);
   assert.match(server,/\/parental-controls\.js/);
   assert.match(sw,/\.\/parental-controls\.js/);
-  assert.match(pkg,/2\.1\.0/);
+  assert.match(pkg,/2\.2\.0/);
   assert.match(pkg,/node --check public\/parental-controls\.js/);
 });
