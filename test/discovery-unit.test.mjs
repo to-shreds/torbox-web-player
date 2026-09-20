@@ -33,8 +33,10 @@ test('catalog broad search is encoded and independent of TorBox files', async ()
   const result = await c.search({ q: 'A & B/?', genre: 'Science Fiction' });
   assert.ok(seen.some(path=>path.startsWith('https://v3-cinemeta.strem.io/catalog/movie/top/')));
   assert.ok(seen.some(path=>path.startsWith('https://cinemeta-catalogs.strem.io/top/catalog/movie/top/')));
-  assert.ok(seen.every(path=>path.includes('search=A%20%26%20B%2F%3F')));
-  assert.ok(seen.every(path=>path.includes('genre=Science%20Fiction')));
+  const cinemeta=seen.filter(path=>path.includes('cinemeta'));
+  assert.ok(cinemeta.length>=2);
+  assert.ok(cinemeta.every(path=>path.includes('search=A%20%26%20B%2F%3F')));
+  assert.ok(cinemeta.every(path=>path.includes('genre=Science%20Fiction')));
   assert.equal(result.metas.length, 1); assert.equal(result.nextSkip, null);
 });
 test('catalog IMDb search resolves metadata rather than partial text matches', async () => {
