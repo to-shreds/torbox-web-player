@@ -34,13 +34,13 @@ test('clearing search restores Home and refreshes browse immediately',async()=>{
   assert.match(discover,/document\.body\.classList\.remove\('search-mode'\)/);
 });
 
-test('stable release metadata is 2.0.2',async()=>{
+test('stable release metadata is 2.0.3',async()=>{
   const [pkg,entry,server,sw,readme]=await Promise.all([
     read('../package.json'),read('../entry.mjs'),read('../server.mjs'),read('../public/sw.js'),read('../README.md')
   ]);
-  assert.equal(JSON.parse(pkg).version,'2.0.2');
-  assert.match(entry,/version: '2\.0\.2'/);
-  assert.match(server,/version: '2\.0\.2'/);
-  assert.match(sw,/torbox-main-v2\.0\.2/);
-  assert.match(readme,/Current version: \*\*2\.0\.2\*\*/);
+  assert.equal(JSON.parse(pkg).version,'2.0.3');
+  assert.match(entry,/version: '2\.0\.3'/);
+  assert.match(server,/version: '2\.0\.3'/);
+  assert.match(sw,/torbox-main-v2\.0\.3/);
+  assert.match(readme,/Current version: \*\*2\.0\.3\*\*/);
 });
