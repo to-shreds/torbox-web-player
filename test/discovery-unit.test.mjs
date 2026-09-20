@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { Catalog, normalizeMeta, posterUrl, jsonFromResponse } from '../lib/catalog.mjs';
 import { Discovery, TorrentGateway, chooseVideo, episodeIdentity } from '../lib/discovery.mjs';
 import { targetOf, normalizeSources, loadPublicSources, sourceHints, browserContainerHints } from '../public/source-client.js';
+import { applySourceMemory, setSourceBad } from '../public/source-memory.js';
 import { AppError } from '../lib/torbox.mjs';
 const HASH = 'a'.repeat(40), HASH2 = 'b'.repeat(40), ID = 'tt1254207';
 const target = { type: 'movie', id: ID };
@@ -20,6 +21,7 @@ function fixture(extra = {}) {
   };
   return { discovery: new Discovery({ catalog, gateway }), calls, gateway };
 }
+function memoryStore(){const map=new Map();return{getItem:key=>map.has(key)?map.get(key):null,setItem:(key,value)=>map.set(key,String(value)),removeItem:key=>map.delete(key)};}
 async function registered(d, input = { target, sources: [source] }, session = 's') { return (await d.register(input, session)).sources[0].id; }
 
 test('catalog validates identities before making requests', async () => {
@@ -149,6 +151,14 @@ test('registering sources and checking availability never enqueues', async () =>
   const { discovery: d, calls } = fixture(); const id = await registered(d);
   assert.equal(calls.create, 0); assert.equal(calls.find, 0); assert.equal(calls.cached, 1);
   assert.equal((await d.status(id, 's')).state, 'not_started');
+});
+test('re-registering a source preserves its hash-based bad-source memory',async()=>{
+  const {discovery:d}=fixture(),store=memoryStore();
+  const first=(await d.register({target,sources:[source]},'s')).sources[0];
+  setSourceBad(target,first,true,store);
+  const second=(await d.register({target,sources:[source]},'s')).sources[0];
+  assert.notEqual(first.id,second.id);assert.equal(first.hash,HASH);assert.equal(second.hash,HASH);
+  assert.equal(applySourceMemory(target,[second],store)[0].memoryBad,true);
 });
 test('availability failure preserves sources and marks cached state unknown', async () => {
   const { discovery: d } = fixture({ cached: async () => { throw new Error('private-url'); } });

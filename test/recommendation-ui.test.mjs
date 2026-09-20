@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { recommendSource, automaticSourceOrder, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder, recoverySourceOrder, boundedRecoverySourceOrder, sourceRecoveryKey, MAX_AUTOMATIC_SOURCE_ATTEMPTS } from '../public/discover.js';
+import { readFile } from 'node:fs/promises';
+import { recommendSource, automaticSourceOrder, automaticCachedSourceOrder, resolveAutomaticCachedSource, isAutomaticCandidateFailure, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder, recoverySourceOrder, boundedRecoverySourceOrder, sourceRecoveryKey, MAX_AUTOMATIC_SOURCE_ATTEMPTS, AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } from '../public/discover.js';
 import { parseSizeBytes } from '../public/source-client.js';
 import { normalizeIndexRows } from '../lib/source-lookup.mjs';
 
@@ -26,6 +27,59 @@ test('known MP4 source beats cached AVI and unsupported containers never enter a
   assert.equal(recommendSource([avi,mkv,mp4],'series','auto').id,'mp4');
   assert.deepEqual(automaticSourceOrder([avi,mkv,mp4],'series','auto').map(source=>source.id),['mp4']);
   assert.equal(recommendSource([avi,mkv],'series','auto'),null);
+});
+test('cached plausible source is tried before an uncached MP4',()=>{
+  const cached=src('cached-unknown',{browserFriendly:false,browserContainer:false,browserUnsupported:false,containerStatus:'unknown'});
+  const mp4=src('uncached-mp4',{cached:false,browserFriendly:true,browserContainer:true,browserUnsupported:false,containerStatus:'supported'});
+  assert.equal(recommendSource([mp4,cached],'series','auto').id,'cached-unknown');
+  assert.deepEqual(automaticSourceOrder([mp4,cached],'series','auto').map(source=>source.id),['cached-unknown','uncached-mp4']);
+  assert.deepEqual(automaticCachedSourceOrder([mp4,cached],'series','auto').map(source=>source.id),['cached-unknown']);
+});
+test('automatic playback never prepares an uncached source',async()=>{
+  const calls=[];
+  const uncached=src('uncached-mp4',{cached:false,browserContainer:true,containerStatus:'supported'});
+  await assert.rejects(resolveAutomaticCachedSource([uncached],{type:'series'},'auto',{prepare:async source=>{calls.push(source.id);return{state:'ready'};}}),error=>error.code==='NO_CACHED_BROWSER_SOURCE'&&/More Options/.test(error.message)&&/Prepare/.test(error.message));
+  assert.deepEqual(calls,[]);
+});
+test('automatic playback skips a cached source whose real file is AVI',async()=>{
+  const first=src('cached-unknown-1',{browserFriendly:false,browserContainer:false,containerStatus:'unknown',size:.5*G});
+  const second=src('cached-unknown-2',{browserFriendly:false,browserContainer:false,containerStatus:'unknown',size:.7*G});
+  const calls=[],rejected=[];
+  const resolved=await resolveAutomaticCachedSource([second,first],{type:'series'},'auto',{onRejected:(source,error)=>rejected.push([source.id,error.code]),prepare:async source=>{
+    calls.push(source.id);
+    if(source.id==='cached-unknown-1'){const error=new Error('AVI');error.code='BROWSER_CONTAINER_UNSUPPORTED';throw error;}
+    return{state:'ready',file:{id:'video'}};
+  }});
+  assert.deepEqual(calls,['cached-unknown-1','cached-unknown-2']);
+  assert.deepEqual(rejected,[['cached-unknown-1','BROWSER_CONTAINER_UNSUPPORTED']]);
+  assert.equal(resolved.source.id,'cached-unknown-2');
+});
+test('automatic playback advances past a stale TorBox cache result',async()=>{
+  const first=src('stale',{browserFriendly:true,browserContainer:true,containerStatus:'supported',size:.5*G});
+  const second=src('ready',{browserFriendly:true,browserContainer:true,containerStatus:'supported',size:.7*G});
+  const calls=[];
+  const resolved=await resolveAutomaticCachedSource([second,first],{type:'series'},'auto',{prepare:async source=>{
+    calls.push(source.id);
+    if(source.id==='stale'){const error=new Error('This source is no longer cached. Use Prepare to request a download.');error.code='TORBOX_OPERATION_FAILED';throw error;}
+    return{state:'ready',file:{id:'video'}};
+  }});
+  assert.deepEqual(calls,['stale','ready']);assert.equal(resolved.source.id,'ready');
+  assert.equal(isAutomaticCandidateFailure({code:'TORBOX_OPERATION_FAILED',message:'TorBox is rate limiting requests.'}),false);
+});
+test('automatic cached checks share one total timeout budget',async()=>{
+  const sources=[1,2,3].map(id=>src(`cached-${id}`,{browserFriendly:true,browserContainer:true,containerStatus:'supported',size:id*G/10}));
+  let calls=0;const started=Date.now();
+  await assert.rejects(resolveAutomaticCachedSource(sources,{type:'series'},'auto',{totalTimeoutMs:30,prepare:async(_source,{signal})=>{calls++;await new Promise((_resolve,reject)=>signal.addEventListener('abort',()=>reject(new Error('aborted')),{once:true}));}}),error=>error.code==='NO_CACHED_BROWSER_SOURCE');
+  assert.ok(Date.now()-started<150);assert.equal(calls,1);
+});
+test('automatic playback does not poll a stale cached source and direct actions open More Options',async()=>{
+  const source=await readFile(new URL('../public/discover.js',import.meta.url),'utf8');
+  const stop=source.indexOf("if(!waitForPreparation)");
+  const poll=source.indexOf('await delay(3500)',stop);
+  assert.ok(stop>0&&poll>stop);
+  assert.ok(source.includes('unattended:true,waitForPreparation:false'));
+  assert.ok(source.includes("if(e?.code==='NO_CACHED_BROWSER_SOURCE')await openOptions(meta,target,episodeName)"));
+  assert.equal(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS,8000);
 });
 test('resolution filter supports exact 720/1080 and 4K alias',()=>{
   const list=[src('a',{resolution:'720p'}),src('b',{resolution:'1080p'}),src('c',{resolution:'4K'})];

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   MultiSourceLookup, StremioSourceLookup, TorznabSourceLookup, SourceLookupError,
   PUBLIC_STREMIO_PROVIDERS, mergeProviderSources, normalizeStremioStreams, normalizeTorznabXml,
-  MEDIAFUSION_TORZNAB_ORIGIN
+  MEDIAFUSION_TORZNAB_ORIGIN, browserSourceCount
 } from '../lib/source-lookup.mjs';
 
 const movie={type:'movie',id:'tt1160419'};
@@ -59,7 +59,7 @@ test('multi lookup aggregates two primary indexes in parallel and deduplicates b
   assert.deepEqual(result.sources.find(x=>x.hash===hash(1)).providers,['A','B']);
 });
 
-test('fallback is queried only when aggregated primaries do not reach target count',async()=>{
+test('configured fallback providers run concurrently and contribute metadata',async()=>{
   let fallback=0;
   const primaryA={name:'A',lookup:async()=>({sources:Array.from({length:10},(_,i)=>({hash:hash(i+1),title:'A'+i,score:1,provider:'A'}))})};
   const primaryB={name:'B',lookup:async()=>({sources:Array.from({length:5},(_,i)=>({hash:hash(i+11),title:'B'+i,score:1,provider:'B'}))})};
@@ -68,12 +68,12 @@ test('fallback is queried only when aggregated primaries do not reach target cou
   assert.equal(fallback,1); assert.equal(result.sources.length,25); assert.equal(result.fallbackUsed,true);
 });
 
-test('fallback is skipped when aggregated primaries have enough distinct browser candidates',async()=>{
+test('an empty concurrent fallback is not reported as used',async()=>{
   let fallback=0;
   const provider=(name,start)=>({name,lookup:async()=>({sources:Array.from({length:10},(_,i)=>({hash:hash(start+i),title:name+i,score:1,provider:name,browserContainer:true}))})});
   const backup={name:'Backup',lookup:async()=>{fallback++;return{sources:[]}}};
   const result=await new MultiSourceLookup({providers:[provider('A',1),provider('B',11),backup],primaryCount:2}).lookup(movie);
-  assert.equal(result.sources.length,20); assert.equal(fallback,0); assert.equal(result.fallbackUsed,false);
+  assert.equal(result.sources.length,20); assert.equal(fallback,1); assert.equal(result.fallbackUsed,false);
 });
 
 test('twenty unsupported primary results do not hide a playable fallback',async()=>{
@@ -82,6 +82,13 @@ test('twenty unsupported primary results do not hide a playable fallback',async(
   const backup={name:'MP4 backup',lookup:async()=>{fallback++;return{sources:Array.from({length:3},(_,i)=>({hash:hash(i+30),title:`Show.${i}.mp4`,score:100,provider:'MP4 backup',browserContainer:true,containerStatus:'supported'}))}}};
   const result=await new MultiSourceLookup({providers:[primary,backup],primaryCount:1}).lookup(movie);
   assert.equal(fallback,1);assert.equal(result.fallbackUsed,true);assert.equal(result.sources.filter(source=>source.browserContainer).length,3);
+});
+
+test('twenty fast unsupported results wait for a delayed playable fallback',async()=>{
+  const primary={name:'AVI primary',lookup:async()=>({sources:Array.from({length:20},(_,i)=>({hash:hash(i+1),title:`Show.${i}.avi`,score:-500,provider:'AVI primary',browserUnsupported:true,containerStatus:'unsupported'}))})};
+  const backup={name:'MP4 backup',lookup:async()=>{await new Promise(resolve=>setTimeout(resolve,220));return{sources:[{hash:hash(40),title:'Show.mp4',score:100,provider:'MP4 backup',browserContainer:true,containerStatus:'supported'}]}}};
+  const result=await new MultiSourceLookup({providers:[primary,backup],primaryCount:1,timeoutMs:1000}).lookup(movie);
+  assert.equal(result.sources.length,21);assert.equal(browserSourceCount(result.sources),1);assert.equal(result.fallbackUsed,true);
 });
 
 test('provider merge deduplicates the same torrent and keeps richer metadata plus provenance',()=>{
@@ -101,4 +108,57 @@ test('all successful empty providers return an honest empty result',async()=>{
   const providers=['A','B'].map(name=>({name,lookup:async()=>({sources:[]})}));
   const result=await new MultiSourceLookup({providers,primaryCount:2}).lookup(movie);
   assert.deepEqual(result.sources,[]); assert.equal(result.providersTried.length,2);
+});
+
+test('one empty provider plus a stalled provider reports timeout instead of caching an empty result',async()=>{
+  const providers=[{name:'Empty',lookup:async()=>({sources:[]})},{name:'Stalled',lookup:async()=>new Promise(()=>{})}];
+  await assert.rejects(new MultiSourceLookup({providers,primaryCount:1,timeoutMs:30}).lookup(movie),error=>error.code==='SOURCE_TIMEOUT');
+});
+
+test('a stalled provider cannot hold lookup beyond the configured bound',async()=>{
+  const fast={name:'Fast',lookup:async()=>({sources:[{hash:hash(1),title:'Movie.mp4',score:10,provider:'Fast',browserContainer:true}]})};
+  const stalled={name:'Stalled',lookup:async()=>new Promise(()=>{})};
+  const started=Date.now();
+  const result=await new MultiSourceLookup({providers:[fast,stalled],primaryCount:1,timeoutMs:30}).lookup(movie);
+  assert.ok(Date.now()-started<250);assert.equal(result.sources.length,1);assert.equal(result.providersTried.length,2);
+  assert.equal(result.warning,'Some anonymous source indexes were unavailable, but the search completed with the remaining providers.');
+});
+
+test('enough browser candidates return after a brief grace without waiting for the hard bound',async()=>{
+  const ready={name:'Ready',lookup:async()=>({sources:Array.from({length:20},(_,i)=>({hash:hash(i+1),title:`Movie.${i}.mp4`,score:10,provider:'Ready',browserContainer:true}))})};
+  const stalled={name:'Stalled',lookup:async()=>new Promise(()=>{})};
+  const started=Date.now();
+  const result=await new MultiSourceLookup({providers:[ready,stalled],primaryCount:1,timeoutMs:1000}).lookup(movie);
+  assert.ok(Date.now()-started<600);assert.equal(result.sources.length,20);assert.equal(result.providersTried.length,2);
+});
+
+test('one browser source plus a second empty success finishes after grace',async()=>{
+  const browser={name:'Browser',lookup:async()=>({sources:[{hash:hash(1),title:'Movie.mp4',score:10,provider:'Browser',browserContainer:true}]})};
+  const empty={name:'Empty',lookup:async()=>({sources:[]})},stalled={name:'Stalled',lookup:async()=>new Promise(()=>{})};
+  const started=Date.now();
+  const result=await new MultiSourceLookup({providers:[browser,empty,stalled],primaryCount:2,timeoutMs:1500}).lookup(movie);
+  assert.ok(Date.now()-started<800);assert.equal(result.sources.length,1);assert.equal(browserSourceCount(result.sources),1);
+});
+
+test('an AVI source plus an empty success still waits for a delayed browser source',async()=>{
+  const avi={name:'AVI',lookup:async()=>({sources:[{hash:hash(1),title:'Movie.avi',score:10,provider:'AVI',browserUnsupported:true}]})};
+  const empty={name:'Empty',lookup:async()=>({sources:[]})};
+  const browser={name:'Browser',lookup:async()=>{await new Promise(resolve=>setTimeout(resolve,350));return{sources:[{hash:hash(2),title:'Movie.mp4',score:10,provider:'Browser',browserContainer:true}]}}};
+  const result=await new MultiSourceLookup({providers:[avi,empty,browser],primaryCount:2,timeoutMs:1000}).lookup(movie);
+  assert.equal(result.sources.length,2);assert.equal(browserSourceCount(result.sources),1);
+});
+
+test('two AVI providers do not hide a delayed browser source',async()=>{
+  const avi=(name,id)=>({name,lookup:async()=>({sources:[{hash:hash(id),title:`Movie.${id}.avi`,score:10,provider:name,browserUnsupported:true}]})});
+  const browser={name:'Browser',lookup:async()=>{await new Promise(resolve=>setTimeout(resolve,350));return{sources:[{hash:hash(3),title:'Movie.mp4',score:10,provider:'Browser',browserContainer:true}]}}};
+  const result=await new MultiSourceLookup({providers:[avi('AVI A',1),avi('AVI B',2),browser],primaryCount:2,timeoutMs:1000}).lookup(movie);
+  assert.equal(result.sources.length,3);assert.equal(browserSourceCount(result.sources),1);
+});
+
+test('two source-yielding providers with plausible unknown containers finish after grace',async()=>{
+  const provider=(name,id)=>({name,lookup:async()=>({sources:[{hash:hash(id),title:`Movie.${id}`,score:10,provider:name}]})});
+  const stalled={name:'Stalled',lookup:async()=>new Promise(()=>{})};
+  const started=Date.now();
+  const result=await new MultiSourceLookup({providers:[provider('A',1),provider('B',2),stalled],primaryCount:2,timeoutMs:1500}).lookup(movie);
+  assert.ok(Date.now()-started<800);assert.equal(result.sources.length,2);assert.equal(result.providersTried.length,3);
 });

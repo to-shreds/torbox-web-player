@@ -21,11 +21,11 @@ export const filterSourcesByResolution = (list, resolution = 'auto') => list.fil
 export function recommendSource(list, type = 'movie', resolution = 'auto', sizeProfile = getSettings().sourceSizeProfile, allowBrowserUnsupported = false) {
   const visible = filterSourcesByResolution(list, resolution).filter(source=>source.memoryBad!==true&&source.memoryAudio!=='bad'&&(allowBrowserUnsupported||source.browserUnsupported!==true)); if (!visible.length) return null;
   const cachedFriendly = visible.filter(s => s.cached === true && s.browserFriendly && !s.audioRisk && !s.videoRisk);
-  const browserSafe = visible.filter(s => s.browserFriendly && !s.audioRisk);
   const cachedContainer = visible.filter(s => s.cached === true && s.browserContainer && !s.audioRisk && !s.videoRisk);
-  const browserContainer = visible.filter(s => s.browserContainer && !s.audioRisk && !s.videoRisk);
   const cachedUnknown = visible.filter(s => s.cached === true && s.containerStatus !== 'supported' && !s.audioRisk && !s.videoRisk);
-  const pool = cachedFriendly.length ? cachedFriendly : browserSafe.length ? browserSafe : cachedContainer.length ? cachedContainer : browserContainer.length ? browserContainer : cachedUnknown.length ? cachedUnknown : visible;
+  const browserSafe = visible.filter(s => s.browserFriendly && !s.audioRisk);
+  const browserContainer = visible.filter(s => s.browserContainer && !s.audioRisk && !s.videoRisk);
+  const pool = cachedFriendly.length ? cachedFriendly : cachedContainer.length ? cachedContainer : cachedUnknown.length ? cachedUnknown : browserSafe.length ? browserSafe : browserContainer.length ? browserContainer : visible;
   const profile = ['data','balanced','quality'].includes(sizeProfile) ? sizeProfile : 'balanced';
   const limits = profile === 'data' ? { movie:1.5 * GB, series:.6 * GB } : profile === 'quality' ? { movie:6 * GB, series:2 * GB } : { movie:3 * GB, series:1 * GB };
   const limit = limits[type === 'series' ? 'series' : 'movie'];
@@ -48,6 +48,37 @@ export function automaticSourceOrder(list, type = 'movie', resolution = 'auto', 
     }
   }
   return ordered;
+}
+export const NO_CACHED_BROWSER_SOURCE_MESSAGE = 'Could not open a cached browser-compatible source automatically. More Options is open; choose Prepare to download one.';
+export const AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS = 8000;
+export function isAutomaticCandidateFailure(error) {
+  if (['BROWSER_CONTAINER_UNSUPPORTED','CACHED_SOURCE_NOT_READY','PREPARED_ITEM_MISSING'].includes(error?.code)) return true;
+  return error?.code === 'TORBOX_OPERATION_FAILED' && /\bcach(?:e|ed)\b/i.test(error?.message || '');
+}
+export function automaticCachedSourceOrder(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
+  return automaticSourceOrder((Array.isArray(list)?list:[]).filter(source=>source.cached===true),type,resolution,sizeProfile);
+}
+function automaticBudgetError(){const error=new Error('Cached source checks took too long.');error.code='CACHED_SOURCE_NOT_READY';return error;}
+async function withinAutomaticBudget(action,signal){
+  if(!signal)return action();if(signal.aborted)throw automaticBudgetError();
+  return new Promise((resolve,reject)=>{let settled=false;const stop=()=>{if(settled)return;settled=true;reject(automaticBudgetError());};signal.addEventListener('abort',stop,{once:true});
+    Promise.resolve().then(action).then(value=>{if(settled)return;settled=true;signal.removeEventListener('abort',stop);resolve(value);},error=>{if(settled)return;settled=true;signal.removeEventListener('abort',stop);reject(error);});
+  });
+}
+export async function resolveAutomaticCachedSource(list,target,resolution,{prepare,onCandidate,onRejected,maxCandidates=3,sizeProfile='balanced',totalTimeoutMs=AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS}={}){
+  if(typeof prepare!=='function')throw new TypeError('Automatic source preparation is not configured.');
+  const candidates=automaticCachedSourceOrder(list,target?.type||'movie',resolution,sizeProfile).slice(0,Math.max(0,maxCandidates));
+  if(!candidates.length){const error=new Error(NO_CACHED_BROWSER_SOURCE_MESSAGE);error.code='NO_CACHED_BROWSER_SOURCE';throw error;}
+  const budgetSignal=Number.isFinite(totalTimeoutMs)&&totalTimeoutMs>0?AbortSignal.timeout(totalTimeoutMs):null;
+  for(const source of candidates){
+    if(onCandidate)onCandidate(source);
+    try{return{source,result:await withinAutomaticBudget(()=>prepare(source,{signal:budgetSignal}),budgetSignal)};}
+    catch(error){
+      if(!isAutomaticCandidateFailure(error))throw error;
+      if(onRejected)onRejected(source,error);
+    }
+  }
+  const error=new Error(NO_CACHED_BROWSER_SOURCE_MESSAGE);error.code='NO_CACHED_BROWSER_SOURCE';throw error;
 }
 export function episodeQueue(meta, target, now = Date.now()) {
   if (!meta || target?.type !== 'series' || !Array.isArray(meta.episodes)) return [];
@@ -241,8 +272,9 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     if(!result.sources?.length)throw new Error('No supported source found.');return {...result,sources:applySourceMemory(target,result.sources)};
   }
 
-  async function readyFile(source, { signal, unattended=false, allowBrowserUnsupported=false } = {}){
-    let result=await api('/api/discover/prepare',{method:'POST',data:{source:source.id,onlyCached:source.cached===true},signal:signal?AbortSignal.any([signal,AbortSignal.timeout(60000)]):AbortSignal.timeout(60000)});
+  async function readyFile(source, { signal, unattended=false, allowBrowserUnsupported=false, waitForPreparation=true, initialTimeoutMs=waitForPreparation?60000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } = {}){
+    const request=async(path,options,timeoutMs)=>{const timeout=AbortSignal.timeout(timeoutMs);try{return await api(path,{...options,signal:signal?AbortSignal.any([signal,timeout]):timeout});}catch(error){if(!waitForPreparation&&timeout.aborted&&!signal?.aborted){const unavailable=new Error('This cached source did not become ready quickly enough.');unavailable.code='CACHED_SOURCE_NOT_READY';throw unavailable;}throw error;}};
+    let result=await request('/api/discover/prepare',{method:'POST',data:{source:source.id,onlyCached:source.cached===true}},initialTimeoutMs);
     const deadline=Date.now()+300000;
     while(Date.now()<deadline){
       if(result.state==='ready')return result;
@@ -252,25 +284,18 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       }
       if(result.state==='choose_file'){
         if(!result.files?.length)throw new Error('No matching video file was found.');
-        if(unattended&&result.files.length!==1)throw new Error('This package has multiple possible files and cannot be selected automatically.');
-        result=await api('/api/discover/status?'+new URLSearchParams({source:source.id,file:result.files[0].id}),{signal:signal?AbortSignal.any([signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000)});continue;
+        if(unattended&&result.files.length!==1){const error=new Error('This package has multiple possible files and cannot be selected automatically.');if(!waitForPreparation)error.code='CACHED_SOURCE_NOT_READY';throw error;}
+        result=await request('/api/discover/status?'+new URLSearchParams({source:source.id,file:result.files[0].id}),{},waitForPreparation?30000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS);continue;
       }
-      if(result.state!=='preparing')throw new Error(result.message||'This source is unavailable.');
-      await delay(3500);result=await api('/api/discover/status?'+new URLSearchParams({source:source.id}),{signal:signal?AbortSignal.any([signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000)});
+      if(result.state!=='preparing'){const error=new Error(result.message||'This source is unavailable.');if(!waitForPreparation)error.code='CACHED_SOURCE_NOT_READY';throw error;}
+      if(!waitForPreparation){const error=new Error('This cached source is not immediately ready.');error.code='CACHED_SOURCE_NOT_READY';throw error;}
+      await delay(3500);result=await request('/api/discover/status?'+new URLSearchParams({source:source.id}),{},30000);
     }
     throw new Error('TorBox is still preparing this source. Try again shortly.');
   }
 
-  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=5}={}){
-    const candidates=automaticSourceOrder(sources,target.type,resolution,getSettings().sourceSizeProfile).slice(0,maxCandidates);
-    if(!candidates.length)throw new Error('No MP4, WebM, or otherwise plausible browser source was found. AVI and MKV sources were skipped.');
-    let incompatible=null;
-    for(const source of candidates){
-      if(onCandidate)onCandidate(source);
-      try{return{source,result:await readyFile(source,{signal,unattended:true})};}
-      catch(error){if(error?.code!=='BROWSER_CONTAINER_UNSUPPORTED')throw error;incompatible=error;}
-    }
-    throw incompatible||new Error('No browser-compatible source was found.');
+  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=3}={}){
+    return resolveAutomaticCachedSource(sources,target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,onRejected:(source,error)=>{if(error?.code==='BROWSER_CONTAINER_UNSUPPORTED')setSourceBad(target,source,true);},prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false})});
   }
 
   async function quickPlay(meta,target,episodeName='',trigger){
@@ -279,11 +304,15 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     try{
       await ensureService();
       const resolution=getResolution(target),registered=await registeredSources(target,AbortSignal.timeout(45000));
-      const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:AbortSignal.timeout(330000),onCandidate:source=>message('detail-message',source.cached?'Checking cached browser-compatible source…':'Preparing browser-compatible source…')});
+      const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:AbortSignal.timeout(330000),onCandidate:()=>message('detail-message','Checking cached browser-compatible source…')});
       const context=buildContext(meta,target,episodeName,resolution,best);
       if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
       return await play(result.file,context);
-    }catch(e){message('detail-message',e.message,true);return false;}
+    }catch(e){
+      message('detail-message',e.message,true);
+      if(e?.code==='NO_CACHED_BROWSER_SOURCE')await openOptions(meta,target,episodeName);
+      return false;
+    }
     finally{if(trigger&&trigger.isConnected){trigger.disabled=false;trigger.textContent=original;}}
   }
 
@@ -433,16 +462,15 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     try{
       const registered=await registeredSources(context.current,AbortSignal.timeout(45000));
       const failedKey=sourceRecoveryKey(context.sourceInfo),attempted=new Set(Array.isArray(context.recoveryTried)?context.recoveryTried:[]);if(failedKey)attempted.add(failedKey);context.recoveryTried=[...attempted];
-      const availableSlots=Math.max(0,MAX_AUTOMATIC_SOURCE_ATTEMPTS-attempted.size),candidates=recoverySourceOrder(registered.sources,context,context.current.type,getSettings().sourceSizeProfile);
-      let opened=0,preflighted=0;
+      const candidates=boundedRecoverySourceOrder(registered.sources.filter(source=>source.cached===true),context,context.current.type,getSettings().sourceSizeProfile).slice(0,3),budgetSignal=AbortSignal.timeout(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS);
       for(const best of candidates){
-        if(opened>=availableSlots||preflighted>=5)break;preflighted++;
+        if(budgetSignal.aborted)break;
         try{
-          const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});
-          const candidateKey=sourceRecoveryKey(best);if(candidateKey)attempted.add(candidateKey);context.recoveryTried=[...attempted];opened++;
+          const result=await readyFile(best,{signal:budgetSignal,unattended:true,waitForPreparation:false});
+          const candidateKey=sourceRecoveryKey(best);if(candidateKey)attempted.add(candidateKey);context.recoveryTried=[...attempted];
           const nextContext={...context,...buildContext({name:context.title,poster:context.poster,episodes:[]},context.current,context.episodeName||'',context.resolution||'auto',best),queue:context.queue||[],recoveryTried:[...attempted]};
           const moved=await play(result.file,nextContext);if(moved)return true;
-        }catch(error){if(error?.code!=='BROWSER_CONTAINER_UNSUPPORTED')continue;}
+        }catch(error){if(budgetSignal.aborted)break;if(!isAutomaticCandidateFailure(error))break;if(error?.code==='BROWSER_CONTAINER_UNSUPPORTED')setSourceBad(context.current,best,true);}
       }
     }catch{}
     return false;
@@ -451,16 +479,17 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
   async function resumeRecent(entry,startOver=false){
     if(!entry||!['movie','series'].includes(entry.type))return false;
     message('catalog-message',startOver?'Starting over…':'Resuming…');
+    let meta=null,target=null,name='';
     try{
       await ensureService();
-      const data=await api(`/api/discover/meta?type=${entry.type}&id=${entry.id}`,{signal:AbortSignal.timeout(20000)}),meta=data.meta;
-      const target=entry.type==='series'?{type:'series',id:entry.id,season:entry.season,episode:entry.episode}:{type:'movie',id:entry.id};
-      const name=entry.type==='series'?(meta.episodes.find(e=>e.season===entry.season&&e.episode===entry.episode)?.name||entry.episodeName):'';
+      const data=await api(`/api/discover/meta?type=${entry.type}&id=${entry.id}`,{signal:AbortSignal.timeout(20000)});meta=data.meta;
+      target=entry.type==='series'?{type:'series',id:entry.id,season:entry.season,episode:entry.episode}:{type:'movie',id:entry.id};
+      name=entry.type==='series'?(meta.episodes.find(e=>e.season===entry.season&&e.episode===entry.episode)?.name||entry.episodeName):'';
       const registered=await registeredSources(target,AbortSignal.timeout(45000)),resolution=entry.resolution||getResolution(target);
       const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:AbortSignal.timeout(330000)});
       const context=buildContext(meta,target,name,resolution,best);context.forceStartOver=startOver;context.rewindOnResumeSeconds=startOver?0:getSettings().resumeRewindSeconds;
       await play(result.file,context);message('catalog-message','');return true;
-    }catch(e){message('catalog-message',e.message,true);return false;}
+    }catch(e){message('catalog-message',e.message,true);if(e?.code==='NO_CACHED_BROWSER_SOURCE'&&meta&&target)await openOptions(meta,target,name);return false;}
   }
 
   for(const id of ['catalog-type','catalog-feed','catalog-genre'])$(id).addEventListener('change',()=>{persistBrowsePreferences();browse();});
