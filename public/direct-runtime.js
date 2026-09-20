@@ -3,7 +3,8 @@ import { isTrustedDirectMediaUrl } from './runtime.js';
 
 export const DIRECT_BUILD = 'browser-local-2.0.1';
 
-const CATALOG_ORIGINS = new Set(['v3-cinemeta.strem.io', 'cinemeta-catalogs.strem.io']);
+const CATALOG_BASES = Object.freeze(['https://v3-cinemeta.strem.io','https://cinemeta-catalogs.strem.io']);
+const CATALOG_ORIGINS = new Set(CATALOG_BASES.map(value=>new URL(value).hostname));
 const SOURCE_ENDPOINTS = Object.freeze({
   zilean: 'https://zileanfortheweebs.midnightignite.me',
   stremthruMain: 'https://stremthru.13377001.xyz/stremio/torz/eyJzdG9yZXMiOlt7ImMiOiJwMnAiLCJ0IjoiIn1dfQ==',
@@ -71,7 +72,7 @@ async function fetchDirect(label, url, options = {}, timeoutMs = 30000) {
     if (['TimeoutError', 'AbortError'].includes(error?.name)) throw directError('DIRECT_TIMEOUT', label + ' timed out.', 504);
     throw directError(
       'DIRECT_FETCH_BLOCKED',
-      label + ' could not be read directly by this browser. This is commonly caused by CORS. Run the Browser-only diagnostics test.',
+      label + ' could not be read directly by this browser. This can be caused by the network, DNS, TLS, CORS, or another browser policy. Run diagnostics if it persists.',
       502
     );
   }
@@ -161,18 +162,30 @@ function normalizeMeta(raw, type, id) {
 async function catalogRequest(path) {
   const cached = catalogCache.get(path);
   if (cached && cached.until > Date.now()) return cached.value;
-  const response = await fetchDirect(
-    'cinemeta',
-    new URL(path, 'https://v3-cinemeta.strem.io').href,
-    { headers: { Accept: 'application/json' }, redirect: 'follow' },
-    15000
-  );
-  const finalUrl = new URL(response.url || 'https://v3-cinemeta.strem.io');
-  if (!CATALOG_ORIGINS.has(finalUrl.hostname)) throw directError('CATALOG_REDIRECT', 'Cinemeta redirected to an unexpected host.');
-  if (!response.ok) throw directError('CATALOG_UNAVAILABLE', 'Cinemeta returned HTTP ' + response.status, response.status);
-  const value = await readJson(response, 4 * 1024 * 1024);
-  catalogCache.set(path, { value, until: Date.now() + 300000 });
-  return value;
+  const failures=[];
+  for (let index=0;index<CATALOG_BASES.length;index++) {
+    const base=CATALOG_BASES[index];
+    try {
+      const response = await fetchDirect(
+        index ? 'cinemeta_fallback' : 'cinemeta',
+        new URL(path, base).href,
+        { headers: { Accept: 'application/json' }, redirect: 'follow' },
+        8000
+      );
+      const finalUrl = new URL(response.url || base);
+      if (!CATALOG_ORIGINS.has(finalUrl.hostname)) throw directError('CATALOG_REDIRECT', 'Cinemeta redirected to an unexpected host.');
+      if (!response.ok) throw directError('CATALOG_UNAVAILABLE', 'Cinemeta returned HTTP ' + response.status, response.status);
+      const value = await readJson(response, 4 * 1024 * 1024);
+      catalogCache.set(path, { value, until: Date.now() + 300000 });
+      if(index)trace('cinemeta_fallback','ok',{host:finalUrl.hostname});
+      return value;
+    } catch (error) {
+      failures.push(error);
+      trace('cinemeta_origin','failed',{host:new URL(base).hostname,error:safeError(error)});
+    }
+  }
+  const last=failures.at(-1);
+  throw directError('CATALOG_UNAVAILABLE','Cinemeta could not be reached from this browser after trying both catalog hosts. '+(last?.status?('Last HTTP status: '+last.status+'.'):'Check diagnostics if this persists.'),last?.status||502);
 }
 
 async function catalogMeta(type, id) {
@@ -421,9 +434,17 @@ async function directSources(input, signal) {
   ];
   const controllers = jobs.map(() => new AbortController());
   const providers = [], map = new Map();
-  let settled = 0, failures = 0, done = false, graceTimer = null, hardTimer = null;
+  let settled = 0, failures = 0, done = false, graceTimer = null, graceDeadline = Infinity, hardTimer = null;
 
   return await new Promise((resolve, reject) => {
+    const safeCount=()=>[...map.values()].filter(source=>source.browserFriendly===true).length;
+    const scheduleGrace=ms=>{
+      const deadline=Date.now()+ms;
+      if(graceTimer&&deadline>=graceDeadline)return;
+      if(graceTimer)clearTimeout(graceTimer);
+      graceDeadline=deadline;
+      graceTimer=setTimeout(()=>{graceTimer=null;graceDeadline=Infinity;finish();},ms);
+    };
     const cleanup = () => {
       if (graceTimer) clearTimeout(graceTimer);
       if (hardTimer) clearTimeout(hardTimer);
@@ -439,13 +460,15 @@ async function directSources(input, signal) {
       }
       const value = { sources, provider:'Browser direct', providers:[...providers], failures };
       sourceCache.set(key,{value,until:Date.now()+SOURCE_CACHE_MS});
-      trace('source_fan_in','ready',{target:key,count:sources.length,providers:providers.length,settled});
+      trace('source_fan_in','ready',{target:key,count:sources.length,safe:sources.filter(source=>source.browserFriendly===true).length,risky:sources.filter(source=>source.audioRisk===true).length,providers:providers.length,settled});
       resolve(value);
     };
     const maybeFinish = () => {
       if (done) return;
-      if (map.size >= 12 && providers.length >= 2) return finish();
-      if (map.size && !graceTimer) graceTimer = setTimeout(finish, 650);
+      const safe=safeCount();
+      if (safe && providers.length >= 2) return scheduleGrace(450);
+      if (safe) return scheduleGrace(900);
+      if (providers.length >= 2 && map.size) return scheduleGrace(2200);
       if (settled === jobs.length) finish();
     };
     const abort = () => {
