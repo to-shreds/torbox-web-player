@@ -44,5 +44,5 @@ test('repair page removes only TorBox main worker caches then cache-busts canoni
   assert.match(repair,/k\.startsWith\('torbox-main-v'\)/);
   assert.match(repair,/version\.json\?repair=/);
   assert.match(repair,/location\.replace\('\.\.\/\?release='/);
-  assert.doesNotMatch(repair,/caches\.keys\(\)[\s\S]*map\(k=>caches\.delete\(k\)\)(?![\s\S]*torbox-main-v)/);
+  assert.match(repair,/keys\.filter\(k=>k\.startsWith\('torbox-main-v'\)\)\.map\(k=>caches\.delete\(k\)\)/);
 });
