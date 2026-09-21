@@ -453,14 +453,26 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     }catch(e){if(alive()){status.textContent=e.message;status.classList.add('error');area.append(button('Retry',()=>findSources(meta,target,episodeName)));}}
   }
 
-  async function playNext(context){
-    if(!active||!context?.queue?.length)return false;const next=context.queue[0],rest=context.queue.slice(1);
+  async function prepareNext(context,{signal}={}){
+    if(!active||!context?.queue?.length)return null;const next=context.queue[0],rest=context.queue.slice(1);
+    const bounded=signal?AbortSignal.any([signal,AbortSignal.timeout(20000)]):AbortSignal.timeout(20000);
     try{
-      const meta=await api(`/api/discover/meta?type=series&id=${next.id}`,{signal:AbortSignal.timeout(20000)});
-      const registered=await registeredSources(next,AbortSignal.timeout(45000));
-      const {source:best,result}=await readyBrowserSource(registered.sources,next,context.resolution||'auto',{signal:AbortSignal.timeout(330000)});if(best.audioRisk)return false;
-      await play(result.file,{...buildContext(meta.meta,next,next.name||'',context.resolution||getResolution(next),best),poster:meta.meta.poster||context.poster,queue:rest});return true;
-    }catch{return false;}
+      const meta=await api(`/api/discover/meta?type=series&id=${next.id}`,{signal:bounded});
+      const registered=await registeredSources(next,bounded);
+      const {source:best,result}=await readyBrowserSource(registered.sources,next,context.resolution||'auto',{signal:bounded});if(best.audioRisk)return null;
+      return{file:result.file,context:{...buildContext(meta.meta,next,next.name||'',context.resolution||getResolution(next),best),poster:meta.meta.poster||context.poster,queue:rest}};
+    }catch(error){
+      if(error?.name==='AbortError'||error?.name==='TimeoutError')throw error;
+      return null;
+    }
+  }
+  async function playPreparedNext(prepared){
+    if(!active||!prepared?.file||!prepared?.context)return false;
+    return await play(prepared.file,prepared.context);
+  }
+  async function playNext(context,{signal}={}){
+    const prepared=await prepareNext(context,{signal});if(!prepared)return false;
+    return playPreparedNext(prepared);
   }
 
   async function recoverPlayback(context){
@@ -522,7 +534,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       guestMode=true;active=true;
       await showTitle({type:scope.type,id:scope.id,name:scope.name||'Shared title',poster:scope.poster||''});
     },
-    playNext,recoverPlayback,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
+    prepareNext,playPreparedNext,playNext,recoverPlayback,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
     suspend(){active=false;guestMode=false;document.body.classList.remove('search-mode');++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
   };
 }
