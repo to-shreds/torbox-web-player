@@ -78,6 +78,11 @@ export function removeRecent(key, store = storage()) {
   const rows = listRecent(store).filter(item => item.key !== key);
   try { store.setItem(STORAGE_KEY, JSON.stringify(rows)); return true; } catch { return false; }
 }
+export function removeRecentTitle(entry, store = storage()) {
+  if (!store || !entry || !['movie','series'].includes(entry.type) || !/^tt[0-9]{5,12}$/.test(entry.id || '')) return false;
+  const rows=listRecent(store).filter(item=>item.type!==entry.type||item.id!==entry.id);
+  try { store.setItem(STORAGE_KEY, JSON.stringify(rows)); return true; } catch { return false; }
+}
 export function formatResumeTime(seconds) {
   const value = Math.max(0, Math.floor(num(seconds))); const h = Math.floor(value / 3600), m = Math.floor(value % 3600 / 60), s = value % 60;
   return h ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;

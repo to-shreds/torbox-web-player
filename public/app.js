@@ -3,7 +3,7 @@ import { diagnosePlaybackFailure } from './playback-errors.js';
 import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js';
 import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js';
 import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js';
-import { listRecent, continueWatchingItems, recordRecent, removeRecent, recentForContext, resumePosition, formatResumeTime } from './history.js';
+import { listRecent, continueWatchingItems, recordRecent, removeRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js';
 import { getSettings, saveSettings, resetSettings } from './settings.js';
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js';
 import { clearSearchHistory } from './search-history.js';
@@ -151,7 +151,7 @@ function renderRecent() {
     if (item.duration > 0) { const track=document.createElement('span');track.className='recent-progress';const fill=document.createElement('span');fill.style.width=`${Math.min(100,Math.max(0,item.position/item.duration*100))}%`;track.append(fill);copy.append(track); }
     card.append(copy);bindRecentLongPress(card,item);
     const remove=document.createElement('button');remove.type='button';remove.className='recent-remove';remove.textContent='×';remove.setAttribute('aria-label',`Remove ${item.title} from Continue Watching`);
-    remove.addEventListener('click',event=>{event.stopPropagation();if(confirm(`Remove "${item.title}" from Continue Watching?`)){removeRecent(item.key);renderRecent();discoveryUI.historyChanged();}});
+    remove.addEventListener('click',event=>{event.stopPropagation();if(confirm(`Remove "${item.title}" from Continue Watching?`)){removeRecentTitle(item);renderRecent();discoveryUI.historyChanged();}});
     if(item.position>0){const start=document.createElement('button');start.type='button';start.className='recent-start-over';start.textContent='Start over';start.addEventListener('click',event=>{event.stopPropagation();discoveryUI.startOverRecent(item);});entry.append(card,remove,start);}else entry.append(card,remove);fragment.append(entry);
   }
   list.replaceChildren(fragment);

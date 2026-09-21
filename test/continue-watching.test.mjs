@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { continueWatchingItems } from '../public/history.js';
+import { continueWatchingItems, recordRecent, removeRecentTitle, listRecent } from '../public/history.js';
 
 const row=(key,extra={})=>({
   key,type:key.startsWith('series:')?'series':'movie',
@@ -52,4 +52,13 @@ test('Continue Watching UI never offers finished-title mode and supports long-pr
   assert.ok(discover.includes('async function openHistoryTitle(entry)'));
   assert.ok(discover.includes('renderEpisodes(currentMeta,preferredSeason)'));
   assert.ok(discover.includes('seasons.includes(preferredSeason)'));
+});
+test('removing a show-level Continue Watching card removes every stored episode for that show',()=>{
+  const map=new Map(),store={getItem:k=>map.has(k)?map.get(k):null,setItem:(k,v)=>map.set(k,String(v)),removeItem:k=>map.delete(k)};
+  const context=(id,season,episode)=>({title:'Fixture',episodeName:'Episode',poster:'',resolution:'auto',current:{type:'series',id,season,episode}});
+  recordRecent(context('tt1111111',1,1),100,1000,{store});
+  recordRecent(context('tt1111111',1,2),100,1000,{store});
+  recordRecent(context('tt2222222',1,1),100,1000,{store});
+  assert.equal(removeRecentTitle({type:'series',id:'tt1111111'},store),true);
+  assert.deepEqual(listRecent(store).map(x=>x.id),['tt2222222']);
 });
