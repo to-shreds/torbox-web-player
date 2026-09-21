@@ -1,4 +1,4 @@
-const CACHE='torbox-player-v1.1-restored7';
+const CACHE='torbox-player-v1.1-restored8';
 const SHELL=['./','./index.html','./style.css','./discover.css','./app.js','./runtime.js','./history.js','./settings.js','./watchlist.js','./search-history.js','./source-memory.js','./parental-controls.js','./device-transfer.js','./playback-errors.js','./discover.js','./source-client.js','./manifest.webmanifest','./icon.svg'];
 const shellUrls=new Set(SHELL.map(path=>new URL(path,self.registration.scope).href));
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});
