@@ -8,15 +8,15 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `27674977efbbdbc30501931f7c8ed2dac2fea540`
+- Main runtime commit: `9244a1ae3d0cc6b424e2841e803d53c97d4e28c7`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `dfb08df1217ed7ffcf1947027c791d26eaa6ff15`
+- Mirror runtime commit: `d043109aba0cf552baac977370cf941bad4400e4`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-dao9kgo473hc739fm9j0`
-- PWA cache: `torbox-player-v1.1-restored5`
+- Live Render deploy: `dep-dao9m1740ujc73eerqg0`
+- PWA cache: `torbox-player-v1.1-restored6`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
 
@@ -61,7 +61,8 @@ Continue Watching is now a show-level surface rather than a raw episode history 
 - Finished entries never appear in Continue Watching.
 - For a series, only the newest history entry for that show is considered. Older partially watched episodes do not reappear underneath a newer episode.
 - If the newest entry for a show is completed, the show disappears from Continue Watching until a newer episode actually starts.
-- The underlying history is preserved for episode progress and Next Up logic; the deduplication is a presentation rule, not destructive history deletion.
+- The underlying history is preserved for episode progress and Next Up logic while the card is present; the deduplication itself is a presentation rule.
+- Removing a show from Continue Watching removes all stored episode-history rows for that show, so an older episode cannot immediately pop back into the shelf.
 - Normal tap still resumes the displayed episode.
 - Long-pressing a Continue Watching card opens the title as a whole. For a series, the episode list opens on the season containing the current Continue Watching episode.
 - Desktop/right-click context-menu behavior mirrors the long-press shortcut.
@@ -70,10 +71,10 @@ Continue Watching is now a show-level surface rather than a raw episode history 
 
 ## Verification
 
-- Browser-key CI run **146** succeeded for mirror runtime commit `dfb08df1`.
-- Final suite: **296 tests registered, 290 passed, 0 failed, 6 optional live checks skipped**.
-- GitHub Pages run **129** succeeded for main runtime commit `27674977`.
-- Render deploy `dep-dao9kgo473hc739fm9j0` is live from `dfb08df1`.
+- Browser-key CI run **148** succeeded for mirror runtime commit `d043109a`.
+- Final suite: **297 tests registered, 291 passed, 0 failed, 6 optional live checks skipped**.
+- GitHub Pages run **131** succeeded for main runtime commit `9244a1ae`.
+- Render deploy `dep-dao9m1740ujc73eerqg0` is live from `d043109a`.
 - The modified runtime and regression-test files on `main` and `browser-key-clone` are byte-identical by Git blob SHA.
 - Dedicated auto-next tests continue to cover the credits behavior. New Continue Watching tests cover one-entry-per-show grouping, completed-latest suppression, list limits after grouping, removal of finished-title mode, long-press title navigation, and opening the current season.
 
@@ -91,6 +92,6 @@ Continue Watching is now a show-level surface rather than a raw episode history 
 
 ## Immediate next action
 
-Fully close and reopen the installed site or Chrome tab so `torbox-player-v1.1-restored5` activates.
+Fully close and reopen the installed site or Chrome tab so `torbox-player-v1.1-restored6` activates.
 
 Confirm Continue Watching now shows at most one episode for each show and no finished episodes. Long-press a show there and confirm the title dialog opens directly to the season containing that episode. Also complete the pending credits-flow acceptance: Play next now, Watch credits, pause during countdown, and no torrent/source picker.
