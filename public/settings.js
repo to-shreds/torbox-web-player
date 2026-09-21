@@ -5,6 +5,7 @@ export const DEFAULT_SETTINGS=Object.freeze({
   resumeRewindSeconds:10,
   autoNext:true,
   autoNextDelaySeconds:8,
+  creditsLeadSeconds:45,
   autoRecovery:true,
   bufferSeconds:12,
   driveWatchOnly:true,
@@ -41,6 +42,7 @@ const rewind=new Set([0,5,10,15,30]);
 const buffer=new Set([8,12,20,30]);
 const recent=new Set([4,6,8,10,12,16]);
 const nextDelay=new Set([0,5,8,10,15]);
+const creditsLead=new Set([0,20,30,45,60]);
 const rates=new Set([0.75,1,1.25,1.5,1.75,2]);
 const sleep=new Set([0,15,30,45,60,90]);
 const stillWatching=new Set([0,60,75,90,120]);
@@ -62,6 +64,7 @@ export function normalizeSettings(raw){
     resumeRewindSeconds:rewind.has(Number(s.resumeRewindSeconds))?Number(s.resumeRewindSeconds):DEFAULT_SETTINGS.resumeRewindSeconds,
     autoNext:s.autoNext!==false,
     autoNextDelaySeconds:nextDelay.has(Number(s.autoNextDelaySeconds))?Number(s.autoNextDelaySeconds):DEFAULT_SETTINGS.autoNextDelaySeconds,
+    creditsLeadSeconds:creditsLead.has(Number(s.creditsLeadSeconds))?Number(s.creditsLeadSeconds):DEFAULT_SETTINGS.creditsLeadSeconds,
     autoRecovery:s.autoRecovery!==false,
     bufferSeconds:buffer.has(Number(s.bufferSeconds))?Number(s.bufferSeconds):DEFAULT_SETTINGS.bufferSeconds,
     driveWatchOnly:s.driveWatchOnly!==false,

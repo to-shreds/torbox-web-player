@@ -9,7 +9,7 @@ import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemor
 import { clearSearchHistory } from './search-history.js';
 import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js';
 const $ = id => document.getElementById(id);
-let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, nextCountdownTimer = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '';
+let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '';
 let discoveryUI;
 let activeSetupTransferLink='';
 let viewer = 'viewer-1';
@@ -338,7 +338,103 @@ async function saveProgress(context = active, keepalive = false) {
     if (!result.saved && active === context) text('player-message', 'Local resume is saved, but the temporary server progress lease was replaced.', true);
   } catch { if (active === context) text('player-message', 'Playback continues. Resume is saved on this device.', false); }
 }
-function clearNextCountdown(){if(nextCountdownTimer)clearInterval(nextCountdownTimer);nextCountdownTimer=null;$('up-next-card').hidden=true;}
+function hideUpNextCard(){
+  $('up-next-card').hidden=true;$('play-next-now').disabled=false;$('watch-credits').disabled=false;
+}
+function abortNextPreparation(context){
+  try{context?.nextPrepareAbort?.abort();}catch{}
+  if(context){context.nextPrepareAbort=null;context.nextPreparePromise=null;context.nextPrepared=null;}
+}
+function resetNextEpisodeState(context,{abortPreparation=true,keepWatchCredits=false}={}){
+  hideUpNextCard();if(!context)return;
+  context.nextPromptActive=false;context.nextCountdownStart=null;context.nextTransitionStarted=false;context.nextEnded=false;
+  if(!keepWatchCredits)context.nextWatchCredits=false;
+  if(abortPreparation)abortNextPreparation(context);
+}
+function effectiveCreditsLead(duration,configured){
+  const d=Number(duration),lead=Number(configured);
+  if(!Number.isFinite(d)||d<=0||!Number.isFinite(lead)||lead<=0)return 0;
+  return Math.min(lead,Math.max(5,d*.08));
+}
+function queuedNext(context){return context?.playbackContext?.queue?.[0]||null;}
+function markPlaybackCompleted(context){
+  if(!context||context.completedRecorded||!context.playbackContext)return;
+  const duration=Number.isFinite(context.video?.duration)&&context.video.duration>0?context.video.duration:Number(context.video?.currentTime)||0;
+  recordRecent(context.playbackContext,duration,duration,{completed:true});context.completedRecorded=true;scheduleRecentRender(true);
+}
+function renderUpNextCard(context,{ended=false}={}){
+  const next=queuedNext(context);if(!next){hideUpNextCard();return false;}
+  const settings=getSettings(),delay=settings.autoNextDelaySeconds;
+  $('up-next-title').textContent=`Next · S${next.season}E${next.episode} ${next.name||''}`;
+  $('play-next-now').disabled=context.nextTransitionStarted===true;
+  $('watch-credits').disabled=context.nextTransitionStarted===true;
+  $('watch-credits').hidden=ended||!settings.autoNext||context.nextWatchCredits===true;
+  if(context.nextTransitionStarted)$('up-next-time').textContent='Opening next episode…';
+  else if(ended)$('up-next-time').textContent=settings.autoNext?'Opening next episode…':'Episode finished';
+  else if(!settings.autoNext)$('up-next-time').textContent='Credits';
+  else if(context.nextWatchCredits)$('up-next-time').textContent='Next episode starts when the credits finish.';
+  else{
+    const elapsed=Math.max(0,(Number(context.video?.currentTime)||0)-(Number(context.nextCountdownStart)||0));
+    const remaining=Math.max(0,Math.ceil(delay-elapsed));
+    $('up-next-time').textContent=delay===0?'Starting next episode…':`Playing next in ${remaining}s`;
+  }
+  $('up-next-card').hidden=false;return true;
+}
+function ensureNextPrepared(context){
+  if(!context||!queuedNext(context))return Promise.resolve(null);
+  if(context.nextPrepared)return Promise.resolve(context.nextPrepared);
+  if(context.nextPreparePromise)return context.nextPreparePromise;
+  const controller=new AbortController();context.nextPrepareAbort=controller;
+  const promise=discoveryUI.prepareNext(context.playbackContext,{signal:controller.signal}).then(prepared=>{
+    if(prepared&&active===context)context.nextPrepared=prepared;
+    return prepared||null;
+  }).catch(error=>{
+    if(error?.name!=='AbortError'&&error?.name!=='TimeoutError'&&active===context)context.nextPrepareError=error?.message||'';
+    return null;
+  }).finally(()=>{
+    if(context.nextPrepareAbort===controller)context.nextPrepareAbort=null;
+    if(context.nextPreparePromise===promise)context.nextPreparePromise=null;
+  });
+  context.nextPreparePromise=promise;return promise;
+}
+async function openNextEpisode(context,{fromEnded=false}={}){
+  if(active!==context||context.nextTransitionStarted||!queuedNext(context))return false;
+  context.nextTransitionStarted=true;renderUpNextCard(context,{ended:fromEnded||context.nextEnded===true});
+  text('player-message','Opening next episode…');
+  let moved=false;
+  try{
+    const prepared=context.nextPrepared||await ensureNextPrepared(context);
+    if(active!==context)return false;
+    moved=prepared?await discoveryUI.playPreparedNext(prepared):await discoveryUI.playNext(context.playbackContext);
+  }catch{}
+  if(moved){markPlaybackCompleted(context);return true;}
+  if(active===context){
+    context.nextTransitionStarted=false;renderUpNextCard(context,{ended:fromEnded||context.nextEnded===true});
+    text('player-message','Next episode could not be selected automatically.',true);
+  }
+  return false;
+}
+function updateNextEpisodePrompt(context){
+  if(active!==context||!context.ready||context.nextTransitionStarted||!queuedNext(context))return;
+  const video=context.video,duration=Number(video.duration),current=Number(video.currentTime);
+  if(!Number.isFinite(duration)||duration<=0||!Number.isFinite(current)||video.ended)return;
+  if(context.nextWatchCredits)return;
+  const lead=effectiveCreditsLead(duration,getSettings().creditsLeadSeconds);
+  if(!lead)return;
+  const inWindow=duration-current<=lead;
+  if(!inWindow){
+    if(context.nextPromptActive)resetNextEpisodeState(context,{abortPreparation:true});
+    return;
+  }
+  if(!context.nextPromptActive){
+    context.nextPromptActive=true;context.nextCountdownStart=current;
+    if(getSettings().autoNext)void ensureNextPrepared(context);
+  }
+  renderUpNextCard(context);
+  if(!getSettings().autoNext)return;
+  const delay=getSettings().autoNextDelaySeconds,elapsed=Math.max(0,current-context.nextCountdownStart);
+  if(delay===0||elapsed>=delay)void openNextEpisode(context);
+}
 async function releaseWakeLock(){try{await wakeLock?.release();}catch{}wakeLock=null;}
 async function acquireWakeLock(){
   if(!getSettings().keepAwake||!('wakeLock' in navigator)||document.visibilityState!=='visible')return;
@@ -382,13 +478,6 @@ function resetStillWatchingTimer(){
   clearStillWatchingTimer();hideStillWatchingPrompt();
   if(active&&!active.video.paused)armStillWatchingTimer();
 }
-function scheduleNextEpisode(context){
-  const playbackContext=context.playbackContext;if(!getSettings().autoNext||!playbackContext?.queue?.length){text('player-message','Finished');return;}
-  const next=playbackContext.queue[0],delay=getSettings().autoNextDelaySeconds;
-  if(delay===0){text('player-message',`Next · S${next.season}E${next.episode} ${next.name||''}`);discoveryUI.playNext(playbackContext).then(moved=>{if(!moved&&active===context)text('player-message','Next episode could not be selected automatically.',true);});return;}
-  let remaining=delay;$('up-next-title').textContent=`Next · S${next.season}E${next.episode} ${next.name||''}`;clearNextCountdown();$('up-next-card').hidden=false;$('up-next-time').textContent=`Playing in ${remaining}s`;
-  nextCountdownTimer=setInterval(async()=>{if(active!==context){clearNextCountdown();return;}remaining-=1;if(remaining>0){$('up-next-time').textContent=`Playing in ${remaining}s`;return;}clearNextCountdown();text('player-message','Opening next episode…');const moved=await discoveryUI.playNext(playbackContext);if(!moved&&active===context)text('player-message','Next episode could not be selected automatically.',true);},1000);
-}
 function updateKidLimitDialog(reason=kidLimitReason){
   const profile=getKidProfile(viewer),titles={time:'Watching time is finished',episodes:'Episode limit reached',movies:'Movie limit reached'};
   $('kid-limit-title').textContent=titles[reason]||'Watching limit reached';
@@ -429,7 +518,7 @@ async function resumeAfterKidParentAction(){
 }
 
 async function detachPlayback() {
-  const old = active;if(old)tickKidUsage(old,true); active = null; hidePauseCard();clearNextCountdown();await releaseWakeLock();
+  const old = active;if(old){tickKidUsage(old,true);resetNextEpisodeState(old,{abortPreparation:true});} active = null; hidePauseCard();await releaseWakeLock();
   if (old) { clearInterval(old.timer);clearInterval(old.kidTimer);clearTimeout(old.bufferTimer);clearTimeout(old.sleepTimer);clearTimeout(old.healthyTimer); const saving = saveProgress(old, true); old.video.pause(); old.video.removeAttribute('src'); old.video.load(); old.video.remove(); await saving; }
 }
 async function stopPlayback() { playGeneration++; clearStillWatchingTimer(); hideStillWatchingPrompt(); await detachPlayback(); }
@@ -446,7 +535,7 @@ async function startPlayback(file, playbackContext = null) {
     const result = await api('/api/playback', { method: 'POST', data: { viewer: selectedViewer, videoId: file.id, startOver: playbackContext?.forceStartOver===true } });
     if (generation !== playGeneration || !$('player').open || selectedViewer !== viewer) return false;
     const video = document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.playbackRate=getSettings().playbackRate;
-    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, sourceLearned:false, lastTime:0 };
+    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, sourceLearned:false, lastTime:0, nextPromptActive:false, nextCountdownStart:null, nextWatchCredits:false, nextTransitionStarted:false, nextEnded:false, nextPrepareAbort:null, nextPreparePromise:null, nextPrepared:null, nextPrepareError:'', completedRecorded:false };
     active = context; $('video-slot').replaceChildren(video);setHealthSource(context);
     const clearBuffer = () => { clearTimeout(context.bufferTimer); context.bufferTimer = null; };
     const recover = async (reason, diagnosis = null) => {
@@ -478,18 +567,21 @@ async function startPlayback(file, playbackContext = null) {
       video.play().catch(error => { if (active === context && error.name === 'NotAllowedError') text('player-message', 'Tap play'); });
     });
     video.addEventListener('playing', () => { if (active === context) {
-      context.started = true; context.recovering = false; clearBuffer(); hidePauseCard(); clearNextCountdown(); acquireWakeLock(); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); context.kidLastAt=Date.now();context.kidLastPosition=Number.isFinite(video.currentTime)?video.currentTime:0;if(!context.kidTimer)context.kidTimer=setInterval(()=>tickKidUsage(context),5000); setPlaybackHealth('Playing','Stream is advancing normally.'); text('player-message', '');
+      context.started = true; context.recovering = false; clearBuffer(); hidePauseCard(); acquireWakeLock(); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); context.kidLastAt=Date.now();context.kidLastPosition=Number.isFinite(video.currentTime)?video.currentTime:0;if(!context.kidTimer)context.kidTimer=setInterval(()=>tickKidUsage(context),5000); setPlaybackHealth('Playing','Stream is advancing normally.'); text('player-message', '');
       clearTimeout(context.healthyTimer);if(getSettings().autoLearnSources&&playbackContext?.sourceInfo&&!context.sourceLearned)context.healthyTimer=setTimeout(()=>{if(active===context&&!video.paused&&video.currentTime>5){rememberSourceSuccess(playbackContext.current,playbackContext.sourceInfo);context.sourceLearned=true;setHealthSource(context);}},15000);
     } });
     video.addEventListener('canplay',()=>{clearBuffer();if(active===context&&context.started&&!video.paused)setPlaybackHealth('Playing','Stream is ready.');});
-    video.addEventListener('timeupdate', () => { if (active !== context || !context.ready) return; if (Math.abs(video.currentTime - context.lastTime) > .2) { context.lastTime = video.currentTime; clearBuffer(); } if(video.paused)updatePauseCard(context); });
+    video.addEventListener('timeupdate', () => { if (active !== context || !context.ready) return; if (Math.abs(video.currentTime - context.lastTime) > .2) { context.lastTime = video.currentTime; clearBuffer(); } updateNextEpisodePrompt(context); if(video.paused)updatePauseCard(context); });
     video.addEventListener('waiting', armBuffer); video.addEventListener('stalled',()=>{setPlaybackHealth('Stalled','The browser reports that data stopped arriving.');armBuffer();});
     video.addEventListener('pause', () => { if(active===context)tickKidUsage(context,true); if (active === context && !context.recovering) { clearTimeout(context.healthyTimer);releaseWakeLock(); if(!stillWatchingPromptActive&&!video.ended)clearStillWatchingTimer(); saveProgress(context); if(stillWatchingPromptActive){hidePauseCard();setPlaybackHealth('Still watching?','Tap Keep watching to continue.');}else if(!$('kid-limit-dialog').open){setPlaybackHealth('Paused','Playback is paused.');updatePauseCard(context);} } });
     video.addEventListener('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });
     video.addEventListener('ended', async () => {
       if (active !== context) return; tickKidUsage(context,true); clearBuffer(); hidePauseCard(); await saveProgress(context);
-      if (playbackContext) { recordRecent(playbackContext, video.duration || video.currentTime, video.duration || 0, { completed:true }); scheduleRecentRender(true); }
-      clearTimeout(context.healthyTimer);setPlaybackHealth('Finished','Playback completed.');await releaseWakeLock();scheduleNextEpisode(context);
+      context.nextEnded=true;markPlaybackCompleted(context);
+      clearTimeout(context.healthyTimer);setPlaybackHealth('Finished','Playback completed.');await releaseWakeLock();
+      if(!queuedNext(context)){hideUpNextCard();text('player-message','Finished');return;}
+      if(getSettings().autoNext){renderUpNextCard(context,{ended:true});await openNextEpisode(context,{fromEnded:true});}
+      else{context.nextPromptActive=true;renderUpNextCard(context,{ended:true});text('player-message','Finished');}
     });
     video.addEventListener('error', async () => {
       if (active !== context || context.diagnosing) return; context.diagnosing = true; clearBuffer();
@@ -502,7 +594,13 @@ async function startPlayback(file, playbackContext = null) {
     video.src=context.mediaUrl; return true;
   } catch (error) { if (generation===playGeneration) {setPlaybackHealth('Could not start',error.message);text('player-message',error.message,true);} return false; }
 }
-$('cancel-auto-next').addEventListener('click',()=>{clearNextCountdown();text('player-message','Finished');});
+$('play-next-now').addEventListener('click',()=>{if(active&&queuedNext(active))void openNextEpisode(active,{fromEnded:active.nextEnded===true||active.video?.ended===true});});
+$('watch-credits').addEventListener('click',()=>{
+  const context=active;if(!context||!queuedNext(context))return;
+  context.nextWatchCredits=true;context.nextPromptActive=false;context.nextCountdownStart=null;hideUpNextCard();
+  if(getSettings().autoNext)void ensureNextPrepared(context);
+  text('player-message','Watching credits · the next episode will start when this one ends.');
+});
 async function rejectCurrentSource(kind){
   const context=active,playback=context?.playbackContext,source=playback?.sourceInfo;if(!context||!playback?.current||!source)return;
   if(kind==='audio')setAudioFeedback(playback.current,source,'bad');else setSourceBad(playback.current,source,true);
@@ -625,6 +723,7 @@ function loadSettingsForm(){
   $('setting-buffer').value=String(settings.bufferSeconds);
   $('setting-recent-limit').value=String(settings.recentLimit);
   $('setting-auto-next-delay').value=String(settings.autoNextDelaySeconds);
+  $('setting-credits-lead').value=String(settings.creditsLeadSeconds);
   $('setting-playback-rate').value=String(settings.playbackRate);
   $('setting-sleep-timer').value=String(settings.sleepTimerMinutes);
   $('setting-still-watching').value=String(settings.stillWatchingMinutes);
@@ -675,6 +774,7 @@ $('settings-form').addEventListener('submit',event=>{
     recentLimit:Number($('setting-recent-limit').value),
     autoNext:$('setting-auto-next').checked,
     autoNextDelaySeconds:Number($('setting-auto-next-delay').value),
+    creditsLeadSeconds:Number($('setting-credits-lead').value),
     autoRecovery:$('setting-auto-recovery').checked,
     pauseOverlay:$('setting-pause-overlay').checked,
     driveWatchOnly:$('setting-drive-watch-only').checked,
