@@ -36,6 +36,19 @@ export function listRecent(store = storage()) {
 export function recentForContext(context, store = storage()) {
   const key = recentKey(context); return key ? listRecent(store).find(item => item.key === key) || null : null;
 }
+export function continueWatchingItems(items = listRecent(), limit = 6) {
+  const rows=(Array.isArray(items)?items:[]).filter(Boolean).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  const seen=new Set(),out=[];
+  for(const item of rows){
+    const identity=item.type==='series'?'series:'+item.id:'movie:'+item.id;
+    if(seen.has(identity))continue;
+    seen.add(identity);
+    if(item.completed)continue;
+    out.push(item);
+    if(out.length>=Math.max(0,Number(limit)||0))break;
+  }
+  return out;
+}
 export function resumePosition(entry) {
   const row = normalizeRecent(entry); if (!row || row.completed) return 0;
   if (row.duration > 0 && row.duration - row.position < 20) return 0;

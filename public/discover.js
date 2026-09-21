@@ -347,7 +347,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     select.value=getTitleQuality(target);select.addEventListener('change',()=>setTitleQuality(target,select.value));label.append(select);return label;
   }
 
-  async function showTitle(meta){
+  async function showTitle(meta,preferredSeason=null){
     cancelTitle();currentMeta=null;const generation=titleGeneration;titleAbort=new AbortController();$('title-content').replaceChildren();$('episode-area').replaceChildren();
     $('detail-title').textContent=meta.name;$('toggle-watchlist').hidden=true;message('detail-message','Loading…');if(!$('title-dialog').open)$('title-dialog').showModal();
     try{
@@ -356,7 +356,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       const summary=element('div','','title-summary');if(currentMeta.poster)summary.append(image(currentMeta.poster,currentMeta.name,'detail-poster'));
       const copy=element('div','','title-copy');copy.append(element('p',[currentMeta.year,currentMeta.runtime,...currentMeta.genres].filter(Boolean).join(' · '),'muted'),element('p',currentMeta.description||'','title-description'));summary.append(copy);
       $('title-content').replaceChildren(summary);message('detail-message','');
-      if(currentMeta.type==='movie')renderMovieActions(currentMeta);else renderEpisodes(currentMeta);
+      if(currentMeta.type==='movie')renderMovieActions(currentMeta);else renderEpisodes(currentMeta,preferredSeason);
     }catch(e){if(generation===titleGeneration&&active)message('detail-message',e.name==='AbortError'?'Cancelled.':e.message,true);}
   }
 
@@ -368,11 +368,11 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     const options=button('Options',()=>openOptions(meta,target));options.classList.add('advanced-only');actions.append(playButton,shareButton,options);bar.append(actions);$('episode-area').replaceChildren(bar);
   }
 
-  function renderEpisodes(meta){
+  function renderEpisodes(meta,preferredSeason=null){
     const settings=getSettings(),progressRows=settings.showEpisodeProgress?listRecent().filter(item=>item.type==='series'&&item.id===meta.id):[];
     const controls=element('div','','episode-controls');const seasonLabel=element('label','Season','compact-select');const seasonSelect=element('select');
     const seasons=[...new Set(meta.episodes.map(e=>e.season))];for(const n of seasons){const o=element('option',n===0?'Specials':`Season ${n}`);o.value=String(n);seasonSelect.append(o);}
-    if(seasons.some(n=>n>0))seasonSelect.value=String(seasons.find(n=>n>0));seasonLabel.append(seasonSelect);controls.append(seasonLabel,titleResolutionControl(meta));
+    if(Number.isSafeInteger(preferredSeason)&&seasons.includes(preferredSeason))seasonSelect.value=String(preferredSeason);else if(seasons.some(n=>n>0))seasonSelect.value=String(seasons.find(n=>n>0));seasonLabel.append(seasonSelect);controls.append(seasonLabel,titleResolutionControl(meta));
     const list=element('div','','episode-list');
     const render=()=>{
       list.replaceChildren();
@@ -494,6 +494,12 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     return false;
   }
 
+  async function openHistoryTitle(entry){
+    if(!active||guestMode||!entry||!['movie','series'].includes(entry.type))return false;
+    await showTitle({type:entry.type,id:entry.id,name:entry.title||'Title',poster:entry.poster||''},entry.type==='series'?entry.season:null);
+    return true;
+  }
+
   async function resumeRecent(entry,startOver=false){
     if(!entry||!['movie','series'].includes(entry.type))return false;
     message('catalog-message',startOver?'Starting over…':'Resuming…');
@@ -534,7 +540,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       guestMode=true;active=true;
       await showTitle({type:scope.type,id:scope.id,name:scope.name||'Shared title',poster:scope.poster||''});
     },
-    prepareNext,playPreparedNext,playNext,recoverPlayback,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
+    prepareNext,playPreparedNext,playNext,recoverPlayback,openHistoryTitle,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
     suspend(){active=false;guestMode=false;document.body.classList.remove('search-mode');++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
   };
 }
