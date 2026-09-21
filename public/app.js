@@ -3,7 +3,7 @@ import { diagnosePlaybackFailure } from './playback-errors.js';
 import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js';
 import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js';
 import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js';
-import { listRecent, recordRecent, removeRecent, recentForContext, resumePosition, formatResumeTime } from './history.js';
+import { listRecent, continueWatchingItems, recordRecent, removeRecent, recentForContext, resumePosition, formatResumeTime } from './history.js';
 import { getSettings, saveSettings, resetSettings } from './settings.js';
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js';
 import { clearSearchHistory } from './search-history.js';
@@ -114,26 +114,45 @@ async function pollDriveTest() {
 
 function recentLabel(item) {
   const episode = item.type === 'series' ? `S${item.season}E${item.episode}${item.episodeName ? ' · ' + item.episodeName : ''}` : 'Movie';
-  const time = item.completed ? 'Finished' : item.position > 0 ? `Resume ${formatResumeTime(item.position)}` : 'Start';
+  const time = item.position > 0 ? `Resume ${formatResumeTime(item.position)}` : 'Start';
   return `${episode} · ${time}`;
 }
+function bindRecentLongPress(card,item){
+  let longPressed=false,timer=null;
+  const cancel=()=>{if(timer)clearTimeout(timer);timer=null;};
+  card.addEventListener('pointerdown',event=>{
+    if(event.button>0||!getSettings().longPressShortcuts)return;
+    cancel();timer=setTimeout(()=>{timer=null;longPressed=true;discoveryUI.openHistoryTitle(item);},550);
+  });
+  for(const name of ['pointerup','pointercancel','pointerleave'])card.addEventListener(name,cancel);
+  card.addEventListener('contextmenu',event=>{
+    if(!getSettings().longPressShortcuts)return;
+    event.preventDefault();cancel();
+    if(!longPressed){longPressed=true;discoveryUI.openHistoryTitle(item);}
+  });
+  card.addEventListener('click',()=>{
+    if(longPressed){longPressed=false;return;}
+    discoveryUI.resumeRecent(item);
+  });
+}
 function renderRecent() {
-  const settings=getSettings(),all=listRecent(),rows=(settings.showCompletedRecent?all:all.filter(item=>!item.completed)).slice(0,settings.recentLimit), section = $('recent-section'), list = $('recent-list');
-  $('recent-heading').textContent=settings.showCompletedRecent?'Recently played':'Continue watching';
+  const settings=getSettings(),rows=continueWatchingItems(listRecent(),settings.recentLimit), section = $('recent-section'), list = $('recent-list');
+  $('recent-heading').textContent='Continue watching';
   section.hidden = !rows.length || $('discover-panel').hidden;
   const fragment = document.createDocumentFragment();
   for (const item of rows) {
     const entry = document.createElement('div'); entry.className = 'recent-entry';
     const card = document.createElement('button'); card.type = 'button'; card.className = 'recent-card';
+    card.title=item.type==='series'?'Hold for episode list':'Hold for title details';
     if (item.poster) { const img = document.createElement('img'); img.className = 'recent-thumb'; img.src = item.poster; img.alt = ''; img.referrerPolicy = 'no-referrer'; card.append(img); }
     const copy = document.createElement('span'); copy.className = 'recent-copy';
     const title = document.createElement('strong'); title.className = 'recent-title'; title.textContent = item.title;
     const meta = document.createElement('span'); meta.className = 'recent-meta'; meta.textContent = recentLabel(item); copy.append(title, meta);
-    if (item.duration > 0 && !item.completed) { const track=document.createElement('span');track.className='recent-progress';const fill=document.createElement('span');fill.style.width=`${Math.min(100,Math.max(0,item.position/item.duration*100))}%`;track.append(fill);copy.append(track); }
-    card.append(copy); card.addEventListener('click', () => discoveryUI.resumeRecent(item));
-    const remove=document.createElement('button');remove.type='button';remove.className='recent-remove';remove.textContent='×';remove.setAttribute('aria-label',`Remove ${item.title} from Recently played`);
-    remove.addEventListener('click',event=>{event.stopPropagation();if(confirm(`Remove "${item.title}" from Recently played?`)){removeRecent(item.key);renderRecent();discoveryUI.historyChanged();}});
-    if(item.position>0||item.completed){const start=document.createElement('button');start.type='button';start.className='recent-start-over';start.textContent='Start over';start.addEventListener('click',event=>{event.stopPropagation();discoveryUI.startOverRecent(item);});entry.append(card,remove,start);}else entry.append(card,remove);fragment.append(entry);
+    if (item.duration > 0) { const track=document.createElement('span');track.className='recent-progress';const fill=document.createElement('span');fill.style.width=`${Math.min(100,Math.max(0,item.position/item.duration*100))}%`;track.append(fill);copy.append(track); }
+    card.append(copy);bindRecentLongPress(card,item);
+    const remove=document.createElement('button');remove.type='button';remove.className='recent-remove';remove.textContent='×';remove.setAttribute('aria-label',`Remove ${item.title} from Continue Watching`);
+    remove.addEventListener('click',event=>{event.stopPropagation();if(confirm(`Remove "${item.title}" from Continue Watching?`)){removeRecent(item.key);renderRecent();discoveryUI.historyChanged();}});
+    if(item.position>0){const start=document.createElement('button');start.type='button';start.className='recent-start-over';start.textContent='Start over';start.addEventListener('click',event=>{event.stopPropagation();discoveryUI.startOverRecent(item);});entry.append(card,remove,start);}else entry.append(card,remove);fragment.append(entry);
   }
   list.replaceChildren(fragment);
 }
@@ -738,7 +757,6 @@ function loadSettingsForm(){
   $('setting-auto-recovery').checked=settings.autoRecovery;
   $('setting-pause-overlay').checked=settings.pauseOverlay;
   $('setting-drive-watch-only').checked=settings.driveWatchOnly;
-  $('setting-show-completed-recent').checked=settings.showCompletedRecent;
   $('setting-keep-awake').checked=settings.keepAwake;
   $('setting-keyboard-shortcuts').checked=settings.keyboardShortcuts;
   $('setting-show-episode-progress').checked=settings.showEpisodeProgress;
@@ -780,7 +798,6 @@ $('settings-form').addEventListener('submit',event=>{
     pauseOverlay:$('setting-pause-overlay').checked,
     driveWatchOnly:$('setting-drive-watch-only').checked,
     driveDeleteMinutes:Number($('setting-drive-delete').value),
-    showCompletedRecent:$('setting-show-completed-recent').checked,
     playbackRate:Number($('setting-playback-rate').value),
     sleepTimerMinutes:Number($('setting-sleep-timer').value),
     stillWatchingMinutes:Number($('setting-still-watching').value),
