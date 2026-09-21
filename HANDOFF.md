@@ -8,15 +8,15 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `8962c0fa98b154b0e1e9a673ebe3d925c6f2e022`
+- Main runtime commit: `d0db094abbfc33ebcaca789f59d91e3bd41194c8`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `03aec6ce65feddf5018352a6b9db9cfb2bc4eb7e`
+- Mirror runtime commit: `8762cd35fff1b6067a95d41250eb2fbba5a1605f`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-daob6hek1f9s73bck0lg`
-- PWA cache: `torbox-player-v1.1-restored7`
+- Live Render deploy: `dep-daobk36k1f9s73be8hq0`
+- PWA cache: `torbox-player-v1.1-restored8`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
 
@@ -71,25 +71,26 @@ Continue Watching is now a show-level surface rather than a raw episode history 
 
 ## Fullscreen and Picture in Picture behavior
 
-The player now uses app-managed fullscreen on the stable `#player-media-shell` container instead of relying on Chrome's native fullscreen button on the replaceable `<video>` element.
+Jon's physical screenshot showed that the first fullscreen fix did **not** solve the real Android Chrome path. The visible control was still Chrome's native video fullscreen UI, and Android Chrome ignored the attempt to suppress that control. The custom fullscreen/PiP controls were not obvious enough. The implementation was therefore changed again at the architectural level.
 
-- Chrome's native video fullscreen control is suppressed with `controlsList` when the stable Fullscreen API is available.
-- The custom **Full screen** button calls `requestFullscreen()` on the persistent media shell. The video element can be replaced for auto-next without removing the fullscreen element.
-- Rotation is watched through Screen Orientation and legacy orientation events. If Chrome does force an exit during rotation, the app makes a best-effort fullscreen restore and otherwise leaves a visible Return to full screen action.
-- Fullscreen intent is preserved across episode transitions.
-- Explicitly closing the player exits fullscreen and Picture in Picture cleanly.
-- The player also exposes **Picture in picture** when the browser reports the standard video PiP API as available.
-- PiP uses the current video element's `requestPictureInPicture()` and tracks enter/leave events. Unsupported browsers/devices hide the button rather than showing a broken control.
-- PiP is browser/OS-controlled. It may exit when the actual video element is replaced during auto-next; the page cannot silently re-enter standard video PiP without browser permission/user activation.
+- The same actual `<video>` DOM element is now reused across episode changes, auto-next, and recovery. The source URL and playback context change, but the media element itself is not removed.
+- This directly targets the real failure: Chrome native fullscreen and standard video PiP are both tied to the media element. Replacing that element used to destroy those presentation modes.
+- Native Chrome fullscreen is no longer suppressed. The familiar fullscreen icon can be used.
+- A clearly visible **Display** row above the video also provides **Full screen** and **Picture in picture** controls.
+- The app-managed Full screen button still targets the persistent `#player-media-shell` for browsers where that works better.
+- Rotation tracking and best-effort fullscreen restoration remain.
+- PiP is no longer hidden when unsupported. The button reads **PiP unavailable** and is disabled when the browser does not expose the standard API, making the device capability explicit.
+- Because auto-next now reuses the same video element, PiP has a materially better chance of surviving episode transitions as well. Chrome/Android can still terminate PiP or fullscreen for OS/browser reasons, which the web app cannot override.
+- Event listeners are attached through a per-playback AbortController so the reusable video element does not accumulate stale handlers from prior episodes.
 
 ## Verification
 
-- Browser-key CI run **149** succeeded for mirror runtime commit `03aec6ce`.
+- Browser-key CI run **151** succeeded for mirror runtime commit `8762cd35`.
 - Final suite: **299 tests registered, 293 passed, 0 failed, 6 optional live checks skipped**.
-- GitHub Pages run **132** succeeded for main runtime commit `8962c0fa`.
-- Render deploy `dep-daob6hek1f9s73bck0lg` is live from `03aec6ce`.
+- GitHub Pages run **133** succeeded for main runtime commit `d0db094a`.
+- Render deploy `dep-daobk36k1f9s73be8hq0` is live from `8762cd35`.
 - The modified runtime and regression-test files on `main` and `browser-key-clone` are byte-identical by Git blob SHA.
-- Dedicated auto-next and Continue Watching tests remain green. New presentation-mode tests verify the persistent fullscreen container, suppression of the replaceable video's native fullscreen control, orientation/fullscreen state handling, and conditional standard Picture in Picture support.
+- Dedicated auto-next and Continue Watching tests remain green. Presentation-mode tests now verify the stable media shell, persistent video-element reuse across episode transitions, abortable per-playback listeners, orientation/fullscreen state handling, and conditional standard Picture in Picture support.
 
 ## Do not break
 
@@ -105,6 +106,6 @@ The player now uses app-managed fullscreen on the stable `#player-media-shell` c
 
 ## Immediate next action
 
-Fully close and reopen the installed site or Chrome tab so `torbox-player-v1.1-restored7` activates.
+Fully close and reopen the installed site or Chrome tab so `torbox-player-v1.1-restored8` activates.
 
-Test the new **Full screen** button rather than Chrome's old native video fullscreen control. Confirm that auto-next stays fullscreen and rotating the device does not drop the player out of fullscreen. If the **Picture in picture** button is shown on the device, test entering and leaving PiP. Continue the pending Continue Watching and credits acceptance as well.
+Confirm the visible **Display** row appears above the video. Test both the familiar Chrome fullscreen icon and the Display-row Full screen button through an auto-next transition. If the Display-row PiP button says Picture in picture, test it through an episode change; if it says PiP unavailable, record that Chrome is not exposing the standard API in that device/context. Also rotate while fullscreen and continue the pending Continue Watching and credits acceptance.
