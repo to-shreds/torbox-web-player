@@ -357,9 +357,9 @@ function effectiveCreditsLead(duration,configured){
   return Math.min(lead,Math.max(5,d*.08));
 }
 function queuedNext(context){return context?.playbackContext?.queue?.[0]||null;}
-function markPlaybackCompleted(context){
+function markPlaybackCompleted(context,durationOverride=null){
   if(!context||context.completedRecorded||!context.playbackContext)return;
-  const duration=Number.isFinite(context.video?.duration)&&context.video.duration>0?context.video.duration:Number(context.video?.currentTime)||0;
+  const duration=Number.isFinite(durationOverride)&&durationOverride>0?durationOverride:Number.isFinite(context.video?.duration)&&context.video.duration>0?context.video.duration:Number(context.video?.currentTime)||0;
   recordRecent(context.playbackContext,duration,duration,{completed:true});context.completedRecorded=true;scheduleRecentRender(true);
 }
 function renderUpNextCard(context,{ended=false}={}){
@@ -399,6 +399,7 @@ function ensureNextPrepared(context){
 }
 async function openNextEpisode(context,{fromEnded=false}={}){
   if(active!==context||context.nextTransitionStarted||!queuedNext(context))return false;
+  const completionDuration=Number.isFinite(context.video?.duration)&&context.video.duration>0?context.video.duration:null;
   context.nextTransitionStarted=true;renderUpNextCard(context,{ended:fromEnded||context.nextEnded===true});
   text('player-message','Opening next episode…');
   let moved=false;
@@ -407,7 +408,7 @@ async function openNextEpisode(context,{fromEnded=false}={}){
     if(active!==context)return false;
     moved=prepared?await discoveryUI.playPreparedNext(prepared):await discoveryUI.playNext(context.playbackContext);
   }catch{}
-  if(moved){markPlaybackCompleted(context);return true;}
+  if(moved){markPlaybackCompleted(context,completionDuration);return true;}
   if(active===context){
     context.nextTransitionStarted=false;renderUpNextCard(context,{ended:fromEnded||context.nextEnded===true});
     text('player-message','Next episode could not be selected automatically.',true);

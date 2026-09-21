@@ -29,6 +29,7 @@ test('auto-next is media-time driven during credits and ended is only the safety
   assert.ok(app.includes('context.nextWatchCredits=true'));
   assert.ok(app.includes("Watching credits · the next episode will start when this one ends."));
   assert.ok(app.includes('openNextEpisode(context,{fromEnded:true})'));
+  assert.ok(app.includes('markPlaybackCompleted(context,completionDuration)'));
   assert.ok(!app.includes('nextCountdownTimer=setInterval'));
   assert.ok(!app.includes('scheduleNextEpisode(context)'));
 });
