@@ -8,15 +8,15 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `9244a1ae3d0cc6b424e2841e803d53c97d4e28c7`
+- Main runtime commit: `8962c0fa98b154b0e1e9a673ebe3d925c6f2e022`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `d043109aba0cf552baac977370cf941bad4400e4`
+- Mirror runtime commit: `03aec6ce65feddf5018352a6b9db9cfb2bc4eb7e`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-dao9m1740ujc73eerqg0`
-- PWA cache: `torbox-player-v1.1-restored6`
+- Live Render deploy: `dep-daob6hek1f9s73bck0lg`
+- PWA cache: `torbox-player-v1.1-restored7`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
 
@@ -69,14 +69,27 @@ Continue Watching is now a show-level surface rather than a raw episode history 
 - The old setting that allowed finished titles to appear in Recently Played has been removed. Continue Watching now has one unambiguous meaning.
 - The long-press setting label is now general rather than poster-specific.
 
+## Fullscreen and Picture in Picture behavior
+
+The player now uses app-managed fullscreen on the stable `#player-media-shell` container instead of relying on Chrome's native fullscreen button on the replaceable `<video>` element.
+
+- Chrome's native video fullscreen control is suppressed with `controlsList` when the stable Fullscreen API is available.
+- The custom **Full screen** button calls `requestFullscreen()` on the persistent media shell. The video element can be replaced for auto-next without removing the fullscreen element.
+- Rotation is watched through Screen Orientation and legacy orientation events. If Chrome does force an exit during rotation, the app makes a best-effort fullscreen restore and otherwise leaves a visible Return to full screen action.
+- Fullscreen intent is preserved across episode transitions.
+- Explicitly closing the player exits fullscreen and Picture in Picture cleanly.
+- The player also exposes **Picture in picture** when the browser reports the standard video PiP API as available.
+- PiP uses the current video element's `requestPictureInPicture()` and tracks enter/leave events. Unsupported browsers/devices hide the button rather than showing a broken control.
+- PiP is browser/OS-controlled. It may exit when the actual video element is replaced during auto-next; the page cannot silently re-enter standard video PiP without browser permission/user activation.
+
 ## Verification
 
-- Browser-key CI run **148** succeeded for mirror runtime commit `d043109a`.
-- Final suite: **297 tests registered, 291 passed, 0 failed, 6 optional live checks skipped**.
-- GitHub Pages run **131** succeeded for main runtime commit `9244a1ae`.
-- Render deploy `dep-dao9m1740ujc73eerqg0` is live from `d043109a`.
+- Browser-key CI run **149** succeeded for mirror runtime commit `03aec6ce`.
+- Final suite: **299 tests registered, 293 passed, 0 failed, 6 optional live checks skipped**.
+- GitHub Pages run **132** succeeded for main runtime commit `8962c0fa`.
+- Render deploy `dep-daob6hek1f9s73bck0lg` is live from `03aec6ce`.
 - The modified runtime and regression-test files on `main` and `browser-key-clone` are byte-identical by Git blob SHA.
-- Dedicated auto-next tests continue to cover the credits behavior. New Continue Watching tests cover one-entry-per-show grouping, completed-latest suppression, list limits after grouping, removal of finished-title mode, long-press title navigation, and opening the current season.
+- Dedicated auto-next and Continue Watching tests remain green. New presentation-mode tests verify the persistent fullscreen container, suppression of the replaceable video's native fullscreen control, orientation/fullscreen state handling, and conditional standard Picture in Picture support.
 
 ## Do not break
 
@@ -92,6 +105,6 @@ Continue Watching is now a show-level surface rather than a raw episode history 
 
 ## Immediate next action
 
-Fully close and reopen the installed site or Chrome tab so `torbox-player-v1.1-restored6` activates.
+Fully close and reopen the installed site or Chrome tab so `torbox-player-v1.1-restored7` activates.
 
-Confirm Continue Watching now shows at most one episode for each show and no finished episodes. Long-press a show there and confirm the title dialog opens directly to the season containing that episode. Also complete the pending credits-flow acceptance: Play next now, Watch credits, pause during countdown, and no torrent/source picker.
+Test the new **Full screen** button rather than Chrome's old native video fullscreen control. Confirm that auto-next stays fullscreen and rotating the device does not drop the player out of fullscreen. If the **Picture in picture** button is shown on the device, test entering and leaving PiP. Continue the pending Continue Watching and credits acceptance as well.
