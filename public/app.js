@@ -9,7 +9,7 @@ import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemor
 import { clearSearchHistory } from './search-history.js';
 import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js';
 const $ = id => document.getElementById(id);
-let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '';
+let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null;
 let discoveryUI;
 let activeSetupTransferLink='';
 let viewer = 'viewer-1';
@@ -32,6 +32,38 @@ function setHealthSource(context=active){
   for(const id of ['health-sound-good','health-sound-bad','health-source-bad'])$(id).disabled=!source;
 }
 function text(id, value, error = false) { $(id).textContent = value; $(id).classList.toggle('error', error); }
+function playerMediaShell(){return $('player-media-shell');}
+function playerFullscreenSupported(){return typeof playerMediaShell()?.requestFullscreen==='function';}
+function playerPiPSupported(video=active?.video){return !!video&&document.pictureInPictureEnabled===true&&typeof video.requestPictureInPicture==='function';}
+function updatePlayerModeActions(){
+  const fs=$('toggle-fullscreen'),pip=$('toggle-pip'),shell=playerMediaShell();
+  if(fs){fs.hidden=!playerFullscreenSupported();fs.textContent=document.fullscreenElement===shell?'Exit full screen':fullscreenIntent?'Return to full screen':'Full screen';}
+  if(pip){
+    const supported=playerPiPSupported();pip.hidden=!supported;pip.disabled=!supported||!active?.video||active.video.readyState===0;
+    pip.textContent=document.pictureInPictureElement===active?.video?'Exit picture in picture':'Picture in picture';
+  }
+}
+async function requestPlayerFullscreen({restoring=false}={}){
+  const shell=playerMediaShell();if(!shell||!playerFullscreenSupported())return false;
+  if(document.fullscreenElement===shell){fullscreenIntent=true;updatePlayerModeActions();return true;}
+  try{await shell.requestFullscreen();fullscreenIntent=true;updatePlayerModeActions();return true;}
+  catch{
+    updatePlayerModeActions();
+    if(restoring&&$('player').open)text('player-message','Chrome left full screen after rotation. Tap Full screen to return.');
+    return false;
+  }
+}
+function noteOrientationChange(){
+  if(!fullscreenIntent||!$('player').open)return;
+  fullscreenRestoreDeadline=Date.now()+2500;
+  setTimeout(()=>{if(fullscreenIntent&&!document.fullscreenElement&&Date.now()<=fullscreenRestoreDeadline)void requestPlayerFullscreen({restoring:true});},120);
+}
+async function exitPlayerPresentationModes(){
+  fullscreenIntent=false;fullscreenRestoreDeadline=0;clearTimeout(fullscreenExitTimer);fullscreenExitTimer=null;
+  try{if(document.pictureInPictureElement)await document.exitPictureInPicture();}catch{}
+  try{if(document.fullscreenElement===playerMediaShell())await document.exitFullscreen();}catch{}
+  updatePlayerModeActions();
+}
 function requestParentPin(message,onSuccess){
   if(!hasParentPin()){if(typeof onSuccess==='function')onSuccess();return;}
   parentPinCallback=onSuccess;$('parent-pin-prompt').textContent=message||'Enter the Parent PIN.';
@@ -541,8 +573,9 @@ async function detachPlayback() {
   const old = active;if(old){tickKidUsage(old,true);resetNextEpisodeState(old,{abortPreparation:true});} active = null; hidePauseCard();await releaseWakeLock();
   if (old) { clearInterval(old.timer);clearInterval(old.kidTimer);clearTimeout(old.bufferTimer);clearTimeout(old.sleepTimer);clearTimeout(old.healthyTimer); const saving = saveProgress(old, true); old.video.pause(); old.video.removeAttribute('src'); old.video.load(); old.video.remove(); await saving; }
 }
-async function stopPlayback() { playGeneration++; clearStillWatchingTimer(); hideStillWatchingPrompt(); await detachPlayback(); }
+async function stopPlayback() { playGeneration++; clearStillWatchingTimer(); hideStillWatchingPrompt(); await exitPlayerPresentationModes(); await detachPlayback(); }
 async function startPlayback(file, playbackContext = null) {
+  if(document.fullscreenElement===playerMediaShell()){fullscreenIntent=true;fullscreenRestoreDeadline=Date.now()+6000;}
   if(!guestMode){
     const block=canStartKidPlayback(viewer,playbackContext);
     if(!block.allowed){showKidLimit(block,{file,playbackContext});return false;}
@@ -555,8 +588,10 @@ async function startPlayback(file, playbackContext = null) {
     const result = await api('/api/playback', { method: 'POST', data: { viewer: selectedViewer, videoId: file.id, startOver: playbackContext?.forceStartOver===true } });
     if (generation !== playGeneration || !$('player').open || selectedViewer !== viewer) return false;
     const video = document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.playbackRate=getSettings().playbackRate;
+    if(playerFullscreenSupported())try{video.controlsList.add('nofullscreen');}catch{}
+    try{video.disablePictureInPicture=false;}catch{}
     const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, sourceLearned:false, lastTime:0, nextPromptActive:false, nextCountdownStart:null, nextWatchCredits:false, nextTransitionStarted:false, nextEnded:false, nextPrepareAbort:null, nextPreparePromise:null, nextPrepared:null, nextPrepareError:'', completedRecorded:false };
-    active = context; $('video-slot').replaceChildren(video);setHealthSource(context);
+    active = context; $('video-slot').replaceChildren(video);setHealthSource(context);updatePlayerModeActions();
     const clearBuffer = () => { clearTimeout(context.bufferTimer); context.bufferTimer = null; };
     const recover = async (reason, diagnosis = null) => {
       if (active !== context || context.recovering || video.ended || (reason === 'buffer' && (!context.started || video.paused))) return;
@@ -581,7 +616,7 @@ async function startPlayback(file, playbackContext = null) {
       const rewind = Number(playbackContext?.rewindOnResumeSeconds) || 0;
       if (rewind > 0 && position > 0) position = Math.max(0, position - rewind);
       if (Number.isFinite(video.duration) && position > 0) video.currentTime = Math.min(position, Math.max(0, video.duration - .25));
-      context.ready = true;setPlaybackHealth('Ready',position>0?'Resume point loaded.':'Ready to play.');
+      context.ready = true;updatePlayerModeActions();setPlaybackHealth('Ready',position>0?'Resume point loaded.':'Ready to play.');
       if (playbackContext) { recordRecent(playbackContext, position, video.duration || 0); scheduleRecentRender(true); }
       text('player-message', position > 0 ? `Resuming ${formatResumeTime(position)}` : '');
       video.play().catch(error => { if (active === context && error.name === 'NotAllowedError') text('player-message', 'Tap play'); });
@@ -590,7 +625,9 @@ async function startPlayback(file, playbackContext = null) {
       context.started = true; context.recovering = false; clearBuffer(); hidePauseCard(); acquireWakeLock(); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); context.kidLastAt=Date.now();context.kidLastPosition=Number.isFinite(video.currentTime)?video.currentTime:0;if(!context.kidTimer)context.kidTimer=setInterval(()=>tickKidUsage(context),5000); setPlaybackHealth('Playing','Stream is advancing normally.'); text('player-message', '');
       clearTimeout(context.healthyTimer);if(getSettings().autoLearnSources&&playbackContext?.sourceInfo&&!context.sourceLearned)context.healthyTimer=setTimeout(()=>{if(active===context&&!video.paused&&video.currentTime>5){rememberSourceSuccess(playbackContext.current,playbackContext.sourceInfo);context.sourceLearned=true;setHealthSource(context);}},15000);
     } });
-    video.addEventListener('canplay',()=>{clearBuffer();if(active===context&&context.started&&!video.paused)setPlaybackHealth('Playing','Stream is ready.');});
+    video.addEventListener('canplay',()=>{clearBuffer();updatePlayerModeActions();if(active===context&&context.started&&!video.paused)setPlaybackHealth('Playing','Stream is ready.');});
+    video.addEventListener('enterpictureinpicture',updatePlayerModeActions);
+    video.addEventListener('leavepictureinpicture',updatePlayerModeActions);
     video.addEventListener('timeupdate', () => { if (active !== context || !context.ready) return; if (Math.abs(video.currentTime - context.lastTime) > .2) { context.lastTime = video.currentTime; clearBuffer(); } updateNextEpisodePrompt(context); if(video.paused)updatePauseCard(context); });
     video.addEventListener('waiting', armBuffer); video.addEventListener('stalled',()=>{setPlaybackHealth('Stalled','The browser reports that data stopped arriving.');armBuffer();});
     video.addEventListener('pause', () => { if(active===context)tickKidUsage(context,true); if (active === context && !context.recovering) { clearTimeout(context.healthyTimer);releaseWakeLock(); if(!stillWatchingPromptActive&&!video.ended)clearStillWatchingTimer(); saveProgress(context); if(stillWatchingPromptActive){hidePauseCard();setPlaybackHealth('Still watching?','Tap Keep watching to continue.');}else if(!$('kid-limit-dialog').open){setPlaybackHealth('Paused','Playback is paused.');updatePauseCard(context);} } });
@@ -660,6 +697,37 @@ $('kid-turn-off').addEventListener('click',()=>{updateKidProfile(viewer,{enabled
 $('player').addEventListener('pointerdown',()=>{
   if(active&&!stillWatchingPromptActive&&!active.video.paused)resetStillWatchingTimer();
 });
+$('toggle-fullscreen').addEventListener('click',async()=>{
+  const shell=playerMediaShell();
+  if(document.fullscreenElement===shell){fullscreenIntent=false;try{await document.exitFullscreen();}catch{}updatePlayerModeActions();return;}
+  fullscreenIntent=true;await requestPlayerFullscreen();
+});
+$('toggle-pip').addEventListener('click',async()=>{
+  const video=active?.video;
+  if(!playerPiPSupported(video)){text('player-message','Picture in picture is not available in this browser.');return;}
+  try{
+    if(document.pictureInPictureElement===video)await document.exitPictureInPicture();
+    else await video.requestPictureInPicture();
+  }catch(error){
+    const message=document.fullscreenElement?'Exit full screen and try Picture in picture again.':'Chrome could not start Picture in picture on this device.';
+    text('player-message',message,true);
+  }
+  updatePlayerModeActions();
+});
+document.addEventListener('fullscreenchange',()=>{
+  const shell=playerMediaShell();
+  if(document.fullscreenElement===shell){fullscreenIntent=true;clearTimeout(fullscreenExitTimer);fullscreenExitTimer=null;updatePlayerModeActions();return;}
+  if(!document.fullscreenElement&&fullscreenIntent){
+    clearTimeout(fullscreenExitTimer);
+    fullscreenExitTimer=setTimeout(()=>{
+      fullscreenExitTimer=null;
+      if(fullscreenIntent&&Date.now()<=fullscreenRestoreDeadline&&$('player').open)void requestPlayerFullscreen({restoring:true});
+      else{fullscreenIntent=false;updatePlayerModeActions();}
+    },250);
+  }else updatePlayerModeActions();
+});
+if(screen.orientation?.addEventListener)screen.orientation.addEventListener('change',noteOrientationChange);
+window.addEventListener('orientationchange',noteOrientationChange);
 $('close-player').addEventListener('click', () => $('player').close());
 $('player').addEventListener('close', () => stopPlayback());
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { tickKidUsage(active,true);saveProgress(active, true); releaseWakeLock(); } else if(active&&!active.video.paused){active.kidLastAt=Date.now();active.kidLastPosition=Number.isFinite(active.video.currentTime)?active.video.currentTime:0;acquireWakeLock();} });
