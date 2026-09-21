@@ -51,14 +51,14 @@ test('browser-key clone is discovery-only and does not display TorBox library',a
   assert.ok(!js.includes('loadLibrary'));
 });
 
-test('Recently Played is individually removable with confirmation and no clear-all control',async()=>{
+test('Continue Watching is removable with confirmation and no clear-all control',async()=>{
   const [app,html]=await Promise.all([
     readFile(new URL('../public/app.js',import.meta.url),'utf8'),
     readFile(new URL('../public/index.html',import.meta.url),'utf8')
   ]);
   assert.ok(app.includes("className='recent-remove'"));
   assert.ok(app.includes('Remove "'));
-  assert.ok(app.includes('removeRecent(item.key)'));
+  assert.ok(app.includes('removeRecentTitle(item)'));
   assert.ok(!html.includes('id="clear-recent"'));
 });
 test('settings and TorBox outage preflight are visible while old connection checker is gone',async()=>{
