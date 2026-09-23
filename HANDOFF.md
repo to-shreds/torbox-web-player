@@ -8,15 +8,15 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `00b73697d63786ee921d871bd5b7e1c5c3900e4b`
+- Main runtime commit: `85453c13f1284809436fcab16f55466da0448a9a`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `b2a1f780a9fff57e1b4fd9931c1a1f1049cb621a`
+- Mirror runtime commit: `24219db26c8af0ed5c04ee4a2e2763ba1216eb86`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-dapk63vlk1mc73bta1qg`
-- PWA cache: `torbox-player-v1.1-restored9`
+- Live Render deploy: `dep-dapkr7e7bikc73frqr80`
+- PWA cache: `torbox-player-v1.1-restored10`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
 
@@ -96,11 +96,17 @@ Jon confirmed the stable-video architecture fixed fullscreen persistence and PiP
 - A second tap can interact normally with the video controls.
 - If Chrome enters native video fullscreen, the app makes a best-effort promotion to the persistent player-shell fullscreen so the exit overlay can be rendered.
 
+## Startup-crash correction
+
+The first restored9 fullscreen-exit build contained a selector typo that prevented the module from reaching `bootstrap()`: the HTML element is `fullscreen-exit-overlay`, but the startup event binding looked for `exit-fullscreen-overlay` and called `.addEventListener()` on null. On Android this presented exactly as the app sitting forever on **Opening · Checking this session**.
+
+The selector is corrected. A new regression now scans every static `$('...')` lookup in `app.js` and fails CI if the corresponding published HTML id does not exist, specifically preventing this class of startup failure from recurring.
+
 ## Verification
 
-- Browser-key CI run **153** succeeded for the final mirror benchmark with **301 tests registered, 295 passed, 0 failed, 6 optional live checks skipped**.
-- GitHub Pages run **134** succeeded for main runtime commit `00b73697`.
-- Render deploy `dep-dapk63vlk1mc73bta1qg` is live from the final mirror benchmark.
+- Browser-key CI run **154** succeeded for mirror runtime commit `24219db2` with **302 tests registered, 296 passed, 0 failed, 6 optional live checks skipped**.
+- GitHub Pages run **135** succeeded for main runtime commit `85453c13`.
+- Render deploy `dep-dapkr7e7bikc73frqr80` is live from `24219db2`.
 - The modified runtime and regression-test files on `main` and `browser-key-clone` are byte-identical by Git blob SHA.
 - Existing auto-next, Continue Watching, and stable-video presentation tests remain green. New regressions verify PiP-aware wake-lock handling, the dedicated fullscreen exit affordance, first-tap seek shielding, and best-effort promotion from native video fullscreen to the persistent player shell.
 
@@ -118,6 +124,6 @@ Jon confirmed the stable-video architecture fixed fullscreen persistence and PiP
 
 ## Immediate next action
 
-Fully close and reopen the installed site or Chrome tab so `torbox-player-v1.1-restored9` activates.
+Fully close and reopen the installed site or Chrome tab so `torbox-player-v1.1-restored10` activates.
 
-Test PiP long enough to see whether the display now remains awake after the main page is backgrounded. In fullscreen, let the exit control fade, then tap once on the video near the progress-bar area: the tap should reveal **Exit full screen** without seeking. Tap that button to leave fullscreen. Also continue the pending Continue Watching and credits acceptance.
+First confirm the app now clears **Opening · Checking this session** and loads normally. Then test PiP wake behavior and the fullscreen exit overlay exactly as planned. Continue the pending Continue Watching and credits acceptance.
