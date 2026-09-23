@@ -9,7 +9,7 @@ import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemor
 import { clearSearchHistory } from './search-history.js';
 import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js';
 const $ = id => document.getElementById(id);
-let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null;
+let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null, fullscreenExitControlTimer = null;
 let discoveryUI;
 let activeSetupTransferLink='';
 let viewer = 'viewer-1';
@@ -35,6 +35,14 @@ function text(id, value, error = false) { $(id).textContent = value; $(id).class
 function playerMediaShell(){return $('player-media-shell');}
 function playerFullscreenSupported(){return typeof playerMediaShell()?.requestFullscreen==='function';}
 function playerPiPSupported(video=active?.video){return !!video&&document.pictureInPictureEnabled===true&&typeof video.requestPictureInPicture==='function';}
+function playerIsFullscreen(){const shell=playerMediaShell(),video=active?.video;return document.fullscreenElement===shell||document.fullscreenElement===video;}
+function playerIsPiP(context=active){return !!context?.video&&document.pictureInPictureElement===context.video;}
+function showFullscreenExitControl(){
+  const control=$('fullscreen-exit-overlay');if(!control||document.fullscreenElement!==playerMediaShell())return;
+  clearTimeout(fullscreenExitControlTimer);control.hidden=false;
+  fullscreenExitControlTimer=setTimeout(()=>{fullscreenExitControlTimer=null;if(control)control.hidden=true;},3200);
+}
+function hideFullscreenExitControl(){clearTimeout(fullscreenExitControlTimer);fullscreenExitControlTimer=null;const control=$('fullscreen-exit-overlay');if(control)control.hidden=true;}
 function updatePlayerModeActions(){
   const fs=$('toggle-fullscreen'),pip=$('toggle-pip'),shell=playerMediaShell(),video=active?.video;
   const playerFullscreen=document.fullscreenElement===shell||document.fullscreenElement===video;
@@ -57,10 +65,11 @@ async function requestPlayerFullscreen({restoring=false}={}){
 function noteOrientationChange(){
   if(!fullscreenIntent||!$('player').open)return;
   fullscreenRestoreDeadline=Date.now()+2500;
+  if(document.fullscreenElement===playerMediaShell())showFullscreenExitControl();
   setTimeout(()=>{if(fullscreenIntent&&!document.fullscreenElement&&Date.now()<=fullscreenRestoreDeadline)void requestPlayerFullscreen({restoring:true});},120);
 }
 async function exitPlayerPresentationModes(){
-  fullscreenIntent=false;fullscreenRestoreDeadline=0;clearTimeout(fullscreenExitTimer);fullscreenExitTimer=null;
+  fullscreenIntent=false;fullscreenRestoreDeadline=0;clearTimeout(fullscreenExitTimer);fullscreenExitTimer=null;hideFullscreenExitControl();
   try{if(document.pictureInPictureElement)await document.exitPictureInPicture();}catch{}
   try{if(document.fullscreenElement===playerMediaShell())await document.exitFullscreen();}catch{}
   updatePlayerModeActions();
@@ -489,9 +498,21 @@ function updateNextEpisodePrompt(context){
   if(delay===0||elapsed>=delay)void openNextEpisode(context);
 }
 async function releaseWakeLock(){try{await wakeLock?.release();}catch{}wakeLock=null;}
-async function acquireWakeLock(){
-  if(!getSettings().keepAwake||!('wakeLock' in navigator)||document.visibilityState!=='visible')return;
-  try{await releaseWakeLock();wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null;},{once:true});}catch{}
+async function acquireWakeLock(context=active){
+  if(!getSettings().keepAwake||!('wakeLock' in navigator)||!context?.video||context.video.paused||context.video.ended)return false;
+  const pip=playerIsPiP(context);
+  if(document.visibilityState!=='visible'&&!pip)return false;
+  try{
+    if(wakeLock&&!wakeLock.released)return true;
+    wakeLock=await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release',()=>{wakeLock=null;},{once:true});
+    return true;
+  }catch{return false;}
+}
+async function refreshWakeLockForPlayback(context=active){
+  if(!context?.video||context.video.paused||context.video.ended){await releaseWakeLock();return false;}
+  if(document.visibilityState==='visible'||playerIsPiP(context))return acquireWakeLock(context);
+  await releaseWakeLock();return false;
 }
 function armSleepTimer(context){
   clearTimeout(context.sleepTimer);context.sleepTimer=null;
@@ -628,12 +649,12 @@ async function startPlayback(file, playbackContext = null) {
       video.play().catch(error => { if (active === context && error.name === 'NotAllowedError') text('player-message', 'Tap play'); });
     });
     listen('playing', () => { if (active === context) {
-      context.started = true; context.recovering = false; clearBuffer(); hidePauseCard(); acquireWakeLock(); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); context.kidLastAt=Date.now();context.kidLastPosition=Number.isFinite(video.currentTime)?video.currentTime:0;if(!context.kidTimer)context.kidTimer=setInterval(()=>tickKidUsage(context),5000); setPlaybackHealth('Playing','Stream is advancing normally.'); text('player-message', '');
+      context.started = true; context.recovering = false; clearBuffer(); hidePauseCard(); void refreshWakeLockForPlayback(context); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); context.kidLastAt=Date.now();context.kidLastPosition=Number.isFinite(video.currentTime)?video.currentTime:0;if(!context.kidTimer)context.kidTimer=setInterval(()=>tickKidUsage(context),5000); setPlaybackHealth('Playing','Stream is advancing normally.'); text('player-message', '');
       clearTimeout(context.healthyTimer);if(getSettings().autoLearnSources&&playbackContext?.sourceInfo&&!context.sourceLearned)context.healthyTimer=setTimeout(()=>{if(active===context&&!video.paused&&video.currentTime>5){rememberSourceSuccess(playbackContext.current,playbackContext.sourceInfo);context.sourceLearned=true;setHealthSource(context);}},15000);
     } });
     listen('canplay',()=>{clearBuffer();updatePlayerModeActions();if(active===context&&context.started&&!video.paused)setPlaybackHealth('Playing','Stream is ready.');});
-    listen('enterpictureinpicture',updatePlayerModeActions);
-    listen('leavepictureinpicture',updatePlayerModeActions);
+    listen('enterpictureinpicture',()=>{updatePlayerModeActions();void refreshWakeLockForPlayback(context);});
+    listen('leavepictureinpicture',()=>{updatePlayerModeActions();void refreshWakeLockForPlayback(context);});
     listen('timeupdate', () => { if (active !== context || !context.ready) return; if (Math.abs(video.currentTime - context.lastTime) > .2) { context.lastTime = video.currentTime; clearBuffer(); } updateNextEpisodePrompt(context); if(video.paused)updatePauseCard(context); });
     listen('waiting', armBuffer); listen('stalled',()=>{setPlaybackHealth('Stalled','The browser reports that data stopped arriving.');armBuffer();});
     listen('pause', () => { if(active===context)tickKidUsage(context,true); if (active === context && !context.recovering) { clearTimeout(context.healthyTimer);releaseWakeLock(); if(!stillWatchingPromptActive&&!video.ended)clearStillWatchingTimer(); saveProgress(context); if(stillWatchingPromptActive){hidePauseCard();setPlaybackHealth('Still watching?','Tap Keep watching to continue.');}else if(!$('kid-limit-dialog').open){setPlaybackHealth('Paused','Playback is paused.');updatePauseCard(context);} } });
@@ -721,9 +742,17 @@ $('toggle-pip').addEventListener('click',async()=>{
   updatePlayerModeActions();
 });
 document.addEventListener('fullscreenchange',()=>{
-  const shell=playerMediaShell(),video=active?.video;
-  if(document.fullscreenElement===shell||document.fullscreenElement===video){fullscreenIntent=true;clearTimeout(fullscreenExitTimer);fullscreenExitTimer=null;updatePlayerModeActions();return;}
-  if(!document.fullscreenElement&&fullscreenIntent){
+  const shell=playerMediaShell(),video=active?.video,current=document.fullscreenElement;
+  if(current===shell){
+    fullscreenIntent=true;clearTimeout(fullscreenExitTimer);fullscreenExitTimer=null;showFullscreenExitControl();updatePlayerModeActions();return;
+  }
+  if(current===video){
+    fullscreenIntent=true;clearTimeout(fullscreenExitTimer);fullscreenExitTimer=null;updatePlayerModeActions();
+    if(playerFullscreenSupported())Promise.resolve(shell.requestFullscreen()).catch(()=>{});
+    return;
+  }
+  hideFullscreenExitControl();
+  if(!current&&fullscreenIntent){
     clearTimeout(fullscreenExitTimer);
     fullscreenExitTimer=setTimeout(()=>{
       fullscreenExitTimer=null;
@@ -732,11 +761,18 @@ document.addEventListener('fullscreenchange',()=>{
     },250);
   }else updatePlayerModeActions();
 });
+$('exit-fullscreen-overlay').addEventListener('click',async event=>{event.preventDefault();event.stopPropagation();fullscreenIntent=false;hideFullscreenExitControl();try{if(document.fullscreenElement)await document.exitFullscreen();}catch{}updatePlayerModeActions();});
+playerMediaShell().addEventListener('pointerdown',event=>{
+  if(document.fullscreenElement!==playerMediaShell())return;
+  const control=$('fullscreen-exit-overlay'),wasHidden=control?.hidden!==false;
+  showFullscreenExitControl();
+  if(wasHidden&&event.target===active?.video){event.preventDefault();event.stopPropagation();}
+},true);
 if(screen.orientation?.addEventListener)screen.orientation.addEventListener('change',noteOrientationChange);
 window.addEventListener('orientationchange',noteOrientationChange);
 $('close-player').addEventListener('click', () => $('player').close());
 $('player').addEventListener('close', () => stopPlayback());
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { tickKidUsage(active,true);saveProgress(active, true); releaseWakeLock(); } else if(active&&!active.video.paused){active.kidLastAt=Date.now();active.kidLastPosition=Number.isFinite(active.video.currentTime)?active.video.currentTime:0;acquireWakeLock();} });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { tickKidUsage(active,true);saveProgress(active, true); if(!playerIsPiP(active))releaseWakeLock();else void refreshWakeLockForPlayback(active); } else if(active&&!active.video.paused){active.kidLastAt=Date.now();active.kidLastPosition=Number.isFinite(active.video.currentTime)?active.video.currentTime:0;void refreshWakeLockForPlayback(active);} });
 document.addEventListener('keydown',event=>{
   if(!$('player').open||!active||!getSettings().keyboardShortcuts||event.altKey||event.ctrlKey||event.metaKey)return;
   const tag=event.target?.tagName;if(['INPUT','TEXTAREA','SELECT','BUTTON'].includes(tag))return;
