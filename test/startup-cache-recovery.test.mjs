@@ -30,6 +30,6 @@ test('service worker bypasses HTTP cache for shell refresh and contains the reco
   ]);
   assert.ok(sw.includes(`torbox-player-v1.1-${BUILD}`));
   assert.ok(sw.includes("cache:'no-store'"));
-  assert.ok(sw.includes(`./boot.js?v=${BUILD}`));
+  assert.ok(sw.includes('boot.js?v=${BUILD}'));
   assert.ok(server.includes("['/boot.js'"));
 });
