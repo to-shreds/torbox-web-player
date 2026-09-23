@@ -8,15 +8,15 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `85453c13f1284809436fcab16f55466da0448a9a`
+- Main runtime commit: `814cbc56df2e9332d366aa3c30350e34e3dc3f38`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `24219db26c8af0ed5c04ee4a2e2763ba1216eb86`
+- Mirror runtime commit: `60fb139b37e028e9a6bdbe548e2cd9c75d346b74`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-dapkr7e7bikc73frqr80`
-- PWA cache: `torbox-player-v1.1-restored10`
+- Live Render deploy: `dep-dapkvqnlk1mc73bvupb0`
+- PWA cache: `torbox-player-v1.1-restored11`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
 
@@ -102,13 +102,32 @@ The first restored9 fullscreen-exit build contained a selector typo that prevent
 
 The selector is corrected. A new regression now scans every static `$('...')` lookup in `app.js` and fails CI if the corresponding published HTML id does not exist, specifically preventing this class of startup failure from recurring.
 
+## Sticky-cache startup recovery
+
+Restored10 corrected the selector typo, but Jon still saw the exact unchanged **Opening · Checking this session** screen. That strongly indicates the device was still executing the previously cached broken module rather than restored10: the corrected app either reaches `bootstrap()` or reports a startup/API error, while the stale restored9 module throws before either can happen.
+
+The prior architecture had a recovery trap: service-worker registration lived at the bottom of `app.js`. If `app.js` crashed during module initialization, it never asked Chrome to update the service worker, so a bad cached app could remain sticky across Chrome restarts.
+
+Restored11 changes startup and caching structurally:
+
+- `index.html` loads a tiny, versioned `boot.js?v=restored11` instead of loading `app.js` directly.
+- `boot.js` requests the service-worker update **before** importing the application and uses `updateViaCache: 'none'`.
+- `app.js` and every startup-module import are versioned with `?v=restored11`, so the old service worker does not recognize or intercept those URLs and the browser cannot satisfy them from the broken unversioned module entry.
+- CSS and manifest URLs are versioned as well.
+- The new service worker performs shell network refreshes with `cache: 'no-store'`, then stores the fresh responses in the restored11 cache.
+- Service-worker registration is no longer dependent on the main app successfully initializing.
+- If the app module ever fails during startup again, `boot.js` replaces the indefinite Checking-this-session screen with an explicit startup-failure message and Reload button.
+- `boot.js` is also served by the Render static server so Pages and the deployment mirror remain structurally equivalent.
+
+Because an already cached old `index.html` can still point at the broken unversioned app, the one-time recovery URL is `https://to-shreds.github.io/torbox-web-player/?v=restored11`. The unique navigation URL forces a fresh index fetch; from there, the versioned boot/module graph repairs the normal URL for subsequent visits.
+
 ## Verification
 
-- Browser-key CI run **154** succeeded for mirror runtime commit `24219db2` with **302 tests registered, 296 passed, 0 failed, 6 optional live checks skipped**.
-- GitHub Pages run **135** succeeded for main runtime commit `85453c13`.
-- Render deploy `dep-dapkr7e7bikc73frqr80` is live from `24219db2`.
+- Browser-key CI run **157** succeeded for mirror benchmark `60fb139b` with **305 tests registered, 299 passed, 0 failed, 6 optional live checks skipped**.
+- GitHub Pages run **136** succeeded for main runtime commit `814cbc56`.
+- Render deploy `dep-dapkvqnlk1mc73bvupb0` is live from mirror benchmark `60fb139b`.
 - The modified runtime and regression-test files on `main` and `browser-key-clone` are byte-identical by Git blob SHA.
-- Existing auto-next, Continue Watching, and stable-video presentation tests remain green. New regressions verify PiP-aware wake-lock handling, the dedicated fullscreen exit affordance, first-tap seek shielding, and best-effort promotion from native video fullscreen to the persistent player shell.
+- Existing auto-next, Continue Watching, stable-video presentation, PiP wake-lock, and fullscreen-exit tests remain green. New startup regressions verify the versioned boot loader, versioned module graph, no-store service-worker shell refresh, Render boot route, and project-relative cache-busted assets.
 
 ## Do not break
 
@@ -124,6 +143,6 @@ The selector is corrected. A new regression now scans every static `$('...')` lo
 
 ## Immediate next action
 
-Fully close and reopen the installed site or Chrome tab so `torbox-player-v1.1-restored10` activates.
+Open the one-time recovery URL `https://to-shreds.github.io/torbox-web-player/?v=restored11`. Once it loads, restored11 updates the service worker independently of app startup and future normal visits should use the repaired boot path.
 
-First confirm the app now clears **Opening · Checking this session** and loads normally. Then test PiP wake behavior and the fullscreen exit overlay exactly as planned. Continue the pending Continue Watching and credits acceptance.
+First confirm the recovery URL clears **Opening · Checking this session** and reaches the normal app. Then close that tab and verify the ordinary root URL also loads. Only after startup is confirmed should PiP wake behavior and the fullscreen exit overlay be retested.
