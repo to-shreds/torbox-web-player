@@ -761,7 +761,7 @@ document.addEventListener('fullscreenchange',()=>{
     },250);
   }else updatePlayerModeActions();
 });
-$('exit-fullscreen-overlay').addEventListener('click',async event=>{event.preventDefault();event.stopPropagation();fullscreenIntent=false;hideFullscreenExitControl();try{if(document.fullscreenElement)await document.exitFullscreen();}catch{}updatePlayerModeActions();});
+$('fullscreen-exit-overlay').addEventListener('click',async event=>{event.preventDefault();event.stopPropagation();fullscreenIntent=false;hideFullscreenExitControl();try{if(document.fullscreenElement)await document.exitFullscreen();}catch{}updatePlayerModeActions();});
 playerMediaShell().addEventListener('pointerdown',event=>{
   if(document.fullscreenElement!==playerMediaShell())return;
   const control=$('fullscreen-exit-overlay'),wasHidden=control?.hidden!==false;

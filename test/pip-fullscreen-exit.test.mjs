@@ -17,9 +17,18 @@ test('fullscreen exposes a dedicated exit control and shields the first reveal t
   ]);
   assert.ok(html.includes('id="fullscreen-exit-overlay"'));
   assert.ok(html.includes('Exit full screen'));
-  assert.ok(app.includes("$('exit-fullscreen-overlay').addEventListener('click'"));
+  assert.ok(app.includes("$('fullscreen-exit-overlay').addEventListener('click'"));
   assert.ok(app.includes("if(wasHidden&&event.target===active?.video){event.preventDefault();event.stopPropagation();}"));
   assert.ok(app.includes("if(current===video)"));
   assert.ok(app.includes("shell.requestFullscreen()"));
   assert.ok(css.includes('.player-media-shell:fullscreen .fullscreen-exit-overlay'));
+});
+test('all static app element lookups point to published HTML ids',async()=>{
+  const [app,html]=await Promise.all([
+    readFile(new URL('../public/app.js',import.meta.url),'utf8'),
+    readFile(new URL('../public/index.html',import.meta.url),'utf8')
+  ]);
+  const ids=[...app.matchAll(/\\$\\('([^']+)'\\)/g)].map(match=>match[1]);
+  const missing=[...new Set(ids)].filter(id=>!html.includes(`id="${id}"`));
+  assert.deepEqual(missing,[]);
 });
