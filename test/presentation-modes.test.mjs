@@ -32,6 +32,6 @@ test('player offers picture in picture only when the browser exposes the standar
   assert.ok(app.includes("typeof video.requestPictureInPicture==='function'"));
   assert.ok(app.includes('video.requestPictureInPicture()'));
   assert.ok(app.includes('document.exitPictureInPicture()'));
-  assert.ok(app.includes("listen('enterpictureinpicture',updatePlayerModeActions)"));
-  assert.ok(app.includes("listen('leavepictureinpicture',updatePlayerModeActions)"));
+  assert.ok(app.includes("listen('enterpictureinpicture',()=>{updatePlayerModeActions();void refreshWakeLockForPlayback(context);})"));
+  assert.ok(app.includes("listen('leavepictureinpicture',()=>{updatePlayerModeActions();void refreshWakeLockForPlayback(context);})"));
 });
