@@ -9,3 +9,7 @@
 /* visible presentation controls and stable video element */
 .player-presentation-bar{display:flex;align-items:center;justify-content:flex-end;gap:.4rem;margin:0 0 .45rem}.player-presentation-bar>span{margin-right:auto;color:#91a4b7;font-size:.68rem;font-weight:650}.player-presentation-bar button{min-height:34px;padding:.3rem .55rem;font-size:.66rem}.player-presentation-bar button:disabled{cursor:not-allowed;opacity:.5}
 @media(max-width:600px){.player-presentation-bar{gap:.28rem}.player-presentation-bar button{min-height:32px;padding:.25rem .45rem;font-size:.6rem}}
+/* fullscreen exit affordance */
+.fullscreen-exit-overlay{display:none}
+.player-media-shell:fullscreen .fullscreen-exit-overlay{position:absolute;z-index:30;top:max(.55rem,env(safe-area-inset-top));right:max(.55rem,env(safe-area-inset-right));display:inline-flex;min-height:42px;padding:.45rem .7rem;border:1px solid rgb(255 255 255/.42);background:rgb(4 10 18/.78);backdrop-filter:blur(7px);color:#fff;font-size:.72rem;font-weight:700;box-shadow:0 4px 18px rgb(0 0 0/.35)}
+.player-media-shell:fullscreen .fullscreen-exit-overlay[hidden]{display:none!important}
