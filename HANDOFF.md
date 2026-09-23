@@ -8,14 +8,14 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `814cbc56df2e9332d366aa3c30350e34e3dc3f38`
+- Main runtime commit: `852297851601077cd18a5cc0a82da784d1cb2582`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `60fb139b37e028e9a6bdbe548e2cd9c75d346b74`
+- Mirror runtime commit: `0808d54f737108c495fcd711daf69daedc8012b2`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-dapkvqnlk1mc73bvupb0`
+- Live Render deploy: `dep-dapnj6nlk1mc73c98cc0`
 - PWA cache: `torbox-player-v1.1-restored11`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
@@ -121,11 +121,23 @@ Restored11 changes startup and caching structurally:
 
 Because an already cached old `index.html` can still point at the broken unversioned app, the one-time recovery URL is `https://to-shreds.github.io/torbox-web-player/?v=restored11`. The unique navigation URL forces a fresh index fetch; from there, the versioned boot/module graph repairs the normal URL for subsequent visits.
 
+## Permanent recovery entry
+
+Jon confirmed the restored11 one-time recovery URL successfully escaped the stale cached frontend.
+
+A permanent cache-busting recovery entry now exists at `https://to-shreds.github.io/torbox-web-player/recover/`.
+
+- The recovery page is intentionally standalone and does not import the normal application or boot loader.
+- It immediately redirects to the root player with a unique `?recover=<timestamp>` query on every use.
+- Because the redirect query is generated at runtime, the recovery page itself can remain stable forever and does not need a version number.
+- The root player remains the normal/default URL. The recovery path is a permanent emergency escape hatch if a future browser or service-worker cache gets stuck.
+- The Render static mirror also serves `/recover` and `/recover/`.
+
 ## Verification
 
-- Browser-key CI run **157** succeeded for mirror benchmark `60fb139b` with **305 tests registered, 299 passed, 0 failed, 6 optional live checks skipped**.
-- GitHub Pages run **136** succeeded for main runtime commit `814cbc56`.
-- Render deploy `dep-dapkvqnlk1mc73bvupb0` is live from mirror benchmark `60fb139b`.
+- Browser-key CI run **158** succeeded for mirror runtime commit `0808d54f` with **307 tests registered, 301 passed, 0 failed, 6 optional live checks skipped**.
+- GitHub Pages run **137** succeeded for main runtime commit `85229785`.
+- Render deploy `dep-dapnj6nlk1mc73c98cc0` is live from `0808d54f`.
 - The modified runtime and regression-test files on `main` and `browser-key-clone` are byte-identical by Git blob SHA.
 - Existing auto-next, Continue Watching, stable-video presentation, PiP wake-lock, and fullscreen-exit tests remain green. New startup regressions verify the versioned boot loader, versioned module graph, no-store service-worker shell refresh, Render boot route, and project-relative cache-busted assets.
 
@@ -143,6 +155,4 @@ Because an already cached old `index.html` can still point at the broken unversi
 
 ## Immediate next action
 
-Open the one-time recovery URL `https://to-shreds.github.io/torbox-web-player/?v=restored11`. Once it loads, restored11 updates the service worker independently of app startup and future normal visits should use the repaired boot path.
-
-First confirm the recovery URL clears **Opening · Checking this session** and reaches the normal app. Then close that tab and verify the ordinary root URL also loads. Only after startup is confirmed should PiP wake behavior and the fullscreen exit overlay be retested.
+Startup recovery is physically confirmed. Use the ordinary root URL for normal operation. If a future build ever becomes stuck behind stale browser/service-worker state, use the permanent recovery URL `https://to-shreds.github.io/torbox-web-player/recover/`. Resume the PiP wake-lock and fullscreen-exit acceptance checks next.
