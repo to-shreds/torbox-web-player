@@ -8,15 +8,15 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `d0db094abbfc33ebcaca789f59d91e3bd41194c8`
+- Main runtime commit: `00b73697d63786ee921d871bd5b7e1c5c3900e4b`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `8762cd35fff1b6067a95d41250eb2fbba5a1605f`
+- Mirror runtime commit: `b2a1f780a9fff57e1b4fd9931c1a1f1049cb621a`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-daobk36k1f9s73be8hq0`
-- PWA cache: `torbox-player-v1.1-restored8`
+- Live Render deploy: `dep-dapk63vlk1mc73bta1qg`
+- PWA cache: `torbox-player-v1.1-restored9`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
 
@@ -83,14 +83,26 @@ Jon's physical screenshot showed that the first fullscreen fix did **not** solve
 - Because auto-next now reuses the same video element, PiP has a materially better chance of surviving episode transitions as well. Chrome/Android can still terminate PiP or fullscreen for OS/browser reasons, which the web app cannot override.
 - Event listeners are attached through a per-playback AbortController so the reusable video element does not accumulate stale handlers from prior episodes.
 
+## PiP wake and fullscreen exit behavior
+
+Jon confirmed the stable-video architecture fixed fullscreen persistence and PiP itself. Two follow-up usability issues were then addressed.
+
+- PiP now keeps the existing Screen Wake Lock request active instead of the app explicitly releasing it merely because the main page becomes hidden.
+- Entering and leaving PiP refreshes the wake-lock request, and visible playback continues to reacquire it when needed.
+- This is a best-effort browser API path. Android Chrome may still revoke Screen Wake Lock automatically when the underlying document is hidden even while a PiP window remains visible. If the screen still sleeps after this build, that remaining behavior is browser/OS policy rather than an app-side release.
+- Fullscreen now contains a dedicated **Exit full screen** button in the persistent player shell.
+- The button appears when fullscreen is entered or the screen is touched and stays visible for about 3.2 seconds.
+- When the button is hidden, the first tap directly on the video is intercepted only to reveal the exit control. That first reveal tap is not allowed to fall through to Chrome's progress bar, preventing the accidental seek Jon reported.
+- A second tap can interact normally with the video controls.
+- If Chrome enters native video fullscreen, the app makes a best-effort promotion to the persistent player-shell fullscreen so the exit overlay can be rendered.
+
 ## Verification
 
-- Browser-key CI run **151** succeeded for mirror runtime commit `8762cd35`.
-- Final suite: **299 tests registered, 293 passed, 0 failed, 6 optional live checks skipped**.
-- GitHub Pages run **133** succeeded for main runtime commit `d0db094a`.
-- Render deploy `dep-daobk36k1f9s73be8hq0` is live from `8762cd35`.
+- Browser-key CI run **153** succeeded for the final mirror benchmark with **301 tests registered, 295 passed, 0 failed, 6 optional live checks skipped**.
+- GitHub Pages run **134** succeeded for main runtime commit `00b73697`.
+- Render deploy `dep-dapk63vlk1mc73bta1qg` is live from the final mirror benchmark.
 - The modified runtime and regression-test files on `main` and `browser-key-clone` are byte-identical by Git blob SHA.
-- Dedicated auto-next and Continue Watching tests remain green. Presentation-mode tests now verify the stable media shell, persistent video-element reuse across episode transitions, abortable per-playback listeners, orientation/fullscreen state handling, and conditional standard Picture in Picture support.
+- Existing auto-next, Continue Watching, and stable-video presentation tests remain green. New regressions verify PiP-aware wake-lock handling, the dedicated fullscreen exit affordance, first-tap seek shielding, and best-effort promotion from native video fullscreen to the persistent player shell.
 
 ## Do not break
 
@@ -106,6 +118,6 @@ Jon's physical screenshot showed that the first fullscreen fix did **not** solve
 
 ## Immediate next action
 
-Fully close and reopen the installed site or Chrome tab so `torbox-player-v1.1-restored8` activates.
+Fully close and reopen the installed site or Chrome tab so `torbox-player-v1.1-restored9` activates.
 
-Confirm the visible **Display** row appears above the video. Test both the familiar Chrome fullscreen icon and the Display-row Full screen button through an auto-next transition. If the Display-row PiP button says Picture in picture, test it through an episode change; if it says PiP unavailable, record that Chrome is not exposing the standard API in that device/context. Also rotate while fullscreen and continue the pending Continue Watching and credits acceptance.
+Test PiP long enough to see whether the display now remains awake after the main page is backgrounded. In fullscreen, let the exit control fade, then tap once on the video near the progress-bar area: the tap should reveal **Exit full screen** without seeking. Tap that button to leave fullscreen. Also continue the pending Continue Watching and credits acceptance.
