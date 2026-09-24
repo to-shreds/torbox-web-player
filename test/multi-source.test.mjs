@@ -45,9 +45,19 @@ test('MediaFusion Torznab adapter sends anonymous IMDb/episode metadata query on
     assert.equal(url.searchParams.get('t'),'tvsearch'); assert.equal(url.searchParams.get('imdbid'),episode.id);
     assert.equal(url.searchParams.get('season'),'1'); assert.equal(url.searchParams.get('ep'),'1'); assert.equal(url.searchParams.get('limit'),'100');
     assert.equal(opts.credentials,'omit'); assert.ok(!('Authorization' in opts.headers));
-    return new Response(`<rss><channel><item><title>Show.S01E01.720p</title><size>700000000</size><torznab:attr name="infohash" value="${hash(4)}"/><torznab:attr name="seeders" value="12"/></item></channel></rss>`,{status:200,headers:{'content-type':'application/xml'}});
+    return new Response(`<rss><channel><item><title>Show.S01E01.720p</title><size>700000000</size><torznab:attr name="infohash" value="${hash(4)}"/><torznab:attr name="seeders" value="12"/><torznab:attr name="imdb" value="0903747"/></item></channel></rss>`,{status:200,headers:{'content-type':'application/xml'}});
   }});
   const result=await s.lookup(episode); assert.equal(result.sources.length,1); assert.equal(result.sources[0].provider,'MediaFusion Torznab');
+});
+
+test('MediaFusion Torznab requires a matching IMDb identity and accepts its numeric live format',()=>{
+  const xml=`<rss><channel>
+    <item><title>Correct</title><torznab:attr name="infohash" value="${hash(41)}"/><torznab:attr name="imdb" value="0903747"/></item>
+    <item><title>Wrong ID</title><torznab:attr name="infohash" value="${hash(42)}"/><torznab:attr name="imdb" value="1234567"/></item>
+    <item><title>Missing ID</title><torznab:attr name="infohash" value="${hash(43)}"/></item>
+  </channel></rss>`;
+  const rows=normalizeTorznabXml(xml,episode);
+  assert.deepEqual(rows.map(row=>row.hash),[hash(41)]);
 });
 
 test('multi lookup aggregates two primary indexes in parallel and deduplicates by hash',async()=>{
