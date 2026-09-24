@@ -15,3 +15,22 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run check
       - run: npm test
+      - name: Verify live Office E3 browser candidates
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { MultiSourceLookup } from './lib/source-lookup.mjs';
+          import { Catalog } from './lib/catalog.mjs';
+          import { sourceEpisodeTitleFit } from './lib/discovery.mjs';
+          const target={type:'series',id:'tt0386676',season:4,episode:3};
+          const [sources,meta]=await Promise.all([
+            new MultiSourceLookup({timeoutMs:12000}).lookup(target),
+            new Catalog().meta(target.type,target.id)
+          ]);
+          const rows=sources.sources.filter(source=>sourceEpisodeTitleFit(meta,target,source)!==false);
+          const browser=rows.filter(source=>source.browserContainer===true&&source.browserUnsupported!==true);
+          console.log('PROVIDERS',sources.providers);
+          console.log('TOTAL',sources.sources.length,'IDENTITY_OK',rows.length,'BROWSER',browser.length);
+          for(const source of browser.slice(0,20))console.log(JSON.stringify({provider:source.provider,hash:source.hash,filename:source.filename,title:source.title,resolution:source.resolution,videoRisk:source.videoRisk,audioRisk:source.audioRisk}));
+          if(!browser.some(source=>/dunder[ ._-]+mifflin[ ._-]+infinity/i.test((source.filename||'')+' '+(source.title||'')))) throw new Error('No exact Dunder Mifflin Infinity browser candidate survived live lookup');
+          NODE
