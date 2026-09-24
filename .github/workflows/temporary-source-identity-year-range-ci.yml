@@ -1,0 +1,17 @@
+name: Temporary source identity year-range CI
+on:
+  push:
+    branches: [fix/source-identity-year-range]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run check
+      - run: npm test
