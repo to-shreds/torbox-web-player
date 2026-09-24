@@ -1,9 +1,9 @@
-import { loadPublicSources, browserContainerHints } from './source-client.js?v=restored12';
-import { getSettings, updateSettings } from './settings.js?v=restored12';
-import { listRecent, formatResumeTime } from './history.js?v=restored12';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=restored12';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=restored12';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=restored12';
+import { loadPublicSources, browserContainerHints } from './source-client.js?v=restored13';
+import { getSettings, updateSettings } from './settings.js?v=restored13';
+import { listRecent, formatResumeTime } from './history.js?v=restored13';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=restored13';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=restored13';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=restored13';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
