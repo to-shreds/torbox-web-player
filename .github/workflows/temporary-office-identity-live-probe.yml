@@ -1,0 +1,31 @@
+name: Temporary live Office identity guard probe
+on:
+  push:
+    branches: [diagnose/office-identity-guard-live]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Verify live Office identity filtering
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { Catalog } from './lib/catalog.mjs';
+          import { TorznabSourceLookup, SourceLookup } from './lib/source-lookup.mjs';
+          import { sourceIdentityFit } from './lib/discovery.mjs';
+          const target={type:'series',id:'tt0386676',season:4,episode:1};
+          const meta=await new Catalog().meta(target.type,target.id);
+          console.log('META',JSON.stringify({name:meta.name,year:meta.year,seasonYears:[...new Set(meta.episodes.filter(e=>e.season===4&&e.released).map(e=>new Date(e.released).getUTCFullYear()))]}));
+          for(const provider of [new SourceLookup({timeoutMs:15000}),new TorznabSourceLookup({timeoutMs:15000})]){
+            const result=await provider.lookup(target);
+            const rows=result.sources.map(source=>({source,fit:sourceIdentityFit(meta,target,source)}));
+            console.log('PROVIDER',provider.name,'TOTAL',rows.length,'ACCEPTED',rows.filter(x=>x.fit!==false).length,'REJECTED',rows.filter(x=>x.fit===false).length);
+            for(const row of rows.filter(x=>x.fit===false)) console.log('REJECT',JSON.stringify({provider:row.source.provider,hash:row.source.hash,title:row.source.title}));
+          }
+          NODE
