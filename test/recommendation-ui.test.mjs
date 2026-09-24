@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { recommendSource, automaticSourceOrder, automaticCachedSourceOrder, resolveAutomaticCachedSource, isAutomaticCandidateFailure, selectAutomaticVideoFile, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder, recoverySourceOrder, boundedRecoverySourceOrder, sourceRecoveryKey, MAX_AUTOMATIC_SOURCE_ATTEMPTS, AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS, AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS, AUTOMATIC_SOURCE_CANDIDATES } from '../public/discover.js';
+import { recommendSource, automaticSourceOrder, automaticCachedSourceOrder, browserPreparationCandidate, resolveAutomaticCachedSource, isAutomaticCandidateFailure, selectAutomaticVideoFile, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder, recoverySourceOrder, boundedRecoverySourceOrder, sourceRecoveryKey, MAX_AUTOMATIC_SOURCE_ATTEMPTS, AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS, AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS, AUTOMATIC_SOURCE_CANDIDATES } from '../public/discover.js';
 import { parseSizeBytes } from '../public/source-client.js';
 import { normalizeIndexRows } from '../lib/source-lookup.mjs';
 
@@ -44,6 +44,21 @@ test('automatic playback skips a cached source whose cached file list proves it 
   const blocked=src('blocked',{cachedBrowserPlayable:false,browserFriendly:true,browserContainer:true,containerStatus:'supported',size:.3*G});
   const verified=src('verified',{cachedBrowserPlayable:true,browserFriendly:false,browserContainer:false,containerStatus:'unknown',size:.8*G});
   assert.deepEqual(automaticCachedSourceOrder([blocked,verified],'series','auto').map(source=>source.id),['verified']);
+});
+test('explicit browser preparation fallback chooses an uncached direct browser file and avoids alternate cuts when possible',()=>{
+  const cachedMkv=src('cached-mkv',{cached:true,browserFriendly:false,browserContainer:false,browserUnsupported:true,containerStatus:'unsupported',filename:'Show.S01E01.mkv'});
+  const extended=src('extended',{cached:false,browserFriendly:false,browserContainer:true,browserUnsupported:false,containerStatus:'supported',filename:'Show.S01E01.EXTENDED.mp4',resolution:'720p',size:.4*G});
+  const regular=src('regular',{cached:false,browserFriendly:false,browserContainer:true,browserUnsupported:false,containerStatus:'supported',filename:'Show.S01E01.mp4',resolution:'720p',size:.8*G});
+  assert.equal(browserPreparationCandidate([cachedMkv,extended,regular],'series','720p').id,'regular');
+  assert.equal(browserPreparationCandidate([cachedMkv,extended],'series','720p').id,'extended');
+});
+test('no-cache Play failure offers an explicit Prepare-and-Play confirmation instead of silently downloading',async()=>{
+  const source=await readFile(new URL('../public/discover.js',import.meta.url),'utf8');
+  assert.ok(source.includes("e?.code==='NO_CACHED_BROWSER_SOURCE'"));
+  assert.ok(source.includes('browserPreparationCandidate(registered.sources'));
+  assert.ok(source.includes('window.confirm('));
+  assert.ok(source.includes("waitForPreparation:true"));
+  assert.ok(source.includes("source.cached===true"));
 });
 test('automatic playback never prepares an uncached source',async()=>{
   const calls=[];
