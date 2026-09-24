@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  MultiSourceLookup, StremioSourceLookup, TorznabSourceLookup, SourceLookupError,
+  MultiSourceLookup, StremioSourceLookup, TorznabSourceLookup, TorrentioSourceLookup, SourceLookupError,
   PUBLIC_STREMIO_PROVIDERS, mergeProviderSources, normalizeStremioStreams, normalizeTorznabXml,
-  MEDIAFUSION_TORZNAB_ORIGIN, browserSourceCount
+  MEDIAFUSION_TORZNAB_ORIGIN, TORRENTIO_ORIGIN, browserSourceCount
 } from '../lib/source-lookup.mjs';
 
 const movie={type:'movie',id:'tt1160419'};
@@ -37,6 +37,26 @@ test('MediaFusion Torznab normalization keeps only hashes and useful metadata',(
   </channel></rss>`;
   const rows=normalizeTorznabXml(xml,movie);
   assert.equal(rows.length,1); assert.equal(rows[0].hash,hash(3)); assert.equal(rows[0].seeders,42); assert.equal(rows[0].size,1800000000); assert.equal(rows[0].resolution,'720p');
+});
+
+test('Torrentio adapter uses the fixed anonymous episode endpoint and preserves exact filenames',async()=>{
+  const s=new TorrentioSourceLookup({fetchFn:async(url,opts)=>{
+    assert.equal(url.origin,new URL(TORRENTIO_ORIGIN).origin);
+    assert.equal(url.pathname,'/sort=qualityseed/stream/series/tt0903747:1:1.json');
+    assert.equal(opts.credentials,'omit'); assert.equal(opts.redirect,'manual'); assert.equal(opts.headers.Authorization,undefined);
+    return reply({streams:[{
+      infoHash:hash(44),fileIdx:12,name:'Torrentio\n1080p',
+      title:'Fixture Season\nFixture.S01E01.1080p.WEB-DL.H264.AAC.mp4\n👤 77',
+      behaviorHints:{filename:'Fixture.S01E01.1080p.WEB-DL.H264.AAC.mp4',videoSize:850000000}
+    }]});
+  }});
+  const result=await s.lookup(episode);
+  assert.equal(result.sources.length,1);
+  assert.equal(result.sources[0].provider,'Torrentio');
+  assert.equal(result.sources[0].filename,'Fixture.S01E01.1080p.WEB-DL.H264.AAC.mp4');
+  assert.equal(result.sources[0].seeders,77);
+  assert.equal(result.sources[0].browserContainer,true);
+  assert.equal(result.sources[0].browserFriendly,true);
 });
 
 test('MediaFusion Torznab adapter sends anonymous IMDb/episode metadata query only',async()=>{
