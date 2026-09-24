@@ -1,4 +1,4 @@
-name: Temporary Office E3 mapping probe
+name: Temporary Office E3 provider probe
 on:
   push:
     branches: [diagnose/office-e3-mapping]
@@ -9,46 +9,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Inspect public torrent file lists
-        shell: python
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Probe additional Stremio providers
+        shell: bash
         run: |
-          import urllib.request
-          HASHES = [
-            "9bdb6e45ad9a6f9454303816fd26584f54803494",
-            "317997ff1b6060fe669aaf6216e5f54fb364398c",
-            "6281fbb4605117fbb297ca4d6ab29ee1c11486a4",
-          ]
-          def parse(data, i=0):
-            c=data[i:i+1]
-            if c==b'i':
-              j=data.index(b'e',i); return int(data[i+1:j]),j+1
-            if c==b'l':
-              out=[];i+=1
-              while data[i:i+1]!=b'e':
-                v,i=parse(data,i);out.append(v)
-              return out,i+1
-            if c==b'd':
-              out={};i+=1
-              while data[i:i+1]!=b'e':
-                k,i=parse(data,i);v,i=parse(data,i);out[k]=v
-              return out,i+1
-            j=data.index(b':',i);n=int(data[i:j]);j+=1
-            return data[j:j+n],j+n
-          for h in HASHES:
-            print("\nHASH",h)
-            try:
-              req=urllib.request.Request(f"https://itorrents.org/torrent/{h.upper()}.torrent",headers={"User-Agent":"Mozilla/5.0"})
-              data=urllib.request.urlopen(req,timeout=5).read()
-              root,_=parse(data)
-              info=root[b'info']
-              files=info.get(b'files')
-              if files is None:
-                print("FILE",info.get(b'name',b'').decode("utf-8","replace"),info.get(b'length'))
-                continue
-              for row in files:
-                path="/".join(p.decode("utf-8","replace") for p in row.get(b'path',[]))
-                low=path.lower()
-                if any(x in low for x in ["s04e0","4x0","dunder","fun run","launch party","money"]):
-                  print("FILE",path,row.get(b'length'))
-            except Exception as e:
-              print("ERROR",type(e).__name__,str(e)[:200])
+          node --input-type=module <<'NODE'
+          import { StremioSourceLookup, PUBLIC_STREMIO_PROVIDERS } from './lib/source-lookup.mjs';
+          const target={type:'series',id:'tt0386676',season:4,episode:3};
+          for(const row of PUBLIC_STREMIO_PROVIDERS.filter(x=>['mediafusion','comet'].includes(x.id))){
+            const p=new StremioSourceLookup({...row,timeoutMs:20000});
+            console.log('\nPROVIDER',row.name,row.origin);
+            try{
+              const r=await p.lookup(target);
+              console.log('COUNT',r.sources.length);
+              for(const s of r.sources.slice(0,80)) console.log(JSON.stringify({hash:s.hash,title:s.title,filename:s.filename,resolution:s.resolution,container:s.container,videoCodec:s.videoCodec,audioCodecs:s.audioCodecs,size:s.size,seeders:s.seeders,browserContainer:s.browserContainer,browserUnsupported:s.browserUnsupported}));
+            }catch(e){console.log('ERROR',e.code,e.message);}
+          }
+          NODE
