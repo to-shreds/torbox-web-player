@@ -1,0 +1,59 @@
+name: Temporary Office E3 mapping probe
+on:
+  push:
+    branches: [diagnose/office-e3-mapping]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Probe Office S4 episode mapping
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const id='tt0386676';
+          const meta=await fetch('https://v3-cinemeta.strem.io/meta/series/'+id+'.json').then(r=>r.json());
+          const s4=(meta.meta?.videos||[]).filter(v=>v.season===4).map(v=>({id:v.id,episode:v.episode??v.number,name:v.name||v.title,released:v.released||v.firstAired,runtime:v.runtime}));
+          console.log('CINEMETA_S4',JSON.stringify(s4));
+          for(const ep of [2,3,4]){
+            const zu=new URL('https://zileanfortheweebs.midnightignite.me/dmm/filtered');
+            zu.searchParams.set('ImdbId',id);
+            zu.searchParams.set('Season','4');
+            zu.searchParams.set('Episode',String(ep));
+            const zr=await fetch(zu,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(20000)});
+            console.log('\nZILEAN EP',ep,'STATUS',zr.status);
+            const zj=await zr.json();
+            const rows=Array.isArray(zj)?zj:Array.isArray(zj?.data)?zj.data:[];
+            for(const row of rows.slice(0,30)){
+              console.log('Z',JSON.stringify({
+                raw_title:row.raw_title??row.title??row.name,
+                info_hash:row.info_hash??row.infoHash??row.hash,
+                season:row.season,episode:row.episode,
+                episodes:row.episodes,files:row.files,
+                year:row.year,resolution:row.resolution,codec:row.codec,audio:row.audio,size:row.size
+              }));
+            }
+            const mu=new URL('https://mediafusion.elfhosted.com/torznab');
+            mu.searchParams.set('t','tvsearch');mu.searchParams.set('imdbid',id);mu.searchParams.set('limit','100');
+            mu.searchParams.set('season','4');mu.searchParams.set('ep',String(ep));
+            const mr=await fetch(mu,{headers:{Accept:'application/rss+xml, application/xml, text/xml'},signal:AbortSignal.timeout(20000)});
+            const xml=await mr.text();
+            console.log('\nMEDIAFUSION EP',ep,'STATUS',mr.status);
+            const items=xml.match(/<item\b[^>]*>[\s\S]*?<\/item>/gi)||[];
+            for(const item of items.slice(0,40)){
+              const title=(/<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(item)?.[1]||'').replace(/^<!\[CDATA\[|\]\]>$/g,'').replace(/&amp;/g,'&').trim();
+              const attrs={};
+              for(const tag of item.match(/<torznab:attr\b[^>]*\/?\s*>/gi)||[]){
+                const n=/\bname=["']([^"']+)["']/i.exec(tag)?.[1];
+                const v=/\bvalue=["']([^"']*)["']/i.exec(tag)?.[1];
+                if(n&&v!==undefined)attrs[n]=v;
+              }
+              if(/S04|Season\s*4|Season\.4|S4\b/i.test(title)) console.log('M',JSON.stringify({title,attrs}));
+            }
+          }
+          NODE
