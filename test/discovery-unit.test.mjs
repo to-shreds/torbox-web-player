@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Catalog, normalizeMeta, posterUrl, jsonFromResponse } from '../lib/catalog.mjs';
-import { Discovery, TorrentGateway, chooseVideo, episodeIdentity, cachedBrowserFit, sourceIdentityFit } from '../lib/discovery.mjs';
+import { Discovery, TorrentGateway, chooseVideo, episodeIdentity, cachedBrowserFit, sourceIdentityFit, sourceEpisodeTitleFit } from '../lib/discovery.mjs';
 import { targetOf, normalizeSources, loadPublicSources, sourceHints, browserContainerHints } from '../public/source-client.js';
 import { applySourceMemory, setSourceBad } from '../public/source-memory.js';
 import { AppError } from '../lib/torbox.mjs';
@@ -95,6 +95,21 @@ test('source normalization deduplicates and bounds results', () => {
   const rows = Array.from({ length: 100 }, (_, n) => ({ infoHash: n.toString(16).padStart(40, '0') }));
   assert.equal(normalizeSources(rows).length, 40);
 });
+test('episode-title guard rejects a mismatched numbering release but keeps the selected episode title', () => {
+  const meta={name:'The Office',year:'2005-2013',episodes:[
+    {season:4,episode:1,name:'Fun Run (1)'},
+    {season:4,episode:2,name:'Fun Run (2)'},
+    {season:4,episode:3,name:'Dunder Mifflin Infinity (1)'},
+    {season:4,episode:4,name:'Dunder Mifflin Infinity (2)'},
+    {season:4,episode:5,name:'Launch Party (1)'}
+  ]};
+  const t={type:'series',id:'tt0386676',season:4,episode:3};
+  assert.equal(sourceEpisodeTitleFit(meta,t,{filename:'The.Office.US.S04E03.Dunder.Mifflin.Infinity.Part.1.mp4'}),true);
+  assert.equal(sourceEpisodeTitleFit(meta,t,{filename:'The Office (US) - S04E03-E04 - Dunder Mifflin Infinity.mp4'}),true);
+  assert.equal(sourceEpisodeTitleFit(meta,t,{filename:'E03 Launch Party.mp4'}),false);
+  assert.equal(sourceEpisodeTitleFit(meta,t,{filename:'The.Office.US.S04E03.1080p.WEB-DL.mp4'}),null);
+});
+
 test('source identity guard rejects an alternate-series year while allowing the selected show years', () => {
   const meta={name:'The Office',year:'2005-2013',episodes:[
     {season:4,episode:1,released:'2001-01-01T00:00:00.000Z'},
@@ -130,6 +145,28 @@ test('registration drops a source with conflicting catalog year before TorBox av
   assert.deepEqual(result.sources.map(row=>row.hash),[HASH]);
   assert.match(result.warning,/title identity conflicts/i);
 });
+test('registration drops a source whose filename clearly names another episode', async () => {
+  const officeTarget={type:'series',id:'tt0386676',season:4,episode:3};
+  const officeMeta={id:'tt0386676',type:'series',name:'The Office',year:'2005-2013',episodes:[
+    {season:4,episode:3,name:'Dunder Mifflin Infinity (1)'},
+    {season:4,episode:4,name:'Dunder Mifflin Infinity (2)'},
+    {season:4,episode:5,name:'Launch Party (1)'}
+  ]};
+  const seen=[];
+  const gateway={
+    cached:async hashes=>{seen.push(...hashes);return{[HASH]:{cached:false,files:[]}};},
+    find:async()=>null,create:async()=>42,item:async()=>item
+  };
+  const d=new Discovery({catalog:{meta:async()=>officeMeta},gateway});
+  const result=await d.register({target:officeTarget,sources:[
+    {infoHash:HASH,filename:'The.Office.US.S04E03.Dunder.Mifflin.Infinity.Part.1.mp4'},
+    {infoHash:HASH2,filename:'E03 Launch Party.mp4'}
+  ]},'s');
+  assert.deepEqual(seen,[HASH]);
+  assert.deepEqual(result.sources.map(row=>row.hash),[HASH]);
+  assert.match(result.warning,/title identity conflicts/i);
+});
+
 test('source hints identify likely browser-friendly audio without promising universal compatibility', () => {
   const friendly = sourceHints({ filename: 'Test.H264.AAC.mp4' });
   const risky = sourceHints({ filename: 'Test.HEVC.DTS.mkv' });
