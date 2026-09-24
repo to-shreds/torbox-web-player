@@ -9,51 +9,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v5
-        with:
-          node-version: '24'
-      - name: Probe Office S4 episode mapping
-        shell: bash
+      - name: Inspect public torrent file lists
+        shell: python
         run: |
-          node --input-type=module <<'NODE'
-          const id='tt0386676';
-          const meta=await fetch('https://v3-cinemeta.strem.io/meta/series/'+id+'.json').then(r=>r.json());
-          const s4=(meta.meta?.videos||[]).filter(v=>v.season===4).map(v=>({id:v.id,episode:v.episode??v.number,name:v.name||v.title,released:v.released||v.firstAired,runtime:v.runtime}));
-          console.log('CINEMETA_S4',JSON.stringify(s4));
-          for(const ep of [2,3,4]){
-            const zu=new URL('https://zileanfortheweebs.midnightignite.me/dmm/filtered');
-            zu.searchParams.set('ImdbId',id);
-            zu.searchParams.set('Season','4');
-            zu.searchParams.set('Episode',String(ep));
-            const zr=await fetch(zu,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(20000)});
-            console.log('\nZILEAN EP',ep,'STATUS',zr.status);
-            const zj=await zr.json();
-            const rows=Array.isArray(zj)?zj:Array.isArray(zj?.data)?zj.data:[];
-            for(const row of rows.slice(0,30)){
-              console.log('Z',JSON.stringify({
-                raw_title:row.raw_title??row.title??row.name,
-                info_hash:row.info_hash??row.infoHash??row.hash,
-                season:row.season,episode:row.episode,
-                episodes:row.episodes,files:row.files,
-                year:row.year,resolution:row.resolution,codec:row.codec,audio:row.audio,size:row.size
-              }));
-            }
-            const mu=new URL('https://mediafusion.elfhosted.com/torznab');
-            mu.searchParams.set('t','tvsearch');mu.searchParams.set('imdbid',id);mu.searchParams.set('limit','100');
-            mu.searchParams.set('season','4');mu.searchParams.set('ep',String(ep));
-            const mr=await fetch(mu,{headers:{Accept:'application/rss+xml, application/xml, text/xml'},signal:AbortSignal.timeout(20000)});
-            const xml=await mr.text();
-            console.log('\nMEDIAFUSION EP',ep,'STATUS',mr.status);
-            const items=xml.match(/<item\b[^>]*>[\s\S]*?<\/item>/gi)||[];
-            for(const item of items.slice(0,40)){
-              const title=(/<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(item)?.[1]||'').replace(/^<!\[CDATA\[|\]\]>$/g,'').replace(/&amp;/g,'&').trim();
-              const attrs={};
-              for(const tag of item.match(/<torznab:attr\b[^>]*\/?\s*>/gi)||[]){
-                const n=/\bname=["']([^"']+)["']/i.exec(tag)?.[1];
-                const v=/\bvalue=["']([^"']*)["']/i.exec(tag)?.[1];
-                if(n&&v!==undefined)attrs[n]=v;
-              }
-              if(/S04|Season\s*4|Season\.4|S4\b/i.test(title)) console.log('M',JSON.stringify({title,attrs}));
-            }
-          }
-          NODE
+          import urllib.request
+          HASHES = [
+            "9bdb6e45ad9a6f9454303816fd26584f54803494",
+            "317997ff1b6060fe669aaf6216e5f54fb364398c",
+            "9266bad1e0102a369aa8556c69be2215e080eb7a",
+            "6281fbb4605117fbb297ca4d6ab29ee1c11486a4",
+            "273724d3a199acb640b85394af1d9e01364e1192",
+            "5689a7e436e654cac756854f2ca0348826c54e92",
+            "a0374c50ec75898ec57052d97770cffd81fa4890",
+          ]
+          def parse(data, i=0):
+            c=data[i:i+1]
+            if c==b'i':
+              j=data.index(b'e',i); return int(data[i+1:j]),j+1
+            if c==b'l':
+              out=[];i+=1
+              while data[i:i+1]!=b'e':
+                v,i=parse(data,i);out.append(v)
+              return out,i+1
+            if c==b'd':
+              out={};i+=1
+              while data[i:i+1]!=b'e':
+                k,i=parse(data,i);v,i=parse(data,i);out[k]=v
+              return out,i+1
+            j=data.index(b':',i);n=int(data[i:j]);j+=1
+            return data[j:j+n],j+n
+          for h in HASHES:
+            print("\nHASH",h)
+            try:
+              req=urllib.request.Request(f"https://itorrents.org/torrent/{h.upper()}.torrent",headers={"User-Agent":"Mozilla/5.0"})
+              data=urllib.request.urlopen(req,timeout=20).read()
+              root,_=parse(data)
+              info=root[b'info']
+              files=info.get(b'files')
+              if files is None:
+                print("FILE",info.get(b'name',b'').decode("utf-8","replace"),info.get(b'length'))
+                continue
+              for row in files:
+                path="/".join(p.decode("utf-8","replace") for p in row.get(b'path',[]))
+                low=path.lower()
+                if any(x in low for x in ["s04e0","4x0","dunder","fun run","launch party","money"]):
+                  print("FILE",path,row.get(b'length'))
+            except Exception as e:
+              print("ERROR",type(e).__name__,str(e)[:200])
