@@ -12,31 +12,28 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
-      - name: Probe public source providers
+      - name: Inspect MediaFusion Torznab identity fields
         shell: bash
         run: |
           node --input-type=module <<'NODE'
-          import { SourceLookup, TorznabSourceLookup, StremioSourceLookup, ACTIVE_STREMIO_PROVIDERS } from './lib/source-lookup.mjs';
-          const target={type:'series',id:'tt0386676',season:4,episode:1};
-          const providers=[
-            new SourceLookup({timeoutMs:15000}),
-            new TorznabSourceLookup({timeoutMs:15000}),
-            ...ACTIVE_STREMIO_PROVIDERS.map(row=>new StremioSourceLookup({...row,timeoutMs:15000}))
-          ];
-          for(const provider of providers){
-            console.log('\n### '+provider.name);
-            try{
-              const result=await provider.lookup(target);
-              console.log('COUNT',result.sources.length);
-              for(const s of result.sources.slice(0,50)){
-                console.log(JSON.stringify({
-                  provider:s.provider,hash:s.hash,title:s.title,filename:s.filename,
-                  resolution:s.resolution,container:s.container,videoCodec:s.videoCodec,
-                  audioCodecs:s.audioCodecs,size:s.size,seeders:s.seeders
-                }));
-              }
-            }catch(error){
-              console.log('ERROR',error.code,error.message);
+          const u=new URL('https://mediafusion.elfhosted.com/torznab');
+          u.searchParams.set('t','tvsearch');
+          u.searchParams.set('imdbid','tt0386676');
+          u.searchParams.set('limit','100');
+          u.searchParams.set('season','4');
+          u.searchParams.set('ep','1');
+          const r=await fetch(u,{headers:{Accept:'application/rss+xml, application/xml, text/xml'},redirect:'manual',signal:AbortSignal.timeout(20000)});
+          console.log('STATUS',r.status);
+          const xml=await r.text();
+          const items=xml.match(/<item\b[^>]*>[\s\S]*?<\/item>/gi)||[];
+          for(const item of items.slice(0,15)){
+            const title=(/<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(item)?.[1]||'').replace(/^<!\[CDATA\[|\]\]>$/g,'').replace(/&amp;/g,'&').trim();
+            const attrs={};
+            for(const tag of item.match(/<torznab:attr\b[^>]*\/?\s*>/gi)||[]){
+              const n=/\bname=["']([^"']+)["']/i.exec(tag)?.[1];
+              const v=/\bvalue=["']([^"']*)["']/i.exec(tag)?.[1];
+              if(n&&v!==undefined)attrs[n]=v;
             }
+            console.log(JSON.stringify({title,attrs}));
           }
           NODE
