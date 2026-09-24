@@ -8,15 +8,15 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `d3db9d19a720ef96e26ad7c58798fda90a4c8351`
+- Main runtime commit: `db5da66c2e0999c39ce712485791605ee390b5d0`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `30d9385e12dbed35aca1bd999ef08cbfc8bcdf2c`
+- Mirror runtime commit: `f95ab0f422dd7dd0106b62d5945dc77e618e808b`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-daqauq0u01pc73fgq4a0`
-- PWA cache: `torbox-player-v1.1-restored12`
+- Live Render deploy: `dep-daqhuhugekts73ahjhfg`
+- PWA cache: `torbox-player-v1.1-restored13`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
 
@@ -189,42 +189,44 @@ A live post-change MultiSource probe for The Office S4E3 used Torrentio + Zilean
 
 This does **not** guarantee that one of those MP4 hashes is cached in Jon's TorBox account. Anonymous TorBox cache probing returned HTTP 401, so cache state remains account-authenticated and is checked only by the live player. If S4E3 still fails after this deployment, the next fact to establish is whether any of these exact browser-compatible hashes are cached. Do not weaken MKV rejection merely to make the button proceed.
 
-## Explicit browser-version preparation fallback
+## In-app source-option fallback
 
-Jon physically retested The Office S4E3 after Torrentio source expansion and still received the same cached Chrome-compatible-source error. At this point source discovery is no longer the useful place to keep widening the search: live discovery already exposes several exact MP4 candidates, but the cached-only path cannot use an uncached MP4 and Android Chrome cannot directly play the cached MKV/AVI alternatives.
+Jon correctly rejected the single confirmation fallback as too restrictive. The purpose of the player is to keep source selection and TorBox preparation inside the player, not make the user leave the app or accept one opaque choice.
 
-The player now converts that terminal dead end into an explicit choice:
+Current behavior:
 
-- Normal Play remains cached-only first. It still never starts an uncached torrent silently.
-- Only after cached-only automatic playback returns `NO_CACHED_BROWSER_SOURCE`, the UI looks for the best **uncached browser-container candidate** already returned by the identity-safe source pipeline.
-- Eligible fallback candidates must be MP4/M4V/WebM-class browser containers and cannot be marked browser-unsupported, audio-risk, video-risk, locally bad, or locally no-sound.
-- When an ordinary release exists, the fallback avoids titles labeled Superfan or Extended Cut. Alternate cuts are used only when no ordinary browser candidate exists.
-- The user receives an explicit confirmation explaining that TorBox will prepare a browser-compatible version, that this starts a torrent download, and that it may take a few minutes.
-- Only if the user confirms does the app call the existing explicit preparation path with `waitForPreparation:true`. It then polls TorBox and automatically plays the matching browser-compatible episode file when ready.
-- Canceling the confirmation leaves TorBox unchanged and retains the original no-cached-browser-source result.
-- The displayed candidate size is the discovered video-file estimate. TorBox may need to download the containing torrent, which can be larger.
-- This fallback does not expose the technical source picker in Simple mode.
+- Normal Play remains cached-only and automatic first.
+- If automatic Play cannot find a cached Chrome-compatible source, the title dialog now shows up to **three** safe browser-compatible choices directly in the app.
+- Each choice shows resolution, estimated episode-file size, and filename, with a **Prepare & Play** button.
+- These are a deliberately simplified playback chooser, not the technical Full-mode source table. Simple mode can expose useful fallback choices without exposing raw torrent management controls.
+- The options come from the same identity-safe discovery pipeline. Known wrong-title/wrong-episode sources, unsupported containers, video/audio-risk sources, locally bad sources, and locally no-sound sources are excluded.
+- Ordinary cuts are preferred over Superfan/Extended cuts when possible.
+- Tapping Prepare & Play is the explicit write action. The app adds/prepares that source through TorBox, polls it, and plays the matching browser-compatible episode file when ready. The user never needs to open TorBox.
+- If the user does nothing, nothing is added to TorBox.
+- TorBox may need to download the containing torrent, which can be larger than the displayed episode-file estimate.
+- Full mode still retains the complete technical source table for power users.
 
-The frontend cache graph was bumped from `restored11` to **`restored12`** so existing devices load this behavior rather than continuing to execute the old dead-end frontend.
+The frontend cache graph is now **`restored13`** so existing devices load the in-app chooser rather than the restored12 confirmation flow.
 
 ## Verification
 
-- Feature CI run `35958080304` registered **320 tests: 314 passed, 0 failed, 6 optional live checks skipped**.
-- New regressions verify that the explicit fallback selects an uncached direct browser-container source, avoids alternate cuts when an ordinary release exists, uses a user confirmation, and enters `waitForPreparation:true` only after the cached-only path fails.
+- Feature CI run `36002509064` registered **320 tests: 314 passed, 0 failed, 6 optional live checks skipped**.
+- New regressions verify that no-cache playback renders in-app Prepare & Play choices, does not use `window.confirm()`, and preserves explicit `waitForPreparation:true` only after a user taps a choice.
+- Browser preparation-option tests verify multiple safe choices, duplicate-hash suppression, ordinary-cut preference, and fallback to an alternate cut only when no ordinary choice exists.
 - The existing regression that automatic playback never prepares an uncached source remains green.
-- Startup/cache recovery regressions pass with the complete module graph bumped to `restored12`.
-- GitHub Pages run `35958151067` succeeded for main runtime commit `d3db9d19`.
-- Browser-key clone CI run `35958320533` succeeded for mirror runtime commit `30d9385e` with **320 tests registered, 314 passed, 0 failed, 6 optional live checks skipped**.
-- Render deploy `dep-daqauq0u01pc73fgq4a0` completed successfully and is **live** from mirror runtime commit `30d9385e`.
-- All **11** modified frontend/regression files are byte-identical between `main` and `browser-key-clone` by Git blob SHA.
-- Existing source identity, cached-only automation, TorBox credential isolation, source-picker isolation, startup recovery, PiP/fullscreen, Continue Watching, credits, and security regressions remain green.
+- Startup/cache recovery regressions pass with the complete frontend graph bumped to `restored13`.
+- GitHub Pages run `36002643124` succeeded for main runtime commit `db5da66c`.
+- Browser-key clone CI run `36002859896` succeeded for mirror runtime commit `f95ab0f4` with **320 tests registered, 314 passed, 0 failed, 6 optional live checks skipped**.
+- Render deploy `dep-daqhuhugekts73ahjhfg` completed successfully and is **live** from mirror runtime commit `f95ab0f4`.
+- The restored13 frontend/runtime test files synced in this benchmark are byte-identical between `main` and `browser-key-clone`.
+- Existing source identity, cached-only automation, TorBox credential isolation, startup recovery, PiP/fullscreen, Continue Watching, credits, and security regressions remain green.
 
 ## Do not break
 
 - Root and `/key/` must serve the same v1.1 frontend.
-- Simple mode must stay torrent-blind.
+- Simple mode must stay free of raw torrent-management complexity. It may show a small curated set of playback-source choices when automatic Play cannot proceed.
 - Automatic actions may use cached sources only.
-- Uncached downloads require an explicit user action. Full-mode Prepare remains available, and Simple-mode Play may offer a one-time explicit Prepare-and-Play confirmation only after cached-only playback has failed.
+- Uncached downloads require an explicit user action. Full-mode Prepare remains available, and Simple-mode fallback choices may expose Prepare & Play only after cached-only playback has failed.
 - The TorBox API key and temporary CDN URL remain server-side.
 - AVI/MKV and other known unsupported containers must not be sent to Android Chrome as normal playback.
 - Search must not show a fallback card that cannot be opened through the catalog.
@@ -233,8 +235,8 @@ The frontend cache graph was bumped from `restored11` to **`restored12`** so exi
 
 ## Immediate next action
 
-Reload the ordinary root player and retry The Office Season 4 Episode 3, **Dunder Mifflin Infinity (1)**. Because this benchmark changes the frontend, the expected restored12 behavior is different: if no cached Chrome-compatible copy exists, Play should present an explicit confirmation offering to prepare a browser-compatible version in TorBox instead of ending immediately on the red error.
+Reload the ordinary root player and retry The Office Season 4 Episode 3, **Dunder Mifflin Infinity (1)**. Under restored13, the expected fallback is no longer a red dead end or a single confirmation dialog. If no cached Chrome-compatible source is ready, the title dialog should show up to three in-app playback choices with **Prepare & Play** buttons.
 
-Confirming that prompt is intentionally a write action. TorBox may take several minutes to download the containing torrent; the app waits/polls and should play the selected browser-compatible episode when it becomes ready. Declining the prompt makes no TorBox change.
+Choose one of those options. The app should add/prepare it in TorBox, wait for readiness, and play it without requiring any visit to torbox.app.
 
-If the old red error appears with **no confirmation prompt after a normal reload**, use the permanent `/recover/` URL once to force the restored12 frontend. If preparation is confirmed but ultimately fails, inspect the TorBox preparation result rather than broadening source discovery again.
+If the old UI remains after a normal reload, use the permanent `/recover/` path once to force restored13. If the chooser appears but a selected Prepare & Play fails, investigate that source's TorBox preparation response next rather than broadening discovery again.
