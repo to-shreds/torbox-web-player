@@ -16,11 +16,7 @@ jobs:
           HASHES = [
             "9bdb6e45ad9a6f9454303816fd26584f54803494",
             "317997ff1b6060fe669aaf6216e5f54fb364398c",
-            "9266bad1e0102a369aa8556c69be2215e080eb7a",
             "6281fbb4605117fbb297ca4d6ab29ee1c11486a4",
-            "273724d3a199acb640b85394af1d9e01364e1192",
-            "5689a7e436e654cac756854f2ca0348826c54e92",
-            "a0374c50ec75898ec57052d97770cffd81fa4890",
           ]
           def parse(data, i=0):
             c=data[i:i+1]
@@ -42,7 +38,7 @@ jobs:
             print("\nHASH",h)
             try:
               req=urllib.request.Request(f"https://itorrents.org/torrent/{h.upper()}.torrent",headers={"User-Agent":"Mozilla/5.0"})
-              data=urllib.request.urlopen(req,timeout=20).read()
+              data=urllib.request.urlopen(req,timeout=5).read()
               root,_=parse(data)
               info=root[b'info']
               files=info.get(b'files')
