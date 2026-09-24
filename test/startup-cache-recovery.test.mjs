@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const BUILD='restored11';
+const BUILD='restored12';
 
 test('published page boots through a versioned recovery loader instead of directly importing app.js',async()=>{
   const [html,boot]=await Promise.all([
