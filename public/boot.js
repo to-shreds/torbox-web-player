@@ -1,4 +1,4 @@
-const BUILD='restored11';
+const BUILD='restored12';
 const loadingMessage=()=>document.querySelector('#loading p');
 async function refreshServiceWorker(){
   if(!('serviceWorker' in navigator))return;
