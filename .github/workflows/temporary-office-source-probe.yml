@@ -26,7 +26,7 @@ jobs:
           console.log('STATUS',r.status);
           const xml=await r.text();
           const items=xml.match(/<item\b[^>]*>[\s\S]*?<\/item>/gi)||[];
-          for(const item of items.slice(0,15)){
+          for(const item of items){
             const title=(/<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(item)?.[1]||'').replace(/^<!\[CDATA\[|\]\]>$/g,'').replace(/&amp;/g,'&').trim();
             const attrs={};
             for(const tag of item.match(/<torznab:attr\b[^>]*\/?\s*>/gi)||[]){
@@ -34,6 +34,6 @@ jobs:
               const v=/\bvalue=["']([^"']*)["']/i.exec(tag)?.[1];
               if(n&&v!==undefined)attrs[n]=v;
             }
-            console.log(JSON.stringify({title,attrs}));
+            if(/Office\.PL\.2024|The\.Office\.PL/i.test(title)) console.log(JSON.stringify({title,attrs}));
           }
           NODE
