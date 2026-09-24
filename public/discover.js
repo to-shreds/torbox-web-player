@@ -62,6 +62,15 @@ export function isAutomaticCandidateFailure(error) {
 export function automaticCachedSourceOrder(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
   return automaticSourceOrder((Array.isArray(list)?list:[]).filter(source=>source.cached===true),type,resolution,sizeProfile);
 }
+export function browserPreparationCandidate(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
+  const eligible=(Array.isArray(list)?list:[]).filter(source=>
+    source.cached!==true&&source.browserContainer===true&&source.browserUnsupported!==true&&
+    source.audioRisk!==true&&source.videoRisk!==true&&source.memoryBad!==true&&source.memoryAudio!=='bad'
+  );
+  const regular=eligible.filter(source=>!/\b(?:superfan|extended(?:[ ._-]+cut)?)\b/i.test([source.filename,source.title].filter(Boolean).join(' ')));
+  const pool=regular.length?regular:eligible;
+  return recommendSource(pool,type,resolution,sizeProfile)||(resolution&&resolution!=='auto'?recommendSource(pool,type,'auto',sizeProfile):null);
+}
 export function selectAutomaticVideoFile(files = []) {
   const rows=(Array.isArray(files)?files:[]).filter(file=>file&&file.id);
   const supported=rows.find(file=>browserContainerHints(file).browserContainer);
@@ -312,14 +321,37 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
   async function quickPlay(meta,target,episodeName='',trigger){
     const original=trigger?.textContent;if(trigger){trigger.disabled=true;trigger.textContent='Opening…';}
     message('detail-message','Finding the recommended source…');
+    let resolution,registered;
     try{
       await ensureService();
-      const resolution=getResolution(target),registered=await registeredSources(target,AbortSignal.timeout(45000));
+      resolution=getResolution(target);registered=await registeredSources(target,AbortSignal.timeout(45000));
       const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:AbortSignal.timeout(330000),onCandidate:()=>message('detail-message','Checking cached browser-compatible source…')});
       const context=buildContext(meta,target,episodeName,resolution,best);
       if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
       return await play(result.file,context);
     }catch(e){
+      if(e?.code==='NO_CACHED_BROWSER_SOURCE'&&registered?.sources?.length){
+        const fallback=browserPreparationCandidate(registered.sources,target.type,resolution,getSettings().sourceSizeProfile);
+        if(fallback){
+          const shownSize=formatBytes(fallback.size);
+          const details=[fallback.resolution||fallback.quality,shownSize!=='—'?shownSize:''].filter(Boolean).join(' · ');
+          const note=details?'\n\nRecommended file: '+details+'. TorBox may need to download its containing torrent.':'';
+          const approved=window.confirm('No cached Chrome-compatible version is available. Prepare a browser-compatible version in TorBox and play it when ready? This starts a torrent download and may take a few minutes.'+note);
+          if(approved){
+            try{
+              if(trigger){trigger.disabled=true;trigger.textContent='Preparing…';}
+              message('detail-message','Preparing a browser-compatible version in TorBox…');
+              const result=await readyFile(fallback,{signal:AbortSignal.timeout(330000),unattended:true,waitForPreparation:true});
+              const context=buildContext(meta,target,episodeName,resolution,fallback);
+              if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
+              return await play(result.file,context);
+            }catch(prepError){
+              message('detail-message',prepError.message,true);
+              return false;
+            }
+          }
+        }
+      }
       message('detail-message',e.message,true);
       return false;
     }
