@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Catalog, normalizeMeta, posterUrl, jsonFromResponse } from '../lib/catalog.mjs';
-import { Discovery, TorrentGateway, chooseVideo, episodeIdentity } from '../lib/discovery.mjs';
+import { Discovery, TorrentGateway, chooseVideo, episodeIdentity, cachedBrowserFit } from '../lib/discovery.mjs';
 import { targetOf, normalizeSources, loadPublicSources, sourceHints, browserContainerHints } from '../public/source-client.js';
 import { applySourceMemory, setSourceBad } from '../public/source-memory.js';
 import { AppError } from '../lib/torbox.mjs';
@@ -124,10 +124,22 @@ test('source lookup treats provider denial as an error, never no sources', async
 test('cache calls go only to TorBox and preserve hash query repetitions', async () => {
   const g = new TorrentGateway({ provider: { key: 'synthetic-secret' }, fetchFn: async (url, opts) => {
     assert.equal(url.origin, 'https://api.torbox.app'); assert.equal(url.pathname, '/v1/api/torrents/checkcached');
-    assert.deepEqual(url.searchParams.getAll('hash'), [HASH, HASH2]); assert.equal(opts.headers.Authorization, 'Bearer synthetic-secret');
+    assert.deepEqual(url.searchParams.getAll('hash'), [HASH, HASH2]); assert.equal(url.searchParams.get('list_files'), 'false');
+    assert.equal(opts.headers.Authorization, 'Bearer synthetic-secret');
     assert.equal(opts.redirect, 'error'); return response({ success: true, data: { [HASH]: { hash: HASH } } });
   } });
   assert.deepEqual(await g.cached([HASH, HASH2]), { [HASH]: true, [HASH2]: false });
+});
+test('file-aware cache checks retain only safe file metadata needed for source selection', async () => {
+  const g = new TorrentGateway({ provider: { key: 'synthetic-secret' }, fetchFn: async (url) => {
+    assert.equal(url.searchParams.get('list_files'), 'true');
+    return response({ success: true, data: { [HASH]: { hash: HASH, files: [
+      { id: 91, name: 'Show.S01E02.mp4', short_name: 'S01E02.mp4', size: 123, mimetype: 'video/mp4', secret: 'drop-me' }
+    ] } } });
+  } });
+  assert.deepEqual(await g.cached([HASH], { listFiles: true }), {
+    [HASH]: { cached: true, files: [{ name: 'Show.S01E02.mp4', size: 123, mime: 'video/mp4' }] }
+  });
 });
 test('torrent creation uses only a hash magnet, with cached-only explicit option', async () => {
   const g = new TorrentGateway({ provider: { key: 'synthetic' }, fetchFn: async (url, opts) => {
@@ -179,6 +191,18 @@ test('actual AVI file is rejected before browser playback even when source metad
   const {discovery:d}=fixture({find:async()=>aviItem,item:async()=>aviItem});
   const id=await registered(d,{target,sources:[{infoHash:HASH,title:'Unknown package'}]});
   const result=await d.prepare(id,'s');assert.equal(result.state,'browser_unsupported');assert.equal(result.compatibility.container,'avi');assert.match(result.message,/Android Chrome/);
+});
+test('cached file preflight identifies an exact browser-playable episode without adding the torrent', () => {
+  const t={type:'series',season:1,episode:2};
+  assert.equal(cachedBrowserFit({cached:true,files:[{name:'Show.S01E02.mp4',mimetype:'video/mp4'}]},t,{}),true);
+  assert.equal(cachedBrowserFit({cached:true,files:[{name:'Show.S01E02.mkv',mimetype:'video/x-matroska'}]},t,{}),false);
+  assert.equal(cachedBrowserFit({cached:true,files:[{name:'Show.S01E03.mp4',mimetype:'video/mp4'}]},t,{}),null);
+});
+test('registration exposes file-aware cached browser compatibility for automatic ranking', async () => {
+  const {discovery:d}=fixture({cached:async()=>({[HASH]:{cached:true,files:[{name:'Fixture.mp4',mimetype:'video/mp4'}]}})});
+  const result=await d.register({target,sources:[source]},'s');
+  assert.equal(result.sources[0].cached,true);
+  assert.equal(result.sources[0].cachedBrowserPlayable,true);
 });
 test('source tickets are session-bound and revoked on logout', async () => {
   const { discovery: d } = fixture(); const id = await registered(d);
