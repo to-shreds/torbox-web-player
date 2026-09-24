@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { recommendSource, automaticSourceOrder, automaticCachedSourceOrder, resolveAutomaticCachedSource, isAutomaticCandidateFailure, selectAutomaticVideoFile, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder, recoverySourceOrder, boundedRecoverySourceOrder, sourceRecoveryKey, MAX_AUTOMATIC_SOURCE_ATTEMPTS, AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } from '../public/discover.js';
+import { recommendSource, automaticSourceOrder, automaticCachedSourceOrder, resolveAutomaticCachedSource, isAutomaticCandidateFailure, selectAutomaticVideoFile, filterSourcesByResolution, episodeQueue, sourceMatchesResolution, lowerResolutionOrder, recoverySourceOrder, boundedRecoverySourceOrder, sourceRecoveryKey, MAX_AUTOMATIC_SOURCE_ATTEMPTS, AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS, AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS, AUTOMATIC_SOURCE_CANDIDATES } from '../public/discover.js';
 import { parseSizeBytes } from '../public/source-client.js';
 import { normalizeIndexRows } from '../lib/source-lookup.mjs';
 
@@ -34,6 +34,16 @@ test('cached plausible source is tried before an uncached MP4',()=>{
   assert.equal(recommendSource([mp4,cached],'series','auto').id,'cached-unknown');
   assert.deepEqual(automaticSourceOrder([mp4,cached],'series','auto').map(source=>source.id),['cached-unknown','uncached-mp4']);
   assert.deepEqual(automaticCachedSourceOrder([mp4,cached],'series','auto').map(source=>source.id),['cached-unknown']);
+});
+test('TorBox file-aware cache verification outranks an unknown cached source',()=>{
+  const unknown=src('unknown',{browserFriendly:false,browserContainer:false,browserUnsupported:false,containerStatus:'unknown',size:.4*G});
+  const verified=src('verified',{browserFriendly:false,browserContainer:false,browserUnsupported:false,containerStatus:'unknown',cachedBrowserPlayable:true,size:.8*G});
+  assert.equal(recommendSource([unknown,verified],'series','auto').id,'verified');
+});
+test('automatic playback skips a cached source whose cached file list proves it is not browser-playable',()=>{
+  const blocked=src('blocked',{cachedBrowserPlayable:false,browserFriendly:true,browserContainer:true,containerStatus:'supported',size:.3*G});
+  const verified=src('verified',{cachedBrowserPlayable:true,browserFriendly:false,browserContainer:false,containerStatus:'unknown',size:.8*G});
+  assert.deepEqual(automaticCachedSourceOrder([blocked,verified],'series','auto').map(source=>source.id),['verified']);
 });
 test('automatic playback never prepares an uncached source',async()=>{
   const calls=[];
@@ -81,7 +91,9 @@ test('automatic playback stays bounded and never opens the technical source pick
   assert.ok(source.includes('unattended?selectAutomaticVideoFile(result.files):result.files[0]'));
   assert.ok(!source.includes("if(e?.code==='NO_CACHED_BROWSER_SOURCE')await openOptions(meta,target,episodeName)"));
   assert.ok(!source.includes('await openOptions('));
-  assert.equal(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS,8000);
+  assert.equal(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS,5000);
+  assert.equal(AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS,18000);
+  assert.equal(AUTOMATIC_SOURCE_CANDIDATES,8);
 });
 test('automatic package selection prefers a browser-playable episode file and rejects all-unsupported choices',()=>{
   const files=[{id:'mkv',title:'Elena.of.Avalor.S02E03.mkv'},{id:'mp4',title:'Elena.of.Avalor.S02E03.mp4'},{id:'avi',title:'Elena.of.Avalor.S02E03.avi'}];

@@ -20,26 +20,28 @@ export function sourceMatchesResolution(source, resolution = 'auto') {
 export const filterSourcesByResolution = (list, resolution = 'auto') => list.filter(s => sourceMatchesResolution(s, resolution));
 export function recommendSource(list, type = 'movie', resolution = 'auto', sizeProfile = getSettings().sourceSizeProfile, allowBrowserUnsupported = false) {
   const visible = filterSourcesByResolution(list, resolution).filter(source=>source.memoryBad!==true&&source.memoryAudio!=='bad'&&(allowBrowserUnsupported||source.browserUnsupported!==true)); if (!visible.length) return null;
-  const cachedFriendly = visible.filter(s => s.cached === true && s.browserFriendly && !s.audioRisk && !s.videoRisk);
-  const cachedContainer = visible.filter(s => s.cached === true && s.browserContainer && !s.audioRisk && !s.videoRisk);
-  const cachedUnknown = visible.filter(s => s.cached === true && s.containerStatus !== 'supported' && !s.audioRisk && !s.videoRisk);
+  const cachedVerified = visible.filter(s => s.cached === true && s.cachedBrowserPlayable === true && !s.audioRisk && !s.videoRisk);
+  const cachedFriendly = visible.filter(s => s.cached === true && s.cachedBrowserPlayable !== false && s.browserFriendly && !s.audioRisk && !s.videoRisk);
+  const cachedContainer = visible.filter(s => s.cached === true && s.cachedBrowserPlayable !== false && s.browserContainer && !s.audioRisk && !s.videoRisk);
+  const cachedUnknown = visible.filter(s => s.cached === true && s.cachedBrowserPlayable !== false && s.containerStatus !== 'supported' && !s.audioRisk && !s.videoRisk);
   const browserSafe = visible.filter(s => s.browserFriendly && !s.audioRisk);
   const browserContainer = visible.filter(s => s.browserContainer && !s.audioRisk && !s.videoRisk);
-  const pool = cachedFriendly.length ? cachedFriendly : cachedContainer.length ? cachedContainer : cachedUnknown.length ? cachedUnknown : browserSafe.length ? browserSafe : browserContainer.length ? browserContainer : visible;
+  const pool = cachedVerified.length ? cachedVerified : cachedFriendly.length ? cachedFriendly : cachedContainer.length ? cachedContainer : cachedUnknown.length ? cachedUnknown : browserSafe.length ? browserSafe : browserContainer.length ? browserContainer : visible;
   const profile = ['data','balanced','quality'].includes(sizeProfile) ? sizeProfile : 'balanced';
   const limits = profile === 'data' ? { movie:1.5 * GB, series:.6 * GB } : profile === 'quality' ? { movie:6 * GB, series:2 * GB } : { movie:3 * GB, series:1 * GB };
   const limit = limits[type === 'series' ? 'series' : 'movie'];
   const rank = s => {
     const r = resolutionOf(s), sizeScore = s.size == null ? 15 : s.size <= limit ? 110 : -Math.min(140, (s.size / limit - 1) * 90);
     const seedScore = Number.isSafeInteger(s.seeders) ? Math.min(35, Math.log2(s.seeders + 1) * 5) : 0;
-    return (s.score || 0) + (s.memoryBonus || 0) + (s.cached === true ? 260 : 0) + (s.browserFriendly ? 100 : 0) - (s.audioRisk ? 180 : 0) - (s.videoRisk ? 100 : 0)
+    const cacheFileScore = s.cachedBrowserPlayable === true ? 220 : s.cachedBrowserPlayable === false ? -500 : 0;
+    return (s.score || 0) + (s.memoryBonus || 0) + (s.cached === true ? 260 : 0) + cacheFileScore + (s.browserFriendly ? 100 : 0) - (s.audioRisk ? 180 : 0) - (s.videoRisk ? 100 : 0)
       + (r.includes('720') ? 135 : r.includes('1080') ? 55 : 0) + sizeScore + seedScore;
   };
   return [...pool].sort((a,b)=>rank(b)-rank(a)||(a.size??Infinity)-(b.size??Infinity))[0];
 }
 export const preferredSource = list => recommendSource(list, 'movie', 'auto');
 export function automaticSourceOrder(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
-  let remaining=(Array.isArray(list)?list:[]).filter(source=>source.memoryBad!==true&&source.memoryAudio!=='bad'&&source.browserUnsupported!==true),ordered=[];
+  let remaining=(Array.isArray(list)?list:[]).filter(source=>source.memoryBad!==true&&source.memoryAudio!=='bad'&&source.browserUnsupported!==true&&source.cachedBrowserPlayable!==false),ordered=[];
   const passes=resolution&&resolution!=='auto'?[resolution,'auto']:['auto'];
   for(const pass of passes){
     while(true){
@@ -49,8 +51,10 @@ export function automaticSourceOrder(list, type = 'movie', resolution = 'auto', 
   }
   return ordered;
 }
-export const NO_CACHED_BROWSER_SOURCE_MESSAGE = 'No cached browser-compatible source could be opened automatically.';
-export const AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS = 8000;
+export const NO_CACHED_BROWSER_SOURCE_MESSAGE = 'Sources were found, but no cached Chrome-compatible version could be opened automatically.';
+export const AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS = 5000;
+export const AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS = 18000;
+export const AUTOMATIC_SOURCE_CANDIDATES = 8;
 export function isAutomaticCandidateFailure(error) {
   if (['BROWSER_CONTAINER_UNSUPPORTED','CACHED_SOURCE_NOT_READY','PREPARED_ITEM_MISSING'].includes(error?.code)) return true;
   return error?.code === 'TORBOX_OPERATION_FAILED' && /\bcach(?:e|ed)\b/i.test(error?.message || '');
@@ -71,7 +75,7 @@ async function withinAutomaticBudget(action,signal){
     Promise.resolve().then(action).then(value=>{if(settled)return;settled=true;signal.removeEventListener('abort',stop);resolve(value);},error=>{if(settled)return;settled=true;signal.removeEventListener('abort',stop);reject(error);});
   });
 }
-export async function resolveAutomaticCachedSource(list,target,resolution,{prepare,onCandidate,onRejected,maxCandidates=3,sizeProfile='balanced',totalTimeoutMs=AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS}={}){
+export async function resolveAutomaticCachedSource(list,target,resolution,{prepare,onCandidate,onRejected,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,sizeProfile='balanced',totalTimeoutMs=AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS}={}){
   if(typeof prepare!=='function')throw new TypeError('Automatic source preparation is not configured.');
   const candidates=automaticCachedSourceOrder(list,target?.type||'movie',resolution,sizeProfile).slice(0,Math.max(0,maxCandidates));
   if(!candidates.length){const error=new Error(NO_CACHED_BROWSER_SOURCE_MESSAGE);error.code='NO_CACHED_BROWSER_SOURCE';throw error;}
@@ -301,7 +305,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     throw new Error('TorBox is still preparing this source. Try again shortly.');
   }
 
-  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=3}={}){
+  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES}={}){
     return resolveAutomaticCachedSource(sources,target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,onRejected:(source,error)=>{if(error?.code==='BROWSER_CONTAINER_UNSUPPORTED')setSourceBad(target,source,true);},prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false})});
   }
 
