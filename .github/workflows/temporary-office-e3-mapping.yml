@@ -1,4 +1,4 @@
-name: Temporary Office E3 Torrentio probe
+name: Temporary Office E3 TorBox cache probe
 on:
   push:
     branches: [diagnose/office-e3-mapping]
@@ -12,33 +12,24 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
-      - name: Probe Torrentio Office E3
+      - name: Probe TorBox public cache for exact MP4 candidates
         shell: bash
         run: |
           node --input-type=module <<'NODE'
-          const base='https://torrentio.strem.fun';
-          const urls=[
-            base+'/sort=qualityseed/stream/series/tt0386676:4:3.json',
-            base+'/sort=seeders/stream/series/tt0386676:4:3.json'
+          const hashes=[
+            '2ccca4b8fdaf48f19ed28531971bf91c9d1f2a5c',
+            'b298b2ad83576081395c232545fa903e67f93ded',
+            'ad5b9c42ec7daa25f47da3fb2837738706b3adaf',
+            'e66805bb996d70fb250efe44a9d790371553c2d4',
+            'e35b17b01b5a8ffb886f4ce7c0a5abbe0e418274',
+            '286f285158bb4ac51412a4e36020f2bfae61c319',
+            '2d302dd91cefe563a7edd5c5bbf45ff75978027e'
           ];
-          for(const url of urls){
-            console.log('\nURL',url);
-            try{
-              const r=await fetch(url,{headers:{Accept:'application/json','User-Agent':'Mozilla/5.0'},redirect:'manual',signal:AbortSignal.timeout(25000)});
-              console.log('STATUS',r.status,r.headers.get('content-type'));
-              const j=await r.json();
-              const streams=Array.isArray(j?.streams)?j.streams:[];
-              console.log('COUNT',streams.length);
-              for(const s of streams.slice(0,100)){
-                const filename=s?.behaviorHints?.filename||'';
-                const blob=[s?.name,s?.title,filename].filter(Boolean).join(' ');
-                if(/\.mp4\b|\.m4v\b|\.webm\b|S04E03|Dunder/i.test(blob)){
-                  console.log(JSON.stringify({
-                    infoHash:s.infoHash,fileIdx:s.fileIdx,name:s.name,title:s.title,filename,
-                    videoSize:s?.behaviorHints?.videoSize
-                  }));
-                }
-              }
-            }catch(e){console.log('ERROR',e.name,e.message);}
-          }
+          const u=new URL('https://api.torbox.app/v1/api/torrents/checkcached');
+          for(const h of hashes)u.searchParams.append('hash',h);
+          u.searchParams.set('format','object');u.searchParams.set('list_files','true');
+          const r=await fetch(u,{headers:{Accept:'application/json'},redirect:'error',signal:AbortSignal.timeout(20000)});
+          console.log('STATUS',r.status);
+          const j=await r.json();
+          console.log(JSON.stringify(j));
           NODE
