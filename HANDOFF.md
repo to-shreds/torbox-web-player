@@ -8,14 +8,14 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `1779fdc0480fb4d9aa4280b54fc4285afe27641f`
+- Main runtime commit: `1becb60afb6984e17403b34189eb5711762c2383`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `7ab33083bbd47516dad8ce645fe1c2c025d75639`
+- Mirror runtime commit: `87856b4677fa91e2fae02f6a8d7c0e09905dda14`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-daqa0j8u01pc73fdipjg`
+- Live Render deploy: `dep-daqa8s49v7es73cefk10`
 - PWA cache: `torbox-player-v1.1-restored11`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
@@ -149,15 +149,37 @@ The automatic path is now less brittle while preserving the cached-only contract
 - Raw TorBox cached file listings remain server-side. The browser receives only the existing source metadata plus a tri-state cached-browser compatibility hint.
 - If The Office Season 4 still fails specifically on one of Cinemeta's split entries such as part 2 of an hour-long broadcast, investigate split-episode numbering versus combined torrent files next. Do not weaken exact episode identity matching without a verified mapping.
 
+## Wrong-title source identity correction
+
+The first cached-source hardening test changed the failure from "no source" to actual playback, but Jon physically confirmed that it opened a different non-English show. This was traced to a real upstream metadata false positive rather than an episode-picker bug.
+
+A live provider probe against The Office US (`tt0386676`), Season 4 Episode 1, found that MediaFusion Torznab was returning this torrent while labeling it with the US show's IMDb/TMDB identity:
+
+- Hash: `ac4a0b102dbf52f95b0a3883ec8d9f67bb4ca4b6`
+- Title: `The.Office.PL.2024.S04E01-03.PL.1080p.WEB-DL.H264.DD2.0 - TL.PL`
+- MediaFusion itself reported IMDb `0386676` and TMDB `2316`, even though the torrent is the 2024 Polish Office rather than the US 2005 series.
+
+Two identity guards now sit in front of TorBox cache selection:
+
+- MediaFusion Torznab results must explicitly carry the requested IMDb identity. Numeric live-format IDs such as `0386676` are normalized to `tt0386676`; missing or different IDs are rejected.
+- Because the provider can still attach the *wrong* matching IMDb ID, source registration separately compares explicit title years against the authoritative catalog run. For a series such as The Office `2005–2013`, any year within the series run is accepted; a conflicting identity year such as `2024` is rejected before TorBox availability is checked.
+- Series year filtering deliberately uses the catalog's overall run range rather than Cinemeta episode release timestamps. A live probe exposed bad season release dates from Cinemeta, so those timestamps are not trusted when a reliable run range exists.
+- Sources that state a matching catalog year receive a small ranking bonus. Sources with no explicit identity year remain eligible.
+- This guard is additive to the existing exact season/episode file matching. It does not weaken episode identity, enable uncached downloads, or expose the Full-mode source picker.
+
+A live post-fix probe against current providers returned 11 Zilean sources and 40 MediaFusion sources. All 11 Zilean sources remained eligible; MediaFusion kept 39 and rejected exactly the Polish 2024 false positive above.
+
 ## Verification
 
-- Feature-branch CI for the cached-source fix registered **312 tests: 306 passed, 0 failed, 6 optional live checks skipped**.
-- Browser-key clone CI run `35953428723` succeeded for mirror runtime commit `7ab33083` with the same **312 / 306 / 0 / 6** result.
-- GitHub Pages run `35953374466` succeeded for main runtime commit `1779fdc0`.
-- Render deploy `dep-daqa0j8u01pc73fdipjg` completed successfully and is **live** from mirror runtime commit `7ab33083`.
-- The four modified runtime/regression files on `main` and `browser-key-clone` are byte-identical by Git blob SHA.
-- New regressions cover TorBox file-aware cache checks, sanitized file metadata, exact episode compatibility preflight, verified-cache ranking, exclusion of cached packages proven browser-incompatible, the expanded bounded automatic search, and the existing prohibition on uncached automatic preparation.
-- Existing auto-next, Continue Watching, stable-video presentation, PiP wake-lock, fullscreen-exit, startup-recovery, and security regressions remain green.
+- Initial live source probe run `35954211152` reproduced the bad provider data and exposed the Polish 2024 Office torrent among results for US Office `tt0386676`.
+- Raw MediaFusion identity probe run `35954323021` confirmed MediaFusion itself tagged that Polish torrent with IMDb `0386676` and TMDB `2316`.
+- Feature CI for the identity guard registered **315 tests: 309 passed, 0 failed, 6 optional live checks skipped**.
+- Live post-fix provider probe run `35954824330` confirmed the guard rejects the exact Polish 2024 torrent while keeping all 11 Zilean sources and 39 of 40 MediaFusion sources.
+- The live probe also exposed unreliable Cinemeta episode release years, so the follow-up range hardening uses the series run year instead. Follow-up CI again registered **315 tests: 309 passed, 0 failed, 6 optional live checks skipped**.
+- Browser-key clone CI run `35955013687` succeeded for mirror runtime commit `87856b46` with **315 tests registered, 309 passed, 0 failed, 6 optional live checks skipped**.
+- Render deploy `dep-daqa8s49v7es73cefk10` completed successfully and is **live** from mirror runtime commit `87856b46`.
+- The four identity-related runtime/regression files on `main` and `browser-key-clone` are byte-identical by Git blob SHA.
+- Existing cached-only playback, source-picker isolation, auto-next, Continue Watching, fullscreen/PiP, startup recovery, and security regressions remain green.
 
 ## Do not break
 
@@ -173,4 +195,6 @@ The automatic path is now less brittle while preserving the cached-only contract
 
 ## Immediate next action
 
-Retest the same The Office Season 4 Play action on the ordinary root URL. The source-selection fix is deployed on both GitHub Pages and Render, but that title/episode still needs physical Android acceptance. If a split Season 4 entry still fails, inspect the exact cached package filenames and split-versus-combined episode mapping before changing identity rules. After that, resume the pending PiP wake-lock, fullscreen-exit, Continue Watching, and credits acceptance checks.
+Retest The Office Season 4 Episode 1 on the ordinary root player. The exact Polish 2024 false-positive torrent that played in Jon's last test is now rejected server-side before TorBox cache selection, so no frontend cache-bust is required for this correction. If the next playback is still incorrect, capture the visible content immediately and inspect the remaining selected source identity rather than changing episode numbering or compatibility logic speculatively.
+
+After this title is physically confirmed, resume the pending PiP wake-lock, fullscreen-exit, Continue Watching, and credits/auto-next acceptance checks.
