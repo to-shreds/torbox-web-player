@@ -1,5 +1,5 @@
-const CACHE='torbox-player-v1.1-restored12';
-const BUILD='restored12';
+const CACHE='torbox-player-v1.1-restored13';
+const BUILD='restored13';
 const SHELL=[
   './','./index.html',
   `./style.css?v=${BUILD}`,`./discover.css?v=${BUILD}`,`./boot.js?v=${BUILD}`,`./app.js?v=${BUILD}`,
