@@ -52,6 +52,14 @@ test('explicit browser preparation fallback chooses an uncached direct browser f
   assert.equal(browserPreparationCandidate([cachedMkv,extended,regular],'series','720p').id,'regular');
   assert.equal(browserPreparationCandidate([cachedMkv,extended],'series','720p').id,'extended');
 });
+test('no-cache Play failure offers an explicit Prepare-and-Play confirmation instead of silently downloading',async()=>{
+  const source=await readFile(new URL('../public/discover.js',import.meta.url),'utf8');
+  assert.ok(source.includes("e?.code==='NO_CACHED_BROWSER_SOURCE'"));
+  assert.ok(source.includes('browserPreparationCandidate(registered.sources'));
+  assert.ok(source.includes('window.confirm('));
+  assert.ok(source.includes("waitForPreparation:true"));
+  assert.ok(source.includes("source.cached===true"));
+});
 test('automatic playback never prepares an uncached source',async()=>{
   const calls=[];
   const uncached=src('uncached-mp4',{cached:false,browserContainer:true,containerStatus:'supported'});
