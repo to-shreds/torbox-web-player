@@ -8,14 +8,14 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `1becb60afb6984e17403b34189eb5711762c2383`
+- Main runtime commit: `a6c2e1fa60dcabc039603765a98a3da1c256ccec`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `87856b4677fa91e2fae02f6a8d7c0e09905dda14`
+- Mirror runtime commit: `332b3623adcd54a39b748bcd8d0abf8f9a5a0e25`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-daqa8s49v7es73cefk10`
+- Live Render deploy: `dep-daqamggjo6nc73doshpg`
 - PWA cache: `torbox-player-v1.1-restored11`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
@@ -169,17 +169,37 @@ Two identity guards now sit in front of TorBox cache selection:
 
 A live post-fix probe against current providers returned 11 Zilean sources and 40 MediaFusion sources. All 11 Zilean sources remained eligible; MediaFusion kept 39 and rejected exactly the Polish 2024 false positive above.
 
+## The Office S4E3 source-coverage correction
+
+After the wrong-title identity fix, Jon physically confirmed that Season 4 Episode 2 could play, but Season 4 Episode 3, **Dunder Mifflin Infinity (1)**, still ended with the cached Chrome-compatible-source error. This was a different failure.
+
+Live probes showed that the existing Zilean and MediaFusion indexes did contain many sources for the episode, but most useful exact matches were MKV/AVI or metadata-only season packs. The same live title/episode queried through Torrentio returned a much richer set of exact file metadata, including multiple MP4 candidates:
+
+- `b298b2ad83576081395c232545fa903e67f93ded` → `The.Office.US.S04E03.Dunder.Mifflin.Infinity.Part.1.mp4`
+- `2ccca4b8fdaf48f19ed28531971bf91c9d1f2a5c` → `The Office Superfan Episodes S04e03 Dunder Mifflin Infinity Part 1 (Extended Cut).mp4`
+- `e66805bb996d70fb250efe44a9d790371553c2d4` → combined `S04E03-E04 - Dunder Mifflin Infinity.mp4`
+- `286f285158bb4ac51412a4e36020f2bfae61c319` → `S04E03 + 04 Dunder Mifflin Infinity.mp4`
+- `2d302dd91cefe563a7edd5c5bbf45ff75978027e` → `The Office S04E03+E04 Dunder Mifflin Infinity.mp4`
+
+Torrentio is now a fixed anonymous metadata provider in the server-side multi-source lookup. It receives only the public IMDb/season/episode identity. It never receives the TorBox key, browser credentials, or a TorBox playback URL. TorBox remains the authority for whether a returned hash is actually cached.
+
+The live probe also exposed a numbering hazard: some 14-file releases call **Launch Party** `E03`, while Cinemeta's split 19-entry season calls **Dunder Mifflin Infinity (1)** `E03`. A new episode-title identity guard therefore rejects a source when its filename clearly names a different episode from the selected Cinemeta episode. For example, `E03 Launch Party.mp4` is rejected for Dunder Mifflin Infinity, while exact Dunder filenames and neutral number-only filenames remain eligible.
+
+A live post-change MultiSource probe for The Office S4E3 used Torrentio + Zilean, returned 40 merged source hashes, retained 33 after episode-title identity filtering, and exposed **7 browser-container candidates**. The exact Dunder Mifflin Infinity Part 1 MP4 was among them.
+
+This does **not** guarantee that one of those MP4 hashes is cached in Jon's TorBox account. Anonymous TorBox cache probing returned HTTP 401, so cache state remains account-authenticated and is checked only by the live player. If S4E3 still fails after this deployment, the next fact to establish is whether any of these exact browser-compatible hashes are cached. Do not weaken MKV rejection merely to make the button proceed.
+
 ## Verification
 
-- Initial live source probe run `35954211152` reproduced the bad provider data and exposed the Polish 2024 Office torrent among results for US Office `tt0386676`.
-- Raw MediaFusion identity probe run `35954323021` confirmed MediaFusion itself tagged that Polish torrent with IMDb `0386676` and TMDB `2316`.
-- Feature CI for the identity guard registered **315 tests: 309 passed, 0 failed, 6 optional live checks skipped**.
-- Live post-fix provider probe run `35954824330` confirmed the guard rejects the exact Polish 2024 torrent while keeping all 11 Zilean sources and 39 of 40 MediaFusion sources.
-- The live probe also exposed unreliable Cinemeta episode release years, so the follow-up range hardening uses the series run year instead. Follow-up CI again registered **315 tests: 309 passed, 0 failed, 6 optional live checks skipped**.
-- Browser-key clone CI run `35955013687` succeeded for mirror runtime commit `87856b46` with **315 tests registered, 309 passed, 0 failed, 6 optional live checks skipped**.
-- Render deploy `dep-daqa8s49v7es73cefk10` completed successfully and is **live** from mirror runtime commit `87856b46`.
-- The four identity-related runtime/regression files on `main` and `browser-key-clone` are byte-identical by Git blob SHA.
-- Existing cached-only playback, source-picker isolation, auto-next, Continue Watching, fullscreen/PiP, startup recovery, and security regressions remain green.
+- Torrentio live probe run `35956569940` returned **42** sources for The Office S4E3 and exposed several exact MP4 filenames for Dunder Mifflin Infinity.
+- The same probe demonstrated the 14-file numbering conflict by returning `E03 Launch Party.mp4` for the Cinemeta split-episode E3 request; the new episode-title guard rejects that mismatch.
+- Feature CI run `35956913448` registered **318 tests: 312 passed, 0 failed, 6 optional live checks skipped**.
+- That feature run also performed a live post-change MultiSource probe: providers used Torrentio + Zilean, **40 total merged sources, 33 identity-safe, 7 browser-container candidates**, including the exact Dunder Mifflin Infinity Part 1 MP4.
+- Browser-key clone CI run `35957071142` succeeded for mirror runtime commit `332b3623` with **318 tests registered, 312 passed, 0 failed, 6 optional live checks skipped**.
+- Render deploy `dep-daqamggjo6nc73doshpg` completed successfully and is **live** from mirror runtime commit `332b3623`.
+- The five modified runtime/regression files on `main` and `browser-key-clone` are byte-identical by Git blob SHA.
+- Existing cached-only playback, TorBox credential isolation, source-picker isolation, startup recovery, PiP/fullscreen, Continue Watching, credits, and security regressions remain green.
+- No frontend file changed in this benchmark, so no browser cache-bust is required.
 
 ## Do not break
 
@@ -195,6 +215,6 @@ A live post-fix probe against current providers returned 11 Zilean sources and 4
 
 ## Immediate next action
 
-Retest The Office Season 4 Episode 1 on the ordinary root player. The exact Polish 2024 false-positive torrent that played in Jon's last test is now rejected server-side before TorBox cache selection, so no frontend cache-bust is required for this correction. If the next playback is still incorrect, capture the visible content immediately and inspect the remaining selected source identity rather than changing episode numbering or compatibility logic speculatively.
+Retest The Office Season 4 Episode 3, **Dunder Mifflin Infinity (1)**, on the ordinary root player. The backend now sees exact MP4 candidates that the prior Zilean/MediaFusion-only path did not expose, and it filters the known `E03 Launch Party` numbering conflict before TorBox cache selection.
 
-After this title is physically confirmed, resume the pending PiP wake-lock, fullscreen-exit, Continue Watching, and credits/auto-next acceptance checks.
+If the same cached Chrome-compatible-source error remains, do not keep broadening identity rules. The next unresolved point is TorBox cache state: determine whether any of the newly surfaced exact MP4 hashes are cached for Jon's authenticated account. If none are cached, the remaining limitation is browser-compatible delivery on the current TorBox plan/architecture, not torrent discovery.
