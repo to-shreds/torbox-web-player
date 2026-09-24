@@ -1,9 +1,9 @@
-import { loadPublicSources, browserContainerHints } from './source-client.js?v=restored12';
-import { getSettings, updateSettings } from './settings.js?v=restored12';
-import { listRecent, formatResumeTime } from './history.js?v=restored12';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=restored12';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=restored12';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=restored12';
+import { loadPublicSources, browserContainerHints } from './source-client.js?v=restored13';
+import { getSettings, updateSettings } from './settings.js?v=restored13';
+import { listRecent, formatResumeTime } from './history.js?v=restored13';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=restored13';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=restored13';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=restored13';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
@@ -62,14 +62,25 @@ export function isAutomaticCandidateFailure(error) {
 export function automaticCachedSourceOrder(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
   return automaticSourceOrder((Array.isArray(list)?list:[]).filter(source=>source.cached===true),type,resolution,sizeProfile);
 }
-export function browserPreparationCandidate(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
+export function browserPreparationOptions(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced', limit = 3) {
   const eligible=(Array.isArray(list)?list:[]).filter(source=>
     source.cached!==true&&source.browserContainer===true&&source.browserUnsupported!==true&&
     source.audioRisk!==true&&source.videoRisk!==true&&source.memoryBad!==true&&source.memoryAudio!=='bad'
   );
   const regular=eligible.filter(source=>!/\b(?:superfan|extended(?:[ ._-]+cut)?)\b/i.test([source.filename,source.title].filter(Boolean).join(' ')));
-  const pool=regular.length?regular:eligible;
-  return recommendSource(pool,type,resolution,sizeProfile)||(resolution&&resolution!=='auto'?recommendSource(pool,type,'auto',sizeProfile):null);
+  let remaining=regular.length?regular:eligible,ordered=[];
+  const passes=resolution&&resolution!=='auto'?[resolution,'auto']:['auto'];
+  for(const pass of passes){
+    while(ordered.length<Math.max(0,limit)){
+      const best=recommendSource(remaining,type,pass,sizeProfile);if(!best)break;
+      ordered.push(best);const key=sourceRecoveryKey(best);
+      remaining=remaining.filter(source=>source!==best&&sourceRecoveryKey(source)!==key);
+    }
+  }
+  return ordered;
+}
+export function browserPreparationCandidate(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
+  return browserPreparationOptions(list,type,resolution,sizeProfile,1)[0]||null;
 }
 export function selectAutomaticVideoFile(files = []) {
   const rows=(Array.isArray(files)?files:[]).filter(file=>file&&file.id);
@@ -318,9 +329,54 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
     return resolveAutomaticCachedSource(sources,target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,onRejected:(source,error)=>{if(error?.code==='BROWSER_CONTAINER_UNSUPPORTED')setSourceBad(target,source,true);},prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false})});
   }
 
+  function clearPlaybackFallback(){const area=$('play-fallback');if(area)area.replaceChildren();}
+  async function prepareAndPlayFallback(meta,target,episodeName,resolution,source,button,buttons){
+    try{
+      for(const item of buttons)item.disabled=true;
+      button.textContent='Preparing…';
+      message('detail-message','Preparing this version in TorBox…');
+      const result=await readyFile(source,{signal:AbortSignal.timeout(330000),unattended:true,waitForPreparation:true});
+      const context=buildContext(meta,target,episodeName,resolution,source);
+      clearPlaybackFallback();
+      if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
+      return await play(result.file,context);
+    }catch(error){
+      message('detail-message',error.message,true);
+      for(const item of buttons)item.disabled=false;
+      button.textContent='Prepare & Play';
+      return false;
+    }
+  }
+  function renderPlaybackFallback(meta,target,episodeName,resolution,sources){
+    const area=$('play-fallback');if(!area)return false;
+    const options=browserPreparationOptions(sources,target.type,resolution,getSettings().sourceSizeProfile,3);
+    area.replaceChildren();
+    if(!options.length)return false;
+    const panel=element('section','','play-fallback-panel');
+    panel.append(
+      element('strong','No cached browser-ready copy is available.','play-fallback-title'),
+      element('p','Pick a version below. The player will add it to TorBox, wait for it to become ready, and play it here. You do not need to open TorBox.','play-fallback-copy')
+    );
+    const choices=element('div','','play-fallback-choices'),buttons=[];
+    for(const [index,source] of options.entries()){
+      const row=element('div','','play-fallback-row'),copy=element('div','','play-fallback-source');
+      const shownSize=formatBytes(source.size);
+      copy.append(
+        element('strong',index===0?'Recommended':'Alternative'),
+        element('span',[source.resolution||source.quality||'Auto',shownSize!=='—'?shownSize:''].filter(Boolean).join(' · ')),
+        element('small',source.filename||source.title||'Browser-compatible source')
+      );
+      const action=button('Prepare & Play',()=>prepareAndPlayFallback(meta,target,episodeName,resolution,source,action,buttons),index===0);
+      buttons.push(action);row.append(copy,action);choices.append(row);
+    }
+    panel.append(choices,element('p','Nothing is added unless you tap Prepare & Play. TorBox may need to download the containing torrent, which can be larger than the episode file shown here.','play-fallback-note'));
+    area.append(panel);
+    return true;
+  }
+
   async function quickPlay(meta,target,episodeName='',trigger){
     const original=trigger?.textContent;if(trigger){trigger.disabled=true;trigger.textContent='Opening…';}
-    message('detail-message','Finding the recommended source…');
+    clearPlaybackFallback();message('detail-message','Finding the recommended source…');
     let resolution,registered;
     try{
       await ensureService();
@@ -330,27 +386,9 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
       if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
       return await play(result.file,context);
     }catch(e){
-      if(e?.code==='NO_CACHED_BROWSER_SOURCE'&&registered?.sources?.length){
-        const fallback=browserPreparationCandidate(registered.sources,target.type,resolution,getSettings().sourceSizeProfile);
-        if(fallback){
-          const shownSize=formatBytes(fallback.size);
-          const details=[fallback.resolution||fallback.quality,shownSize!=='—'?shownSize:''].filter(Boolean).join(' · ');
-          const note=details?'\n\nRecommended file: '+details+'. TorBox may need to download its containing torrent.':'';
-          const approved=window.confirm('No cached Chrome-compatible version is available. Prepare a browser-compatible version in TorBox and play it when ready? This starts a torrent download and may take a few minutes.'+note);
-          if(approved){
-            try{
-              if(trigger){trigger.disabled=true;trigger.textContent='Preparing…';}
-              message('detail-message','Preparing a browser-compatible version in TorBox…');
-              const result=await readyFile(fallback,{signal:AbortSignal.timeout(330000),unattended:true,waitForPreparation:true});
-              const context=buildContext(meta,target,episodeName,resolution,fallback);
-              if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
-              return await play(result.file,context);
-            }catch(prepError){
-              message('detail-message',prepError.message,true);
-              return false;
-            }
-          }
-        }
+      if(e?.code==='NO_CACHED_BROWSER_SOURCE'&&registered?.sources?.length&&renderPlaybackFallback(meta,target,episodeName,resolution,registered.sources)){
+        message('detail-message','Choose a browser-compatible version below.');
+        return false;
       }
       message('detail-message',e.message,true);
       return false;
@@ -384,7 +422,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
   }
 
   async function showTitle(meta,preferredSeason=null){
-    cancelTitle();currentMeta=null;const generation=titleGeneration;titleAbort=new AbortController();$('title-content').replaceChildren();$('episode-area').replaceChildren();
+    cancelTitle();currentMeta=null;const generation=titleGeneration;titleAbort=new AbortController();$('title-content').replaceChildren();$('episode-area').replaceChildren();clearPlaybackFallback();
     $('detail-title').textContent=meta.name;$('toggle-watchlist').hidden=true;message('detail-message','Loading…');if(!$('title-dialog').open)$('title-dialog').showModal();
     try{
       const data=await api(`/api/discover/meta?type=${meta.type}&id=${meta.id}`,{signal:AbortSignal.any([titleAbort.signal,AbortSignal.timeout(20000)])});
