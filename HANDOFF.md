@@ -8,14 +8,14 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `852297851601077cd18a5cc0a82da784d1cb2582`
+- Main runtime commit: `1779fdc0480fb4d9aa4280b54fc4285afe27641f`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `0808d54f737108c495fcd711daf69daedc8012b2`
+- Mirror runtime commit: `7ab33083bbd47516dad8ce645fe1c2c025d75639`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-dapnj6nlk1mc73c98cc0`
+- Live Render deploy: `dep-daqa0j8u01pc73fdipjg`
 - PWA cache: `torbox-player-v1.1-restored11`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
@@ -133,13 +133,31 @@ A permanent cache-busting recovery entry now exists at `https://to-shreds.github
 - The root player remains the normal/default URL. The recovery path is a permanent emergency escape hatch if a future browser or service-worker cache gets stuck.
 - The Render static mirror also serves `/recover` and `/recover/`.
 
+## Cached source selection hardening
+
+A physical Android test of The Office exposed a misleading automatic-playback failure: the player said no cached browser-compatible source could be opened even though source torrents plainly existed. The failure was in the automatic selection path, not title discovery.
+
+The automatic path is now less brittle while preserving the cached-only contract:
+
+- Source registration asks TorBox cache availability for file metadata with `list_files=true`. Only sanitized cached file name, size, and MIME information is retained for matching.
+- For a cached series source, the server checks the actual cached file list for the requested episode before automatic ranking. A cached source with a matching MP4/M4V/WebM file is preferred. A cached source whose matching files are all known unsupported containers is skipped automatically.
+- Unknown cases remain eligible rather than being falsely rejected.
+- Initial automatic playback may examine up to **8 cached candidates** instead of 3.
+- The initial automatic source path has an **18-second total bound** with a **5-second per-candidate preparation request bound**. This is separate from runtime playback recovery, which remains capped at three attempts.
+- Automatic Play, Resume, auto-next, and recovery still cannot start an uncached torrent or open the technical source picker.
+- The terminal message now says sources were found but no cached Chrome-compatible version could be opened automatically. It no longer implies that no torrent exists.
+- Raw TorBox cached file listings remain server-side. The browser receives only the existing source metadata plus a tri-state cached-browser compatibility hint.
+- If The Office Season 4 still fails specifically on one of Cinemeta's split entries such as part 2 of an hour-long broadcast, investigate split-episode numbering versus combined torrent files next. Do not weaken exact episode identity matching without a verified mapping.
+
 ## Verification
 
-- Browser-key CI run **158** succeeded for mirror runtime commit `0808d54f` with **307 tests registered, 301 passed, 0 failed, 6 optional live checks skipped**.
-- GitHub Pages run **137** succeeded for main runtime commit `85229785`.
-- Render deploy `dep-dapnj6nlk1mc73c98cc0` is live from `0808d54f`.
-- The modified runtime and regression-test files on `main` and `browser-key-clone` are byte-identical by Git blob SHA.
-- Existing auto-next, Continue Watching, stable-video presentation, PiP wake-lock, and fullscreen-exit tests remain green. New startup regressions verify the versioned boot loader, versioned module graph, no-store service-worker shell refresh, Render boot route, and project-relative cache-busted assets.
+- Feature-branch CI for the cached-source fix registered **312 tests: 306 passed, 0 failed, 6 optional live checks skipped**.
+- Browser-key clone CI run `35953428723` succeeded for mirror runtime commit `7ab33083` with the same **312 / 306 / 0 / 6** result.
+- GitHub Pages run `35953374466` succeeded for main runtime commit `1779fdc0`.
+- Render deploy `dep-daqa0j8u01pc73fdipjg` completed successfully and is **live** from mirror runtime commit `7ab33083`.
+- The four modified runtime/regression files on `main` and `browser-key-clone` are byte-identical by Git blob SHA.
+- New regressions cover TorBox file-aware cache checks, sanitized file metadata, exact episode compatibility preflight, verified-cache ranking, exclusion of cached packages proven browser-incompatible, the expanded bounded automatic search, and the existing prohibition on uncached automatic preparation.
+- Existing auto-next, Continue Watching, stable-video presentation, PiP wake-lock, fullscreen-exit, startup-recovery, and security regressions remain green.
 
 ## Do not break
 
@@ -155,4 +173,4 @@ A permanent cache-busting recovery entry now exists at `https://to-shreds.github
 
 ## Immediate next action
 
-Startup recovery is physically confirmed. Use the ordinary root URL for normal operation. If a future build ever becomes stuck behind stale browser/service-worker state, use the permanent recovery URL `https://to-shreds.github.io/torbox-web-player/recover/`. Resume the PiP wake-lock and fullscreen-exit acceptance checks next.
+Retest the same The Office Season 4 Play action on the ordinary root URL. The source-selection fix is deployed on both GitHub Pages and Render, but that title/episode still needs physical Android acceptance. If a split Season 4 entry still fails, inspect the exact cached package filenames and split-versus-combined episode mapping before changing identity rules. After that, resume the pending PiP wake-lock, fullscreen-exit, Continue Watching, and credits acceptance checks.
