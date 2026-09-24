@@ -97,13 +97,14 @@ test('source normalization deduplicates and bounds results', () => {
 });
 test('source identity guard rejects an alternate-series year while allowing the selected show years', () => {
   const meta={name:'The Office',year:'2005-2013',episodes:[
-    {season:4,episode:1,released:'2007-09-27T00:00:00.000Z'},
+    {season:4,episode:1,released:'2001-01-01T00:00:00.000Z'},
     {season:4,episode:8,released:'2008-04-10T00:00:00.000Z'}
   ]};
   const t={type:'series',id:'tt0386676',season:4,episode:1};
   assert.equal(sourceIdentityFit(meta,t,{title:'The.Office.PL.2024.S04E01-03.PL.1080p.WEB-DL.H264'}),false);
   assert.equal(sourceIdentityFit(meta,t,{title:'The Office US (2005) Season 4 1080p'}),true);
   assert.equal(sourceIdentityFit(meta,t,{title:'The Office 2007 S04 720p'}),true);
+  assert.equal(sourceIdentityFit(meta,t,{title:'The Office 2010 S04 720p'}),true);
   assert.equal(sourceIdentityFit(meta,t,{title:'The Office - Season 4 (2007) BDRip 1080p'}),null);
   assert.equal(sourceIdentityFit(meta,t,{title:'The.Office.US.S04.720p.BluRay.x264'}),null);
 });
