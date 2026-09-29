@@ -1,4 +1,4 @@
-import { isTrustedMediaUrl, isTrustedRelayMediaUrl } from './runtime.js?v=restored14';
+import { isTrustedMediaUrl, isTrustedRelayMediaUrl } from './runtime.js?v=restored15';
 export function matchesFormat(file, format = 'all') {
   return format !== 'mp4' || /\.mp4$/i.test(file.title || '');
 }
