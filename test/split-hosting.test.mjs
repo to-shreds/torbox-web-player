@@ -6,13 +6,12 @@ const password = 'fixture-password-only';
 const hash = await hashPassword(password);
 const page = 'https://to-shreds.github.io';
 async function fixture(t) {
-  const provider = { list: async () => ({ files: [], stale: false }), account: async () => ({ valid: true }), resolveForRelay: async videoId => ({ upstreamUrl: 'https://store.tb-cdn.io/file?token=secret', file: { id: videoId } }) };
-  const mediaFetch=async(_url,options={})=>new Response(Buffer.from('P'),{status:options.headers?.Range?206:200,headers:{'content-type':'video/mp4','content-length':'1','accept-ranges':'bytes',...(options.headers?.Range?{'content-range':'bytes 0-0/100'}:{})}});
-  const app = createApp({ env: { HOUSEHOLD_PASSWORD_HASH: hash, PUBLIC_ORIGIN: 'https://torbox-web-player.onrender.com', FRONTEND_ORIGINS: page, NODE_ENV: 'production' }, provider, mediaFetch });
+  const provider = { key:'secret-master-key', list: async () => ({ files: [], stale: false }), account: async () => ({ valid: true }), resolveGuest: async videoId => ({ url: 'https://store.tb-cdn.io/file?token=temporary-file-token', file: { id: videoId } }) };
+  const app = createApp({ env: { HOUSEHOLD_PASSWORD_HASH: hash, PUBLIC_ORIGIN: 'https://torbox-web-player.onrender.com', FRONTEND_ORIGINS: page, NODE_ENV: 'production' }, provider, mediaFetch:async()=>{throw new Error('video bytes must not pass through Render');} });
   await new Promise(r => app.server.listen(0, '127.0.0.1', r));
   t.after(() => { app.server.closeAllConnections(); app.server.close(); });
   const base = `http://127.0.0.1:${app.server.address().port}`;
-  const call = (path, { method='GET', data, token, origin=page, headers={} }={}) => fetch(base+path, { method, headers: { Origin: origin, ...(data?{'Content-Type':'application/json'}:{}), ...(token?{Authorization:`Bearer ${token}`}:{}), ...headers }, body: data ? JSON.stringify(data) : undefined });
+  const call = (path, { method='GET', data, token, origin=page, headers={}, redirect='follow' }={}) => fetch(base+path, { method, redirect, headers: { Origin: origin, ...(data?{'Content-Type':'application/json'}:{}), ...(token?{Authorization:`Bearer ${token}`}:{}), ...headers }, body: data ? JSON.stringify(data) : undefined });
   return { ...app, call };
 }
 test('GitHub Pages origin receives narrowly scoped CORS preflight', async t => {
@@ -46,15 +45,15 @@ test('published HTML uses project-relative assets and the public Render API orig
   const { call }=await fixture(t);
   const html=await (await call('/')).text();
   assert.ok(html.includes('name="api-origin" content="https://torbox-web-player-key.onrender.com"'));
-  assert.ok(html.includes('href="./style.css?v=restored15"')); assert.ok(html.includes('src="./boot.js?v=restored15"'));
+  assert.ok(html.includes('href="./style.css?v=restored16"')); assert.ok(html.includes('src="./boot.js?v=restored16"'));
   assert.ok(!html.includes('src="/boot.js')); assert.ok(!html.includes('href="/style.css'));
 });
-test('GitHub Pages bearer session receives an opaque Render media ticket', async t => {
+test('GitHub Pages bearer session receives an opaque direct media ticket', async t => {
   const { call }=await fixture(t);
   const token=(await (await call('/api/login',{method:'POST',data:{password}})).json()).sessionToken;
   const play=await (await call('/api/playback',{method:'POST',token,data:{viewer:'viewer-1',videoId:'torrents:1:0'}})).json();
-  assert.equal(play.delivery,'relay'); assert.equal(play.exposesTorBoxToken,false);assert.match(play.mediaUrl,/^\/media\/[A-Za-z0-9_-]{43}$/);assert.ok(!JSON.stringify(play).includes('secret'));
-  const media=await call(play.mediaUrl,{headers:{Range:'bytes=0-0'}});assert.equal(media.status,206);assert.equal(await media.text(),'P');assert.equal(media.headers.get('access-control-allow-origin'),page);
+  assert.equal(play.delivery,'direct'); assert.equal(play.exposesTorBoxToken,false);assert.match(play.mediaUrl,/^\/media\/[A-Za-z0-9_-]{43}$/);assert.ok(!JSON.stringify(play).includes('secret-master-key'));
+  const media=await call(play.mediaUrl,{headers:{Range:'bytes=0-0'},redirect:'manual'});assert.equal(media.status,307);assert.equal(media.headers.get('location'),'https://store.tb-cdn.io/file?token=temporary-file-token');assert.equal(media.headers.get('access-control-allow-origin'),page);
 });
 test('an invented Render media ticket cannot be used', async t => {
   const { call }=await fixture(t);

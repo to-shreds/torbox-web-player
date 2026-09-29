@@ -1,4 +1,4 @@
-const BUILD='restored15';
+const BUILD='restored16';
 const startedAt=Date.now();
 let startupTimer=null;
 const stageNode=()=>document.querySelector('#startup-stage');
