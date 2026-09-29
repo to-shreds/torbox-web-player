@@ -8,15 +8,15 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `db5da66c2e0999c39ce712485791605ee390b5d0`
+- Main runtime commit: `ad251de2c5bc69e06c136feca1af201cabc7345b`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `f95ab0f422dd7dd0106b62d5945dc77e618e808b`
+- Mirror runtime commit: `91f6ac4e88ebac4721e380abd97f488984ba0026`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-daqhuhugekts73ahjhfg`
-- PWA cache: `torbox-player-v1.1-restored13`
+- Live Render deploy: `dep-datkfldg1s2s739o6v3g`
+- PWA cache: `torbox-player-v1.1-restored14`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
 
@@ -24,7 +24,7 @@ Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to
 
 Simple mode must never expose the torrent/source picker as an automatic fallback from Play, Resume, auto-next, or recovery. The source picker is an explicit Full-mode Options tool only.
 
-Automatic playback may use cached sources only. It must never silently begin an uncached download. If no cached browser-compatible source exists, Play may offer one explicit confirmation to prepare a browser-compatible version in TorBox; declining that confirmation must leave the account unchanged. Cached multi-file packages may select a browser-compatible matching file automatically. Known unsupported containers must be rejected before normal Android Chrome playback.
+Automatic playback may use cached sources only. It must never silently begin an uncached download. If no cached browser-compatible source exists, Simple mode may show a small curated set of safe browser-compatible options with explicit **Prepare & Play** actions. Cached multi-file packages may select a browser-compatible matching file automatically. Known unsupported containers must be rejected before normal Android Chrome playback.
 
 Do not reintroduce automatic `openOptions()`, silent uncached preparation, direct TorBox media URLs, or any failed 2.x source-selection path.
 
@@ -208,18 +208,38 @@ Current behavior:
 
 The frontend cache graph is now **`restored13`** so existing devices load the in-app chooser rather than the restored12 confirmation flow.
 
+## Startup latency and progress
+
+Jon reported on 2026-09-29 that ordinary site loads could sit on the generic Opening screen for close to a minute with no indication of whether anything was happening.
+
+Two concrete contributors were identified:
+
+- The Render backend is currently on the **free** web-service plan. Recent Render logs from the same time as the report show the service process starting again at 2026-09-29 04:57:29Z and reaching the listening state at 04:57:31Z, confirming that the backend had been asleep and was being cold-started.
+- The frontend boot loader also unnecessarily awaited a service-worker registration/update before it imported the application. That update path can refresh the whole shell and should never have been on the critical path to showing the player.
+
+Restored14 changes startup behavior:
+
+- The GitHub Pages frontend immediately sends a best-effort `/healthz` request to the Render backend to begin waking it as early as possible.
+- The app module imports immediately. Service-worker registration/update now runs **after** app import and is never awaited by the opening path.
+- The self-healing cache architecture remains intact because the boot loader and app module are still fully versioned, and a failed app import still triggers a background service-worker refresh plus the explicit startup-failure UI.
+- The generic loading panel now has an indeterminate progress animation, a live elapsed-seconds counter, and real stage text.
+- Startup stages distinguish **Starting player**, **Loading player**, **Checking this session**, **Waking the player service**, **Restoring saved connection**, **Verifying TorBox connection**, and **Session ready**.
+- If the initial private-service session request is still pending after 2.5 seconds, the UI changes to **Waking the player service** and explicitly says the backend sleeps when idle and can take around a minute to restart.
+- This makes the remaining delay observable. If a future slow load spends its time on another stage, that stage now identifies the next bottleneck rather than leaving an ambiguous frozen screen.
+
+The progress bar is intentionally indeterminate. The backend cold-start time is not predictable enough for a truthful percentage bar; elapsed time plus stage transitions are the reliable indicators.
+
 ## Verification
 
-- Feature CI run `36002509064` registered **320 tests: 314 passed, 0 failed, 6 optional live checks skipped**.
-- New regressions verify that no-cache playback renders in-app Prepare & Play choices, does not use `window.confirm()`, and preserves explicit `waitForPreparation:true` only after a user taps a choice.
-- Browser preparation-option tests verify multiple safe choices, duplicate-hash suppression, ordinary-cut preference, and fallback to an alternate cut only when no ordinary choice exists.
-- The existing regression that automatic playback never prepares an uncached source remains green.
-- Startup/cache recovery regressions pass with the complete frontend graph bumped to `restored13`.
-- GitHub Pages run `36002643124` succeeded for main runtime commit `db5da66c`.
-- Browser-key clone CI run `36002859896` succeeded for mirror runtime commit `f95ab0f4` with **320 tests registered, 314 passed, 0 failed, 6 optional live checks skipped**.
-- Render deploy `dep-daqhuhugekts73ahjhfg` completed successfully and is **live** from mirror runtime commit `f95ab0f4`.
-- The restored13 frontend/runtime test files synced in this benchmark are byte-identical between `main` and `browser-key-clone`.
-- Existing source identity, cached-only automation, TorBox credential isolation, startup recovery, PiP/fullscreen, Continue Watching, credits, and security regressions remain green.
+- Startup feature CI run `36524513482` registered **321 tests: 315 passed, 0 failed, 6 optional live checks skipped**.
+- New regressions verify the live opening stages, elapsed timer, progress indicator, immediate backend wake, and that service-worker refresh is no longer awaited before app import.
+- GitHub Pages run `36524602877` succeeded for main runtime commit `ad251de2`.
+- Browser-key clone CI run `36524735932` succeeded for mirror runtime commit `91f6ac4e` with **321 tests registered, 315 passed, 0 failed, 6 optional live checks skipped**.
+- Render deploy `dep-datkfldg1s2s739o6v3g` completed successfully and is **live** from mirror runtime commit `91f6ac4e`.
+- All **11** startup-related frontend/regression files are byte-identical between `main` and `browser-key-clone` by Git blob SHA.
+- Render service inspection confirms the production backend is on plan `free`, region `ohio`, one instance, with auto-deploy enabled.
+- Recent production logs at the time of Jon's report show the Render process starting at 04:57:29Z and listening at 04:57:31Z, confirming a real backend cold start during the reported loading delay.
+- Existing source identity, cached-only automation, in-app Prepare & Play fallback, TorBox credential isolation, startup recovery, PiP/fullscreen, Continue Watching, credits, and security regressions remain green.
 
 ## Do not break
 
@@ -235,8 +255,10 @@ The frontend cache graph is now **`restored13`** so existing devices load the in
 
 ## Immediate next action
 
-Reload the ordinary root player and retry The Office Season 4 Episode 3, **Dunder Mifflin Infinity (1)**. Under restored13, the expected fallback is no longer a red dead end or a single confirmation dialog. If no cached Chrome-compatible source is ready, the title dialog should show up to three in-app playback choices with **Prepare & Play** buttons.
+Physically reload the ordinary root player on Android and observe restored14 startup.
 
-Choose one of those options. The app should add/prepare it in TorBox, wait for readiness, and play it without requiring any visit to torbox.app.
+The expected UI should immediately animate and show elapsed time. A normal warm load should move quickly through **Loading player** and **Checking this session**. If Render is asleep, it should switch after about 2.5 seconds to **Waking the player service** instead of appearing frozen.
 
-If the old UI remains after a normal reload, use the permanent `/recover/` path once to force restored13. If the chooser appears but a selected Prepare & Play fails, investigate that source's TorBox preparation response next rather than broadening discovery again.
+If startup still takes close to a minute, record the stage label and elapsed time at which it spends most of the delay. That now distinguishes Render cold-start latency from saved-key/TorBox verification or a frontend boot issue without guesswork.
+
+After startup acceptance, resume The Office S4E3 in-app source chooser acceptance and the pending PiP wake-lock, fullscreen-exit, Continue Watching, and credits/auto-next checks.
