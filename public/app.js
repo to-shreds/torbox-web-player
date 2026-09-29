@@ -1,13 +1,13 @@
-import { createDiscoveryUI } from './discover.js?v=restored13';
-import { diagnosePlaybackFailure } from './playback-errors.js?v=restored13';
-import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=restored13';
-import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=restored13';
-import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=restored13';
-import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=restored13';
-import { getSettings, saveSettings, resetSettings } from './settings.js?v=restored13';
-import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=restored13';
-import { clearSearchHistory } from './search-history.js?v=restored13';
-import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=restored13';
+import { createDiscoveryUI } from './discover.js?v=restored14';
+import { diagnosePlaybackFailure } from './playback-errors.js?v=restored14';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=restored14';
+import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=restored14';
+import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=restored14';
+import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=restored14';
+import { getSettings, saveSettings, resetSettings } from './settings.js?v=restored14';
+import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=restored14';
+import { clearSearchHistory } from './search-history.js?v=restored14';
+import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=restored14';
 const $ = id => document.getElementById(id);
 let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null, fullscreenExitControlTimer = null;
 let discoveryUI;
@@ -32,6 +32,13 @@ function setHealthSource(context=active){
   for(const id of ['health-sound-good','health-sound-bad','health-source-bad'])$(id).disabled=!source;
 }
 function text(id, value, error = false) { $(id).textContent = value; $(id).classList.toggle('error', error); }
+function startupStage(stage,detail=''){
+  const controller=globalThis.__torboxStartup;
+  if(controller?.stage){controller.stage(stage,detail);return;}
+  const primary=$('startup-stage'),secondary=$('startup-detail');
+  if(primary)primary.textContent=stage;if(secondary)secondary.textContent=detail;
+}
+function startupStop(){globalThis.__torboxStartup?.stop?.();}
 function playerMediaShell(){return $('player-media-shell');}
 function playerFullscreenSupported(){return typeof playerMediaShell()?.requestFullscreen==='function';}
 function playerPiPSupported(video=active?.video){return !!video&&document.pictureInPictureEnabled===true&&typeof video.requestPictureInPicture==='function';}
@@ -226,7 +233,7 @@ async function ensureTorBoxReady() {
   if (!ok) throw new Error(torboxStatusCache?.message || 'TorBox is currently unavailable. Try again after the outage clears.');
   return true;
 }
-function show(section) { if (section !== 'workspace') discoveryUI?.suspend(); for (const id of ['loading', 'setup-needed', 'login', 'workspace']) $(id).hidden = id !== section; }
+function show(section) { if (section !== 'workspace') discoveryUI?.suspend(); if(section!=='loading')startupStop(); for (const id of ['loading', 'setup-needed', 'login', 'workspace']) $(id).hidden = id !== section; }
 async function api(path, { method = 'GET', data, signal, keepalive = false } = {}) {
   const headers = {}; if (data !== undefined) headers['Content-Type'] = 'application/json';
   if (sessionToken) headers.Authorization = `Bearer ${sessionToken}`;
@@ -289,13 +296,13 @@ function clearSetupTransferHash(){try{history.replaceState(null,'',location.path
 async function acceptSetupTransfer(code){
   let existing=false;try{existing=!!(await loadRememberedApiKey())||['torbox-recent-v1','torbox-watchlist-v1','torbox-parental-controls-v1'].some(key=>localStorage.getItem(key)!==null)}catch{}
   if(existing&&!confirm('Replace this device’s current player setup with the transferred setup?')){clearSetupTransferHash();return false;}
-  show('loading');$('loading').querySelector('p').textContent='Transferring this setup securely…';
+  show('loading');startupStage('Transferring this setup…','Decrypting the one-time setup package securely.');
   const lookup=await transferLookup(code),result=await api('/api/setup-transfer?id='+encodeURIComponent(lookup));
   const payload=await decryptEncryptedTransfer(code,result.envelope);
   await connectWithKey(payload.apiKey,true);
   applyTransferredState(payload.state);
   try{const saved=localStorage.getItem('tw-viewer');if(['viewer-1','viewer-2'].includes(saved))viewer=saved;sessionStorage.setItem('tw-viewer',viewer)}catch{}
-  $('viewer').value=viewer;clearSetupTransferHash();applyInterfaceMode();$('loading').querySelector('p').textContent='Setup transferred. Opening the player…';return true;
+  $('viewer').value=viewer;clearSetupTransferHash();applyInterfaceMode();startupStage('Setup transferred.','Opening the player…');return true;
 }
 async function publishSetupTransfer(apiKey){
   const created=await createEncryptedTransfer(apiKey),saved=await api('/api/setup-transfer',{method:'POST',data:{lookup:created.lookup,envelope:created.envelope}});
@@ -314,22 +321,33 @@ async function bootstrap() {
     const transferCode=transferCodeFromHash();
     if(transferCode&&!guestMode){try{const imported=await acceptSetupTransfer(transferCode);if(imported)return await bootstrap();}catch(error){clearSetupTransferHash();show('login');text('login-message','Setup transfer failed: '+error.message,true);return;}}
     const invite = guestTokenFromHash();
-    if (invite && !guestMode) { await acceptGuestInvite(invite); return await bootstrap(); }
-    const session = await api('/api/session');
+    if (invite && !guestMode) {
+      startupStage('Opening shared access…','Validating the temporary guest link.');
+      await acceptGuestInvite(invite); return await bootstrap();
+    }
+    startupStage('Checking this session…','Connecting to the private player service.');
+    const wakeTimer=setTimeout(()=>startupStage('Waking the player service…','The backend sleeps when idle and can take around a minute to restart.'),2500);
+    let session;
+    try{session=await api('/api/session');}
+    finally{clearTimeout(wakeTimer);}
     if (session.setupRequired) return show('setup-needed');
     if (!session.authenticated) {
       clearSessionToken(); sessionToken = ''; csrf = ''; leaveGuestUi();
       if (!autoLoginTried) {
         autoLoginTried = true;
+        startupStage('Restoring saved connection…','Checking this device for an encrypted TorBox key.');
         const remembered = await loadRememberedApiKey();
         if (remembered) {
+          startupStage('Verifying TorBox connection…','Using the encrypted key saved on this device.');
           try { await connectWithKey(remembered, false); return await bootstrap(); }
           catch { clearSessionToken(); sessionToken = ''; csrf = ''; }
         }
       }
       return show('login');
     }
-    csrf = session.csrf; show('workspace');
+    csrf = session.csrf;
+    startupStage('Session ready.','Opening the player…');
+    show('workspace');
     if (session.guest) {
       enterGuestUi();
       $('recent-section').hidden = true;
@@ -337,7 +355,10 @@ async function bootstrap() {
       return;
     }
     leaveGuestUi(); await checkTorBoxStatus(true); renderRecent(); await discoveryUI.activate();
-  } catch (error) { show('loading'); $('loading').querySelector('p').textContent = error.message; }
+  } catch (error) {
+    show('loading');
+    startupStage('Could not open the player.',error.message);
+  }
 }
 $('login-form').addEventListener('submit', async event => {
   event.preventDefault(); const button = event.submitter; button.disabled = true; text('login-message', 'Checking TorBox…');
