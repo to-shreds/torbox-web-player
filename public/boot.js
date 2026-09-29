@@ -41,8 +41,14 @@ function showStartupFailure(){
   button.addEventListener('click',()=>location.reload());panel.append(button);
 }
 
-// Do both in the background. A service-worker update must never hold the opening screen hostage.
-void refreshServiceWorker();
+// Wake the backend immediately, but keep service-worker refresh off the critical startup path.
 warmBackend();
 setStartupStage('Loading player…','Connecting to the private player service.');
-try{await import(`./app.js?v=${BUILD}`);}catch(error){console.error('player_boot_failed',error);showStartupFailure();}
+try{
+  await import(`./app.js?v=${BUILD}`);
+  void refreshServiceWorker();
+}catch(error){
+  console.error('player_boot_failed',error);
+  void refreshServiceWorker();
+  showStartupFailure();
+}
