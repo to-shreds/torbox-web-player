@@ -1,9 +1,9 @@
-import { loadPublicSources, browserContainerHints } from './source-client.js?v=restored14';
-import { getSettings, updateSettings } from './settings.js?v=restored14';
-import { listRecent, formatResumeTime } from './history.js?v=restored14';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=restored14';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=restored14';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=restored14';
+import { loadPublicSources, browserContainerHints } from './source-client.js?v=restored15';
+import { getSettings, updateSettings } from './settings.js?v=restored15';
+import { listRecent, formatResumeTime } from './history.js?v=restored15';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=restored15';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=restored15';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=restored15';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
@@ -162,13 +162,32 @@ function createResolutionSelect(value = getResolution()) {
   select.value = value; select.addEventListener('change',()=>setResolution(select.value)); return select;
 }
 
-export function createDiscoveryUI({ api, play, driveTest, guard }) {
+export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity }) {
   let active=false, guestMode=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0, nextUpGeneration=0;
   let catalogAbort,titleAbort,sourceAbort,searchTimer,pollTimer,metas=[],nextSkip=null,currentMeta;
 
   function cancelSource(){++preparationGeneration;++sourceGeneration;sourceAbort?.abort();clearTimeout(pollTimer);}
   function cancelTitle(){++titleGeneration;titleAbort?.abort();cancelSource();}
   function message(id,text,error=false){$(id).textContent=text;$(id).classList.toggle('error',error);}
+  function savedResumeForTarget(target){
+    if(!target)return null;
+    const row=listRecent().find(item=>item.type===target.type&&item.id===target.id&&(target.type!=='series'||(item.season===target.season&&item.episode===target.episode)));
+    if(!row||row.completed||!(row.position>0))return null;
+    if(row.duration>0&&row.duration-row.position<20)return null;
+    return row;
+  }
+  function resumeTitle(meta,target,episodeName=''){
+    const title=meta?.name||'your video';
+    if(target?.type==='series'&&episodeName)return title+' · '+episodeName;
+    return title;
+  }
+  function showResumeActivity(meta,target,episodeName='',startOver=false){
+    const row=startOver?null:savedResumeForTarget(target);
+    if(!startOver&&!row)return null;
+    const label=resumeTitle(meta,target,episodeName);
+    resumeActivity?.show?.(startOver?'Starting '+label+' over…':'Resuming '+label+'…',startOver?'Getting the video ready from the beginning.':'Finding your saved video and a playable source.');
+    return row||{startOver:true};
+  }
   function applyBrowsePreferences(){
     const settings=getSettings();if(!settings.rememberBrowse)return;
     $('catalog-type').value=settings.catalogType;$('catalog-feed').value=settings.catalogFeed;$('catalog-genre').value=settings.catalogGenre;
@@ -331,16 +350,21 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
 
   function clearPlaybackFallback(){const area=$('play-fallback');if(area)area.replaceChildren();}
   async function prepareAndPlayFallback(meta,target,episodeName,resolution,source,button,buttons){
+    const resumeRow=savedResumeForTarget(target);
+    if(resumeRow)resumeActivity?.show?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Preparing the version you selected in TorBox.');
     try{
       for(const item of buttons)item.disabled=true;
       button.textContent='Preparing…';
       message('detail-message','Preparing this version in TorBox…');
+      if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','TorBox is preparing the selected version.');
       const result=await readyFile(source,{signal:AbortSignal.timeout(330000),unattended:true,waitForPreparation:true});
       const context=buildContext(meta,target,episodeName,resolution,source);
+      if(resumeRow)context.resumeIntent=true;
       clearPlaybackFallback();
       if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
       return await play(result.file,context);
     }catch(error){
+      resumeActivity?.hide?.();
       message('detail-message',error.message,true);
       for(const item of buttons)item.disabled=false;
       button.textContent='Prepare & Play';
@@ -376,16 +400,25 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
 
   async function quickPlay(meta,target,episodeName='',trigger){
     const original=trigger?.textContent;if(trigger){trigger.disabled=true;trigger.textContent='Opening…';}
+    const resumeRow=showResumeActivity(meta,target,episodeName,false);
     clearPlaybackFallback();message('detail-message','Finding the recommended source…');
     let resolution,registered;
     try{
+      if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Checking the player connection.');
       await ensureService();
+      if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Finding a playable source.');
       resolution=getResolution(target);registered=await registeredSources(target,AbortSignal.timeout(45000));
-      const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:AbortSignal.timeout(330000),onCandidate:()=>message('detail-message','Checking cached browser-compatible source…')});
+      const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:AbortSignal.timeout(330000),onCandidate:()=>{
+        message('detail-message','Checking cached browser-compatible source…');
+        if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Checking a ready browser-compatible version.');
+      }});
       const context=buildContext(meta,target,episodeName,resolution,best);
+      if(resumeRow)context.resumeIntent=true;
+      if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Opening the video and loading your saved position.');
       if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
-      return await play(result.file,context);
+      const moved=await play(result.file,context);if(!moved)resumeActivity?.hide?.();return moved;
     }catch(e){
+      resumeActivity?.hide?.();
       if(e?.code==='NO_CACHED_BROWSER_SOURCE'&&registered?.sources?.length&&renderPlaybackFallback(meta,target,episodeName,resolution,registered.sources)){
         message('detail-message','Choose a browser-compatible version below.');
         return false;
@@ -576,18 +609,24 @@ export function createDiscoveryUI({ api, play, driveTest, guard }) {
 
   async function resumeRecent(entry,startOver=false){
     if(!entry||!['movie','series'].includes(entry.type))return false;
+    const initialName=entry.type==='series'?entry.episodeName:'';
+    resumeActivity?.show?.(startOver?'Starting '+entry.title+' over…':'Resuming '+entry.title+'…',entry.type==='series'&&initialName?initialName+' · Getting your video ready.':'Getting your video ready.');
     message('catalog-message',startOver?'Starting over…':'Resuming…');
     let meta=null,target=null,name='';
     try{
+      resumeActivity?.update?.(startOver?'Starting '+entry.title+' over…':'Resuming '+entry.title+'…','Checking the player connection.');
       await ensureService();
+      resumeActivity?.update?.(startOver?'Starting '+entry.title+' over…':'Resuming '+entry.title+'…','Loading title and episode details.');
       const data=await api(`/api/discover/meta?type=${entry.type}&id=${entry.id}`,{signal:AbortSignal.timeout(20000)});meta=data.meta;
       target=entry.type==='series'?{type:'series',id:entry.id,season:entry.season,episode:entry.episode}:{type:'movie',id:entry.id};
       name=entry.type==='series'?(meta.episodes.find(e=>e.season===entry.season&&e.episode===entry.episode)?.name||entry.episodeName):'';
+      resumeActivity?.update?.(startOver?'Starting '+resumeTitle(meta,target,name)+' over…':'Resuming '+resumeTitle(meta,target,name)+'…','Finding a playable source.');
       const registered=await registeredSources(target,AbortSignal.timeout(45000)),resolution=entry.resolution||getResolution(target);
-      const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:AbortSignal.timeout(330000)});
-      const context=buildContext(meta,target,name,resolution,best);context.forceStartOver=startOver;context.rewindOnResumeSeconds=startOver?0:getSettings().resumeRewindSeconds;
-      await play(result.file,context);message('catalog-message','');return true;
-    }catch(e){message('catalog-message',e.message,true);return false;}
+      const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:AbortSignal.timeout(330000),onCandidate:()=>resumeActivity?.update?.(startOver?'Starting '+resumeTitle(meta,target,name)+' over…':'Resuming '+resumeTitle(meta,target,name)+'…','Checking a ready browser-compatible version.')});
+      const context=buildContext(meta,target,name,resolution,best);context.forceStartOver=startOver;context.rewindOnResumeSeconds=startOver?0:getSettings().resumeRewindSeconds;context.resumeIntent=!startOver;context.startOverIntent=startOver;
+      resumeActivity?.update?.(startOver?'Starting '+resumeTitle(meta,target,name)+' over…':'Resuming '+resumeTitle(meta,target,name)+'…','Opening the video.');
+      const moved=await play(result.file,context);if(!moved)resumeActivity?.hide?.();message('catalog-message','');return moved;
+    }catch(e){resumeActivity?.hide?.();message('catalog-message',e.message,true);return false;}
   }
 
   for(const id of ['catalog-type','catalog-feed','catalog-genre'])$(id).addEventListener('change',()=>{persistBrowsePreferences();browse();});

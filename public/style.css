@@ -13,3 +13,13 @@
 .fullscreen-exit-overlay{display:none}
 .player-media-shell:fullscreen .fullscreen-exit-overlay{position:absolute;z-index:30;top:max(.55rem,env(safe-area-inset-top));right:max(.55rem,env(safe-area-inset-right));display:inline-flex;min-height:42px;padding:.45rem .7rem;border:1px solid rgb(255 255 255/.42);background:rgb(4 10 18/.78);backdrop-filter:blur(7px);color:#fff;font-size:.72rem;font-weight:700;box-shadow:0 4px 18px rgb(0 0 0/.35)}
 .player-media-shell:fullscreen .fullscreen-exit-overlay[hidden]{display:none!important}
+
+/* prominent resume/start-over activity overlay */
+.resume-overlay{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:1.2rem;background:rgb(3 8 14/.72);backdrop-filter:blur(5px)}
+.resume-overlay-card{width:min(360px,88vw);display:grid;justify-items:center;gap:.45rem;padding:1.2rem 1.25rem;border:1px solid #40546a;border-radius:16px;background:#101925;box-shadow:0 18px 50px rgb(0 0 0/.45);text-align:center}
+.resume-overlay-card strong{font-size:1.05rem;color:#f3f8ff}
+.resume-overlay-card span{font-size:.82rem;color:#b9c8d8;max-width:30ch}
+.resume-overlay-card small{font-size:.68rem;color:#71859a;font-variant-numeric:tabular-nums;min-height:1em}
+.resume-spinner{width:38px;height:38px;border-radius:50%;border:4px solid #2a3949;border-top-color:#a7e5df;animation:resume-spin .85s linear infinite;margin-bottom:.15rem}
+@keyframes resume-spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){.resume-overlay-card{padding:1rem}.resume-overlay-card strong{font-size:1rem}}
