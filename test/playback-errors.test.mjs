@@ -17,8 +17,8 @@ test('only verified TorBox CDN URLs and opaque Render tickets are trusted media'
   for(const url of [direct,relay,'/media/'+'a'.repeat(43)])assert.equal((await diagnosePlaybackFailure(url,4)).kind,'codec');
 });
 test('user cancellation remains distinct', async () => { assert.equal((await diagnosePlaybackFailure(relay,1)).kind,'cancelled'); });
-test('network media error identifies the protected stream without exposing its upstream URL', async () => {
-  const r=await diagnosePlaybackFailure(relay,2); assert.equal(r.kind,'network'); assert.equal(r.retry,true); assert.ok(/protected stream/.test(r.message));assert.ok(!/tb-cdn|token/i.test(r.message));
+test('network media error identifies the protected redirect without exposing its upstream URL', async () => {
+  const r=await diagnosePlaybackFailure(relay,2); assert.equal(r.kind,'network'); assert.equal(r.retry,true); assert.ok(/protected playback redirect/.test(r.message));assert.ok(!/tb-cdn|token/i.test(r.message));
 });
 test('browser codec rejection states that transport does not convert the file', async () => {
   for(const code of [3,4]) { const r=await diagnosePlaybackFailure(relay,code); assert.equal(r.kind,'codec'); assert.equal(r.retry,false); assert.ok(/does not convert/.test(r.message)); }
