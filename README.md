@@ -26,13 +26,13 @@ Settings now includes **Sync & devices → Transfer this setup**. It creates a o
 
 Transferred state includes the selected viewer, general settings, Continue Watching history, My list, search history, and Kid Mode/PIN/allowance state. Device-specific source/audio compatibility learning is intentionally not transferred. If the API key is not remembered on the source device, Settings asks for it once and verifies it against the current session before creating the encrypted package. Opening a transfer link on the destination device validates the debrid credential before applying the imported state and stores the credential using the destination browser's existing encrypted vault. This transfer does not yet enable ongoing cloud synchronization.
 
-Video passes through the protected Render relay restored from the last known-good pre-direct architecture. The browser receives only an opaque, expiring media ticket. The TorBox CDN URL and API key remain server-side.
+Video bytes no longer pass through Render. The browser still receives an opaque, expiring `/media/<ticket>` path, but Render now answers that request with a temporary redirect to a TorBox CDN URL that has been verified not to contain the master API key. The TorBox API key stays server-side while the actual movie or episode bytes travel directly from TorBox to the browser.
 
 Owner playback path:
 
-`TorBox CDN -> Render relay -> browser`
+`TorBox CDN -> browser`
 
-Render handles control/API operations such as catalog and source lookup, cache checks, preparation, playback-link generation, TorBox status checks, Drive control, and temporary progress leases.
+Render handles control/API operations such as catalog and source lookup, cache checks, preparation, playback-link generation, safe redirect issuance, TorBox status checks, Drive control, and temporary progress leases.
 
 ## Discovery and source selection
 
@@ -80,7 +80,7 @@ Long-pressing a poster opens quick actions. Play, My list, and Details remain us
 
 Automatic next episode uses a cancellable countdown. The countdown can be immediate or 5, 8, 10, or 15 seconds.
 
-If a stream buffers continuously or fails, automatic recovery can try at most two alternatives, for no more than three sources total. The Render relay renews an expired TorBox link once without rebuilding the player again. The buffering threshold is configurable.
+If a stream buffers continuously or fails, automatic recovery can try at most two alternatives, for no more than three sources total. A fresh playback request obtains a new temporary TorBox link if the previous direct link expires. The buffering threshold is configurable.
 
 Full mode includes a playback-health panel that distinguishes states such as Opening, Ready, Playing, Buffering, Stalled, Recovering, Paused, Finished, and failure. It also exposes Sound works, No sound, and Bad source feedback for the current source.
 
