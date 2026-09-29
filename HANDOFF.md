@@ -8,15 +8,15 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `ad251de2c5bc69e06c136feca1af201cabc7345b`
+- Main runtime commit: `1e6a66f1d3b7ac9023452b3b5d5dba244810da9b`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `91f6ac4e88ebac4721e380abd97f488984ba0026`
+- Mirror runtime commit: `b9338b79b6b61bb91deee33a7d32700c568e4826`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-datkfldg1s2s739o6v3g`
-- PWA cache: `torbox-player-v1.1-restored14`
+- Live Render deploy: `dep-datkmcvlot8c73fusm2g`
+- PWA cache: `torbox-player-v1.1-restored15`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
 
@@ -229,16 +229,33 @@ Restored14 changes startup behavior:
 
 The progress bar is intentionally indeterminate. The backend cold-start time is not predictable enough for a truthful percentage bar; elapsed time plus stage transitions are the reliable indicators.
 
+## Prominent resume activity overlay
+
+Jon reported that Resume activity was technically visible only as small status text in an easy-to-miss location. A family user interpreted that as the app doing nothing.
+
+Restored15 makes resume/start-over activity deliberately obvious:
+
+- Tapping a Continue Watching item now shows a centered, full-screen activity overlay immediately.
+- The overlay has a large **Resuming…** or **Starting over…** label, the title/episode context, an animated spinner, elapsed seconds, and live stage text.
+- Resume stages cover connection checking, loading title/episode metadata, finding a playable source, checking a cached browser-compatible source, opening the player, and loading the saved position.
+- The overlay stays visible through source discovery and player opening. It does **not** disappear merely because the player dialog has opened.
+- Once metadata loads, the overlay changes to the actual resume point, for example **Resuming at 29:23…**.
+- The overlay disappears only when the video reaches the real `playing` event, so it cannot falsely imply that playback has started.
+- The same behavior also applies when a normal Play action resolves to an existing saved resume point.
+- If a resume falls back to the in-app Prepare & Play chooser, the overlay is hidden so the user can make a choice. After the user chooses a source, the overlay reappears while TorBox prepares it.
+- Errors, autoplay blocks, kid-limit interruptions, cancellation, and explicit playback stop all clear the overlay so it cannot get stuck over the UI.
+- The existing small status text remains as secondary information, but it is no longer the only visible feedback.
+
+The frontend cache graph is now **restored15**.
+
 ## Verification
 
-- Startup feature CI run `36524513482` registered **321 tests: 315 passed, 0 failed, 6 optional live checks skipped**.
-- New regressions verify the live opening stages, elapsed timer, progress indicator, immediate backend wake, and that service-worker refresh is no longer awaited before app import.
-- GitHub Pages run `36524602877` succeeded for main runtime commit `ad251de2`.
-- Browser-key clone CI run `36524735932` succeeded for mirror runtime commit `91f6ac4e` with **321 tests registered, 315 passed, 0 failed, 6 optional live checks skipped**.
-- Render deploy `dep-datkfldg1s2s739o6v3g` completed successfully and is **live** from mirror runtime commit `91f6ac4e`.
-- All **11** startup-related frontend/regression files are byte-identical between `main` and `browser-key-clone` by Git blob SHA.
-- Render service inspection confirms the production backend is on plan `free`, region `ohio`, one instance, with auto-deploy enabled.
-- Recent production logs at the time of Jon's report show the Render process starting at 04:57:29Z and listening at 04:57:31Z, confirming a real backend cold start during the reported loading delay.
+- Resume-overlay feature CI run `36525625645` registered **322 tests: 316 passed, 0 failed, 6 optional live checks skipped**.
+- New regression `resume-overlay.test.mjs` verifies the overlay markup, fixed full-screen presentation, spinner animation, resume/start-over wiring, saved-position stage update, and removal on actual playback.
+- GitHub Pages run `36525720128` succeeded for main runtime commit `1e6a66f1`.
+- Browser-key clone CI run `36525859347` succeeded for mirror runtime commit `b9338b79` with **322 tests registered, 316 passed, 0 failed, 6 optional live checks skipped**.
+- Render deploy `dep-datkmcvlot8c73fusm2g` completed successfully and is **live** from mirror runtime commit `b9338b79`.
+- Existing restored14 startup-progress/nonblocking-boot regressions remain green.
 - Existing source identity, cached-only automation, in-app Prepare & Play fallback, TorBox credential isolation, startup recovery, PiP/fullscreen, Continue Watching, credits, and security regressions remain green.
 
 ## Do not break
@@ -255,10 +272,10 @@ The progress bar is intentionally indeterminate. The backend cold-start time is 
 
 ## Immediate next action
 
-Physically reload the ordinary root player on Android and observe restored14 startup.
+Physically resume a partially watched show and movie on Android, preferably from Continue Watching.
 
-The expected UI should immediately animate and show elapsed time. A normal warm load should move quickly through **Loading player** and **Checking this session**. If Render is asleep, it should switch after about 2.5 seconds to **Waking the player service** instead of appearing frozen.
+The expected restored15 behavior is a prominent centered overlay that appears immediately, shows the title/episode and live resume stage, displays elapsed time, updates to the actual resume point once loaded, and stays visible until the video is genuinely playing.
 
-If startup still takes close to a minute, record the stage label and elapsed time at which it spends most of the delay. That now distinguishes Render cold-start latency from saved-key/TorBox verification or a frontend boot issue without guesswork.
+Also confirm that a normal Play action on an episode/movie with saved progress gets the same overlay, and that Start over uses the same obvious activity treatment with **Starting over…** wording.
 
-After startup acceptance, resume The Office S4E3 in-app source chooser acceptance and the pending PiP wake-lock, fullscreen-exit, Continue Watching, and credits/auto-next checks.
+If that passes, resume the pending restored14 startup acceptance, The Office S4E3 in-app source chooser acceptance, PiP wake-lock, fullscreen-exit, Continue Watching, and credits/auto-next checks.
