@@ -26,13 +26,17 @@ Settings now includes **Sync & devices → Transfer this setup**. It creates a o
 
 Transferred state includes the selected viewer, general settings, Continue Watching history, My list, search history, and Kid Mode/PIN/allowance state. Device-specific source/audio compatibility learning is intentionally not transferred. If the API key is not remembered on the source device, Settings asks for it once and verifies it against the current session before creating the encrypted package. Opening a transfer link on the destination device validates the debrid credential before applying the imported state and stores the credential using the destination browser's existing encrypted vault. This transfer does not yet enable ongoing cloud synchronization.
 
-Video bytes no longer pass through Render. The browser still receives an opaque, expiring `/media/<ticket>` path, but Render now answers that request with a temporary redirect to a TorBox CDN URL that has been verified not to contain the master API key. The TorBox API key stays server-side while the actual movie or episode bytes travel directly from TorBox to the browser.
+Normal owner video bytes no longer pass through Render. The browser still receives an opaque, expiring `/media/<ticket>` path, and Render answers that request with a redirect to the TorBox CDN. On this TorBox account the CDN URL itself contains the account API key, so the key can be visible to the signed-in owner's browser network stack during playback even though it is never returned in playback JSON or written into the page. Guest playback remains on the protected Render relay so an owner's API key is never exposed to a guest browser.
 
 Owner playback path:
 
 `TorBox CDN -> browser`
 
-Render handles control/API operations such as catalog and source lookup, cache checks, preparation, playback-link generation, safe redirect issuance, TorBox status checks, Drive control, and temporary progress leases.
+Temporary guest playback path:
+
+`TorBox CDN -> Render relay -> guest browser`
+
+Render handles control/API operations such as catalog and source lookup, cache checks, preparation, playback-link generation, owner redirect issuance, TorBox status checks, Drive control, and temporary progress leases.
 
 ## Discovery and source selection
 
