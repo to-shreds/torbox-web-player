@@ -6,7 +6,7 @@ const password = 'fixture-password-only';
 const hash = await hashPassword(password);
 const page = 'https://to-shreds.github.io';
 async function fixture(t) {
-  const provider = { key:'secret-master-key', list: async () => ({ files: [], stale: false }), account: async () => ({ valid: true }), resolveGuest: async videoId => ({ url: 'https://store.tb-cdn.io/file?token=temporary-file-token', file: { id: videoId } }) };
+  const provider = { key:'secret-master-key', list: async () => ({ files: [], stale: false }), account: async () => ({ valid: true }), resolveForRelay: async videoId => ({ upstreamUrl: 'https://store.tb-cdn.io/file?token=secret-master-key', file: { id: videoId } }) };
   const app = createApp({ env: { HOUSEHOLD_PASSWORD_HASH: hash, PUBLIC_ORIGIN: 'https://torbox-web-player.onrender.com', FRONTEND_ORIGINS: page, NODE_ENV: 'production' }, provider, mediaFetch:async()=>{throw new Error('video bytes must not pass through Render');} });
   await new Promise(r => app.server.listen(0, '127.0.0.1', r));
   t.after(() => { app.server.closeAllConnections(); app.server.close(); });
@@ -52,8 +52,8 @@ test('GitHub Pages bearer session receives an opaque direct media ticket', async
   const { call }=await fixture(t);
   const token=(await (await call('/api/login',{method:'POST',data:{password}})).json()).sessionToken;
   const play=await (await call('/api/playback',{method:'POST',token,data:{viewer:'viewer-1',videoId:'torrents:1:0'}})).json();
-  assert.equal(play.delivery,'direct'); assert.equal(play.exposesTorBoxToken,false);assert.match(play.mediaUrl,/^\/media\/[A-Za-z0-9_-]{43}$/);assert.ok(!JSON.stringify(play).includes('secret-master-key'));
-  const media=await call(play.mediaUrl,{headers:{Range:'bytes=0-0'},redirect:'manual'});assert.equal(media.status,307);assert.equal(media.headers.get('location'),'https://store.tb-cdn.io/file?token=temporary-file-token');assert.equal(media.headers.get('access-control-allow-origin'),page);
+  assert.equal(play.delivery,'direct'); assert.equal(play.exposesTorBoxToken,true);assert.match(play.mediaUrl,/^\/media\/[A-Za-z0-9_-]{43}$/);assert.ok(!JSON.stringify(play).includes('secret-master-key'));
+  const media=await call(play.mediaUrl,{headers:{Range:'bytes=0-0'},redirect:'manual'});assert.equal(media.status,307);assert.equal(media.headers.get('location'),'https://store.tb-cdn.io/file?token=secret-master-key');assert.equal(media.headers.get('access-control-allow-origin'),page);
 });
 test('an invented Render media ticket cannot be used', async t => {
   const { call }=await fixture(t);
