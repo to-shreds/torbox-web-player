@@ -6,7 +6,7 @@ const password = 'fixture-password-only';
 const hash = await hashPassword(password);
 const defaultMediaFetch = async () => { throw new Error('video bytes must not pass through Render'); };
 async function fixture(t, { providerExtra = {}, mediaFetch = defaultMediaFetch } = {}) {
-  const provider = { key: 'fixture-master-key', list: async () => ({ files: [], stale: false }), account: async () => ({ valid: true }), resolveGuest: async videoId => ({ url: 'https://store.tb-cdn.io/fixture?token=temporary-file-token', file: { id: videoId } }), ...providerExtra };
+  const provider = { key: 'fixture-master-key', list: async () => ({ files: [], stale: false }), account: async () => ({ valid: true }), resolveForRelay: async videoId => ({ upstreamUrl: 'https://store.tb-cdn.io/fixture?token=fixture-master-key', file: { id: videoId } }), ...providerExtra };
   const app = createApp({ env: { HOUSEHOLD_PASSWORD_HASH: hash, PUBLIC_ORIGIN: 'https://player.example.test', NODE_ENV: 'production' }, provider, mediaFetch });
   await new Promise(resolve => app.server.listen(0, '127.0.0.1', resolve));
   t.after(() => { app.server.closeAllConnections(); app.server.close(); });
@@ -45,13 +45,13 @@ test('playback returns an opaque ticket for direct delivery and progress resumes
   const { call, login } = await fixture(t), auth = await login();
   const start = async () => (await call('/api/playback', { ...auth, method: 'POST', data: { viewer: 'viewer-1', videoId: 'torrents:1:0' } })).json();
   const one = await start();
-  assert.equal(one.delivery, 'direct'); assert.equal(one.exposesTorBoxToken, false);
+  assert.equal(one.delivery, 'direct'); assert.equal(one.exposesTorBoxToken, true);
   assert.match(one.mediaUrl, /^\/media\/[A-Za-z0-9_-]{43}$/);assert.ok(!JSON.stringify(one).includes('fixture-master-key'));assert.ok(!JSON.stringify(one).includes('tb-cdn'));
   const save = await call('/api/progress', { ...auth, method: 'PUT', data: { viewer: 'viewer-1', videoId: 'torrents:1:0', leaseId: one.leaseId, seq: 1, position: 45, duration: 100 } });
   assert.equal((await save.json()).saved, true); assert.equal((await start()).progress.position, 45);
 });
 test('playback refuses an actual AVI before creating a browser media ticket',async t=>{
-  const providerExtra={resolveGuest:async videoId=>({url:'https://store.tb-cdn.io/fixture?token=temporary-file-token',file:{id:videoId,title:'Fixture.avi',mime:'video/x-msvideo'}})};
+  const providerExtra={resolveForRelay:async videoId=>({upstreamUrl:'https://store.tb-cdn.io/fixture?token=fixture-master-key',file:{id:videoId,title:'Fixture.avi',mime:'video/x-msvideo'}})};
   const {call,login,mediaTickets}=await fixture(t,{providerExtra}),auth=await login();
   const response=await call('/api/playback',{...auth,method:'POST',data:{viewer:'viewer-1',videoId:'torrents:1:0'}}),body=await response.json();
   assert.equal(response.status,415);assert.equal(body.error,'BROWSER_CONTAINER_UNSUPPORTED');assert.equal(mediaTickets.rows.size,0);
@@ -61,7 +61,7 @@ test('media ticket redirects range-preserving to TorBox without relaying video b
   const {call,login}=await fixture(t,{mediaFetch:async()=>{mediaFetchCalls++;throw new Error('unexpected relay');}}),auth=await login();
   const playback=await (await call('/api/playback',{...auth,method:'POST',data:{viewer:'viewer-1',videoId:'torrents:1:0'}})).json();
   const media=await call(playback.mediaUrl,{headers:{Range:'bytes=0-0'},redirect:'manual'});
-  assert.equal(media.status,307);assert.equal(media.headers.get('location'),'https://store.tb-cdn.io/fixture?token=temporary-file-token');
+  assert.equal(media.status,307);assert.equal(media.headers.get('location'),'https://store.tb-cdn.io/fixture?token=fixture-master-key');
   assert.equal(media.headers.get('x-media-delivery'),'direct');assert.equal(mediaFetchCalls,0);
 });
 test('media tickets reject another signed-in session and malformed ranges',async t=>{
@@ -70,10 +70,11 @@ test('media tickets reject another signed-in session and malformed ranges',async
   assert.equal((await call(playback.mediaUrl,{cookie:b.cookie,headers:{Range:'bytes=0-0'},redirect:'manual'})).status,404);
   assert.equal((await call(playback.mediaUrl,{headers:{Range:'bytes=0-1,4-5'},redirect:'manual'})).status,416);
 });
-test('media redirect refuses a URL containing the master TorBox key',async t=>{
-  const providerExtra={key:'fixture-master-key',resolveGuest:async videoId=>({url:'https://store.tb-cdn.io/fixture?token=fixture-master-key',file:{id:videoId,title:'Fixture.mp4'}})};
-  const {call,login}=await fixture(t,{providerExtra}),auth=await login();
-  const playback=await (await call('/api/playback',{...auth,method:'POST',data:{viewer:'viewer-1',videoId:'torrents:1:0'}})).json();
-  const media=await call(playback.mediaUrl,{redirect:'manual'});const body=await media.json();
-  assert.equal(media.status,502);assert.equal(body.error,'UNSAFE_PROVIDER_URL');assert.equal(media.headers.get('location'),null);
+test('owner direct redirect can carry the account key without returning it in playback JSON',async t=>{
+  const {call,login}=await fixture(t),auth=await login();
+  const playbackResponse=await call('/api/playback',{...auth,method:'POST',data:{viewer:'viewer-1',videoId:'torrents:1:0'}});
+  const raw=await playbackResponse.text();assert.ok(!raw.includes('fixture-master-key'));
+  const playback=JSON.parse(raw);
+  const media=await call(playback.mediaUrl,{redirect:'manual'});
+  assert.equal(media.status,307);assert.equal(media.headers.get('location'),'https://store.tb-cdn.io/fixture?token=fixture-master-key');
 });

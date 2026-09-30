@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { Sessions, Limiter, GuestInvites, verifyPassword, validHash } from './lib/auth.mjs';
 import { ProgressStore, VIEWERS, validViewer } from './lib/progress.mjs';
-import { MediaTickets, validatedRange } from './lib/media.mjs';
-import { TorBox, AppError, parseVideoId, safePlaybackUrl, TORBOX_MEDIA_HOSTS } from './lib/torbox.mjs';
+import { MediaTickets, relayMedia, validatedRange } from './lib/media.mjs';
+import { TorBox, AppError, parseVideoId, validatedPlaybackUrl, TORBOX_MEDIA_HOSTS } from './lib/torbox.mjs';
 import { DriveTransferTests } from './lib/drive-share.mjs';
 import { TorBoxStatusChecker } from './lib/torbox-status.mjs';
 import { SetupTransfers } from './lib/setup-transfer.mjs';
@@ -221,8 +221,24 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
           throw new AppError('MEDIA_NOT_FOUND', 'This playback session is no longer available. Reopen the video.', 404);
         }
         const ticketProvider = ticketSession.provider || torbox;
+        if (ticketSession.guest) {
+          return await relayMedia({
+            request,
+            response,
+            ticket,
+            provider: ticketProvider,
+            fetchFn: mediaFetch,
+            onEvent: event => console.log(JSON.stringify({
+              event: event.event,
+              ...(Number.isInteger(event.upstreamStatus) ? { upstreamStatus: event.upstreamStatus } : {}),
+              ...(typeof event.ranged === 'boolean' ? { ranged: event.ranged } : {}),
+              ...(event.renewed === true ? { renewed: true } : {}),
+              ...(event.code ? { code: event.code } : {})
+            }))
+          });
+        }
         const range = validatedRange(request.headers.range);
-        const directUrl = safePlaybackUrl(ticket.upstreamUrl, ticketProvider?.key || '', mediaHosts);
+        const directUrl = validatedPlaybackUrl(ticket.upstreamUrl, mediaHosts);
         response.statusCode = 307;
         response.setHeader('Location', directUrl);
         response.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
@@ -370,7 +386,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (path === '/api/owner/diagnostics' && method === 'POST') {
           if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before checking again.', 429);
           const account = await activeProvider.account();
-          return json(response, 200, { account, authMode: apiKeyMode ? 'api-key' : 'household', apiKeyPersistence: apiKeyMode ? 'Render process memory only' : 'Render environment', directMedia: true, proxyEnabled: true, mediaRelayEnabled: false, credentialProtection: 'The TorBox API key stays in the Render process. The browser receives an opaque playback ticket that redirects only to a temporary TorBox CDN URL verified not to contain the master key.', discoveryConfigured: true, catalogProvider: 'Cinemeta', sourceProvider: sourceMode === 'multi' ? 'Zilean + Torrentio + MediaFusion Torznab, with StremThru Main/ElfHosted fallbacks' : 'Zilean (server-side)', sourceProviders: sourceLookup.diagnostics?.() || [], progressStorage: 'temporary server memory plus browser-local canonical resume history', automaticNextEnabled: true });
+          return json(response, 200, { account, authMode: apiKeyMode ? 'api-key' : 'household', apiKeyPersistence: apiKeyMode ? 'Render process memory only' : 'Render environment', directMedia: true, proxyEnabled: true, mediaRelayEnabled: true, mediaRelayScope: 'guest-only', credentialProtection: 'Owner playback uses an opaque ticket that redirects to TorBox directly. TorBox may place the account API key in that CDN URL, so it can be visible to the signed-in owner browser network stack but is never returned in playback JSON. Guest playback stays on the protected Render relay so the owner key is not exposed to guests.', discoveryConfigured: true, catalogProvider: 'Cinemeta', sourceProvider: sourceMode === 'multi' ? 'Zilean + Torrentio + MediaFusion Torznab, with StremThru Main/ElfHosted fallbacks' : 'Zilean (server-side)', sourceProviders: sourceLookup.diagnostics?.() || [], progressStorage: 'temporary server memory plus browser-local canonical resume history', automaticNextEnabled: true });
         }
       }
       if (path.startsWith('/api/discover/')) {
@@ -422,7 +438,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (session.guest && !session.allowedVideos?.has(data.videoId)) throw new AppError('GUEST_FORBIDDEN', 'This file was not selected through the shared title.', 403);
         const progressViewer = session.guest ? 'guest:' + session.id : data.viewer;
         const intent = progress.beginIntent(progressViewer);
-        const stream = await activeProvider.resolveGuest(data.videoId);
+        const stream = await activeProvider.resolveForRelay(data.videoId);
         const container = browserContainerHints(stream.file);
         if (container.browserUnsupported) {
           console.log(JSON.stringify({ event: 'media_playback_rejected', code: 'BROWSER_CONTAINER_UNSUPPORTED', container: container.container }));
@@ -431,8 +447,8 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (!progress.isCurrent(progressViewer, intent)) throw new AppError('PLAYBACK_SUPERSEDED', 'A newer playback request replaced this one.', 409);
         if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
         const lease = progress.start(progressViewer, data.videoId, { reset: data.startOver === true, sessionId: session.id });
-        const mediaToken = mediaTickets.create(session.id, data.videoId, stream.url, stream.file);
-        return json(response, 200, { file: stream.file, mediaUrl: `/media/${mediaToken}`, delivery: 'direct', conversion: false, exposesTorBoxToken: false, guestSafeLink: true, ...lease });
+        const mediaToken = mediaTickets.create(session.id, data.videoId, stream.upstreamUrl, stream.file);
+        return json(response, 200, { file: stream.file, mediaUrl: `/media/${mediaToken}`, delivery: session.guest ? 'relay' : 'direct', conversion: false, exposesTorBoxToken: session.guest ? false : true, guestSafeLink: session.guest === true, ...lease });
       }
       if (path === '/api/progress' && method === 'PUT') {
         if (!progressRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Progress is being saved too frequently.', 429);

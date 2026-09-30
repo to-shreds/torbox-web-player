@@ -94,13 +94,13 @@ test('owner sign-out invalidates existing guest sessions and invitation links',a
   assert.equal((await call('/api/guest/accept',{method:'POST',data:{token:invite.token}})).status,401);
 });
 
-test('guest playback uses an opaque direct ticket and never exposes the owner key',async t=>{
-  const {call,sessions}=await fixture(t),ownerToken=await owner(call);
+test('guest playback stays on the protected relay and never exposes the owner key',async t=>{
+  const {call,sessions,mediaRequests}=await fixture(t),ownerToken=await owner(call);
   const invite=await (await call('/api/share/create',{method:'POST',token:ownerToken,data:{type:'series',id:show,hours:2}})).json();
   const accepted=await (await call('/api/guest/accept',{method:'POST',data:{token:invite.token}})).json();
   const row=sessions.read(accepted.sessionToken),videoId='torrents:7:3'; row.allowedVideos.add(videoId);
   const playback=await call('/api/playback',{method:'POST',token:accepted.sessionToken,data:{viewer:'viewer-1',videoId}});
   assert.equal(playback.status,200); const body=await playback.json();
-  assert.equal(body.guestSafeLink,true);assert.equal(body.delivery,'direct');assert.match(body.mediaUrl,/^\/media\/[A-Za-z0-9_-]{43}$/);assert.ok(!JSON.stringify(body).includes(key));
-  const media=await call(body.mediaUrl,{redirect:'manual'});assert.equal(media.status,307);assert.equal(media.headers.get('location'),'https://store.tb-cdn.io/file?token=temporary-file-token');assert.ok(!media.headers.get('location').includes(key));
+  assert.equal(body.guestSafeLink,true);assert.equal(body.delivery,'relay');assert.equal(body.exposesTorBoxToken,false);assert.match(body.mediaUrl,/^\/media\/[A-Za-z0-9_-]{43}$/);assert.ok(!JSON.stringify(body).includes(key));
+  const media=await call(body.mediaUrl);assert.equal(media.status,200);assert.equal(await media.text(),'G');assert.ok(mediaRequests[0].includes(key));
 });
