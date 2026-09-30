@@ -8,14 +8,14 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `9c4de1986df6fb7d4fa457a658daf99c4cd6f4cb`
+- Main runtime commit: `ca71d5373c5725008e52f9ab1e1135e5f44ad5f0`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `7534b65c3737242cc072d15ae08142a22355c440`
+- Mirror runtime commit: `1fa271e8418105431a2aae079538e28de3cf2d81`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-dattphuk1f9s739kfmjg`
+- Live Render deploy: `dep-dau627hsrm7s73au7bg0`
 - PWA cache: `torbox-player-v1.1-restored16`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
@@ -26,7 +26,7 @@ Simple mode must never expose the torrent/source picker as an automatic fallback
 
 Automatic playback may use cached sources only. It must never silently begin an uncached download. If no cached browser-compatible source exists, Simple mode may show a small curated set of safe browser-compatible options with explicit **Prepare & Play** actions. Cached multi-file packages may select a browser-compatible matching file automatically. Known unsupported containers must be rejected before normal Android Chrome playback.
 
-Do not reintroduce automatic `openOptions()`, silent uncached preparation, raw `redirect=false` TorBox media URLs, or any failed 2.x source-selection path. Direct media delivery is allowed only through the master-key-safe temporary redirect path described below.
+Do not reintroduce automatic `openOptions()`, silent uncached preparation, or any failed 2.x source-selection path. Normal owner playback may use the TorBox `redirect=false` CDN URL only behind the opaque authenticated media ticket described below. Never return that URL in playback JSON or expose it to guest sessions.
 
 ## Catalog contract
 
@@ -34,35 +34,45 @@ IMDb Suggest is fallback discovery only. A fallback suggestion must resolve thro
 
 ## Architecture to preserve
 
-GitHub Pages serves the UI. Render performs catalog/search, source discovery, TorBox cache/preparation operations, playback-link generation, and authentication. The browser still receives only an opaque `/media/<ticket>` path from the playback API. When the video element opens that ticket, Render validates the ticket/session and Range syntax, then sends a `307` redirect to a temporary TorBox CDN URL that has been verified not to contain the master API key. The actual media bytes flow directly from TorBox to the browser. There is no transcoding, remuxing, or HLS implementation.
+GitHub Pages serves the UI. Render performs catalog/search, source discovery, TorBox cache/preparation operations, playback-link generation, and authentication. Normal owner playback still starts from an opaque `/media/<ticket>` path. Render validates the ticket/session and Range syntax, then sends a `307` redirect to the TorBox CDN. On this account TorBox places the master API key in that CDN URL, so the key can be visible to the signed-in owner's browser network stack, although it is never returned in playback JSON or written into the page. The actual owner media bytes flow directly from TorBox to the browser. Temporary guest playback remains on the Render byte relay so the owner's key is never exposed to a guest browser. There is no transcoding, remuxing, or HLS implementation.
 
 ## Bandwidth-safe direct media delivery
 
-On 2026-09-29 Render warned that the Hobby workspace had consumed 70% of its 5 GB free bandwidth allowance. Render's per-service metric showed about **4.27 GB** on `torbox-web-player-key`, while the other workspace services were negligible. The cause was the restored protected relay: every movie/episode byte flowed `TorBox CDN -> Render -> browser`.
+On 2026-09-29 Render warned that the Hobby workspace had consumed 70% of its 5 GB free bandwidth allowance. Render's per-service metric showed about **4.27 GB** on `torbox-web-player-key`, while the other workspace services were negligible. The cause was the protected relay carrying every movie/episode byte.
 
-Restored16 removes Render from the media data path without moving the master TorBox API key into the frontend:
+The first restored16 implementation assumed TorBox's `redirect=true` path would produce a key-free temporary CDN token. Physical Android acceptance disproved that assumption: TorBox returned a direct link containing the master key and the app correctly blocked it. The server-only correction keeps the bandwidth fix while accepting the actual TorBox behavior.
 
-- `/api/playback` obtains a TorBox `redirect=true` download target through the existing safe direct-link path.
-- That target must pass the TorBox media-host allowlist and `safePlaybackUrl()`, which rejects any URL containing the current master API key.
-- The playback API still returns only an opaque `/media/<ticket>` path. It does not return the TorBox CDN URL in JSON.
-- Opening the ticket validates the ticket, live session, and Range syntax, re-validates the stored TorBox URL against the master key, and responds with HTTP `307`.
-- The browser follows the redirect and receives video bytes directly from TorBox. Render sends only the small redirect/control response, so ordinary playback should consume negligible Render bandwidth.
-- CSP now permits the same TorBox CDN suffix allowlist used by the server while API/connect traffic remains restricted to Render.
-- The old byte-relay helper remains in the codebase for now but is no longer imported or used by the playback route.
-- A pre-change archive branch, `archive/pre-bandwidth-direct-2026-09-29`, preserves the prior production state.
+Current owner path:
 
-Security boundary: the **master TorBox API key must remain server-side**. The browser may see only TorBox's temporary direct CDN URL/token after following the authenticated opaque ticket. Never substitute the `redirect=false` provider URL when it contains the master API key.
+`TorBox CDN -> owner browser`
 
-Verification for this benchmark:
+Current guest path:
 
-- Pull request CI run `36592084219`: **322 tests, 316 passed, 0 failed, 6 optional live checks skipped**.
-- GitHub Pages run `36592179629` completed successfully for main runtime commit `9c4de198`.
-- Browser-key clone CI run `36592361273` completed successfully for mirror runtime commit `7534b65c`: **322 tests, 316 passed, 0 failed, 6 optional live checks skipped**.
-- Render deploy `dep-dattphuk1f9s739kfmjg` completed successfully and is **live** from mirror runtime commit `7534b65c`.
-- Main and mirror runtime trees were verified identical at deployment time.
-- New tests prove that the media endpoint emits a direct redirect instead of invoking the byte fetcher, rejects a redirect URL containing the master API key, preserves opaque-ticket behavior, and supports API-key and guest sessions.
+`TorBox CDN -> Render relay -> guest browser`
 
-Physical acceptance is still required for one normal Android playback. Confirm that Chrome follows the redirect and playback starts normally, including seeking. After that test, Render bandwidth should increase only by tiny control-response amounts rather than by the size of the video.
+Owner behavior:
+- `/api/playback` resolves the known TorBox file server-side and returns only an opaque `/media/<ticket>` path.
+- The playback JSON never contains the TorBox CDN URL or API key.
+- When the owner browser opens the ticket, Render validates the ticket/session, Range syntax, and TorBox CDN hostname, then returns HTTP `307` to the TorBox CDN URL.
+- That CDN URL can contain the account API key because that is how this TorBox account's raw download URL works. The key can therefore be visible in the signed-in owner's browser network stack during playback.
+- Render does not fetch or retransmit the owner video body, so normal household playback no longer consumes Render bandwidth proportional to the movie/episode size.
+- `Referrer-Policy: no-referrer`, no-store responses, the narrow TorBox host allowlist, and the opaque ticket keep the URL out of ordinary page state and application JSON.
+
+Guest behavior:
+- Guest sessions never receive the owner key-bearing redirect.
+- Guest media remains on the protected Render relay, preserving the existing title/session restrictions.
+- Guest relay traffic can still consume Render bandwidth, but ordinary owner/household playback does not.
+
+The Pro-only `stream/createstream` path was previously live-tested on this account and returned `PLAN_RESTRICTED_FEATURE`, so it is not an available key-free streaming substitute on the current TorBox plan.
+
+Verification:
+- Pull request CI run `36653602623`: **322 tests, 316 passed, 0 failed, 6 optional live checks skipped**.
+- Browser-key clone CI run `36653672131`: **322 tests, 316 passed, 0 failed, 6 optional live checks skipped**.
+- Render deploy `dep-dau627hsrm7s73au7bg0` is **live** from mirror runtime commit `1fa271e8`.
+- New/updated regressions verify that owner playback JSON remains key-free while the 307 Location can carry the owner key, Render does not fetch owner video bytes, malformed/cross-session tickets still fail, and guest playback remains relayed without exposing the owner key.
+- Archive branch `archive/restored16-safe-redirect-failed-2026-09-29` preserves the failed key-free-redirect assumption.
+
+Physical acceptance is still required for one normal Android owner playback and seeking. After that, compare Render bandwidth before and after; the expected delta is tiny control/redirect traffic rather than the size of the streamed media.
 
 ## Credits and Up Next behavior
 
@@ -292,7 +302,7 @@ The resume overlay was introduced in restored15. The current frontend cache grap
 - Simple mode must stay free of raw torrent-management complexity. It may show a small curated set of playback-source choices when automatic Play cannot proceed.
 - Automatic actions may use cached sources only.
 - Uncached downloads require an explicit user action. Full-mode Prepare remains available, and Simple-mode fallback choices may expose Prepare & Play only after cached-only playback has failed.
-- The master TorBox API key remains server-side. A temporary TorBox CDN URL may reach the browser only through the validated opaque-ticket redirect and must never contain the master key.
+- The master TorBox API key must never be returned in playback JSON or exposed to guest sessions. For normal owner playback, TorBox's CDN URL may contain that key and is allowed only behind the opaque authenticated ticket redirect to the signed-in owner browser.
 - AVI/MKV and other known unsupported containers must not be sent to Android Chrome as normal playback.
 - Search must not show a fallback card that cannot be opened through the catalog.
 - Still Watching must continue across episode transitions.
@@ -302,7 +312,7 @@ The resume overlay was introduced in restored15. The current frontend cache grap
 
 Physically resume a partially watched show and movie on Android, preferably from Continue Watching.
 
-First, physically start any normal title on Android and confirm restored16 playback works through the direct-media redirect, including initial start and seeking. This is the final acceptance check for the Render-bandwidth fix.
+First, physically start any normal title on Android and confirm the corrected owner-direct playback works, including initial start and seeking. This is the final acceptance check for the Render-bandwidth fix.
 
 Then continue the restored15 resume-overlay acceptance: the expected behavior is a prominent centered overlay that appears immediately, shows the title/episode and live resume stage, displays elapsed time, updates to the actual resume point once loaded, and stays visible until the video is genuinely playing.
 
