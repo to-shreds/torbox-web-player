@@ -12,7 +12,7 @@ function fakeProvider(key) {
       return { valid:true, planCode:'fixture' };
     },
     list: async () => ({ files: [], stale:false }),
-    resolveGuest: async videoId => ({ url:'https://store.tb-cdn.io/file?token=temporary-file-token', file:{id:videoId} }),
+    resolveForRelay: async videoId => ({ upstreamUrl:`https://store.tb-cdn.io/file?token=${key}`, file:{id:videoId} }),
     request: async () => []
   };
 }
@@ -46,8 +46,8 @@ test('validated key stays in server process session and is not returned by norma
 test('API-key playback returns an opaque ticket that redirects directly to TorBox', async t=>{
   const {call}=await fixture(t); const login=await (await call('/api/login',{method:'POST',data:{apiKey:goodKey}})).json();
   const p=await (await call('/api/playback',{method:'POST',token:login.sessionToken,data:{viewer:'viewer-1',videoId:'torrents:1:0'}})).json();
-  assert.equal(p.delivery,'direct'); assert.equal(p.exposesTorBoxToken,false);assert.match(p.mediaUrl,/^\/media\/[A-Za-z0-9_-]{43}$/);assert.ok(!JSON.stringify(p).includes(goodKey));
-  const media=await call(p.mediaUrl,{origin:page,redirect:'manual'});assert.equal(media.status,307);assert.equal(media.headers.get('location'),'https://store.tb-cdn.io/file?token=temporary-file-token');assert.ok(!media.headers.get('location').includes(goodKey));
+  assert.equal(p.delivery,'direct'); assert.equal(p.exposesTorBoxToken,true);assert.match(p.mediaUrl,/^\/media\/[A-Za-z0-9_-]{43}$/);assert.ok(!JSON.stringify(p).includes(goodKey));
+  const media=await call(p.mediaUrl,{origin:page,redirect:'manual'});assert.equal(media.status,307);assert.equal(media.headers.get('location'),`https://store.tb-cdn.io/file?token=${goodKey}`);
 });
 test('logout clears API access for the in-memory key session', async t=>{
   const {call}=await fixture(t); const login=await (await call('/api/login',{method:'POST',data:{apiKey:goodKey}})).json();

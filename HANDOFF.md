@@ -8,15 +8,15 @@ The restored browser-key v1.1 player is the only production baseline. Jon report
 
 - Version: **1.1.0**
 - Source of truth: `main`
-- Main runtime commit: `1e6a66f1d3b7ac9023452b3b5d5dba244810da9b`
+- Main runtime commit: `9c4de1986df6fb7d4fa457a658daf99c4cd6f4cb`
 - Render deployment mirror: `browser-key-clone`
-- Mirror runtime commit: `b9338b79b6b61bb91deee33a7d32700c568e4826`
+- Mirror runtime commit: `7534b65c3737242cc072d15ae08142a22355c440`
 - Public app: `https://to-shreds.github.io/torbox-web-player/`
 - Legacy URL: `https://to-shreds.github.io/torbox-web-player/key/`
 - Render service: `torbox-web-player-key` / `srv-damu91142hec73chb7qg`
 - Render URL: `https://torbox-web-player-key.onrender.com`
-- Live Render deploy: `dep-datkmcvlot8c73fusm2g`
-- PWA cache: `torbox-player-v1.1-restored15`
+- Live Render deploy: `dep-dattphuk1f9s739kfmjg`
+- PWA cache: `torbox-player-v1.1-restored16`
 
 Render still deploys `browser-key-clone`. Keep that branch runtime-equivalent to `main` until the service can be repointed to `main`.
 
@@ -26,7 +26,7 @@ Simple mode must never expose the torrent/source picker as an automatic fallback
 
 Automatic playback may use cached sources only. It must never silently begin an uncached download. If no cached browser-compatible source exists, Simple mode may show a small curated set of safe browser-compatible options with explicit **Prepare & Play** actions. Cached multi-file packages may select a browser-compatible matching file automatically. Known unsupported containers must be rejected before normal Android Chrome playback.
 
-Do not reintroduce automatic `openOptions()`, silent uncached preparation, direct TorBox media URLs, or any failed 2.x source-selection path.
+Do not reintroduce automatic `openOptions()`, silent uncached preparation, raw `redirect=false` TorBox media URLs, or any failed 2.x source-selection path. Direct media delivery is allowed only through the master-key-safe temporary redirect path described below.
 
 ## Catalog contract
 
@@ -34,7 +34,35 @@ IMDb Suggest is fallback discovery only. A fallback suggestion must resolve thro
 
 ## Architecture to preserve
 
-GitHub Pages serves the UI. Render performs catalog/search, source discovery, TorBox cache/preparation operations, playback-link generation, and protected byte-range relay. The browser receives only an opaque `/media/<ticket>` path. The relay transports original bytes. There is no transcoding, remuxing, or HLS implementation.
+GitHub Pages serves the UI. Render performs catalog/search, source discovery, TorBox cache/preparation operations, playback-link generation, and authentication. The browser still receives only an opaque `/media/<ticket>` path from the playback API. When the video element opens that ticket, Render validates the ticket/session and Range syntax, then sends a `307` redirect to a temporary TorBox CDN URL that has been verified not to contain the master API key. The actual media bytes flow directly from TorBox to the browser. There is no transcoding, remuxing, or HLS implementation.
+
+## Bandwidth-safe direct media delivery
+
+On 2026-09-29 Render warned that the Hobby workspace had consumed 70% of its 5 GB free bandwidth allowance. Render's per-service metric showed about **4.27 GB** on `torbox-web-player-key`, while the other workspace services were negligible. The cause was the restored protected relay: every movie/episode byte flowed `TorBox CDN -> Render -> browser`.
+
+Restored16 removes Render from the media data path without moving the master TorBox API key into the frontend:
+
+- `/api/playback` obtains a TorBox `redirect=true` download target through the existing safe direct-link path.
+- That target must pass the TorBox media-host allowlist and `safePlaybackUrl()`, which rejects any URL containing the current master API key.
+- The playback API still returns only an opaque `/media/<ticket>` path. It does not return the TorBox CDN URL in JSON.
+- Opening the ticket validates the ticket, live session, and Range syntax, re-validates the stored TorBox URL against the master key, and responds with HTTP `307`.
+- The browser follows the redirect and receives video bytes directly from TorBox. Render sends only the small redirect/control response, so ordinary playback should consume negligible Render bandwidth.
+- CSP now permits the same TorBox CDN suffix allowlist used by the server while API/connect traffic remains restricted to Render.
+- The old byte-relay helper remains in the codebase for now but is no longer imported or used by the playback route.
+- A pre-change archive branch, `archive/pre-bandwidth-direct-2026-09-29`, preserves the prior production state.
+
+Security boundary: the **master TorBox API key must remain server-side**. The browser may see only TorBox's temporary direct CDN URL/token after following the authenticated opaque ticket. Never substitute the `redirect=false` provider URL when it contains the master API key.
+
+Verification for this benchmark:
+
+- Pull request CI run `36592084219`: **322 tests, 316 passed, 0 failed, 6 optional live checks skipped**.
+- GitHub Pages run `36592179629` completed successfully for main runtime commit `9c4de198`.
+- Browser-key clone CI run `36592361273` completed successfully for mirror runtime commit `7534b65c`: **322 tests, 316 passed, 0 failed, 6 optional live checks skipped**.
+- Render deploy `dep-dattphuk1f9s739kfmjg` completed successfully and is **live** from mirror runtime commit `7534b65c`.
+- Main and mirror runtime trees were verified identical at deployment time.
+- New tests prove that the media endpoint emits a direct redirect instead of invoking the byte fetcher, rejects a redirect URL containing the master API key, preserves opaque-ticket behavior, and supports API-key and guest sessions.
+
+Physical acceptance is still required for one normal Android playback. Confirm that Chrome follows the redirect and playback starts normally, including seeking. After that test, Render bandwidth should increase only by tiny control-response amounts rather than by the size of the video.
 
 ## Credits and Up Next behavior
 
@@ -246,7 +274,7 @@ Restored15 makes resume/start-over activity deliberately obvious:
 - Errors, autoplay blocks, kid-limit interruptions, cancellation, and explicit playback stop all clear the overlay so it cannot get stuck over the UI.
 - The existing small status text remains as secondary information, but it is no longer the only visible feedback.
 
-The frontend cache graph is now **restored15**.
+The resume overlay was introduced in restored15. The current frontend cache graph is **restored16** because of the direct-media bandwidth fix.
 
 ## Verification
 
@@ -264,7 +292,7 @@ The frontend cache graph is now **restored15**.
 - Simple mode must stay free of raw torrent-management complexity. It may show a small curated set of playback-source choices when automatic Play cannot proceed.
 - Automatic actions may use cached sources only.
 - Uncached downloads require an explicit user action. Full-mode Prepare remains available, and Simple-mode fallback choices may expose Prepare & Play only after cached-only playback has failed.
-- The TorBox API key and temporary CDN URL remain server-side.
+- The master TorBox API key remains server-side. A temporary TorBox CDN URL may reach the browser only through the validated opaque-ticket redirect and must never contain the master key.
 - AVI/MKV and other known unsupported containers must not be sent to Android Chrome as normal playback.
 - Search must not show a fallback card that cannot be opened through the catalog.
 - Still Watching must continue across episode transitions.
@@ -274,7 +302,9 @@ The frontend cache graph is now **restored15**.
 
 Physically resume a partially watched show and movie on Android, preferably from Continue Watching.
 
-The expected restored15 behavior is a prominent centered overlay that appears immediately, shows the title/episode and live resume stage, displays elapsed time, updates to the actual resume point once loaded, and stays visible until the video is genuinely playing.
+First, physically start any normal title on Android and confirm restored16 playback works through the direct-media redirect, including initial start and seeking. This is the final acceptance check for the Render-bandwidth fix.
+
+Then continue the restored15 resume-overlay acceptance: the expected behavior is a prominent centered overlay that appears immediately, shows the title/episode and live resume stage, displays elapsed time, updates to the actual resume point once loaded, and stays visible until the video is genuinely playing.
 
 Also confirm that a normal Play action on an episode/movie with saved progress gets the same overlay, and that Start over uses the same obvious activity treatment with **Starting over…** wording.
 
