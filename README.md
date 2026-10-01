@@ -4,6 +4,8 @@ The browser-key player is the production codebase. `main` is authoritative. The 
 
 Current version: **1.2.0**
 
+Deployment status: the v1.2.0 frontend is live and the backend release has passed CI, but the live Render backend remains v1.1.0 pending the Render connector's required workspace confirmation. See [HANDOFF.md](HANDOFF.md) for the exact deployment state.
+
 Frontend: `https://to-shreds.github.io/torbox-web-player/` (legacy mirror: `/key/`)
 
 Backend: `https://torbox-web-player-key.onrender.com`

@@ -2,6 +2,12 @@
 
 Scope: improve actual failures, responsiveness, and operating limits while preserving the working browser-key player. No redesign or new hosting service.
 
+## Publication state
+
+The verified runtime is `081ef97567a0dc6cca45285312bb530c5bde9dac`. GitHub Pages [run 36814776986](https://github.com/to-shreds/torbox-web-player/actions/runs/36814776986) passed verification and deployment. Both the published root and `/key/` boot scripts report `release-1.2.0`.
+
+The matching Render mirror is `7dfdac6ba47158c24e4af1601910c9e94872c356`. Its CI is green, but the live backend still reports v1.1.0 and deployment `dep-dau627hsrm7s73au7bg0`. No automatic deployment appeared. The Render connector rejected a manual trigger because it requires explicit user confirmation of the workspace. The available workspace is `My Workspace`; no deployment, service configuration change, or plan change was made through Render. Backend publication must be completed before treating the changes below as the live backend contract. In particular, the old backend can still relay guest video until it is replaced.
+
 ## Archive and rollback
 
 The exact preceding main revision `c978c143cf5362a5c7ddd1bcee34811ca5a0f219` is preserved remotely on `archive/v1.1.0-before-reliability-2026-10-01`. Its runtime is equivalent to the preceding Render mirror revision `1fa271e8418105431a2aae079538e28de3cf2d81`. The archive includes the full source, tests, workflows, documentation, and lockfile. Browser-local history, settings, and encrypted credentials use their existing storage formats.
@@ -30,6 +36,8 @@ To roll back, restore that archive's complete tracked tree into a new commit on 
 ## Test method and limits
 
 Baseline: 322 tests registered, 316 passed, six optional live/account probes skipped. Seven newly written HTTP scenarios failed against the old implementation and passed after the fixes.
+
+Final local verification: 337 tests registered, 331 passed, zero failed, and the same six optional live/account probes skipped; all 13 browser scenarios passed. Independent [release CI run 36814630892](https://github.com/to-shreds/torbox-web-player/actions/runs/36814630892) reproduced those exact totals. The Render mirror also passed [CI run 36814779367](https://github.com/to-shreds/torbox-web-player/actions/runs/36814779367).
 
 The synthetic stress scenario uses 24 independent device sessions, 288 playback starts, and 576 Range requests. Its first measured run completed in 504 ms, with median 37 ms and 95th percentile 50 ms for each local start-plus-two-seeks sequence. These are local fixture timings, not Internet playback benchmarks. The critical result is zero upstream media fetches and zero media response-body bytes.
 
@@ -61,5 +69,7 @@ Release-branch CI runs the browser tests. GitHub Pages now requires the same ver
 - Guest-safe direct links are unavailable if TorBox embeds the owner's master key. The app refuses that guest path rather than expose the key or spend Render bandwidth.
 - On owner playback, TorBox's key-bearing URL can still be visible in the owner's browser network stack. It is absent from normal playback JSON and page state.
 - Live Android playback, seek behavior, OS fullscreen/PiP policy, and actual account/cache availability still need device acceptance. Synthetic browser verification is not a substitute for that acceptance.
+
+A read-only live probe on 2026-10-01 retrieved The Office metadata (208 episodes) in about five seconds. The S4E3 source lookup reached its ten-second bound and returned 11 Zilean rows with no known browser container in their public metadata. No TorBox credential was used, so this did not establish cache availability or playable files. This release does not claim to resolve that title-specific live acceptance question. The pre-release production health request returned v1.1.0 after about 18.7 seconds, consistent with the need to tolerate a slower backend startup.
 
 Official service references: [Render free service limits](https://render.com/docs/free), [TorBox download-link API](https://github.com/TorBox-App/torbox-sdk-js/blob/main/documentation/services/TorrentsService.md).
