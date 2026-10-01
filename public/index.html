@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="api-origin" content="https://torbox-web-player-key.onrender.com"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; worker-src 'self'; manifest-src 'self'; style-src 'self'; img-src 'self' https://images.metahub.space https://image.tmdb.org https://m.media-amazon.com; connect-src https://torbox-web-player-key.onrender.com; media-src https://torbox-web-player-key.onrender.com https://torbox.app https://*.torbox.app https://*.tb-cdn.cx https://*.tb-cdn.io https://*.tb-cdn.pw https://*.tb-cdn.sh https://*.tb-cdn.st https://*.tb-cdn.to https://*.tb-cdn.earth; object-src 'none'; base-uri 'none'; form-action 'self'"><title>TorBox Player</title><meta name="theme-color" content="#101925"><link rel="manifest" href="./manifest.webmanifest?v=restored16"><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=restored16"><link rel="stylesheet" href="./discover.css?v=restored16"><script type="module" src="./boot.js?v=restored16"></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="api-origin" content="https://torbox-web-player-key.onrender.com"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; worker-src 'self'; manifest-src 'self'; style-src 'self'; img-src 'self' https://images.metahub.space https://image.tmdb.org https://m.media-amazon.com; connect-src 'self' https://torbox-web-player-key.onrender.com; media-src 'self' https://torbox-web-player-key.onrender.com https://torbox.app https://*.torbox.app https://*.tb-cdn.cx https://*.tb-cdn.io https://*.tb-cdn.pw https://*.tb-cdn.sh https://*.tb-cdn.st https://*.tb-cdn.to https://*.tb-cdn.earth; object-src 'none'; base-uri 'none'; form-action 'self'"><title>TorBox Player</title><meta name="theme-color" content="#101925"><link rel="manifest" href="./manifest.webmanifest?v=release-1.2.0"><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=release-1.2.0"><link rel="stylesheet" href="./discover.css?v=release-1.2.0"><script type="module" src="./boot.js?v=release-1.2.0"></script></head>
 <body class="mode-simple">
 <header class="top"><a class="brand" href="./">TorBox</a><span class="tag">KEY</span></header>
 <main>
-<section id="loading" class="panel narrow startup-panel" aria-live="polite"><p class="eyebrow">STARTING</p><h1>Opening</h1><div class="startup-track" aria-hidden="true"><span></span></div><p id="startup-stage" class="startup-stage" role="status">Starting player…</p><p id="startup-detail" class="startup-detail">Loading the app.</p><p id="startup-elapsed" class="startup-elapsed">Starting…</p></section>
+<section id="loading" class="panel narrow startup-panel" aria-live="polite"><p class="eyebrow">STARTING</p><h1>Opening</h1><div class="startup-track" aria-hidden="true"><span></span></div><p id="startup-stage" class="startup-stage" role="status">Starting player…</p><p id="startup-detail" class="startup-detail">Loading the app.</p><p id="startup-elapsed" class="startup-elapsed">Starting…</p><button id="startup-retry" type="button" class="primary" hidden>Try again</button></section>
 <section id="setup-needed" class="panel narrow" hidden><h1>Backend unavailable</h1><p>This clone is not configured correctly.</p></section>
 <section id="login" class="panel narrow" hidden><p class="eyebrow">THIS DEVICE</p><h1>Connect TorBox</h1><p class="muted">Your API key is the sign-in. It is never committed to GitHub or stored in Render configuration.</p><form id="login-form"><label for="api-key">TorBox API key</label><input id="api-key" type="password" autocapitalize="none" spellcheck="false" autocomplete="off" maxlength="512" required><label class="remember-key"><input id="remember-key" type="checkbox"> Remember encrypted on this device</label><button class="primary" type="submit">Connect</button></form><button id="forget-key" class="text-button" type="button">Forget saved key</button><p id="login-message" role="status"></p></section>
 <section id="workspace" hidden>
@@ -31,7 +31,7 @@
     <div class="resume-spinner" aria-hidden="true"></div>
     <strong id="resume-overlay-title">Resuming…</strong>
     <span id="resume-overlay-detail">Getting your video ready.</span>
-    <small id="resume-overlay-time"></small>
+    <small id="resume-overlay-time"></small><button id="cancel-resume" type="button">Cancel</button>
   </div>
 </div>
 <dialog id="title-dialog"><div class="dialog-bar"><h2 id="detail-title"></h2><div class="dialog-actions"><button id="toggle-watchlist" class="text-button" type="button" hidden>Add to My list</button><button id="close-title" class="icon-button" aria-label="Close title">×</button></div></div><p id="detail-message" class="status compact-status" role="status"></p><div id="title-content"></div><div id="play-fallback"></div><div id="episode-area"></div></dialog>
@@ -60,7 +60,7 @@
 <form id="settings-form" class="settings-grid">
 <fieldset class="settings-group"><legend>Interface</legend>
 <label>Interface mode<select id="setting-interface-mode"><option value="simple">Simple · family/kid friendly</option><option value="full">Full · advanced controls</option></select></label>
-<p class="setting-help">Simple keeps the normal experience to posters, episodes, Play, My list, resume, and automatic recovery. Full reveals source controls, per-title tuning, sharing, playback health, and technical feedback.</p>
+<p class="setting-help">Simple keeps the normal experience to posters, episodes, Play, My list, resume, and automatic recovery. Full reveals source controls, per-title tuning, playback health, and technical feedback.</p>
 <label class="setting-check"><input id="setting-long-press" type="checkbox"> Enable long-press shortcuts</label>
 </fieldset>
 <fieldset class="settings-group"><legend>Parental controls</legend>
@@ -116,9 +116,9 @@
 <div id="transfer-result" hidden><label for="transfer-code">One-time code<input id="transfer-code" type="text" readonly></label><label for="transfer-link">Transfer link<input id="transfer-link" type="text" readonly></label><div class="setting-inline-actions"><button id="transfer-copy" type="button">Copy transfer link</button><button id="transfer-share" type="button">Share to another device</button></div><p id="transfer-expiry" class="setting-help"></p></div>
 <p id="transfer-message" class="status compact-status" role="status"></p>
 </fieldset>
-<fieldset class="settings-group"><legend>Drive sharing and app</legend>
-<label>Default Drive cleanup<select id="setting-drive-delete"><option value="10">10 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option><option value="45">45 minutes</option></select></label>
-<label class="setting-check"><input id="setting-drive-watch-only" type="checkbox"> Default Drive shares to watch-only</label>
+<fieldset class="settings-group"><legend>App</legend>
+<label hidden>Default Drive cleanup<select id="setting-drive-delete"><option value="10">10 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option><option value="45">45 minutes</option></select></label>
+<label class="setting-check" hidden><input id="setting-drive-watch-only" type="checkbox"> Default Drive shares to watch-only</label>
 <div class="setting-inline-actions"><button id="settings-install-app" type="button">Install app</button><button id="settings-check-status" type="button">Check TorBox status</button><button id="settings-clear-learning" type="button">Clear source learning</button><button id="settings-clear-searches" type="button">Clear this viewer's searches</button></div>
 </fieldset>
 <div class="settings-actions"><button class="primary" type="submit">Save settings</button><button id="reset-settings" type="button">Reset defaults</button></div>

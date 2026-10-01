@@ -1,10 +1,11 @@
-name: Deploy restored v1.1 to GitHub Pages
+name: Deploy tested player to GitHub Pages
 on:
   push:
     branches: [main]
     paths:
       - 'public/**'
       - '.github/workflows/pages.yml'
+      - '.github/workflows/release-checks.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -14,7 +15,10 @@ concurrency:
   group: pages
   cancel-in-progress: true
 jobs:
+  verify:
+    uses: ./.github/workflows/release-checks.yml
   deploy:
+    needs: verify
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

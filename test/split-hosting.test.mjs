@@ -45,7 +45,7 @@ test('published HTML uses project-relative assets and the public Render API orig
   const { call }=await fixture(t);
   const html=await (await call('/')).text();
   assert.ok(html.includes('name="api-origin" content="https://torbox-web-player-key.onrender.com"'));
-  assert.ok(html.includes('href="./style.css?v=restored16"')); assert.ok(html.includes('src="./boot.js?v=restored16"'));
+  assert.ok(html.includes('href="./style.css?v=release-1.2.0"')); assert.ok(html.includes('src="./boot.js?v=release-1.2.0"'));
   assert.ok(!html.includes('src="/boot.js')); assert.ok(!html.includes('href="/style.css'));
 });
 test('GitHub Pages bearer session receives an opaque direct media ticket', async t => {
