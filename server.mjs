@@ -6,8 +6,9 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { Sessions, Limiter, GuestInvites, verifyPassword, validHash } from './lib/auth.mjs';
 import { ProgressStore, VIEWERS, validViewer } from './lib/progress.mjs';
-import { MediaTickets, relayMedia, validatedRange } from './lib/media.mjs';
-import { TorBox, AppError, parseVideoId, validatedPlaybackUrl, TORBOX_MEDIA_HOSTS } from './lib/torbox.mjs';
+import { MediaTickets, validatedRange } from './lib/media.mjs';
+import { TorBox, AppError, parseVideoId, validatedPlaybackUrl, safePlaybackUrl, TORBOX_MEDIA_HOSTS } from './lib/torbox.mjs';
+import { Catalog } from './lib/catalog.mjs';
 import { DriveTransferTests } from './lib/drive-share.mjs';
 import { TorBoxStatusChecker } from './lib/torbox-status.mjs';
 import { SetupTransfers } from './lib/setup-transfer.mjs';
@@ -23,6 +24,8 @@ const publicFiles = new Map([
   ['/boot.js', ['boot.js', 'text/javascript; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
   ['/runtime.js', ['runtime.js', 'text/javascript; charset=utf-8']],
+  ['/playback-lifecycle.js', ['playback-lifecycle.js', 'text/javascript; charset=utf-8']],
+  ['/vault.js', ['vault.js', 'text/javascript; charset=utf-8']],
   ['/history.js', ['history.js', 'text/javascript; charset=utf-8']],
   ['/settings.js', ['settings.js', 'text/javascript; charset=utf-8']],
   ['/watchlist.js', ['watchlist.js', 'text/javascript; charset=utf-8']],
@@ -122,8 +125,20 @@ async function torboxRelayRequest(request,url,{fetchFn=fetch,backend='render'}={
     if(['TimeoutError','AbortError'].includes(error?.name))throw new AppError('RELAY_UPSTREAM_TIMEOUT','TorBox took too long to respond through this bridge.',504);
     throw new AppError('RELAY_UPSTREAM_UNAVAILABLE','This bridge could not reach TorBox.',502);
   }
-  const bytes=new Uint8Array(await upstreamResponse.arrayBuffer());
-  if(bytes.byteLength>8*1024*1024)throw new AppError('RELAY_RESPONSE_TOO_LARGE','TorBox returned too much data through this bridge.',502);
+  const contentType=upstreamResponse.headers.get('content-type')||'';
+  if(!/^application\/json(?:;|$)/i.test(contentType)){
+    await upstreamResponse.body?.cancel();
+    throw new AppError('RELAY_INVALID_RESPONSE','The bridge accepts TorBox JSON only. Video must play directly from TorBox.',502);
+  }
+  const chunks=[];let size=0;
+  const reader=upstreamResponse.body?.getReader();
+  try{
+    while(reader){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;
+      if(size>8*1024*1024)throw new AppError('RELAY_RESPONSE_TOO_LARGE','TorBox returned too much data through this bridge.',502);
+      chunks.push(Buffer.from(value));
+    }
+  }finally{await reader?.cancel().catch(()=>{});}
+  const bytes=Buffer.concat(chunks);
   return {
     status:upstreamResponse.status,
     body:bytes,
@@ -164,7 +179,9 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
   const mediaHosts = (env.MEDIA_HOST_SUFFIXES || TORBOX_MEDIA_HOSTS.join(',')).split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
   const torbox = provider || new TorBox({ key: env.TORBOX_API_KEY || '', mediaHosts });
   const makeProvider = key => providerFactory ? providerFactory(key) : new TorBox({ key, mediaHosts });
-  const discovery = discoveryService || new Discovery({ provider: torbox, fetchFn: discoveryFetch, now });
+  // Catalog metadata is public. Share its cache across devices, never their account data.
+  const catalog = new Catalog({ fetchFn: discoveryFetch, now });
+  const discovery = discoveryService || new Discovery({ provider: torbox, fetchFn: discoveryFetch, catalog, now });
   const sourceMode = env.SOURCE_PROVIDER || 'zilean';
   const sourceLookup = sourceLookupService || (sourceMode === 'multi'
     ? new MultiSourceLookup({ fetchFn: discoveryFetch, now })
@@ -189,7 +206,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.1.0', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.2.0', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/relay/health') {
         if(!corsAllowed)throw new AppError('BAD_ORIGIN','This frontend is not allowed to use the TorBox bridge.',403);
         response.setHeader('X-TorBox-Bridge','render');
@@ -220,25 +237,11 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
           if (!session) throw new AppError('LOGIN_REQUIRED', 'This playback ticket is no longer available. Reopen the video.', 401);
           throw new AppError('MEDIA_NOT_FOUND', 'This playback session is no longer available. Reopen the video.', 404);
         }
-        const ticketProvider = ticketSession.provider || torbox;
-        if (ticketSession.guest) {
-          return await relayMedia({
-            request,
-            response,
-            ticket,
-            provider: ticketProvider,
-            fetchFn: mediaFetch,
-            onEvent: event => console.log(JSON.stringify({
-              event: event.event,
-              ...(Number.isInteger(event.upstreamStatus) ? { upstreamStatus: event.upstreamStatus } : {}),
-              ...(typeof event.ranged === 'boolean' ? { ranged: event.ranged } : {}),
-              ...(event.renewed === true ? { renewed: true } : {}),
-              ...(event.code ? { code: event.code } : {})
-            }))
-          });
-        }
         const range = validatedRange(request.headers.range);
-        const directUrl = validatedPlaybackUrl(ticket.upstreamUrl, mediaHosts);
+        // Never fetch media here. Owners and eligible guests get header-only redirects.
+        const directUrl = ticketSession.guest
+          ? safePlaybackUrl(ticket.upstreamUrl, (ticketSession.provider || torbox).key, mediaHosts)
+          : validatedPlaybackUrl(ticket.upstreamUrl, mediaHosts);
         response.statusCode = 307;
         response.setHeader('Location', directUrl);
         response.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
@@ -268,7 +271,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
             if (key.length < 8 || key.length > 512 || /[\u0000-\u001f\u007f]/.test(key)) throw new AppError('BAD_API_KEY', 'Enter a valid TorBox API key.', 401);
             sessionProvider = makeProvider(key);
             await sessionProvider.account();
-            sessionDiscovery = new Discovery({ provider: sessionProvider, fetchFn: discoveryFetch, now });
+            sessionDiscovery = new Discovery({ provider: sessionProvider, fetchFn: discoveryFetch, catalog, now });
           } else {
             const ok = await verifyPassword(data.password, passwordHash);
             if (!ok) throw new AppError('WRONG_PASSWORD', 'That household password did not match.', 401);
@@ -292,7 +295,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         created.row.ownerId = owner.id;
         created.row.scope = { ...invite.scope };
         created.row.provider = owner.provider;
-        created.row.discovery = new Discovery({ provider: owner.provider, fetchFn: discoveryFetch, now });
+        created.row.discovery = new Discovery({ provider: owner.provider, fetchFn: discoveryFetch, catalog, now });
         created.row.allowedVideos = new Set();
         created.row.expires = Math.min(created.row.expires, invite.expires);
         setCookie(response, created.id, Math.max(1, Math.floor((created.row.expires - now()) / 1000)));
@@ -333,6 +336,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         session.torboxStatus = { value, until: now() + (value.ok ? 60000 : 15000) };
         return json(response, 200, value);
       }
+      if (method === 'POST' && ['/api/drive/connect','/api/drive/test/start'].includes(path)) throw new AppError('DRIVE_SHARING_DISABLED', 'Video exports to quota-limited storage are disabled. Playback uses TorBox directly.', 410);
       if (path === '/api/drive/connect' && method === 'POST') {
         if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'Temporary guests cannot configure Drive sharing.', 403);
         if (!operationRate.allow('drive:' + session.id)) throw new AppError('SLOW_DOWN', 'Please wait a minute before connecting Drive again.', 429);
@@ -386,7 +390,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (path === '/api/owner/diagnostics' && method === 'POST') {
           if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before checking again.', 429);
           const account = await activeProvider.account();
-          return json(response, 200, { account, authMode: apiKeyMode ? 'api-key' : 'household', apiKeyPersistence: apiKeyMode ? 'Render process memory only' : 'Render environment', directMedia: true, proxyEnabled: true, mediaRelayEnabled: true, mediaRelayScope: 'guest-only', credentialProtection: 'Owner playback uses an opaque ticket that redirects to TorBox directly. TorBox may place the account API key in that CDN URL, so it can be visible to the signed-in owner browser network stack but is never returned in playback JSON. Guest playback stays on the protected Render relay so the owner key is not exposed to guests.', discoveryConfigured: true, catalogProvider: 'Cinemeta', sourceProvider: sourceMode === 'multi' ? 'Zilean + Torrentio + MediaFusion Torznab, with StremThru Main/ElfHosted fallbacks' : 'Zilean (server-side)', sourceProviders: sourceLookup.diagnostics?.() || [], progressStorage: 'temporary server memory plus browser-local canonical resume history', automaticNextEnabled: true });
+          return json(response, 200, { account, authMode: apiKeyMode ? 'api-key' : 'household', apiKeyPersistence: apiKeyMode ? 'Render process memory only' : 'Render environment', directMedia: true, proxyEnabled: false, mediaRelayEnabled: false, mediaRelayScope: 'none', credentialProtection: 'Owner playback uses an opaque ticket that redirects to TorBox directly. TorBox may place the account API key in that CDN URL, so it can be visible to the signed-in owner browser network stack but is never returned in playback JSON. Guest playback requires a key-free direct TorBox link; otherwise it is unavailable. No video bytes are relayed.', discoveryConfigured: true, catalogProvider: 'Cinemeta', sourceProvider: sourceMode === 'multi' ? 'Zilean + Torrentio + MediaFusion Torznab, with StremThru Main/ElfHosted fallbacks' : 'Zilean (server-side)', sourceProviders: sourceLookup.diagnostics?.() || [], progressStorage: 'temporary server memory plus browser-local canonical resume history', automaticNextEnabled: true });
         }
       }
       if (path.startsWith('/api/discover/')) {
@@ -413,7 +417,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
           result = await activeDiscovery.register(data, session.id);
           rememberGuestVideos(result);
         } else if (path === '/api/discover/prepare' && method === 'POST') {
-          if (!preparationRate.allow(session.guest ? session.id : 'household')) throw new AppError('SLOW_DOWN', 'Too many preparation requests. Check existing preparations before adding another.', 429);
+          if (!preparationRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Too many preparation requests. Check existing preparations before adding another.', 429);
           const data = await discoveryBody(request);
           result = await activeDiscovery.prepare(data.source, session.id, data.onlyCached === true);
           rememberGuestVideos(result);
@@ -427,18 +431,29 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
       }
       if (path === '/api/library' && method === 'GET') {
         if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'This temporary link does not include access to the TorBox library.', 403);
-        if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before refreshing again.', 429);
+        if (!operationRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Please wait a minute before refreshing again.', 429);
         return json(response, 200, await activeProvider.list(url.searchParams.get('kind') || 'torrents', Number(url.searchParams.get('offset') || 0), url.searchParams.get('refresh') === '1'));
       }
       if (path === '/api/playback' && method === 'POST') {
-        if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before requesting another stream.', 429);
+        if (!operationRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Please wait a minute before requesting another stream.', 429);
         const data = await body(request);
         if (!validViewer(data.viewer)) throw new AppError('BAD_VIEWER', 'Choose a viewer first.', 400);
         parseVideoId(data.videoId);
         if (session.guest && !session.allowedVideos?.has(data.videoId)) throw new AppError('GUEST_FORBIDDEN', 'This file was not selected through the shared title.', 403);
-        const progressViewer = session.guest ? 'guest:' + session.id : data.viewer;
+        const progressViewer = session.id + '/' + data.viewer;
         const intent = progress.beginIntent(progressViewer);
-        const stream = await activeProvider.resolveForRelay(data.videoId);
+        let stream;
+        if (session.guest) {
+          try {
+            const direct = await activeProvider.resolveGuest(data.videoId);
+            stream = { file: direct.file, upstreamUrl: safePlaybackUrl(direct.url, activeProvider.key, mediaHosts) };
+          } catch (error) {
+            if (['UNSAFE_PROVIDER_URL', 'GUEST_LINK_UNAVAILABLE'].includes(error?.code)) {
+              throw new AppError('GUEST_DIRECT_UNAVAILABLE', 'TorBox cannot provide a private direct link for this guest. Video relaying is disabled to avoid bandwidth charges. The guest can use their own TorBox connection.', 409);
+            }
+            throw error;
+          }
+        } else stream = await activeProvider.resolveForRelay(data.videoId);
         const container = browserContainerHints(stream.file);
         if (container.browserUnsupported) {
           console.log(JSON.stringify({ event: 'media_playback_rejected', code: 'BROWSER_CONTAINER_UNSUPPORTED', container: container.container }));
@@ -448,17 +463,18 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
         const lease = progress.start(progressViewer, data.videoId, { reset: data.startOver === true, sessionId: session.id });
         const mediaToken = mediaTickets.create(session.id, data.videoId, stream.upstreamUrl, stream.file);
-        return json(response, 200, { file: stream.file, mediaUrl: `/media/${mediaToken}`, delivery: session.guest ? 'relay' : 'direct', conversion: false, exposesTorBoxToken: session.guest ? false : true, guestSafeLink: session.guest === true, ...lease });
+        return json(response, 200, { file: stream.file, mediaUrl: `/media/${mediaToken}`, delivery: 'direct', conversion: false, exposesTorBoxToken: session.guest ? false : true, guestSafeLink: session.guest === true, ...lease });
       }
       if (path === '/api/progress' && method === 'PUT') {
         if (!progressRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Progress is being saved too frequently.', 429);
         const data = await body(request);
         if (!validViewer(data.viewer)) throw new AppError('BAD_VIEWER', 'Choose a viewer first.', 400);
-        const progressViewer = session.guest ? 'guest:' + session.id : data.viewer;
+        const progressViewer = session.id + '/' + data.viewer;
         return json(response, 200, { saved: progress.write(progressViewer, data, session.id) });
       }
       throw new AppError('NOT_FOUND', 'This action is not available in this player.', 404);
     } catch (error) {
+      if (response.destroyed) return;
       if (response.headersSent) return response.end();
       if (error instanceof AppError || error instanceof SourceLookupError) return json(response, error.status, { error: error.code, message: error.message });
       console.error(JSON.stringify({ event: 'request_failed', code: 'INTERNAL_ERROR' }));
@@ -470,6 +486,6 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.1.0' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.2.0' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }

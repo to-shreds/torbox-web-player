@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const BUILD='restored16';
+const BUILD='release-1.2.0';
 
 test('published page boots through a versioned recovery loader instead of directly importing app.js',async()=>{
   const [html,boot]=await Promise.all([
@@ -47,7 +47,7 @@ test('service worker bypasses HTTP cache for shell refresh and contains the reco
     readFile(new URL('../public/sw.js',import.meta.url),'utf8'),
     readFile(new URL('../server.mjs',import.meta.url),'utf8')
   ]);
-  assert.ok(sw.includes(`torbox-player-v1.1-${BUILD}`));
+  assert.ok(sw.includes("'torbox-player:'+self.registration.scope"));assert.ok(sw.includes(`'${BUILD}'`));
   assert.ok(sw.includes("cache:'no-store'"));
   assert.ok(sw.includes('boot.js?v=${BUILD}'));
   assert.ok(server.includes("['/boot.js'"));

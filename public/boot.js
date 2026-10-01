@@ -1,4 +1,4 @@
-const BUILD='restored16';
+const BUILD='release-1.2.0';
 const startedAt=Date.now();
 let startupTimer=null;
 const stageNode=()=>document.querySelector('#startup-stage');
@@ -14,8 +14,9 @@ function setStartupStage(stage,detail=''){
   const secondary=detailNode();if(secondary)secondary.textContent=detail;
   tickStartup();
 }
+function startStartupTimer(){stopStartupTimer();startupTimer=setInterval(tickStartup,1000);}
 function stopStartupTimer(){if(startupTimer)clearInterval(startupTimer);startupTimer=null;}
-globalThis.__torboxStartup={stage:setStartupStage,stop:stopStartupTimer,startedAt};
+globalThis.__torboxStartup={stage:setStartupStage,stop:stopStartupTimer,start:startStartupTimer,startedAt};
 setStartupStage('Starting player…','Loading the app and waking the private player service.');
 startupTimer=setInterval(tickStartup,1000);
 

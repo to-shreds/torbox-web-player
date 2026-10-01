@@ -77,3 +77,12 @@ test('requestdl relay injects the API key only into the upstream TorBox token qu
   assert.equal(upstream.searchParams.get('torrent_id'),'7');
   assert.equal(upstream.searchParams.get('file_id'),'9');
 });
+
+test('metadata bridge refuses video before reading its body',async t=>{
+  let cancelled=false;
+  const app=createApp({env:{AUTH_MODE:'api-key',PUBLIC_ORIGIN:PAGE},discoveryFetch:async()=>new Response(new ReadableStream({cancel(){cancelled=true;}}),{headers:{'content-type':'video/mp4'}})});
+  await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
+  t.after(()=>{app.server.closeAllConnections();app.server.close();});
+  const response=await fetch('http://127.0.0.1:'+app.server.address().port+'/relay/torbox/torrents/requestdl?torrent_id=1&file_id=0&redirect=false',{headers:{Origin:PAGE,Authorization:'Bearer '+KEY}});
+  assert.equal(response.status,502);assert.equal((await response.json()).error,'RELAY_INVALID_RESPONSE');assert.equal(cancelled,true);
+});

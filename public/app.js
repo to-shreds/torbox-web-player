@@ -1,17 +1,19 @@
-import { createDiscoveryUI } from './discover.js?v=restored16';
-import { diagnosePlaybackFailure } from './playback-errors.js?v=restored16';
-import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=restored16';
-import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=restored16';
-import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=restored16';
-import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=restored16';
-import { getSettings, saveSettings, resetSettings } from './settings.js?v=restored16';
-import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=restored16';
-import { clearSearchHistory } from './search-history.js?v=restored16';
-import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=restored16';
+import { createDiscoveryUI } from './discover.js?v=release-1.2.0';
+import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.0';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.0';
+import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.0';
+import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.0';
+import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.0';
+import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.0';
+import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=release-1.2.0';
+import { clearSearchHistory } from './search-history.js?v=release-1.2.0';
+import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.0';
 const $ = id => document.getElementById(id);
 let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null, fullscreenExitControlTimer = null;
 let discoveryUI;
 let activeSetupTransferLink='';
+let sessionRecovery=null, statusCheckPromise=null, playbackRequestAbort=null;
+const INITIAL_MEDIA_TIMEOUT_MS=25000;
 let resumeOverlayStartedAt=0,resumeOverlayTimer=null;
 let viewer = 'viewer-1';
 try { const saved = localStorage.getItem('tw-viewer') || sessionStorage.getItem('tw-viewer'); if (['viewer-1', 'viewer-2'].includes(saved)) viewer = saved; } catch {}
@@ -235,15 +237,20 @@ function renderTorBoxStatus(result) {
 }
 async function checkTorBoxStatus(force=false) {
   if (guestMode) return true;
-  if (!force && torboxStatusCache && Date.now()-torboxStatusCache.localAt < 60000) return torboxStatusCache.ok === true;
-  try {
-    const result=await api('/api/torbox-status');
-    renderTorBoxStatus(result);
-    return result.ok === true;
-  } catch (error) {
-    const result={ok:false,official:'unknown',message:error.message,localAt:Date.now()};
-    renderTorBoxStatus(result);return false;
-  }
+  const ttl=torboxStatusCache?.ok?60000:15000;
+  if (!force && torboxStatusCache && Date.now()-torboxStatusCache.localAt < ttl) return torboxStatusCache.ok === true;
+  if(statusCheckPromise)return statusCheckPromise;
+  const operation=(async()=>{
+    try {
+      const result=await api('/api/torbox-status');
+      renderTorBoxStatus(result);
+      return result.ok === true;
+    } catch (error) {
+      renderTorBoxStatus({ok:false,official:'unknown',message:error.message,localAt:Date.now()});return false;
+    }
+  })();
+  statusCheckPromise=operation;
+  try{return await operation;}finally{if(statusCheckPromise===operation)statusCheckPromise=null;}
 }
 async function ensureTorBoxReady() {
   const ok=await checkTorBoxStatus(false);
@@ -251,19 +258,50 @@ async function ensureTorBoxReady() {
   return true;
 }
 function show(section) { if (section !== 'workspace') discoveryUI?.suspend(); if(section!=='loading')startupStop(); for (const id of ['loading', 'setup-needed', 'login', 'workspace']) $(id).hidden = id !== section; }
-async function api(path, { method = 'GET', data, signal, keepalive = false } = {}) {
+async function recoverSession(expiredToken){
+  if(guestMode||!expiredToken)return false;
+  if(sessionToken&&sessionToken!==expiredToken)return true;
+  if(sessionRecovery)return sessionRecovery;
+  const operation=(async()=>{
+    const key=await loadRememberedApiKey();if(!key)return false;
+    try{await connectWithKey(key,false);torboxStatusCache=null;return true;}catch{return false;}
+  })();
+  sessionRecovery=operation;
+  try{return await operation;}finally{if(sessionRecovery===operation)sessionRecovery=null;}
+}
+async function api(path, { method = 'GET', data, signal, keepalive = false, timeoutMs = 22000, restoreSession = true, background = false } = {}) {
+  const sentToken=sessionToken;
   const headers = {}; if (data !== undefined) headers['Content-Type'] = 'application/json';
-  if (sessionToken) headers.Authorization = `Bearer ${sessionToken}`;
+  if (sentToken) headers.Authorization = `Bearer ${sentToken}`;
   if (method !== 'GET') headers['X-CSRF-Token'] = csrf;
-  let response;
-  try { response = await fetch(apiUrl(path), { method, mode: apiMode(), headers, body: data === undefined ? undefined : JSON.stringify(data), credentials: credentialsMode(), cache: 'no-store', signal: signal || AbortSignal.timeout(22000), keepalive }); }
-  catch (error) { if (error.name === 'AbortError') throw error; throw new Error('The connection was interrupted or timed out. Please try again.'); }
-  let result; try { result = await response.json(); } catch { throw new Error('The service is starting or could not answer. Reload the page and try again.'); }
+  const bounded=signal||AbortSignal.timeout(timeoutMs);
+  let response, result;
+  try {
+    response = await fetch(apiUrl(path), { method, mode: apiMode(), headers, body: data === undefined ? undefined : JSON.stringify(data), credentials: credentialsMode(), cache: 'no-store', signal: bounded, keepalive });
+    result = await response.json();
+  } catch (error) {
+    if(signal?.aborted)throw error;
+    const failure=new Error('The connection was interrupted or timed out. Please try again.');failure.code='CONNECTION_UNAVAILABLE';throw failure;
+  }
   if (!response.ok) {
-    if (result.error === 'LOGIN_REQUIRED') { clearSessionToken(); sessionToken = ''; csrf = ''; stopPlayback(); if ($('player').open) $('player').close(); show('login'); }
-    const error = new Error(result.message || 'The request failed.'); error.code = result.error; throw error;
+    if (result.error === 'LOGIN_REQUIRED' && !background) {
+      if(restoreSession&&await recoverSession(sentToken))return api(path,{method,data,signal:bounded,keepalive,restoreSession:false});
+      // A delayed response from an old session must never sign out a newer one.
+      if(sessionToken===sentToken){clearSessionToken();sessionToken='';csrf='';void stopPlayback();if($('player').open)$('player').close();show('login');}
+    }
+    const error = new Error(result.message || 'The request failed.'); error.code = result.error; error.status=response.status; throw error;
   }
   return result;
+}
+async function startupSession(){
+  const deadline=Date.now()+65000;
+  for(let attempt=0;;attempt++){
+    try{return await api('/api/session',{timeoutMs:Math.max(1,deadline-Date.now())});}
+    catch(error){
+      if(attempt>=2||Date.now()>=deadline||!(error.code==='CONNECTION_UNAVAILABLE'||[502,503,504].includes(error.status)))throw error;
+      await new Promise(resolve=>setTimeout(resolve,Math.min(1000*(attempt+1),Math.max(1,deadline-Date.now()))));
+    }
+  }
 }
 function guestTokenFromHash() {
   try {
@@ -334,6 +372,8 @@ async function beginSetupTransfer(){
   $('transfer-key-wrap').hidden=false;$('transfer-api-key').focus();text('transfer-message','Re-enter your TorBox API key once so the new device can inherit the debrid connection. It will be encrypted before upload.');
 }
 async function bootstrap() {
+  $('startup-retry').hidden=true;
+  globalThis.__torboxStartup?.start?.();
   try {
     const transferCode=transferCodeFromHash();
     if(transferCode&&!guestMode){try{const imported=await acceptSetupTransfer(transferCode);if(imported)return await bootstrap();}catch(error){clearSetupTransferHash();show('login');text('login-message','Setup transfer failed: '+error.message,true);return;}}
@@ -345,7 +385,7 @@ async function bootstrap() {
     startupStage('Checking this session…','Connecting to the private player service.');
     const wakeTimer=setTimeout(()=>startupStage('Waking the player service…','The backend sleeps when idle and can take around a minute to restart.'),2500);
     let session;
-    try{session=await api('/api/session');}
+    try{session=await startupSession();}
     finally{clearTimeout(wakeTimer);}
     if (session.setupRequired) return show('setup-needed');
     if (!session.authenticated) {
@@ -371,12 +411,15 @@ async function bootstrap() {
       await discoveryUI.activateGuest(session.scope);
       return;
     }
-    leaveGuestUi(); await checkTorBoxStatus(true); renderRecent(); await discoveryUI.activate();
+    leaveGuestUi(); renderRecent(); void checkTorBoxStatus(true); await discoveryUI.activate();
   } catch (error) {
     show('loading');
     startupStage('Could not open the player.',error.message);
+    startupStop();$('startup-retry').hidden=false;
   }
 }
+$('startup-retry').addEventListener('click',()=>{show('loading');void bootstrap();});
+$('cancel-resume').addEventListener('click',()=>{discoveryUI?.cancelPlayback();void stopPlayback();if($('player').open)$('player').close();});
 $('login-form').addEventListener('submit', async event => {
   event.preventDefault(); const button = event.submitter; button.disabled = true; text('login-message', 'Checking TorBox…');
   const apiKey = $('api-key').value; $('api-key').value = '';
@@ -433,7 +476,7 @@ async function saveProgress(context = active, keepalive = false) {
   if (!context.started) return;
   const seq = ++context.seq;
   try {
-    const result = await api('/api/progress', { method: 'PUT', keepalive, data: { viewer: context.viewer, videoId: context.file.id, leaseId: context.leaseId, seq, position, duration } });
+    const result = await api('/api/progress', { method: 'PUT', keepalive, background:true, timeoutMs:4000, data: { viewer: context.viewer, videoId: context.file.id, leaseId: context.leaseId, seq, position, duration } });
     if (!result.saved && active === context) text('player-message', 'Local resume is saved, but the temporary server progress lease was replaced.', true);
   } catch { if (active === context) text('player-message', 'Playback continues. Resume is saved on this device.', false); }
 }
@@ -630,20 +673,22 @@ async function resumeAfterKidParentAction(){
 }
 
 async function detachPlayback({preserveVideo=false}={}) {
-  const old = active;if(old){tickKidUsage(old,true);resetNextEpisodeState(old,{abortPreparation:true});} active = null; hidePauseCard();await releaseWakeLock();
-  if (!old) return null;
-  clearInterval(old.timer);clearInterval(old.kidTimer);clearTimeout(old.bufferTimer);clearTimeout(old.sleepTimer);clearTimeout(old.healthyTimer);old.eventAbort?.abort();
-  const saving = saveProgress(old, true);old.video.pause();
+  const old = active;if(old){tickKidUsage(old,true);resetNextEpisodeState(old,{abortPreparation:true});} active = null; hidePauseCard();void releaseWakeLock();
+  if (!old) {const idle=$('video-slot').querySelector('video');if(idle&&!preserveVideo){idle.removeAttribute('src');idle.load();idle.remove();}return preserveVideo?idle:null;}
+  clearInterval(old.timer);clearInterval(old.kidTimer);clearTimeout(old.bufferTimer);clearTimeout(old.sleepTimer);clearTimeout(old.healthyTimer);clearTimeout(old.startupTimer);old.eventAbort?.abort();
+  void saveProgress(old, true);old.video.pause();
   if(!preserveVideo){old.video.removeAttribute('src');old.video.load();old.video.remove();}
-  await saving;return preserveVideo?old.video:null;
+  return preserveVideo?(old.video||$('video-slot').querySelector('video')):null;
 }
-async function stopPlayback() { playGeneration++; hideResumeOverlay(); clearStillWatchingTimer(); hideStillWatchingPrompt(); await exitPlayerPresentationModes(); await detachPlayback(); }
+async function stopPlayback() { playGeneration++; playbackRequestAbort?.abort(); discoveryUI?.cancelPlayback(); hideResumeOverlay(); clearStillWatchingTimer(); hideStillWatchingPrompt(); await exitPlayerPresentationModes(); await detachPlayback(); }
 async function startPlayback(file, playbackContext = null) {
   if(document.fullscreenElement===playerMediaShell()||document.fullscreenElement===active?.video){fullscreenIntent=true;fullscreenRestoreDeadline=Date.now()+6000;}
   if(!guestMode){
     const block=canStartKidPlayback(viewer,playbackContext);
     if(!block.allowed){hideResumeOverlay();showKidLimit(block,{file,playbackContext});return false;}
   }
+  playbackRequestAbort?.abort();playbackRequestAbort=new AbortController();
+  const requestSignal=AbortSignal.any([playbackRequestAbort.signal,AbortSignal.timeout(22000)]);
   const generation = ++playGeneration, selectedViewer = viewer;
   const reusableVideo=await detachPlayback({preserveVideo:true}); if (generation !== playGeneration) return false;
   $('playing-title').textContent = file.title; text('player-message', 'Opening…'); setPlaybackHealth('Opening','Requesting a fresh TorBox link…');
@@ -651,26 +696,26 @@ async function startPlayback(file, playbackContext = null) {
   if(playbackContext?.resumeIntent)updateResumeOverlay('Resuming '+(playbackContext.title||'your video')+'…','Opening the player and loading your saved position.');
   else if(playbackContext?.startOverIntent)updateResumeOverlay('Starting '+(playbackContext.title||'your video')+' over…','Opening the player from the beginning.');
   try {
-    const result = await api('/api/playback', { method: 'POST', data: { viewer: selectedViewer, videoId: file.id, startOver: playbackContext?.forceStartOver===true } });
+    const result = await api('/api/playback', { method: 'POST', signal:requestSignal, data: { viewer: selectedViewer, videoId: file.id, startOver: playbackContext?.forceStartOver===true } });
     if (generation !== playGeneration || !$('player').open || selectedViewer !== viewer) return false;
     const video = reusableVideo || document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.playbackRate=getSettings().playbackRate;
     try{video.controlsList.remove('nofullscreen');}catch{}
     try{video.disablePictureInPicture=false;}catch{}
-    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, sourceLearned:false, lastTime:0, nextPromptActive:false, nextCountdownStart:null, nextWatchCredits:false, nextTransitionStarted:false, nextEnded:false, nextPrepareAbort:null, nextPreparePromise:null, nextPrepared:null, nextPrepareError:'', completedRecorded:false, eventAbort:new AbortController() };
+    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, startupTimer:null, sourceLearned:false, lastTime:0, nextPromptActive:false, nextCountdownStart:null, nextWatchCredits:false, nextTransitionStarted:false, nextEnded:false, nextPrepareAbort:null, nextPreparePromise:null, nextPrepared:null, nextPrepareError:'', completedRecorded:false, eventAbort:new AbortController() };
     active = context;if(video.parentElement!==$('video-slot'))$('video-slot').replaceChildren(video);setHealthSource(context);updatePlayerModeActions();
     const listen=(name,handler)=>video.addEventListener(name,handler,{signal:context.eventAbort.signal});
     const clearBuffer = () => { clearTimeout(context.bufferTimer); context.bufferTimer = null; };
     const recover = async (reason, diagnosis = null) => {
       if (active !== context || context.recovering || video.ended || (reason === 'buffer' && (!context.started || video.paused))) return;
-      if (!getSettings().autoRecovery) { setPlaybackHealth(reason==='buffer'?'Buffering':'Playback problem','Automatic recovery is off.'); text('player-message', reason === 'buffer' ? 'Playback is buffering. Automatic recovery is off in Settings.' : (diagnosis?.message||'Playback failed. Automatic recovery is off in Settings.'), true); return; }
-      context.recovering = true; clearBuffer();clearTimeout(context.healthyTimer); hidePauseCard(); await saveProgress(context); video.pause();
+      if (!getSettings().autoRecovery) { hideResumeOverlay(); setPlaybackHealth(reason==='buffer'?'Buffering':'Playback problem','Automatic recovery is off.'); text('player-message', reason === 'buffer' ? 'Playback is buffering. Automatic recovery is off in Settings.' : (diagnosis?.message||'Playback failed. Automatic recovery is off in Settings.'), true); return; }
+      context.recovering = true; clearBuffer();clearTimeout(context.startupTimer);clearTimeout(context.healthyTimer); hidePauseCard(); void saveProgress(context); video.pause();
       setPlaybackHealth('Recovering',reason==='buffer'?'Switching to a lower-resolution source…':'Finding another source…');
       text('player-message', reason === 'buffer' ? 'Buffering · trying another source (maximum 3 total)…' : 'Stream failed · trying another source (maximum 3 total)…');
-      const moved = playbackContext ? await discoveryUI.recoverPlayback(playbackContext) : false;
+      const moved = playbackContext ? await discoveryUI.recoverPlayback(playbackContext,{signal:context.eventAbort.signal}) : false;
       if (moved) return;
       if (active !== context) return;
       const attempts=Math.max(1,new Set(playbackContext?.recoveryTried||[]).size);
-      context.recovering = false; setPlaybackHealth('Could not play',diagnosis?.message||'Automatic recovery could not find a working alternative.'); text('player-message', `${diagnosis?.message||'Playback failed.'} Automatic recovery stopped after ${attempts} source${attempts===1?'':'s'}.`, true);
+      context.recovering = false; hideResumeOverlay(); setPlaybackHealth('Could not play',diagnosis?.message||'Automatic recovery could not find a working alternative.'); text('player-message', `${diagnosis?.message||'Playback failed.'} Automatic recovery stopped after ${attempts} source${attempts===1?'':'s'}.`, true);
     };
     const armBuffer = () => {
       if (!context.started || video.paused || video.ended || context.recovering) return;
@@ -679,7 +724,7 @@ async function startPlayback(file, playbackContext = null) {
     listen('loadedmetadata', () => {
       if (active !== context) return;
       const local = playbackContext ? recentForContext(playbackContext) : null;
-      let position = playbackContext?.forceStartOver ? 0 : Math.max(result.progress.position || 0, resumePosition(local));
+      let position = playbackContext?.forceStartOver ? 0 : (local ? resumePosition(local) : (result.progress.position || 0));
       const rewind = Number(playbackContext?.rewindOnResumeSeconds) || 0;
       if (rewind > 0 && position > 0) position = Math.max(0, position - rewind);
       if (Number.isFinite(video.duration) && position > 0) video.currentTime = Math.min(position, Math.max(0, video.duration - .25));
@@ -688,10 +733,10 @@ async function startPlayback(file, playbackContext = null) {
       text('player-message', position > 0 ? `Resuming ${formatResumeTime(position)}` : '');
       if(playbackContext?.resumeIntent)updateResumeOverlay('Resuming at '+formatResumeTime(position)+'…','Your saved position is loaded. Starting playback now.');
       else if(playbackContext?.startOverIntent)updateResumeOverlay('Starting from the beginning…','The video is ready. Starting playback now.');
-      video.play().catch(error => { if (active === context && error.name === 'NotAllowedError') {hideResumeOverlay();text('player-message', 'Tap play');} });
+      video.play().catch(error => { if (active === context && error.name === 'NotAllowedError') {clearTimeout(context.startupTimer);hideResumeOverlay();text('player-message', 'Tap play');} });
     });
     listen('playing', () => { if (active === context) {
-      context.started = true; context.recovering = false; hideResumeOverlay(); clearBuffer(); hidePauseCard(); void refreshWakeLockForPlayback(context); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); context.kidLastAt=Date.now();context.kidLastPosition=Number.isFinite(video.currentTime)?video.currentTime:0;if(!context.kidTimer)context.kidTimer=setInterval(()=>tickKidUsage(context),5000); setPlaybackHealth('Playing','Stream is advancing normally.'); text('player-message', '');
+      context.started = true; context.recovering = false; clearTimeout(context.startupTimer); hideResumeOverlay(); clearBuffer(); hidePauseCard(); void refreshWakeLockForPlayback(context); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); context.kidLastAt=Date.now();context.kidLastPosition=Number.isFinite(video.currentTime)?video.currentTime:0;if(!context.kidTimer)context.kidTimer=setInterval(()=>tickKidUsage(context),5000); setPlaybackHealth('Playing','Stream is advancing normally.'); text('player-message', '');
       clearTimeout(context.healthyTimer);if(getSettings().autoLearnSources&&playbackContext?.sourceInfo&&!context.sourceLearned)context.healthyTimer=setTimeout(()=>{if(active===context&&!video.paused&&video.currentTime>5){rememberSourceSuccess(playbackContext.current,playbackContext.sourceInfo);context.sourceLearned=true;setHealthSource(context);}},15000);
     } });
     listen('canplay',()=>{clearBuffer();updatePlayerModeActions();if(active===context&&context.started&&!video.paused)setPlaybackHealth('Playing','Stream is ready.');});
@@ -702,7 +747,7 @@ async function startPlayback(file, playbackContext = null) {
     listen('pause', () => { if(active===context)tickKidUsage(context,true); if (active === context && !context.recovering) { clearTimeout(context.healthyTimer);releaseWakeLock(); if(!stillWatchingPromptActive&&!video.ended)clearStillWatchingTimer(); saveProgress(context); if(stillWatchingPromptActive){hidePauseCard();setPlaybackHealth('Still watching?','Tap Keep watching to continue.');}else if(!$('kid-limit-dialog').open){setPlaybackHealth('Paused','Playback is paused.');updatePauseCard(context);} } });
     listen('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });
     listen('ended', async () => {
-      if (active !== context) return; tickKidUsage(context,true); clearBuffer(); hidePauseCard(); await saveProgress(context);
+      if (active !== context) return; tickKidUsage(context,true); clearBuffer(); hidePauseCard(); void saveProgress(context);
       context.nextEnded=true;markPlaybackCompleted(context);
       clearTimeout(context.healthyTimer);setPlaybackHealth('Finished','Playback completed.');await releaseWakeLock();
       if(!queuedNext(context)){hideUpNextCard();text('player-message','Finished');return;}
@@ -710,15 +755,16 @@ async function startPlayback(file, playbackContext = null) {
       else{context.nextPromptActive=true;renderUpNextCard(context,{ended:true});text('player-message','Finished');}
     });
     listen('error', async () => {
-      if (active !== context || context.diagnosing) return; hideResumeOverlay(); context.diagnosing = true; clearBuffer();
+      if (active !== context || context.diagnosing) return; hideResumeOverlay(); context.diagnosing = true; clearBuffer();clearTimeout(context.startupTimer);
       setPlaybackHealth('Playback error','Diagnosing the failed stream…');const diagnosis = await diagnosePlaybackFailure(context.mediaUrl, video.error?.code);
       if (active !== context || generation !== playGeneration) return;
       if (diagnosis.kind !== 'cancelled') { await recover('error',diagnosis); return; }
       text('player-message', diagnosis.message, true);
     });
     context.timer=setInterval(()=>{if(active===context&&!video.paused)saveProgress(context);},10000);
+    context.startupTimer=setTimeout(()=>{if(active===context&&!context.started){hideResumeOverlay();void recover('startup',{message:'This stream did not start within 25 seconds.'});}},INITIAL_MEDIA_TIMEOUT_MS);
     video.src=context.mediaUrl;video.load();return true;
-  } catch (error) { hideResumeOverlay(); if (generation===playGeneration) {setPlaybackHealth('Could not start',error.message);text('player-message',error.message,true);} return false; }
+  } catch (error) { if (generation===playGeneration) {hideResumeOverlay();} if (generation===playGeneration) {setPlaybackHealth('Could not start',error.message);text('player-message',error.message,true);} return false; }
 }
 $('play-next-now').addEventListener('click',()=>{if(active&&queuedNext(active))void openNextEpisode(active,{fromEnded:active.nextEnded===true||active.video?.ended===true});});
 $('watch-credits').addEventListener('click',()=>{
@@ -1003,6 +1049,6 @@ $('settings-clear-searches').addEventListener('click',()=>{if(confirm('Clear sea
 $('settings-install-app').addEventListener('click',async()=>{if(!deferredInstallPrompt){text('settings-message',window.matchMedia?.('(display-mode: standalone)').matches?'The app is already installed.':'Use Chrome’s Add to Home screen / Install app command if the install prompt is not available.');return;}const prompt=deferredInstallPrompt;deferredInstallPrompt=null;await prompt.prompt();await prompt.userChoice.catch(()=>{});updateInstallButton();});
 $('settings-check-status').addEventListener('click',async()=>{text('settings-message','Checking TorBox…');const ok=await checkTorBoxStatus(true);text('settings-message',ok?(torboxStatusCache?.official==='issue'?'TorBox API is reachable, but its status page reports an issue.':'TorBox API is reachable.'):(torboxStatusCache?.message||'TorBox is unavailable.'),!ok);});
 $('retry-torbox-status').addEventListener('click',()=>checkTorBoxStatus(true));
-discoveryUI = createDiscoveryUI({ api, play: startPlayback, driveTest: openDriveTest, guard: ensureTorBoxReady, resumeActivity:{ show:showResumeOverlay, update:updateResumeOverlay, hide:hideResumeOverlay } });
+discoveryUI = createDiscoveryUI({ api, play: startPlayback, guard: ensureTorBoxReady, resumeActivity:{ show:showResumeOverlay, update:updateResumeOverlay, hide:hideResumeOverlay } });
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 bootstrap();

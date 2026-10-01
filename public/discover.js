@@ -1,9 +1,10 @@
-import { loadPublicSources, browserContainerHints } from './source-client.js?v=restored16';
-import { getSettings, updateSettings } from './settings.js?v=restored16';
-import { listRecent, formatResumeTime } from './history.js?v=restored16';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=restored16';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=restored16';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=restored16';
+import { LatestPlaybackAction } from './playback-lifecycle.js?v=release-1.2.0';
+import { loadPublicSources, browserContainerHints } from './source-client.js?v=release-1.2.0';
+import { getSettings, updateSettings } from './settings.js?v=release-1.2.0';
+import { listRecent, formatResumeTime } from './history.js?v=release-1.2.0';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=release-1.2.0';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=release-1.2.0';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=release-1.2.0';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
@@ -163,6 +164,9 @@ function createResolutionSelect(value = getResolution()) {
 }
 
 export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity }) {
+  const playbackActions=new LatestPlaybackAction();
+  let closingTitleForPlayback=false;
+  const cancelPlayback=()=>{playbackActions.cancel();resumeActivity?.hide?.();};
   let active=false, guestMode=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0, nextUpGeneration=0;
   let catalogAbort,titleAbort,sourceAbort,searchTimer,pollTimer,metas=[],nextSkip=null,currentMeta;
 
@@ -254,7 +258,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     if(!meta||guestMode)return;const dialog=$('quick-actions-dialog'),area=$('quick-actions-content');$('quick-actions-title').textContent=meta.name||'Title';area.replaceChildren();
     const favorite=button(isWatchlisted($('viewer').value,meta)?'Remove from My list':'Add to My list',()=>{toggleWatchlist($('viewer').value,meta);renderWatchlist();favorite.textContent=isWatchlisted($('viewer').value,meta)?'Remove from My list':'Add to My list';});
     const playButton=button('Play',async()=>{try{const resolved=await resolveQuickTarget(meta);dialog.close();await quickPlay(resolved.meta,resolved.target,resolved.episodeName,playButton);}catch(e){message('catalog-message',e.message,true);}},true);
-    const shareButton=button('Share',async()=>{try{const resolved=await resolveQuickTarget(meta);dialog.close();await quickDriveShare(resolved.meta,resolved.target,resolved.episodeName,shareButton);}catch(e){message('catalog-message',e.message,true);}});shareButton.classList.add('advanced-only');
+    const shareButton=button('Share',async()=>{try{const resolved=await resolveQuickTarget(meta);dialog.close();await quickDriveShare(resolved.meta,resolved.target,resolved.episodeName,shareButton);}catch(e){message('catalog-message',e.message,true);}});shareButton.hidden=typeof driveTest!=='function';shareButton.classList.add('advanced-only');
     const details=button('Details',()=>{dialog.close();showTitle(meta);});
     area.append(playButton,favorite,shareButton,details);if(!dialog.open)dialog.showModal();
   }
@@ -312,11 +316,11 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   function buildContext(meta,target,episodeName,resolution,source){
     return {title:meta?.name||'',poster:meta?.poster||'',episodeName:episodeName||'',resolution,current:{...target,name:episodeName||''},sourceResolution:source?.resolution||source?.quality||'',sourceInfo:source?{id:source.id||'',hash:source.hash||'',filename:source.filename||'',title:source.title||'',provider:source.provider||'',resolution:source.resolution||source.quality||'',container:source.container||'',browserContainer:source.browserContainer===true,browserUnsupported:source.browserUnsupported===true,videoCodec:source.videoCodec||'',audioCodecs:Array.isArray(source.audioCodecs)?source.audioCodecs.slice(0,6):[]}:null,queue:target.type==='series'?episodeQueue(meta,target):[]};
   }
-  const closeTitleForPlayback = () => { if (!guestMode && $('title-dialog').open) $('title-dialog').close(); };
+  const closeTitleForPlayback = () => { if (!guestMode && $('title-dialog').open) {closingTitleForPlayback=true;$('title-dialog').close();} };
 
   async function ensureService(){ if(typeof guard==='function') await guard(); }
   async function registeredSources(target, signal){
-    const sources=await loadPublicSources(target,{signal});if(!sources.length)throw new Error('No source found.');
+    const sources=await loadPublicSources(target,{signal,api});if(!sources.length)throw new Error('No source found.');
     const result=await api('/api/discover/sources',{method:'POST',data:{target,sources},signal:signal?AbortSignal.any([signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000)});
     if(!result.sources?.length)throw new Error('No supported source found.');return {...result,sources:applySourceMemory(target,result.sources)};
   }
@@ -349,7 +353,9 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   }
 
   function clearPlaybackFallback(){const area=$('play-fallback');if(area)area.replaceChildren();}
-  async function prepareAndPlayFallback(meta,target,episodeName,resolution,source,button,buttons){
+  async function prepareAndPlayFallback(meta,target,episodeName,resolution,source,button,buttons,overrides={}){
+    const action=playbackActions.begin();
+    const bounded=ms=>AbortSignal.any([action.signal,AbortSignal.timeout(ms)]);
     const resumeRow=savedResumeForTarget(target);
     if(resumeRow)resumeActivity?.show?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Preparing the version you selected in TorBox.');
     try{
@@ -357,13 +363,16 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       button.textContent='Preparing…';
       message('detail-message','Preparing this version in TorBox…');
       if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','TorBox is preparing the selected version.');
-      const result=await readyFile(source,{signal:AbortSignal.timeout(330000),unattended:true,waitForPreparation:true});
+      const result=await readyFile(source,{signal:bounded(330000),unattended:true,waitForPreparation:true});
+      action.check();
       const context=buildContext(meta,target,episodeName,resolution,source);
       if(resumeRow)context.resumeIntent=true;
+      Object.assign(context,overrides);
       clearPlaybackFallback();
       if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
+      action.check();action.finish();
       return await play(result.file,context);
-    }catch(error){
+    }catch(error){if(!action.current())return false;action.finish();
       resumeActivity?.hide?.();
       message('detail-message',error.message,true);
       for(const item of buttons)item.disabled=false;
@@ -371,7 +380,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       return false;
     }
   }
-  function renderPlaybackFallback(meta,target,episodeName,resolution,sources){
+  function renderPlaybackFallback(meta,target,episodeName,resolution,sources,overrides={}){
     const area=$('play-fallback');if(!area)return false;
     const options=browserPreparationOptions(sources,target.type,resolution,getSettings().sourceSizeProfile,3);
     area.replaceChildren();
@@ -390,7 +399,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
         element('span',[source.resolution||source.quality||'Auto',shownSize!=='—'?shownSize:''].filter(Boolean).join(' · ')),
         element('small',source.filename||source.title||'Browser-compatible source')
       );
-      const action=button('Prepare & Play',()=>prepareAndPlayFallback(meta,target,episodeName,resolution,source,action,buttons),index===0);
+      const action=button('Prepare & Play',()=>prepareAndPlayFallback(meta,target,episodeName,resolution,source,action,buttons,overrides),index===0);
       buttons.push(action);row.append(copy,action);choices.append(row);
     }
     panel.append(choices,element('p','Nothing is added unless you tap Prepare & Play. TorBox may need to download the containing torrent, which can be larger than the episode file shown here.','play-fallback-note'));
@@ -399,25 +408,29 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   }
 
   async function quickPlay(meta,target,episodeName='',trigger){
+    const action=playbackActions.begin();
+    const bounded=ms=>AbortSignal.any([action.signal,AbortSignal.timeout(ms)]);
     const original=trigger?.textContent;if(trigger){trigger.disabled=true;trigger.textContent='Opening…';}
     const resumeRow=showResumeActivity(meta,target,episodeName,false);
     clearPlaybackFallback();message('detail-message','Finding the recommended source…');
     let resolution,registered;
     try{
       if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Checking the player connection.');
-      await ensureService();
+      await ensureService();action.check();
       if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Finding a playable source.');
-      resolution=getResolution(target);registered=await registeredSources(target,AbortSignal.timeout(45000));
-      const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:AbortSignal.timeout(330000),onCandidate:()=>{
-        message('detail-message','Checking cached browser-compatible source…');
+      resolution=getResolution(target);registered=await registeredSources(target,bounded(45000));
+      const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:bounded(330000),onCandidate:()=>{
+        action.check();message('detail-message','Checking cached browser-compatible source…');
         if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Checking a ready browser-compatible version.');
       }});
+      action.check();
       const context=buildContext(meta,target,episodeName,resolution,best);
       if(resumeRow)context.resumeIntent=true;
       if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Opening the video and loading your saved position.');
       if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
+      action.check();action.finish();
       const moved=await play(result.file,context);if(!moved)resumeActivity?.hide?.();return moved;
-    }catch(e){
+    }catch(e){if(!action.current())return false;action.finish();
       resumeActivity?.hide?.();
       if(e?.code==='NO_CACHED_BROWSER_SOURCE'&&registered?.sources?.length&&renderPlaybackFallback(meta,target,episodeName,resolution,registered.sources)){
         message('detail-message','Choose a browser-compatible version below.');
@@ -455,7 +468,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   }
 
   async function showTitle(meta,preferredSeason=null){
-    cancelTitle();currentMeta=null;const generation=titleGeneration;titleAbort=new AbortController();$('title-content').replaceChildren();$('episode-area').replaceChildren();clearPlaybackFallback();
+    cancelPlayback();cancelTitle();currentMeta=null;const generation=titleGeneration;titleAbort=new AbortController();$('title-content').replaceChildren();$('episode-area').replaceChildren();clearPlaybackFallback();
     $('detail-title').textContent=meta.name;$('toggle-watchlist').hidden=true;message('detail-message','Loading…');if(!$('title-dialog').open)$('title-dialog').showModal();
     try{
       const data=await api(`/api/discover/meta?type=${meta.type}&id=${meta.id}`,{signal:AbortSignal.any([titleAbort.signal,AbortSignal.timeout(20000)])});
@@ -471,7 +484,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     const bar=element('div','','movie-action-bar');bar.append(titleResolutionControl(meta));
     const target={type:'movie',id:meta.id},actions=element('div','','row-actions');
     const playButton=button('Play',()=>quickPlay(meta,target,'',playButton),true);
-    const shareButton=button('Share',()=>quickDriveShare(meta,target,'',shareButton));shareButton.hidden=guestMode;shareButton.classList.add('advanced-only');
+    const shareButton=button('Share',()=>quickDriveShare(meta,target,'',shareButton));shareButton.hidden=guestMode||typeof driveTest!=='function';shareButton.classList.add('advanced-only');
     const options=button('Options',()=>openOptions(meta,target));options.classList.add('advanced-only');actions.append(playButton,shareButton,options);bar.append(actions);$('episode-area').replaceChildren(bar);
   }
 
@@ -490,7 +503,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
         if(progress){const label=progress.completed?'Watched':progress.position>0?`Resume ${formatResumeTime(progress.position)}`:'';if(label)info.append(element('span',label,'episode-progress-text'));}
         const actions=element('div','','episode-actions');const target={type:'series',id:meta.id,season:episode.season,episode:episode.episode};
         const playButton=button('Play',()=>quickPlay(meta,target,episode.name,playButton),true);
-        const shareButton=button('Share',()=>quickDriveShare(meta,target,episode.name,shareButton));shareButton.hidden=guestMode;shareButton.classList.add('advanced-only');
+        const shareButton=button('Share',()=>quickDriveShare(meta,target,episode.name,shareButton));shareButton.hidden=guestMode||typeof driveTest!=='function';shareButton.classList.add('advanced-only');
         const more=button('Options',()=>openOptions(meta,target,episode.name));more.setAttribute('aria-label',`More options for ${episode.name}`);more.classList.add('advanced-only');
         actions.append(playButton,shareButton,more);row.append(number,info,actions);
         if(episode.released&&Date.parse(episode.released)>Date.now()){playButton.disabled=true;shareButton.disabled=true;more.disabled=true;row.classList.add('future');}
@@ -582,16 +595,18 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     return playPreparedNext(prepared);
   }
 
-  async function recoverPlayback(context){
+  async function recoverPlayback(context,{signal}={}){
     if(!active||!context?.current)return false;
     try{
-      const registered=await registeredSources(context.current,AbortSignal.timeout(45000));
+      const bounded=AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(25000)]);
+      const registered=await registeredSources(context.current,bounded);
       const failedKey=sourceRecoveryKey(context.sourceInfo),attempted=new Set(Array.isArray(context.recoveryTried)?context.recoveryTried:[]);if(failedKey)attempted.add(failedKey);context.recoveryTried=[...attempted];
-      const candidates=boundedRecoverySourceOrder(registered.sources.filter(source=>source.cached===true),context,context.current.type,getSettings().sourceSizeProfile).slice(0,3),budgetSignal=AbortSignal.timeout(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS);
+      const candidates=boundedRecoverySourceOrder(registered.sources.filter(source=>source.cached===true),context,context.current.type,getSettings().sourceSizeProfile).slice(0,3),budgetSignal=AbortSignal.any([bounded,AbortSignal.timeout(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS)]);
       for(const best of candidates){
         if(budgetSignal.aborted)break;
         try{
           const result=await readyFile(best,{signal:budgetSignal,unattended:true,waitForPreparation:false});
+          if(signal?.aborted||!active)return false;
           const candidateKey=sourceRecoveryKey(best);if(candidateKey)attempted.add(candidateKey);context.recoveryTried=[...attempted];
           const nextContext={...context,...buildContext({name:context.title,poster:context.poster,episodes:[]},context.current,context.episodeName||'',context.resolution||'auto',best),queue:context.queue||[],recoveryTried:[...attempted]};
           const moved=await play(result.file,nextContext);if(moved)return true;
@@ -608,25 +623,35 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   }
 
   async function resumeRecent(entry,startOver=false){
+    const action=playbackActions.begin();
+    const bounded=ms=>AbortSignal.any([action.signal,AbortSignal.timeout(ms)]);
     if(!entry||!['movie','series'].includes(entry.type))return false;
     const initialName=entry.type==='series'?entry.episodeName:'';
     resumeActivity?.show?.(startOver?'Starting '+entry.title+' over…':'Resuming '+entry.title+'…',entry.type==='series'&&initialName?initialName+' · Getting your video ready.':'Getting your video ready.');
     message('catalog-message',startOver?'Starting over…':'Resuming…');
-    let meta=null,target=null,name='';
+    let meta=null,target=null,name='',registered=null,resolution='auto';
     try{
       resumeActivity?.update?.(startOver?'Starting '+entry.title+' over…':'Resuming '+entry.title+'…','Checking the player connection.');
-      await ensureService();
+      await ensureService();action.check();
       resumeActivity?.update?.(startOver?'Starting '+entry.title+' over…':'Resuming '+entry.title+'…','Loading title and episode details.');
-      const data=await api(`/api/discover/meta?type=${entry.type}&id=${entry.id}`,{signal:AbortSignal.timeout(20000)});meta=data.meta;
+      const data=await api(`/api/discover/meta?type=${entry.type}&id=${entry.id}`,{signal:bounded(20000)});action.check();meta=data.meta;
       target=entry.type==='series'?{type:'series',id:entry.id,season:entry.season,episode:entry.episode}:{type:'movie',id:entry.id};
       name=entry.type==='series'?(meta.episodes.find(e=>e.season===entry.season&&e.episode===entry.episode)?.name||entry.episodeName):'';
       resumeActivity?.update?.(startOver?'Starting '+resumeTitle(meta,target,name)+' over…':'Resuming '+resumeTitle(meta,target,name)+'…','Finding a playable source.');
-      const registered=await registeredSources(target,AbortSignal.timeout(45000)),resolution=entry.resolution||getResolution(target);
-      const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:AbortSignal.timeout(330000),onCandidate:()=>resumeActivity?.update?.(startOver?'Starting '+resumeTitle(meta,target,name)+' over…':'Resuming '+resumeTitle(meta,target,name)+'…','Checking a ready browser-compatible version.')});
+      registered=await registeredSources(target,bounded(45000));resolution=entry.resolution||getResolution(target);
+      const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:bounded(330000),onCandidate:()=>resumeActivity?.update?.(startOver?'Starting '+resumeTitle(meta,target,name)+' over…':'Resuming '+resumeTitle(meta,target,name)+'…','Checking a ready browser-compatible version.')});
+      action.check();
       const context=buildContext(meta,target,name,resolution,best);context.forceStartOver=startOver;context.rewindOnResumeSeconds=startOver?0:getSettings().resumeRewindSeconds;context.resumeIntent=!startOver;context.startOverIntent=startOver;
       resumeActivity?.update?.(startOver?'Starting '+resumeTitle(meta,target,name)+' over…':'Resuming '+resumeTitle(meta,target,name)+'…','Opening the video.');
+      action.check();action.finish();
       const moved=await play(result.file,context);if(!moved)resumeActivity?.hide?.();message('catalog-message','');return moved;
-    }catch(e){resumeActivity?.hide?.();message('catalog-message',e.message,true);return false;}
+    }catch(e){if(!action.current())return false;action.finish();resumeActivity?.hide?.();
+      if(e?.code==='NO_CACHED_BROWSER_SOURCE'&&meta&&registered?.sources?.length){
+        await showTitle(meta,target?.season);
+        if(renderPlaybackFallback(meta,target,name,resolution,registered.sources,{forceStartOver:startOver,startOverIntent:startOver,resumeIntent:!startOver,rewindOnResumeSeconds:startOver?0:getSettings().resumeRewindSeconds})){message('detail-message','Choose a browser-compatible version below.');return false;}
+      }
+      message('catalog-message',e.message,true);return false;
+    }
   }
 
   for(const id of ['catalog-type','catalog-feed','catalog-genre'])$(id).addEventListener('change',()=>{persistBrowsePreferences();browse();});
@@ -642,7 +667,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     if(guestMode)return;++catalogGeneration;catalogAbort?.abort();browse();
   });
   $('search').addEventListener('focus',renderSearchHistory);
-  $('close-title').addEventListener('click',()=>$('title-dialog').close());$('title-dialog').addEventListener('close',()=>{++titleGeneration;titleAbort?.abort();});
+  $('close-title').addEventListener('click',()=>$('title-dialog').close());$('title-dialog').addEventListener('close',()=>{++titleGeneration;titleAbort?.abort();if(closingTitleForPlayback)closingTitleForPlayback=false;else cancelPlayback();});
   $('close-source').addEventListener('click',()=>$('source-dialog').close());$('source-dialog').addEventListener('close',cancelSource);
   $('close-quick-actions').addEventListener('click',()=>$('quick-actions-dialog').close());
   $('toggle-watchlist').addEventListener('click',()=>{if(guestMode||!currentMeta)return;toggleWatchlist($('viewer').value,currentMeta);updateWatchlistButton();renderWatchlist();});
@@ -653,7 +678,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       guestMode=true;active=true;
       await showTitle({type:scope.type,id:scope.id,name:scope.name||'Shared title',poster:scope.poster||''});
     },
-    prepareNext,playPreparedNext,playNext,recoverPlayback,openHistoryTitle,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
-    suspend(){active=false;guestMode=false;document.body.classList.remove('search-mode');++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
+    cancelPlayback,prepareNext,playPreparedNext,playNext,recoverPlayback,openHistoryTitle,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
+    suspend(){cancelPlayback();active=false;guestMode=false;document.body.classList.remove('search-mode');++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
   };
 }

@@ -1,18 +1,26 @@
 # TorBox Web Player
 
-The restored browser-key v1.1 player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same v1.1 code rather than as a separate product line.
+The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.1.0**
+Current version: **1.2.0**
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/` (legacy mirror: `/key/`)
 
 Backend: `https://torbox-web-player-key.onrender.com`
 
+## Release 1.2.0
+
+See [the release and stress-test report](docs/RELEASE-1.2.0.md) for fixes, evidence, limits, and rollback instructions. The preceding release is preserved at `archive/v1.1.0-before-reliability-2026-10-01`.
+
+This release removes the remaining media relay, isolates playback state between devices, makes progress saves nonblocking, survives slower backend startup, reconnects with a remembered encrypted key, and cancels obsolete Play/Resume actions. The browser gets a visible retry or bounded recovery when startup or playback stalls. Existing history, settings, parental controls, source identity checks, and the persistent fullscreen/PiP video element are preserved.
+
+No paid service was added. GitHub Pages serves the app; the existing free Render service handles small control requests only. Render can still sleep and restart. Anonymous metadata indexes can still fail or rate limit requests. TorBox remains the only paid media service.
+
 ## Design
 
 The default interface is **Simple**. It is intended to be easy for a family member or child to use without understanding torrents, codecs, source providers, or recovery logic. The normal path is posters, search, episodes, Play, Continue Watching, Next Up, and My list.
 
-Settings can switch the site to **Full** mode. Full mode reveals technical and power-user controls such as source Options, Drive sharing, per-title quality, playback-health details, source feedback, and learned source behavior.
+Settings can switch the site to **Full** mode. Full mode reveals technical and power-user controls such as source Options, per-title quality, playback-health details, source feedback, and learned source behavior.
 
 Native HTML5 video controls remain the base player controls. The custom interface adds pause information, recovery state, next-episode countdown, playback-health information in Full mode, sleep timer behavior, screen wake lock where supported, and keyboard seeking.
 
@@ -26,19 +34,23 @@ Settings now includes **Sync & devices → Transfer this setup**. It creates a o
 
 Transferred state includes the selected viewer, general settings, Continue Watching history, My list, search history, and Kid Mode/PIN/allowance state. Device-specific source/audio compatibility learning is intentionally not transferred. If the API key is not remembered on the source device, Settings asks for it once and verifies it against the current session before creating the encrypted package. Opening a transfer link on the destination device validates the debrid credential before applying the imported state and stores the credential using the destination browser's existing encrypted vault. This transfer does not yet enable ongoing cloud synchronization.
 
-Video bytes no longer pass through Render. The browser still receives an opaque, expiring `/media/<ticket>` path, but Render now answers that request with a temporary redirect to a TorBox CDN URL that has been verified not to contain the master API key. The TorBox API key stays server-side while the actual movie or episode bytes travel directly from TorBox to the browser.
+Normal owner video bytes no longer pass through Render. The browser still receives an opaque, expiring `/media/<ticket>` path, and Render answers that request with a redirect to the TorBox CDN. On this TorBox account the CDN URL itself contains the account API key, so the key can be visible to the signed-in owner's browser network stack during playback even though it is never returned in playback JSON or written into the page. Guest playback requires a key-free direct TorBox link. If TorBox cannot provide one, playback fails clearly; it never falls back to a video relay.
 
 Owner playback path:
 
 `TorBox CDN -> browser`
 
-Render handles control/API operations such as catalog and source lookup, cache checks, preparation, playback-link generation, safe redirect issuance, TorBox status checks, Drive control, and temporary progress leases.
+Temporary guest playback path:
+
+`TorBox CDN -> guest browser`, only when TorBox supplies a guest-safe link.
+
+Render handles control/API operations such as catalog and source lookup, cache checks, preparation, playback-link generation, owner redirect issuance, TorBox status checks, and temporary progress leases. It never transports video bytes. New Google Drive exports are disabled because Drive adds a separate storage quota; the old cleanup endpoints remain available for previously exported files.
 
 ## Discovery and source selection
 
 Cinemeta supplies catalog metadata. Browse supports Popular, Featured, New, genre filters, movies, shows, and search. The browse adapter accepts Cinemeta's current `imdb_id` rows and follows only the bounded HTTPS redirect between the known Cinemeta hosts used by no-query catalog feeds.
 
-Source discovery aggregates Zilean and MediaFusion Torznab, with StremThru fallbacks when needed. Results are deduplicated before TorBox cache checks.
+Source discovery aggregates Zilean, Torrentio, and MediaFusion Torznab, with StremThru fallbacks when needed. Results are deduplicated before TorBox cache checks.
 
 Automatic source selection continues to prioritize browser-friendly cached sources and penalize known risky audio/video formats. In Simple mode, Play never opens the technical torrent/source picker. Cached multi-file packages are resolved to a browser-compatible matching episode file automatically when that can be done safely; otherwise Play reports that no cached browser-compatible source could be opened. The source picker remains an explicit Full-mode Options tool only.
 
@@ -74,7 +86,7 @@ Recently Played remains individually removable. There is no Clear All button. Re
 
 When the next episode starts, earlier completed episodes from the same show can be cleaned out of local playback history automatically.
 
-Long-pressing a poster opens quick actions. Play, My list, and Details remain useful in Simple mode. Full mode also exposes Share from that quick-action surface.
+Long-pressing a poster opens quick actions. Play, My list, and Details remain useful in Simple mode. Video sharing that needs a relay or a separate storage quota is disabled.
 
 ## Playback behavior
 
@@ -96,7 +108,7 @@ Settings are browser-local. Current groups include:
 - Playback: default quality, source-size profile, speed, sleep timer, Still watching? timeout, recovery timing, keyboard seeking, wake lock, playback health, source learning.
 - Episodes and history: rewind, Continue Watching count, auto-next and countdown, Next Up, watched/resume labels, completed-episode cleanup.
 - Discover, My list, and search: My list size, search-history size, remembered browse filters.
-- Drive sharing and app: Drive defaults, TorBox status check, app install, source-learning reset, search-history reset.
+- App: TorBox status check, app install, source-learning reset, search-history reset.
 
 ## Kid Mode and parental allowances
 
