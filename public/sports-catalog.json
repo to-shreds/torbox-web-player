@@ -1,0 +1,281 @@
+{
+  "updated": "2026-10-10",
+  "items": [
+    {
+      "id": "t2",
+      "title": "T2 Tennis",
+      "sport": "tennis",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "T2 Tennis",
+          "url": "https://amg01444-tennischannel-amg01444c2-lg-us-959.playouts.now.amagi.tv/playlist/amg01444-tennischannelfast-tennischannelus-lgus/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "redbull",
+      "title": "Red Bull TV",
+      "sport": "mixed",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Red Bull TV",
+          "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "pickleball",
+      "title": "Pickleball TV",
+      "sport": "pickleball",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Pickleball TV",
+          "url": "https://amg01444-amg01444c3-lg-us-3412.playouts.now.amagi.tv/playlist/amg01444-tennischannelfast-pickleball-lgus/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "nhl",
+      "title": "NHL classics and coverage",
+      "sport": "hockey",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "NHL classics and coverage",
+          "url": "https://amg01874-nhl-amg01874c1-lg-us-5458.playouts.now.amagi.tv/playlist/amg01874-nhlinteractivecyberenterprisesllcfast-nhl-lgus/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "padel-db443c00-cd86-491d-862c-8d173b0c989b",
+      "title": "Final \u00b7 Paris",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-09-13",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:db443c00-cd86-491d-862c-8d173b0c989b:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-506e2ae4-8614-41e7-a350-89b6965db501",
+      "title": "Semi-finals \u00b7 Paris",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-09-12",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:506e2ae4-8614-41e7-a350-89b6965db501:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-fdc5ecea-16e2-4510-b1a0-b982def3b680",
+      "title": "Quarter-finals Centre Court \u00b7 Paris",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-09-11",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:fdc5ecea-16e2-4510-b1a0-b982def3b680:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-fd20233c-99d6-4725-9482-e1dae7dbff08",
+      "title": "Quarter-finals Secondary Court \u00b7 Paris",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-09-11",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:fd20233c-99d6-4725-9482-e1dae7dbff08:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-88e0829b-5c45-4822-bd74-3c2a78f8ffa5",
+      "title": "Finals \u00b7 Malaga P1",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-07-19",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:88e0829b-5c45-4822-bd74-3c2a78f8ffa5:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-d8920d92-4612-4ae2-9f13-ab4b89ba04ee",
+      "title": "Semi-finals \u00b7 Malaga P1",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-07-18",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:d8920d92-4612-4ae2-9f13-ab4b89ba04ee:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-20ef6742-8429-4c26-94e6-b25c36c2ac6d",
+      "title": "Malaga P1 Quarter-finals Centre Court",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-07-17",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:20ef6742-8429-4c26-94e6-b25c36c2ac6d:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-07c5551d-fcee-4774-a2ea-f2e978e67331",
+      "title": "Malaga P1 Quarter-finals Secondary Court",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-07-17",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:07c5551d-fcee-4774-a2ea-f2e978e67331:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-31345ef3-a9ae-4258-900e-5fe2965800c8",
+      "title": "Final \u00b7 Bordeaux Premier Padel P2",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-07-05",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:31345ef3-a9ae-4258-900e-5fe2965800c8:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-b3316740-6fb1-4ab2-b27d-a990f6ae9afb",
+      "title": "Semi-finals \u00b7 Bordeaux Premier Padel P2",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-07-04",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:b3316740-6fb1-4ab2-b27d-a990f6ae9afb:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-2f3c72c1-cde9-4b85-99aa-65da8f005669",
+      "title": "Quarter-finals Centre Court \u00b7 Bordeaux",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-07-03",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:2f3c72c1-cde9-4b85-99aa-65da8f005669:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-0981d026-be46-401b-8117-b3d0cfc24906",
+      "title": "Quarter-finals Secondary Court \u00b7 Bordeaux",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-07-03",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:0981d026-be46-401b-8117-b3d0cfc24906:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-94e4e110-4c9b-44b5-8d19-3df1a69e7ea0",
+      "title": "Final \u00b7 Valladolid Premier Padel P2",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-06-28",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:94e4e110-4c9b-44b5-8d19-3df1a69e7ea0:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-4243cac1-462f-4c4e-b8ac-1982e5e770ac",
+      "title": "Semi-finals \u00b7 Valladolid Premier Padel P2",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-06-27",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:4243cac1-462f-4c4e-b8ac-1982e5e770ac:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-f836420f-df73-4e67-aec1-d3b27b63c6d1",
+      "title": "Quarter-finals Centre Court \u00b7 Valladolid",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-06-26",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:f836420f-df73-4e67-aec1-d3b27b63c6d1:en-INT"
+        }
+      ]
+    },
+    {
+      "id": "padel-3c586c02-a386-4ec1-ba6d-00350c4fd890",
+      "title": "Quarter-finals Secondary Court \u00b7 Valladolid",
+      "sport": "padel",
+      "kind": "replay",
+      "date": "2026-06-26",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:3c586c02-a386-4ec1-ba6d-00350c4fd890:en-INT"
+        }
+      ]
+    }
+  ]
+}

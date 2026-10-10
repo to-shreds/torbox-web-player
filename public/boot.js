@@ -1,4 +1,4 @@
-const BUILD='release-1.2.0-artwork.1';
+const BUILD='release-1.2.0-sports.1';
 const startedAt=Date.now();
 let startupTimer=null;
 const stageNode=()=>document.querySelector('#startup-stage');
@@ -41,6 +41,9 @@ function showStartupFailure(){
   const button=document.createElement('button');button.id='startup-reload';button.type='button';button.className='primary';button.textContent='Reload';
   button.addEventListener('click',()=>location.reload());panel.append(button);
 }
+
+// Sports initializes independently, before any private service request.
+try{await import(`./sports.js?v=${BUILD}`);}catch{const message=document.querySelector('#sports-nav-message');if(message)message.textContent='Sports could not start. Reload to retry.';}
 
 // Wake the backend immediately, but keep service-worker refresh off the critical startup path.
 warmBackend();

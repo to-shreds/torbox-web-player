@@ -2,13 +2,19 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.0**, frontend artwork patch **release-1.2.0-artwork.1**
+Current version: **1.2.0**, frontend sports build **release-1.2.0-sports.1**
 
 Deployment status: the v1.2.0 frontend is live and the backend release has passed CI, but the live Render backend remains v1.1.0 pending the Render connector's required workspace confirmation. See [HANDOFF.md](HANDOFF.md) for the exact deployment state.
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/` (legacy mirror: `/key/`)
 
 Backend: `https://torbox-web-player-key.onrender.com`
+
+## Sports
+
+Open **Sports** in the top navigation, or use `#sports` in the app URL. Sports opens without a TorBox login or a running private backend. It bundles T2 tennis, Red Bull TV, Pickleball TV and NHL classics/coverage, plus sixteen full Premier Padel replays. No additional subscription, login or VPN is needed by the app. Regional rights still apply, and free channels do not cover every paid event. The replay collection is a release snapshot.
+
+Sports has live/replay and sport filters, text search, 720p by default with quality choices, Go Live, replay resume/Start Over, and clear Retry/channel alternatives. Catalogs omit scores, descriptions and result images. Sports is available to adult viewers. Direct public HLS uses the bundled Apache-licensed hls.js 1.6.15; the native browser HLS fallback selects quality itself. No sports video is relayed through Render. See [the sports report](docs/SPORTS-2026-10-10.md).
 
 ## Artwork patch
 

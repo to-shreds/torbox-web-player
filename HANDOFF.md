@@ -2,6 +2,18 @@
 
 Read this first. The code repository controls implementation; `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md` controls readiness and the next action.
 
+## Sports feature · 2026-10-10
+
+Frontend build **release-1.2.0-sports.1** adds Sports before private-service startup/login. The static app contains its catalog and Apache-licensed hls.js 1.6.15. Four free live channels are T2 tennis, Red Bull TV, Pickleball TV and NHL classics/coverage. Sixteen full Premier Padel sessions cover Paris, Malaga, Bordeaux and Valladolid in 2026. This is a bundled replay snapshot; no automatic event-index refresh or promise of every tennis tournament is implemented.
+
+The current anonymous provider endpoint is `https://api-player.redbull.com/rbcom/videoresource?videoId=<public-rrn>`. Only the public identity is sent, with credentials omitted and no redirects. Playability errors are respected; returned media URLs and HLS requests are restricted to exact verified HTTPS hosts. Scores, result descriptions and images are discarded. Default HLS quality is capped at 720p, with 480p/1080p/Auto options. Live uses Go Live; replay uses local bookmarks and Start Over. Closing/navigation cancels obsolete playback. Sports requires an adult viewer. Browser native-HLS fallback uses the browser's own adaptive selection.
+
+Sports media goes directly from the public provider to the device. It has no TorBox API/login requirement or Render video path. Existing private API CSP remains local; only the static HTML shell permits the exact sports API/CDNs and MediaSource blob playback. TorBox media/key validators and state formats remain unchanged. Module/cache tokens are bumped together. The separate native APK is maintained independently.
+
+Local checks: 351 Node tests registered, **345 passed, 0 failed, 6 optional checks skipped**; all **20 browser scenarios passed**, including five new sports HLS/resume/cancellation/error/Kid Mode scenarios. Browser media tests are synthetic. Real source probes confirmed HLS masters, variants and first segments for T2/Red Bull TV and one full padel replay, including CORS and replay ENDLIST. Real external Chrome playback started for T2, Red Bull TV and a Paris padel replay; details are recorded in the sports report. No authenticated TorBox test or native Firestick acceptance is claimed.
+
+Publication and rollback results are recorded below after the candidate checks. This task does not deploy or reconfigure Render; its earlier backend workspace gate remains.
+
 ## Artwork patch · 2026-10-10
 
 The user expressly authorized a narrow artwork fix in both the independent TV app and this browser app. Live probes of Unabomber (tt6933238), East of Eden (tt21097264) and War (tt37972251) showed valid JPEGs redirected from images.metahub.space to **live.metahub.space**. The production HTML image CSP excluded that exact host, causing otherwise valid posters to disappear.

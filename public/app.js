@@ -1,13 +1,13 @@
-import { createDiscoveryUI, bindArtworkImage } from './discover.js?v=release-1.2.0-artwork.1';
-import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.0-artwork.1';
-import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.0-artwork.1';
-import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.0-artwork.1';
-import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.0-artwork.1';
-import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.0-artwork.1';
-import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.0-artwork.1';
-import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=release-1.2.0-artwork.1';
-import { clearSearchHistory } from './search-history.js?v=release-1.2.0-artwork.1';
-import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.0-artwork.1';
+import { createDiscoveryUI, bindArtworkImage } from './discover.js?v=release-1.2.0-sports.1';
+import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.0-sports.1';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.0-sports.1';
+import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.0-sports.1';
+import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.0-sports.1';
+import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.0-sports.1';
+import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.0-sports.1';
+import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=release-1.2.0-sports.1';
+import { clearSearchHistory } from './search-history.js?v=release-1.2.0-sports.1';
+import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.0-sports.1';
 const $ = id => document.getElementById(id);
 let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null, fullscreenExitControlTimer = null;
 let discoveryUI;
@@ -682,6 +682,7 @@ async function detachPlayback({preserveVideo=false}={}) {
 }
 async function stopPlayback() { playGeneration++; playbackRequestAbort?.abort(); discoveryUI?.cancelPlayback(); hideResumeOverlay(); clearStillWatchingTimer(); hideStillWatchingPrompt(); await exitPlayerPresentationModes(); await detachPlayback(); }
 async function startPlayback(file, playbackContext = null) {
+  window.dispatchEvent(new CustomEvent('cinema-playback-start'));
   if(document.fullscreenElement===playerMediaShell()||document.fullscreenElement===active?.video){fullscreenIntent=true;fullscreenRestoreDeadline=Date.now()+6000;}
   if(!guestMode){
     const block=canStartKidPlayback(viewer,playbackContext);
@@ -1051,4 +1052,5 @@ $('settings-check-status').addEventListener('click',async()=>{text('settings-mes
 $('retry-torbox-status').addEventListener('click',()=>checkTorBoxStatus(true));
 discoveryUI = createDiscoveryUI({ api, play: startPlayback, guard: ensureTorBoxReady, resumeActivity:{ show:showResumeOverlay, update:updateResumeOverlay, hide:hideResumeOverlay } });
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+window.addEventListener('sports-playback-start',()=>{void stopPlayback();if($('player').open)$('player').close();});
 bootstrap();

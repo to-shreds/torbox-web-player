@@ -22,6 +22,11 @@ const publicFiles = new Map([
   ['/recover/', ['recover/index.html', 'text/html; charset=utf-8']],
   ['/recover/index.html', ['recover/index.html', 'text/html; charset=utf-8']],
   ['/boot.js', ['boot.js', 'text/javascript; charset=utf-8']],
+  ['/sports.js', ['sports.js', 'text/javascript; charset=utf-8']],
+  ['/sports-core.js', ['sports-core.js', 'text/javascript; charset=utf-8']],
+  ['/sports.css', ['sports.css', 'text/css; charset=utf-8']],
+  ['/sports-catalog.json', ['sports-catalog.json', 'application/json; charset=utf-8']],
+  ['/hls.min.js', ['hls.min.js', 'text/javascript; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
   ['/runtime.js', ['runtime.js', 'text/javascript; charset=utf-8']],
   ['/playback-lifecycle.js', ['playback-lifecycle.js', 'text/javascript; charset=utf-8']],
@@ -220,6 +225,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
+        if(filename==='index.html'){const html=await readFile(join(root,'public',filename),'utf8');const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];if(csp)response.setHeader('Content-Security-Policy',csp+"; frame-ancestors 'none'");response.setHeader('Content-Type',type);return response.end(html);}
         response.setHeader('Content-Type', type); return response.end(await readFile(join(root, 'public', filename)));
       }
 
