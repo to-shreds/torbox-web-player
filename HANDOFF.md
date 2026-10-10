@@ -12,7 +12,7 @@ Sports media goes directly from the public provider to the device. It has no Tor
 
 Local checks: 351 Node tests registered, **345 passed, 0 failed, 6 optional checks skipped**; all **20 browser scenarios passed**, including five new sports HLS/resume/cancellation/error/Kid Mode scenarios. Browser media tests are synthetic. Real source probes confirmed HLS masters, variants and first segments for T2/Red Bull TV and one full padel replay, including CORS and replay ENDLIST. Real external Chrome playback started for T2, Red Bull TV and a Paris padel replay; details are recorded in the sports report. No authenticated TorBox test or native Firestick acceptance is claimed.
 
-Publication and rollback results are recorded below after the candidate checks. This task does not deploy or reconfigure Render; its earlier backend workspace gate remains.
+Runtime commit `ac963c89d15c6a2070cfd375aa80ade943121f29` is on main and `release/v1.2.0-sports.1`. Release checks [38090258168](https://github.com/to-shreds/torbox-web-player/actions/runs/38090258168) and Pages verification/deployment [38090379801](https://github.com/to-shreds/torbox-web-player/actions/runs/38090379801) succeeded. The previous main SHA `4e57131b3d981acb80a0e0f7e52256130a8204af` remains at `archive/web-before-sports-2026-10-10`. Published root/key assets are verified against the tested tree. This task does not deploy or reconfigure Render; its earlier backend workspace gate remains.
 
 ## Artwork patch · 2026-10-10
 
@@ -33,7 +33,7 @@ Release 1.2.0 is implemented and independently verified. The frontend is live on
 - Backend: https://torbox-web-player-key.onrender.com
 - Render service: `torbox-web-player-key`, `srv-damu91142hec73chb7qg`.
 - `main` is authoritative. Render still watches `browser-key-clone`; publish a matching runtime tree there.
-- Current frontend build: `release-1.2.0-artwork.1`; scope-specific service worker cache. The following 1.2.0 runtime/mirror checks are the preceding baseline; current artwork publication is recorded above.
+- Current frontend build: `release-1.2.0-sports.1`; scope-specific service worker cache. The following 1.2.0 runtime/mirror checks are the preceding baseline; current Sports and artwork publication are recorded above.
 - Verified release runtime: `081ef97567a0dc6cca45285312bb530c5bde9dac`, on main and `release/v1.2.0-reliability`.
 - Prepared Render mirror: `7dfdac6ba47158c24e4af1601910c9e94872c356`. Its entire tree matches the verified runtime commit.
 - Release CI `36814630892`, Pages verification/deployment `36814776986`, and mirror CI `36814779367` all succeeded.
