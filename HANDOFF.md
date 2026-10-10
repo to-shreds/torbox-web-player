@@ -2,6 +2,14 @@
 
 Read this first. The code repository controls implementation; `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md` controls readiness and the next action.
 
+## Buffstreams investigation · 2026-10-10
+
+The user identified `https://mybuffstreams.plus`, which redirects to `/home6`, and requested football live/replays without subscriptions or VPN dependence. Direct probes of two college-football server choices exposed public HLS through `gooz.aapmains.net` and `chatgpt.hereisman.net`, followed by `red.redirector1.space` and two verified R2 accounts. Native-style requests with the public player Referer returned masters, variants and MPEG-TS segments; a bounded segment probe identified 720p H.264/AAC.
+
+This does **not** establish a compatible standalone browser source. Playlist requests with Origin `https://to-shreds.github.io` returned 403, segment CORS only allowed the provider origin, and the provider's `frame-ancestors` allowlist excludes GitHub Pages. An actual sandboxed Chrome frame test was rejected by that policy. Do not add a nonworking iframe tile, forward TorBox credentials, introduce a media-byte relay, or describe live listing pages as a replay archive.
+
+The separate native project adds a 0.2.1 test connector with refreshable football/NHL listings, server selection and an editable source address. Its current build/verification/readiness is controlled by its own handoff and ProjectStatus. Buffstreams full-game archives remain unverified. This investigation changes documentation only: the web runtime remains `release-1.2.0-sports.1`, with its existing four channels and sixteen padel sessions. Render remains untouched. Next browser action is to find a provider that permits our origin and direct video access, or a materially different user-authorized playback arrangement.
+
 ## Sports feature · 2026-10-10
 
 Frontend build **release-1.2.0-sports.1** adds Sports before private-service startup/login. The static app contains its catalog and Apache-licensed hls.js 1.6.15. Four free live channels are T2 tennis, Red Bull TV, Pickleball TV and NHL classics/coverage. Sixteen full Premier Padel sessions cover Paris, Malaga, Bordeaux and Valladolid in 2026. This is a bundled replay snapshot; no automatic event-index refresh or promise of every tennis tournament is implemented.
