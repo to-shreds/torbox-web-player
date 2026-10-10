@@ -1,13 +1,13 @@
-import { createDiscoveryUI } from './discover.js?v=release-1.2.0';
-import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.0';
-import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.0';
-import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.0';
-import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.0';
-import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.0';
-import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.0';
-import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=release-1.2.0';
-import { clearSearchHistory } from './search-history.js?v=release-1.2.0';
-import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.0';
+import { createDiscoveryUI, bindArtworkImage } from './discover.js?v=release-1.2.0-artwork.1';
+import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.0-artwork.1';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.0-artwork.1';
+import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.0-artwork.1';
+import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.0-artwork.1';
+import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.0-artwork.1';
+import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.0-artwork.1';
+import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=release-1.2.0-artwork.1';
+import { clearSearchHistory } from './search-history.js?v=release-1.2.0-artwork.1';
+import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.0-artwork.1';
 const $ = id => document.getElementById(id);
 let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null, fullscreenExitControlTimer = null;
 let discoveryUI;
@@ -212,7 +212,7 @@ function renderRecent() {
     const entry = document.createElement('div'); entry.className = 'recent-entry';
     const card = document.createElement('button'); card.type = 'button'; card.className = 'recent-card';
     card.title=item.type==='series'?'Hold for episode list':'Hold for title details';
-    if (item.poster) { const img = document.createElement('img'); img.className = 'recent-thumb'; img.src = item.poster; img.alt = ''; img.referrerPolicy = 'no-referrer'; card.append(img); }
+    { const img = document.createElement('img'); img.className = 'recent-thumb'; img.alt = ''; bindArtworkImage(img,item.poster,item.id); card.append(img); }
     const copy = document.createElement('span'); copy.className = 'recent-copy';
     const title = document.createElement('strong'); title.className = 'recent-title'; title.textContent = item.title;
     const meta = document.createElement('span'); meta.className = 'recent-meta'; meta.textContent = recentLabel(item); copy.append(title, meta);

@@ -2,13 +2,17 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.0**
+Current version: **1.2.0**, frontend artwork patch **release-1.2.0-artwork.1**
 
 Deployment status: the v1.2.0 frontend is live and the backend release has passed CI, but the live Render backend remains v1.1.0 pending the Render connector's required workspace confirmation. See [HANDOFF.md](HANDOFF.md) for the exact deployment state.
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/` (legacy mirror: `/key/`)
 
 Backend: `https://torbox-web-player-key.onrender.com`
+
+## Artwork patch
+
+Fixes missing posters by accepting the image provider’s exact `live.metahub.space` redirect and adding a title-specific alternate size/one retry. Browser state, playback and the Render service are unchanged. See [the artwork report](docs/ARTWORK-2026-10-10.md).
 
 ## Release 1.2.0
 

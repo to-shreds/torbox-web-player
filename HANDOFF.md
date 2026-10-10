@@ -2,6 +2,16 @@
 
 Read this first. The code repository controls implementation; `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md` controls readiness and the next action.
 
+## Artwork patch · 2026-10-10
+
+The user expressly authorized a narrow artwork fix in both the independent TV app and this browser app. Live probes of Unabomber (tt6933238), East of Eden (tt21097264) and War (tt37972251) showed valid JPEGs redirected from images.metahub.space to **live.metahub.space**. The production HTML image CSP excluded that exact host, causing otherwise valid posters to disappear.
+
+Frontend build **release-1.2.0-artwork.1** adds the exact live image host, an exact-title medium-size fallback and one delayed/cache-bypassed retry. Failures stop after at most three attempts; detached cards do not start more requests. Poster grids, My List, details, Next Up and Continue Watching use the common image binder. The scoped shell cache token and module query versions are bumped consistently so installed PWAs receive the patch. Script sources remain self-only. Playback, catalog/server contracts, settings, credentials and media routing are unchanged.
+
+Local syntax checks passed. The full Node suite reports 345 registered, **339 passed, 0 failed, 6 optional live/account checks skipped**, including eight new artwork regressions. All **15 browser tests passed**, including actual DOM/CSP artwork checks and the existing synthetic-media reliability scenarios. Browser checks cover the new host/CSP and an untrusted-host failure that recovers by exact title ID, plus existing playback/UI scenarios. Publication is performed through the existing reliability gate and Pages workflow; record actual run/deployment results after completion. Original root/backend implementation remains 1.2.0 and the last observed live Render backend remains 1.1.0. Do not mirror or restart Render as part of this frontend fix.
+
+The previous main tree is preserved before publication at an archive branch and in Git history. TorBox TV sources/APKs/releases remain independent. No TV build or rollback changes this frontend.
+
 ## Current work
 
 Release 1.2.0 is implemented and independently verified. The frontend is live on GitHub Pages, but the Render backend is still v1.1.0. Backend publication is the sole blocked implementation step: the Render connector requires the user to confirm its workspace before `trigger_deploy` can proceed. Do not claim that the v1.2.0 backend or direct-only guest policy is live yet.

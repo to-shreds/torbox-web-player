@@ -1,4 +1,4 @@
-const BUILD='release-1.2.0';
+const BUILD='release-1.2.0-artwork.1';
 const startedAt=Date.now();
 let startupTimer=null;
 const stageNode=()=>document.querySelector('#startup-stage');

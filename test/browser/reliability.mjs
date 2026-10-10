@@ -38,7 +38,7 @@ async function pageFor(t,{saved=false,mediaMode='play',speedTimeouts=false,signe
   if(saved){
     // Seed through the real history API once the origin is available, then reload.
     await page.goto(fixture.origin);await page.waitForSelector('#workspace:not([hidden])');
-    await page.evaluate(async()=>{const {recordRecent}=await import('./history.js?v=release-1.2.0');recordRecent({current:{type:'series',id:'tt1234567',season:1,episode:1},title:'Fixture Show',episodeName:'One'},40,120);});
+    await page.evaluate(async()=>{const {recordRecent}=await import('./history.js?v=release-1.2.0-artwork.1');recordRecent({current:{type:'series',id:'tt1234567',season:1,episode:1},title:'Fixture Show',episodeName:'One'},40,120);});
   }
   return{page,context,token,errors};
 }
@@ -49,6 +49,35 @@ async function playEpisode(page,number=1){
   await page.locator('#episode-area button').filter({hasText:/^Play$/}).nth(number-1).click();
   await page.waitForFunction(()=>document.querySelector('video')?.currentTime>0);
 }
+
+const artworkPixel=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aH0cAAAAASUVORK5CYII=','base64');
+async function mountArtwork(page,url){
+  await page.evaluate(async url=>{
+    const {bindArtworkImage}=await import('./discover.js?v=release-1.2.0-artwork.1');
+    const img=document.createElement('img');img.id='artwork-regression';img.alt='Artwork fixture';img.style.cssText='position:fixed;top:0;left:0;width:40px;height:60px';document.body.append(img);
+    bindArtworkImage(img,url,'tt6933238');
+  },url);
+}
+test('browser loads artwork at the actual redirect destination under the production image CSP',async t=>{
+  const {page,context}=await pageFor(t);let liveRequests=0;
+  // Playwright interception handles only the first URL of a redirected request.
+  // Probe the real chain separately and test its destination against real CSP.
+  await context.route('https://live.metahub.space/poster/small/tt6933238/img',route=>{liveRequests++;return route.fulfill({contentType:'image/png',body:artworkPixel});});
+  await page.goto(fixture.origin);await page.waitForSelector('#workspace:not([hidden])');
+  await mountArtwork(page,'https://live.metahub.space/poster/small/tt6933238/img');
+  await page.waitForFunction(()=>document.querySelector('#artwork-regression')?.naturalWidth===1);
+  assert.equal(liveRequests,1);assert.equal(await page.locator('#artwork-regression').isVisible(),true);
+});
+test('browser blocks an untrusted redirect and recovers with the title-specific medium poster',async t=>{
+  const {page,context}=await pageFor(t);let evilRequests=0,mediumRequests=0;
+  await context.route('https://images.metahub.space/poster/small/tt6933238/img',route=>route.fulfill({status:307,headers:{location:'https://evil.example/poster.jpg'}}));
+  await context.route('https://evil.example/**',route=>{evilRequests++;return route.abort();});
+  await context.route('https://images.metahub.space/poster/medium/tt6933238/img',route=>{mediumRequests++;return route.fulfill({contentType:'image/png',body:artworkPixel});});
+  await page.goto(fixture.origin);await page.waitForSelector('#workspace:not([hidden])');
+  await mountArtwork(page,'https://images.metahub.space/poster/small/tt6933238/img');
+  await page.waitForFunction(()=>document.querySelector('#artwork-regression')?.naturalWidth===1);
+  assert.equal(evilRequests,0);assert.equal(mediumRequests,1);
+});
 
 test('full UI login, browse, playback and seeking verify the CDN redirect with synthetic media',async t=>{
   const {page}=await pageFor(t,{signedIn:false});await page.goto(fixture.origin);
@@ -139,7 +168,7 @@ test('rapid episode choices play only the last selected episode',async t=>{
 
 test('a remembered encrypted key reconnects after a backend session restart',async t=>{
   const {page}=await pageFor(t);await home(page);
-  await page.evaluate(async()=>{const {rememberApiKey}=await import('./vault.js?v=release-1.2.0');await rememberApiKey('fixture-master-key');});
+  await page.evaluate(async()=>{const {rememberApiKey}=await import('./vault.js?v=release-1.2.0-artwork.1');await rememberApiKey('fixture-master-key');});
   fixture.sessions.revokeAll();
   await page.locator('#catalog-grid button').first().click();
   await page.locator('#episode-area button').filter({hasText:/^Play$/}).first().waitFor();

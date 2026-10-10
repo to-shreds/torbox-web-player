@@ -1,15 +1,40 @@
-import { LatestPlaybackAction } from './playback-lifecycle.js?v=release-1.2.0';
-import { loadPublicSources, browserContainerHints } from './source-client.js?v=release-1.2.0';
-import { getSettings, updateSettings } from './settings.js?v=release-1.2.0';
-import { listRecent, formatResumeTime } from './history.js?v=release-1.2.0';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=release-1.2.0';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=release-1.2.0';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=release-1.2.0';
+import { LatestPlaybackAction } from './playback-lifecycle.js?v=release-1.2.0-artwork.1';
+import { loadPublicSources, browserContainerHints } from './source-client.js?v=release-1.2.0-artwork.1';
+import { getSettings, updateSettings } from './settings.js?v=release-1.2.0-artwork.1';
+import { listRecent, formatResumeTime } from './history.js?v=release-1.2.0-artwork.1';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=release-1.2.0-artwork.1';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=release-1.2.0-artwork.1';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=release-1.2.0-artwork.1';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
 const button = (label, fn, primary = false) => { const b = element('button', label, primary ? 'primary' : ''); b.type = 'button'; b.addEventListener('click', fn); return b; };
-const image = (url, label, className) => { const i = element('img', '', className); i.alt = label; i.loading = 'lazy'; i.referrerPolicy = 'no-referrer'; i.src = url; i.addEventListener('error', () => { i.hidden = true; }); return i; };
+export const ARTWORK_HOSTS = Object.freeze(['images.metahub.space','live.metahub.space','image.tmdb.org','m.media-amazon.com']);
+export function artworkCandidates(value, id) {
+  const urls=[];
+  try { const u=new URL(value); if(String(value).length<=2048&&u.protocol==='https:'&&!u.username&&!u.password&&!u.port&&ARTWORK_HOSTS.includes(u.hostname)) urls.push(u.href); } catch {}
+  if(/^tt[0-9]{5,12}$/.test(id||''))urls.push(`https://images.metahub.space/poster/medium/${id}/img`);
+  return [...new Set(urls)].slice(0,2);
+}
+export function bindArtworkImage(img, value, id, timers=globalThis) {
+  const candidates=artworkCandidates(value,id),attempts=[...candidates];
+  if(candidates.length){const retry=new URL(candidates[0]);retry.searchParams.set('_artwork_retry','1');attempts.push(retry.href);}
+  let index=0,timer=null;
+  const cleanup=()=>{if(timer!==null)timers.clearTimeout(timer);timer=null;img.removeEventListener('error',failed);img.removeEventListener('load',loaded);};
+  const loaded=()=>{img.hidden=false;cleanup();};
+  const failed=()=>{
+    if(timer!==null)timers.clearTimeout(timer);timer=null;
+    if(!img.isConnected){cleanup();return;}
+    if(index>=attempts.length){img.hidden=true;cleanup();return;}
+    if(index===attempts.length-1){timer=timers.setTimeout(()=>{timer=null;if(img.isConnected)next();else cleanup();},350);}
+    else next();
+  };
+  const next=()=>{img.hidden=false;img.src=attempts[index++];};
+  img.loading='lazy';img.referrerPolicy='no-referrer';
+  if(!attempts.length){img.hidden=true;return;}
+  img.addEventListener('error',failed);img.addEventListener('load',loaded);next();
+}
+const image = (url, label, className, id) => { const i = element('img', '', className); i.alt = label; bindArtworkImage(i,url,id); return i; };
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 const resolutionOf = s => String(s?.resolution || s?.quality || '').toLowerCase();
 export function sourceMatchesResolution(source, resolution = 'auto') {
@@ -232,7 +257,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
         const data=await api(`/api/discover/meta?type=series&id=${item.id}`,{signal:AbortSignal.timeout(12000)}),meta=data.meta;
         const next=episodeQueue(meta,{type:'series',id:item.id,season:item.season,episode:item.episode})[0];if(!next)continue;
         const episode=meta.episodes.find(e=>e.season===next.season&&e.episode===next.episode),card=element('article','','next-up-card');
-        if(meta.poster)card.append(image(meta.poster,'','next-up-thumb'));
+        card.append(image(meta.poster,'','next-up-thumb',meta.id));
         const copy=element('div','','next-up-copy');copy.append(element('strong',meta.name),element('span',`S${next.season}E${next.episode} · ${episode?.name||next.name||'Next episode'}`,'muted'));
         const playButton=button('Play',()=>quickPlay(meta,next,episode?.name||next.name||'',playButton),true);card.append(copy,playButton);cards.push(card);
         if(cards.length>=settings.nextUpLimit)break;
@@ -265,7 +290,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   function posterCard(meta){
     let longPressed=false,timer=null;
     const card=button('',()=>{if(longPressed){longPressed=false;return;}showTitle(meta)});card.className='poster-card';card.setAttribute('aria-label',`Open ${meta.name}`);
-    const art=element('div','','poster-art');if(meta.poster)art.append(image(meta.poster,'','poster-image'));art.append(element('span',meta.name,'poster-fallback'));
+    const art=element('div','','poster-art');art.append(image(meta.poster,'','poster-image',meta.id));art.append(element('span',meta.name,'poster-fallback'));
     card.append(art,element('strong',meta.name),element('span',meta.year||(meta.type==='series'?'Show':'Movie'),'muted'));
     const cancel=()=>{if(timer)clearTimeout(timer);timer=null;};
     card.addEventListener('pointerdown',event=>{if(!getSettings().longPressShortcuts||event.button>0)return;cancel();timer=setTimeout(()=>{longPressed=true;openQuickActions(meta);},550);});
@@ -473,7 +498,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     try{
       const data=await api(`/api/discover/meta?type=${meta.type}&id=${meta.id}`,{signal:AbortSignal.any([titleAbort.signal,AbortSignal.timeout(20000)])});
       if(generation!==titleGeneration||!$('title-dialog').open||!active)return;currentMeta=data.meta;updateWatchlistButton();
-      const summary=element('div','','title-summary');if(currentMeta.poster)summary.append(image(currentMeta.poster,currentMeta.name,'detail-poster'));
+      const summary=element('div','','title-summary');summary.append(image(currentMeta.poster,currentMeta.name,'detail-poster',currentMeta.id));
       const copy=element('div','','title-copy');copy.append(element('p',[currentMeta.year,currentMeta.runtime,...currentMeta.genres].filter(Boolean).join(' · '),'muted'),element('p',currentMeta.description||'','title-description'));summary.append(copy);
       $('title-content').replaceChildren(summary);message('detail-message','');
       if(currentMeta.type==='movie')renderMovieActions(currentMeta);else renderEpisodes(currentMeta,preferredSeason);
