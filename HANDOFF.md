@@ -6,6 +6,16 @@ Read this first. The code repository controls implementation; `to-shreds/Project
 
 The user explicitly confirmed **My Workspace** (`tea-dakujgmk1f9s73d2v8ng`) on 2026-10-10 and requested blanket confirmation because this is the account's only workspace. Reuse that workspace for authorized Render work without asking again unless the user changes the choice. Pass its ID explicitly on Render calls.
 
+## Buffstreams new-tab update · 2026-10-11
+
+The user explicitly accepts opening Buffstreams in a new browser tab. Frontend **release-1.2.2-buffstreams.1** adds **Sports → Buffstreams**, with All live sports, NFL, College football and NHL hockey shortcuts. They open provider directory pages; the viewer chooses a game there. Current native app and in-app Sports catalog/playback are independent. No backend or media policy change is required.
+
+The current provider navigation supplies `/nflstreams2`, `/cfbstreams2` and `/nhlstreams2`, each verified HTTP 200 on the configured default `https://mybuffstreams.plus`. Root remains a fallback if category paths change. Provider listing CORS is uneven: `/home6` permits the Pages origin, but the root redirect and category pages do not reliably do so. No live-game scraping, embedding or football archive is claimed.
+
+A collapsible address control remembers a validated HTTPS Buffstreams root under `tw-buffstreams-base`, independently of credentials and history. Pasted provider page paths normalize to the root. Credentials, query/fragment data, invalid DNS labels, unsupported schemes and custom ports are rejected. A blocked storage write reports that the address lasts only for the visit. Links are real user-clicked anchors with `_blank`, `noopener noreferrer` and `no-referrer`; each click rechecks Adult/Kid Mode, stops local Sports playback and signals the existing movie pause handler. TorBox credentials never enter the links. Existing 36-channel/157-replay counts and filters remain.
+
+The previous main is preserved at `archive/web-before-buffstreams-new-tab-2026-10-11`, SHA `d7d4f3d58fb110af705a54df29487695644e956b`. Cache and import versions are bumped together; the new module is included in the offline shell. Syntax and Node verification are performed locally; the release workflow provides Chromium popup/state/Kid Mode checks and all prior browser regression scenarios. Publication is pending until that workflow and Pages deployment are verified. This frontend-only task does not update or restart Render.
+
 ## Expanded Sports release · 2026-10-11
 
 Prepared runtime **1.2.2**, frontend **release-1.2.2-sports.1**. Web offers 36 live channels, 48 live stream choices and 157 dated full replays across 25 sport filters. Independent native APK 0.2.3 offers 39 channels, 51 stream choices and the same 157 replays across 26 filters. Anonymous Sports entry avoids private-service startup; the requested availability section is removed. Adult/Kid Mode checks, replay bookmarks and the earlier movie startup/state guards remain.

@@ -1,6 +1,6 @@
 const CACHE_PREFIX='torbox-player:'+self.registration.scope+':';
-const CACHE=CACHE_PREFIX+'release-1.2.2-sports.1';
-const BUILD='release-1.2.2-sports.1';
+const CACHE=CACHE_PREFIX+'release-1.2.2-buffstreams.1';
+const BUILD='release-1.2.2-buffstreams.1';
 const SHELL=[
   './','./index.html',
   `./style.css?v=${BUILD}`,`./discover.css?v=${BUILD}`,`./boot.js?v=${BUILD}`,`./app.js?v=${BUILD}`,
@@ -8,6 +8,7 @@ const SHELL=[
   `./watchlist.js?v=${BUILD}`,`./search-history.js?v=${BUILD}`,`./source-memory.js?v=${BUILD}`,`./parental-controls.js?v=${BUILD}`,
   `./device-transfer.js?v=${BUILD}`,`./playback-errors.js?v=${BUILD}`,`./discover.js?v=${BUILD}`,`./source-client.js?v=${BUILD}`,
   `./sports-player.html?v=${BUILD}`,`./sports-player.js?v=${BUILD}`,`./sports-player.css?v=${BUILD}`,`./sports.js?v=${BUILD}`,`./sports-core.js?v=${BUILD}`,`./sports.css?v=${BUILD}`,`./sports-catalog.json?v=${BUILD}`,`./hls.min.js?v=${BUILD}`,
+  `./buffstreams.js?v=${BUILD}`,
   `./manifest.webmanifest?v=${BUILD}`,'./icon.svg'
 ];
 const shellUrls=new Set(SHELL.map(path=>new URL(path,self.registration.scope).href));

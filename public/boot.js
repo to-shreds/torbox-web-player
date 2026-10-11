@@ -1,4 +1,4 @@
-const BUILD='release-1.2.2-sports.1';
+const BUILD='release-1.2.2-buffstreams.1';
 const startedAt=Date.now();
 let startupTimer=null;
 const stageNode=()=>document.querySelector('#startup-stage');
