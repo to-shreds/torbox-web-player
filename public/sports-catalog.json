@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-10",
+  "updated": "2026-10-11",
   "items": [
     {
       "id": "t2",
@@ -12,7 +12,8 @@
           "label": "T2 Tennis",
           "url": "https://amg01444-tennischannel-amg01444c2-lg-us-959.playouts.now.amagi.tv/playlist/amg01444-tennischannelfast-tennischannelus-lgus/playlist.m3u8"
         }
-      ]
+      ],
+      "provider": "T2 Tennis"
     },
     {
       "id": "redbull",
@@ -25,7 +26,8 @@
           "label": "Red Bull TV",
           "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "pickleball",
@@ -38,7 +40,8 @@
           "label": "Pickleball TV",
           "url": "https://amg01444-amg01444c3-lg-us-3412.playouts.now.amagi.tv/playlist/amg01444-tennischannelfast-pickleball-lgus/playlist.m3u8"
         }
-      ]
+      ],
+      "provider": "Pickleball TV"
     },
     {
       "id": "nhl",
@@ -51,11 +54,12 @@
           "label": "NHL classics and coverage",
           "url": "https://amg01874-nhl-amg01874c1-lg-us-5458.playouts.now.amagi.tv/playlist/amg01874-nhlinteractivecyberenterprisesllcfast-nhl-lgus/playlist.m3u8"
         }
-      ]
+      ],
+      "provider": "NHL classics and coverage"
     },
     {
       "id": "padel-db443c00-cd86-491d-862c-8d173b0c989b",
-      "title": "Final \u00b7 Paris",
+      "title": "Final · Paris",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-09-13",
@@ -65,11 +69,12 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:db443c00-cd86-491d-862c-8d173b0c989b:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-506e2ae4-8614-41e7-a350-89b6965db501",
-      "title": "Semi-finals \u00b7 Paris",
+      "title": "Semi-finals · Paris",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-09-12",
@@ -79,11 +84,12 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:506e2ae4-8614-41e7-a350-89b6965db501:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-fdc5ecea-16e2-4510-b1a0-b982def3b680",
-      "title": "Quarter-finals Centre Court \u00b7 Paris",
+      "title": "Quarter-finals Centre Court · Paris",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-09-11",
@@ -93,11 +99,12 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:fdc5ecea-16e2-4510-b1a0-b982def3b680:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-fd20233c-99d6-4725-9482-e1dae7dbff08",
-      "title": "Quarter-finals Secondary Court \u00b7 Paris",
+      "title": "Quarter-finals Secondary Court · Paris",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-09-11",
@@ -107,11 +114,12 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:fd20233c-99d6-4725-9482-e1dae7dbff08:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-88e0829b-5c45-4822-bd74-3c2a78f8ffa5",
-      "title": "Finals \u00b7 Malaga P1",
+      "title": "Finals · Malaga P1",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-07-19",
@@ -121,11 +129,12 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:88e0829b-5c45-4822-bd74-3c2a78f8ffa5:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-d8920d92-4612-4ae2-9f13-ab4b89ba04ee",
-      "title": "Semi-finals \u00b7 Malaga P1",
+      "title": "Semi-finals · Malaga P1",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-07-18",
@@ -135,7 +144,8 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:d8920d92-4612-4ae2-9f13-ab4b89ba04ee:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-20ef6742-8429-4c26-94e6-b25c36c2ac6d",
@@ -149,7 +159,8 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:20ef6742-8429-4c26-94e6-b25c36c2ac6d:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-07c5551d-fcee-4774-a2ea-f2e978e67331",
@@ -163,11 +174,12 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:07c5551d-fcee-4774-a2ea-f2e978e67331:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-31345ef3-a9ae-4258-900e-5fe2965800c8",
-      "title": "Final \u00b7 Bordeaux Premier Padel P2",
+      "title": "Final · Bordeaux Premier Padel P2",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-07-05",
@@ -177,11 +189,12 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:31345ef3-a9ae-4258-900e-5fe2965800c8:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-b3316740-6fb1-4ab2-b27d-a990f6ae9afb",
-      "title": "Semi-finals \u00b7 Bordeaux Premier Padel P2",
+      "title": "Semi-finals · Bordeaux Premier Padel P2",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-07-04",
@@ -191,11 +204,12 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:b3316740-6fb1-4ab2-b27d-a990f6ae9afb:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-2f3c72c1-cde9-4b85-99aa-65da8f005669",
-      "title": "Quarter-finals Centre Court \u00b7 Bordeaux",
+      "title": "Quarter-finals Centre Court · Bordeaux",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-07-03",
@@ -205,11 +219,12 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:2f3c72c1-cde9-4b85-99aa-65da8f005669:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-0981d026-be46-401b-8117-b3d0cfc24906",
-      "title": "Quarter-finals Secondary Court \u00b7 Bordeaux",
+      "title": "Quarter-finals Secondary Court · Bordeaux",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-07-03",
@@ -219,11 +234,12 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:0981d026-be46-401b-8117-b3d0cfc24906:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-94e4e110-4c9b-44b5-8d19-3df1a69e7ea0",
-      "title": "Final \u00b7 Valladolid Premier Padel P2",
+      "title": "Final · Valladolid Premier Padel P2",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-06-28",
@@ -233,11 +249,12 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:94e4e110-4c9b-44b5-8d19-3df1a69e7ea0:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-4243cac1-462f-4c4e-b8ac-1982e5e770ac",
-      "title": "Semi-finals \u00b7 Valladolid Premier Padel P2",
+      "title": "Semi-finals · Valladolid Premier Padel P2",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-06-27",
@@ -247,11 +264,12 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:4243cac1-462f-4c4e-b8ac-1982e5e770ac:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-f836420f-df73-4e67-aec1-d3b27b63c6d1",
-      "title": "Quarter-finals Centre Court \u00b7 Valladolid",
+      "title": "Quarter-finals Centre Court · Valladolid",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-06-26",
@@ -261,11 +279,12 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:f836420f-df73-4e67-aec1-d3b27b63c6d1:en-INT"
         }
-      ]
+      ],
+      "provider": "Red Bull TV"
     },
     {
       "id": "padel-3c586c02-a386-4ec1-ba6d-00350c4fd890",
-      "title": "Quarter-finals Secondary Court \u00b7 Valladolid",
+      "title": "Quarter-finals Secondary Court · Valladolid",
       "sport": "padel",
       "kind": "replay",
       "date": "2026-06-26",
@@ -275,7 +294,2631 @@
           "label": "Red Bull TV",
           "videoId": "rrn:content:live-videos:3c586c02-a386-4ec1-ba6d-00350c4fd890:en-INT"
         }
+      ],
+      "provider": "Red Bull TV"
+    },
+    {
+      "id": "bein-xtra",
+      "title": "beIN SPORTS XTRA",
+      "provider": "beIN SPORTS XTRA",
+      "sport": "soccer",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d9ssxzmclhfo4.cloudfront.net/bein_sports.m3u8"
+        },
+        {
+          "type": "hls",
+          "label": "Tubi feed",
+          "url": "https://aegis-cloudfront-1.tubi.video/651ee7d3-e75b-4748-be86-422d43ff24b6/playlist.m3u8"
+        }
       ]
+    },
+    {
+      "id": "bein-xtra-es",
+      "title": "beIN SPORTS XTRA en Español",
+      "provider": "beIN SPORTS XTRA en Español",
+      "sport": "soccer",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://dc1644a9jazgj.cloudfront.net/beIN_Sports_Xtra_Espanol.m3u8"
+        },
+        {
+          "type": "hls",
+          "label": "Xumo Play feed",
+          "url": "https://bein-esp-xumo.amagi.tv/playlist.m3u8"
+        },
+        {
+          "type": "hls",
+          "label": "Tubi feed",
+          "url": "https://aegis-cloudfront-1.tubi.video/01f6c149-449b-4248-8bda-2278799205ec/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "billiard-tv",
+      "title": "Billiard TV",
+      "provider": "Billiard TV",
+      "sport": "billiards",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://pb-wm04vonaerv0k.akamaized.net/billi.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "fifa-plus",
+      "title": "FIFA+",
+      "provider": "FIFA+",
+      "sport": "soccer",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d2w9q46ikgrcwx.cloudfront.net/v1/sysdata_s_p_a_fifa_7/samsungheadend_us/latest/main/hls/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "fox-sports",
+      "title": "FOX Sports",
+      "provider": "FOX Sports",
+      "sport": "mixed",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d1jzu95oc8fgt3.cloudfront.net/FOX_Sports.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "golfpass",
+      "title": "GolfPass",
+      "provider": "GolfPass",
+      "sport": "golf",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d2icntm6fhxrry.cloudfront.net/master.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "mlb-channel",
+      "title": "MLB Channel classics and coverage",
+      "provider": "MLB Channel",
+      "sport": "baseball",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://pb-2y9ox4r1fy550.akamaized.net/playlist.m3u8"
+        },
+        {
+          "type": "hls",
+          "label": "Tubi feed",
+          "url": "https://aegis-cloudfront-1.tubi.video/36ef2f9d-7100-4c4d-b41a-dbf41ab7e461/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "msg-sportszone",
+      "title": "MSG SportsZone",
+      "provider": "MSG SportsZone",
+      "sport": "mixed",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d2a31kzot4f8t3.cloudfront.net/v1/amc_msgsportszone_1/samsungheadend_us/latest/main/hls/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "nascar-channel",
+      "title": "NASCAR Channel",
+      "provider": "NASCAR Channel",
+      "sport": "motorsport",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://dzz957bqk62e8.cloudfront.net/NASCAR.m3u8"
+        },
+        {
+          "type": "hls",
+          "label": "Tubi feed",
+          "url": "https://aegis-cloudfront-1.tubi.video/a8586229-0ea0-4eb4-bb23-09674c2a94d3/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "nbc-sports-now",
+      "title": "NBC Sports NOW",
+      "provider": "NBC Sports NOW",
+      "sport": "mixed",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d1m1xk35ma8qfl.cloudfront.net/master.m3u8"
+        },
+        {
+          "type": "hls",
+          "label": "Xumo Play feed",
+          "url": "https://xumo-xumoent-vc-122-sjv70.fast.nbcuni.com/live/master.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "nfl-channel",
+      "title": "NFL Channel classics and coverage",
+      "provider": "NFL Channel",
+      "sport": "football",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://pb-we3ltka9xobj6.akamaized.net/master.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "nhra-tv",
+      "title": "NHRA TV",
+      "provider": "NHRA TV",
+      "sport": "motorsport",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d265y4sk8257lt.cloudfront.net/nh.m3u8"
+        },
+        {
+          "type": "hls",
+          "label": "Tubi feed",
+          "url": "https://aegis-cloudfront-1.tubi.video/b8c5eb48-349b-454f-9625-63911ee923f5/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "outdoor-america",
+      "title": "Outdoor America",
+      "provider": "Outdoor America",
+      "sport": "outdoors",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d1e354daam8g5r.cloudfront.net/playlist.m3u8"
+        },
+        {
+          "type": "hls",
+          "label": "Xumo Play feed",
+          "url": "https://linear-600.frequency.stream/dist/xumo/600/hls/master/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "pfl",
+      "title": "PFL",
+      "provider": "PFL",
+      "sport": "combat",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d2w9b8sam7j3zv.cloudfront.net/v1/pfl_pflmma_1/samsungheadend_us/latest/main/hls/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "pga-tour",
+      "title": "PGA TOUR",
+      "provider": "PGA TOUR",
+      "sport": "golf",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://pb-783hpus5r91wv.akamaized.net/playlist.m3u8"
+        },
+        {
+          "type": "hls",
+          "label": "PGA TOUR feed",
+          "url": "https://d11k1mnrgfposz.cloudfront.net/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "roku-sports",
+      "title": "Roku Sports Channel",
+      "provider": "Roku Sports Channel",
+      "sport": "mixed",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d3ialx0k0mla2a.cloudfront.net/Roku_Sports_Channel.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "rugbypass-tv",
+      "title": "RugbyPass TV",
+      "provider": "RugbyPass TV",
+      "sport": "rugby",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://dt1kh32hg3tft.cloudfront.net/v1/world_rugby_rugbypasstv_1/samsungheadend_us/latest/main/hls/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "sportsgrid",
+      "title": "SportsGrid",
+      "provider": "SportsGrid",
+      "sport": "mixed",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://sportsgrid-samsungus.amagi.tv/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "nba-channel",
+      "title": "NBA Channel classics and coverage",
+      "provider": "NBA Channel",
+      "sport": "basketball",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://pb-5pdyic0cu7tri.akamaized.net/NBA.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "tna-wrestling",
+      "title": "TNA Wrestling",
+      "provider": "TNA Wrestling",
+      "sport": "wrestling",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://dpltey7dr5q2g.cloudfront.net/TNA_Wrestling.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "ufc-channel",
+      "title": "UFC Channel classics",
+      "provider": "UFC",
+      "sport": "combat",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://pb-ljudrmfw5j68n.akamaized.net/playlist.m3u8"
+        },
+        {
+          "type": "hls",
+          "label": "Xumo Play feed",
+          "url": "https://linear-893.frequency.stream/dist/xumo/893/hls/master/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "unbeaten-sports",
+      "title": "Unbeaten Sports",
+      "provider": "Unbeaten Sports",
+      "sport": "mixed",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d1t5afz6qed3xk.cloudfront.net/Unbeaten.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "willow-sports",
+      "title": "Willow Sports",
+      "provider": "Willow Sports",
+      "sport": "cricket",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d36r8jifhgsk5j.cloudfront.net/Willow_TV.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "womens-sports",
+      "title": "Women’s Sports Network",
+      "provider": "Women’s Sports Network",
+      "sport": "mixed",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d39accvx65hq9o.cloudfront.net/Womens_Sports_Network.m3u8"
+        },
+        {
+          "type": "hls",
+          "label": "Tubi feed",
+          "url": "https://aegis-cloudfront-1.tubi.video/e974981b-bbcd-42a3-a6c1-6c25e14f10bd/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "yahoo-sports",
+      "title": "Yahoo Sports Network",
+      "provider": "Yahoo Sports Network",
+      "sport": "mixed",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Samsung TV Plus feed",
+          "url": "https://d7vulbd7rxo7j.cloudfront.net/Yahoo_Sports_Network.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "motorvision",
+      "title": "Motorvision",
+      "provider": "Motorvision",
+      "sport": "motorsport",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Xumo Play feed",
+          "url": "https://mvg-mv-xumo.otteravision.com/mvg/mv/mv.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "tennis-plus",
+      "title": "Tennis+",
+      "provider": "Tennis+",
+      "sport": "tennis",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Rakuten TV feed",
+          "url": "https://amg01935-amg01935c1-amgplt0165.playout.now3.amagi.tv/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "formula-1-channel",
+      "title": "Formula 1 Channel classics",
+      "provider": "Formula 1 Channel",
+      "sport": "motorsport",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "LG Channels feed",
+          "url": "https://amg12058-c15studio-amg12058c1-lg-us-5787.playouts.now.amagi.tv/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "flohockey",
+      "title": "FloHockey 24/7",
+      "provider": "FloHockey 24/7",
+      "sport": "hockey",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "FloHockey 24/7 feed",
+          "url": "https://amg02278-amg02278c2-flosports-worldwide-9916.playouts.now.amagi.tv/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "floracing",
+      "title": "FloRacing 24/7",
+      "provider": "FloRacing 24/7",
+      "sport": "motorsport",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "FloRacing 24/7 feed",
+          "url": "https://amg02278-amg02278c1-flosports-worldwide-7592.playouts.now.amagi.tv/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "fuel-tv",
+      "title": "FUEL TV",
+      "provider": "FUEL TV",
+      "sport": "action",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Fire TV feed",
+          "url": "https://amg01074-fueltv-amg01074c1-firetv-us-3150.playouts.now.amagi.tv/playlist.m3u8"
+        },
+        {
+          "type": "hls",
+          "label": "Rakuten TV feed",
+          "url": "https://amg01074-fueltv-fueltvemeaen-rakuten-b6j62.amagi.tv/ts-us-e2-n1/playlist/rakutenAA-fueltvemeaen/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "tennis-channel-international",
+      "title": "Tennis Channel international",
+      "provider": "Tennis Channel international",
+      "sport": "tennis",
+      "kind": "live",
+      "sources": [
+        {
+          "type": "hls",
+          "label": "Tennis Channel international feed",
+          "url": "https://amg01444-tennischannelth-tennischannelnl-samsungnl-x3dq1.amagi.tv/playlist/amg01444-tennischannelth-tennischannelnl-samsungnl/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "id": "cycling-d4046d87-fe89-4537-9fba-bc2eb2bedcb4",
+      "title": "Men's Red Bull Rampage (2026)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:d4046d87-fe89-4537-9fba-bc2eb2bedcb4:en-INT"
+        }
+      ],
+      "date": "2026-10-10"
+    },
+    {
+      "id": "cycling-8ad0e5c6-32db-4fee-ab1d-f15c59e2d198",
+      "title": "Women's Red Bull Rampage (2026)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:8ad0e5c6-32db-4fee-ab1d-f15c59e2d198:en-INT"
+        }
+      ],
+      "date": "2026-10-08"
+    },
+    {
+      "id": "padel-0014c00f-bc1d-45b8-8059-ad57d6062162",
+      "title": "Quarter-finals Secondary Court · Germany (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:0014c00f-bc1d-45b8-8059-ad57d6062162:en-INT"
+        }
+      ],
+      "date": "2026-10-09"
+    },
+    {
+      "id": "surfing-a693d95d-955c-4193-9e04-2516057a286a",
+      "title": "Natural Selection Tour Surf (2026)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:a693d95d-955c-4193-9e04-2516057a286a:en-INT"
+        }
+      ],
+      "date": "2026-09-25"
+    },
+    {
+      "id": "padel-da6bd898-a466-4746-83aa-c8a6e6cb4678",
+      "title": "Quarter-finals Secondary Court · Rotterdam (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:da6bd898-a466-4746-83aa-c8a6e6cb4678:en-INT"
+        }
+      ],
+      "date": "2026-10-02"
+    },
+    {
+      "id": "football-85425f26-98a1-4997-ab2b-9f8154461fe4",
+      "title": "Semi-final: London Warriors at Vienna Vikings (2026)",
+      "sport": "football",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:85425f26-98a1-4997-ab2b-9f8154461fe4:en-INT"
+        }
+      ],
+      "date": "2026-08-29"
+    },
+    {
+      "id": "motorsport-aab5a24a-b4e0-40bd-b0f6-7ab3d5b8e894",
+      "title": "Red Bull Drift Masters Grand Finale: Poland Quali (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:aab5a24a-b4e0-40bd-b0f6-7ab3d5b8e894:en-INT"
+        }
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "id": "skateboarding-587d6379-cd95-4e5c-8628-1c073e2f5d28",
+      "title": "Red Bull Bowl Rippers · From the Bowl (2026)",
+      "sport": "skateboarding",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:587d6379-cd95-4e5c-8628-1c073e2f5d28:en-INT"
+        }
+      ],
+      "date": "2026-08-30"
+    },
+    {
+      "id": "soccer-05b3b7a0-73e3-4f73-96f7-a59692dadce8",
+      "title": "Leeds United FC vs RB Leipzig (2026)",
+      "sport": "soccer",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:05b3b7a0-73e3-4f73-96f7-a59692dadce8:en-INT"
+        }
+      ],
+      "date": "2026-08-08"
+    },
+    {
+      "id": "padel-fb48ae5e-b456-4dcf-8033-6e8fe54bc161",
+      "title": "Pretoria P1 Quarter-finals Secondary Court (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:fb48ae5e-b456-4dcf-8033-6e8fe54bc161:en-INT"
+        }
+      ],
+      "date": "2026-07-31"
+    },
+    {
+      "id": "football-b3cf9251-65c7-471f-85eb-f1c33bf6fc76",
+      "title": "Firenze Red Lions at Vienna Vikings (2026)",
+      "sport": "football",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:b3cf9251-65c7-471f-85eb-f1c33bf6fc76:en-INT"
+        }
+      ],
+      "date": "2026-08-22"
+    },
+    {
+      "id": "football-60e06bc8-df40-453c-9ecb-4058c7251442",
+      "title": "Panthers Wrocław at Vienna Vikings (2026)",
+      "sport": "football",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:60e06bc8-df40-453c-9ecb-4058c7251442:en-INT"
+        }
+      ],
+      "date": "2026-08-08"
+    },
+    {
+      "id": "football-ab6f2c55-cc90-43ed-9330-cc1d119b0381",
+      "title": "Vienna Vikings at Firenze Red Lions (2026)",
+      "sport": "football",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:ab6f2c55-cc90-43ed-9330-cc1d119b0381:en-INT"
+        }
+      ],
+      "date": "2026-07-26"
+    },
+    {
+      "id": "football-b0306bb7-daf8-4883-8b69-5e707a6f708e",
+      "title": "Vienna Vikings at Rhein Fire (2026)",
+      "sport": "football",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:b0306bb7-daf8-4883-8b69-5e707a6f708e:en-INT"
+        }
+      ],
+      "date": "2026-07-18"
+    },
+    {
+      "id": "padel-17989a60-7f01-4931-ad4e-c0f764a3f7e7",
+      "title": "Semi-finals · Germany (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:17989a60-7f01-4931-ad4e-c0f764a3f7e7:en-INT"
+        }
+      ],
+      "date": "2026-10-10"
+    },
+    {
+      "id": "padel-9053da5d-723f-49fa-b3a2-53f45357f105",
+      "title": "Quarter-finals Centre Court · Germany (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:9053da5d-723f-49fa-b3a2-53f45357f105:en-INT"
+        }
+      ],
+      "date": "2026-10-09"
+    },
+    {
+      "id": "padel-7de6f0b7-f9ae-4581-867f-02a07b30b3f5",
+      "title": "Final · Rotterdam (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:7de6f0b7-f9ae-4581-867f-02a07b30b3f5:en-INT"
+        }
+      ],
+      "date": "2026-10-04"
+    },
+    {
+      "id": "padel-fd36fa82-b3f9-4ffb-b2c5-ad31d14941ab",
+      "title": "Semi-finals · Rotterdam (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:fd36fa82-b3f9-4ffb-b2c5-ad31d14941ab:en-INT"
+        }
+      ],
+      "date": "2026-10-03"
+    },
+    {
+      "id": "padel-a228b1bc-a151-40c0-b4ef-71727027a24d",
+      "title": "Quarter-finals Centre Court · Rotterdam (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:a228b1bc-a151-40c0-b4ef-71727027a24d:en-INT"
+        }
+      ],
+      "date": "2026-10-02"
+    },
+    {
+      "id": "football-b28ba71e-160a-46ef-807a-306b136cbb66",
+      "title": "Gold Bowl: Vienna Vikings vs Panthers Wrocław (2026)",
+      "sport": "football",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:b28ba71e-160a-46ef-807a-306b136cbb66:en-INT"
+        }
+      ],
+      "date": "2026-09-06"
+    },
+    {
+      "id": "padel-40345892-ab54-40a2-9e95-9fd4addaf9db",
+      "title": "Final · Madrid (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:40345892-ab54-40a2-9e95-9fd4addaf9db:en-INT"
+        }
+      ],
+      "date": "2026-09-06"
+    },
+    {
+      "id": "padel-09e22d74-8b0a-46c6-abdf-efd8a132de0a",
+      "title": "Semi-finals · Madrid (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:09e22d74-8b0a-46c6-abdf-efd8a132de0a:en-INT"
+        }
+      ],
+      "date": "2026-09-05"
+    },
+    {
+      "id": "padel-e50f0285-9bed-4cac-bd3b-a53d30012b1d",
+      "title": "Quarter-finals Centre Court · Madrid (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:e50f0285-9bed-4cac-bd3b-a53d30012b1d:en-INT"
+        }
+      ],
+      "date": "2026-09-04"
+    },
+    {
+      "id": "athletics-6a2aba1e-c888-4ed0-a5f9-a13479276c42",
+      "title": "Ludwig's Streamer Games (2026)",
+      "sport": "athletics",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:6a2aba1e-c888-4ed0-a5f9-a13479276c42:en-INT"
+        }
+      ],
+      "date": "2026-08-02"
+    },
+    {
+      "id": "padel-658d10fb-f97b-4fb0-90ca-56f6088fef3e",
+      "title": "London P1 Finals (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:658d10fb-f97b-4fb0-90ca-56f6088fef3e:en-INT"
+        }
+      ],
+      "date": "2026-08-09"
+    },
+    {
+      "id": "padel-1ef1d9b5-982d-4211-8a71-fb16d96807b0",
+      "title": "London P1 Semi-finals (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:1ef1d9b5-982d-4211-8a71-fb16d96807b0:en-INT"
+        }
+      ],
+      "date": "2026-08-08"
+    },
+    {
+      "id": "padel-ae3da502-1125-45bc-a96d-9345fee76aab",
+      "title": "London P1 Quarter-finals Secondary Court (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:ae3da502-1125-45bc-a96d-9345fee76aab:en-INT"
+        }
+      ],
+      "date": "2026-08-07"
+    },
+    {
+      "id": "padel-0795c70c-1272-4cf0-9ca2-31c48a019487",
+      "title": "London P1 Quarter-finals Centre Court (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:0795c70c-1272-4cf0-9ca2-31c48a019487:en-INT"
+        }
+      ],
+      "date": "2026-08-07"
+    },
+    {
+      "id": "padel-10520de2-77da-450a-a1ba-aab42d9f2f7f",
+      "title": "Pretoria P1 Semi-finals (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:10520de2-77da-450a-a1ba-aab42d9f2f7f:en-INT"
+        }
+      ],
+      "date": "2026-08-01"
+    },
+    {
+      "id": "padel-f1fdb7c1-6e87-4297-85ed-e55e307aa393",
+      "title": "Pretoria P1 Finals (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:f1fdb7c1-6e87-4297-85ed-e55e307aa393:en-INT"
+        }
+      ],
+      "date": "2026-08-02"
+    },
+    {
+      "id": "padel-4df65bbb-5e79-4592-9e69-270fade49ae3",
+      "title": "Pretoria P1 Quarter-finals Centre Court (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:4df65bbb-5e79-4592-9e69-270fade49ae3:en-INT"
+        }
+      ],
+      "date": "2026-07-31"
+    },
+    {
+      "id": "motorsport-024fd580-d015-4b8f-bab5-74486ef4823d",
+      "title": "Sunday · Goodwood Festival of Speed 2026",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:024fd580-d015-4b8f-bab5-74486ef4823d:en-INT"
+        }
+      ],
+      "date": "2026-07-12"
+    },
+    {
+      "id": "motorsport-d9184c44-f995-4d69-b00b-76005ba49150",
+      "title": "Saturday · Goodwood Festival of Speed 2026",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:d9184c44-f995-4d69-b00b-76005ba49150:en-INT"
+        }
+      ],
+      "date": "2026-07-11"
+    },
+    {
+      "id": "motorsport-af001c0c-0796-4402-a006-73e016eee657",
+      "title": "Friday · Goodwood Festival of Speed 2026",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:af001c0c-0796-4402-a006-73e016eee657:en-INT"
+        }
+      ],
+      "date": "2026-07-10"
+    },
+    {
+      "id": "football-73401526-b229-4823-b7de-b78aaa910a54",
+      "title": "Paris Lights at Vienna Vikings (2026)",
+      "sport": "football",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:73401526-b229-4823-b7de-b78aaa910a54:en-INT"
+        }
+      ],
+      "date": "2026-07-11"
+    },
+    {
+      "id": "football-a52ae667-026a-45a7-88d7-43f222c6d37c",
+      "title": "Vienna Vikings at Berlin Thunder (2026)",
+      "sport": "football",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:a52ae667-026a-45a7-88d7-43f222c6d37c:en-INT"
+        }
+      ],
+      "date": "2026-07-05"
+    },
+    {
+      "id": "cycling-8d16351a-1164-46d4-825a-781adf43fbee",
+      "title": "Red Bull Spin Off Chicago (2026)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:8d16351a-1164-46d4-825a-781adf43fbee:en-INT"
+        }
+      ],
+      "date": "2026-06-14"
+    },
+    {
+      "id": "football-5a284fc9-c8f0-47c2-9b98-e2b83c166176",
+      "title": "Vienna Vikings at London Warriors (2026)",
+      "sport": "football",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:5a284fc9-c8f0-47c2-9b98-e2b83c166176:en-INT"
+        }
+      ],
+      "date": "2026-06-21"
+    },
+    {
+      "id": "football-fc54ae90-358e-4285-8fb1-2b18bae7d805",
+      "title": "Alpine Rams at Vienna Vikings (2026)",
+      "sport": "football",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:fc54ae90-358e-4285-8fb1-2b18bae7d805:en-INT"
+        }
+      ],
+      "date": "2026-06-13"
+    },
+    {
+      "id": "watersports-8a9439d9-79bd-483f-afc9-ae2c19acf735",
+      "title": "Munich Mash · Men's Wakeboarding Final (2026)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:8a9439d9-79bd-483f-afc9-ae2c19acf735:en-INT"
+        }
+      ],
+      "date": "2026-06-28"
+    },
+    {
+      "id": "cycling-b4a47609-de45-4ff4-8035-aebeaaebc336",
+      "title": "Munich Mash · Men's BMX Finals (2026)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:b4a47609-de45-4ff4-8035-aebeaaebc336:en-INT"
+        }
+      ],
+      "date": "2026-06-28"
+    },
+    {
+      "id": "cycling-a6b321a9-8221-4316-a7d9-ced7d28e2a30",
+      "title": "Munich Mash · MTB & BMX Best Tricks (2026)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:a6b321a9-8221-4316-a7d9-ced7d28e2a30:en-INT"
+        }
+      ],
+      "date": "2026-06-28"
+    },
+    {
+      "id": "skateboarding-571f65a8-5359-4374-961b-f73db97e982c",
+      "title": "Munich Mash · Skateboarding Best Tricks (2026)",
+      "sport": "skateboarding",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:571f65a8-5359-4374-961b-f73db97e982c:en-INT"
+        }
+      ],
+      "date": "2026-06-28"
+    },
+    {
+      "id": "watersports-b452b89e-7ec7-4564-9489-a98d449e4136",
+      "title": "Munich Mash · Wakeboarding Elimination (2026)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:b452b89e-7ec7-4564-9489-a98d449e4136:en-INT"
+        }
+      ],
+      "date": "2026-06-27"
+    },
+    {
+      "id": "cycling-b8769996-9086-491e-9732-da69712308a8",
+      "title": "Munich Mash · Mountainbike Final (2026)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:b8769996-9086-491e-9732-da69712308a8:en-INT"
+        }
+      ],
+      "date": "2026-06-27"
+    },
+    {
+      "id": "skateboarding-9bf68d60-c62f-420d-a93e-51c2d152599b",
+      "title": "Munich Mash · Men's Skateboarding Final (2026)",
+      "sport": "skateboarding",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:9bf68d60-c62f-420d-a93e-51c2d152599b:en-INT"
+        }
+      ],
+      "date": "2026-06-27"
+    },
+    {
+      "id": "watersports-d5f1e772-ae7d-4cf6-88ec-9985b34cf25e",
+      "title": "Munich Mash · Women's Wakeboarding Final (2026)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:d5f1e772-ae7d-4cf6-88ec-9985b34cf25e:en-INT"
+        }
+      ],
+      "date": "2026-06-27"
+    },
+    {
+      "id": "watersports-030ea2ce-6768-4203-8d6e-dbd206dd449a",
+      "title": "Munich Mash · Wakeboard Best Trick (2026)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:030ea2ce-6768-4203-8d6e-dbd206dd449a:en-INT"
+        }
+      ],
+      "date": "2026-06-26"
+    },
+    {
+      "id": "football-15bd883e-4b22-4140-a1a2-07c48310ea46",
+      "title": "Rhein Fire at Vienna Vikings (2026)",
+      "sport": "football",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:15bd883e-4b22-4140-a1a2-07c48310ea46:en-INT"
+        }
+      ],
+      "date": "2026-06-06"
+    },
+    {
+      "id": "watersports-cb6adacd-aa03-4fd9-8e89-4a6fb4fc23a1",
+      "title": "Red Bull WakeDuel (2026)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:cb6adacd-aa03-4fd9-8e89-4a6fb4fc23a1:en-INT"
+        }
+      ],
+      "date": "2026-06-13"
+    },
+    {
+      "id": "padel-3be12947-2d3d-4001-89c0-20895b4e2ea1",
+      "title": "Valencia P1 Finals Centre Court (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:3be12947-2d3d-4001-89c0-20895b4e2ea1:en-INT"
+        }
+      ],
+      "date": "2026-06-14"
+    },
+    {
+      "id": "padel-5e494578-2417-438c-8a25-5b4f592e62ac",
+      "title": "Valencia P1 Semi-finals (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:5e494578-2417-438c-8a25-5b4f592e62ac:en-INT"
+        }
+      ],
+      "date": "2026-06-13"
+    },
+    {
+      "id": "padel-02e574da-deb4-4b3d-a5fb-d4be367937c9",
+      "title": "Valencia P1 Quarter-finals Secondary Court (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:02e574da-deb4-4b3d-a5fb-d4be367937c9:en-INT"
+        }
+      ],
+      "date": "2026-06-12"
+    },
+    {
+      "id": "padel-82d69462-0123-46fb-b472-7a5f3d4b37b6",
+      "title": "Valencia P1 Quarter-finals Centre Court (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:82d69462-0123-46fb-b472-7a5f3d4b37b6:en-INT"
+        }
+      ],
+      "date": "2026-06-12"
+    },
+    {
+      "id": "padel-22dce8e7-2969-45ed-955d-bbda4657a812",
+      "title": "Final · Italy Major (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:22dce8e7-2969-45ed-955d-bbda4657a812:en-INT"
+        }
+      ],
+      "date": "2026-06-07"
+    },
+    {
+      "id": "padel-22415c82-5e0c-4bfe-8172-ba48ff86d0bb",
+      "title": "Semi-finals · Italy Major (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:22415c82-5e0c-4bfe-8172-ba48ff86d0bb:en-INT"
+        }
+      ],
+      "date": "2026-06-06"
+    },
+    {
+      "id": "padel-5dbbd0c6-1b55-4c8e-9bfb-d872c90c5584",
+      "title": "Quarter-finals Centre Court · Italy Major (2026)",
+      "sport": "padel",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:5dbbd0c6-1b55-4c8e-9bfb-d872c90c5584:en-INT"
+        }
+      ],
+      "date": "2026-06-05"
+    },
+    {
+      "id": "football-c7ce8eb8-7e70-4f9a-8b6f-3abcb5904564",
+      "title": "Vienna Vikings at Panthers Wrocław (2026)",
+      "sport": "football",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:c7ce8eb8-7e70-4f9a-8b6f-3abcb5904564:en-INT"
+        }
+      ],
+      "date": "2026-05-31"
+    },
+    {
+      "id": "motorsport-166a39d7-75f3-4fd6-91c8-842825876c2f",
+      "title": "Drift Masters: Germany · Qualifying (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:166a39d7-75f3-4fd6-91c8-842825876c2f:en-INT"
+        }
+      ],
+      "date": "2026-08-14"
+    },
+    {
+      "id": "motorsport-996bbb34-d228-476b-a3c8-a6a9ee9f2e5e",
+      "title": "Drift Masters: Latvia · Qualifying (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:996bbb34-d228-476b-a3c8-a6a9ee9f2e5e:en-INT"
+        }
+      ],
+      "date": "2026-07-24"
+    },
+    {
+      "id": "motorsport-1b16e0e3-1b01-42ee-9cba-fed7e154b26f",
+      "title": "Drift Masters: Finland · Qualifying (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:1b16e0e3-1b01-42ee-9cba-fed7e154b26f:en-INT"
+        }
+      ],
+      "date": "2026-07-11"
+    },
+    {
+      "id": "motorsport-27441206-917e-4e7d-a159-299b4d7a7f0c",
+      "title": "Drift Masters: Ireland · Qualifying (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:27441206-917e-4e7d-a159-299b4d7a7f0c:en-INT"
+        }
+      ],
+      "date": "2026-06-13"
+    },
+    {
+      "id": "motorsport-901ea871-a1f9-4bfa-bcac-eec9a5a0e6ee",
+      "title": "Drift Masters: Spain · Qualifying (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:901ea871-a1f9-4bfa-bcac-eec9a5a0e6ee:en-INT"
+        }
+      ],
+      "date": "2026-05-16"
+    },
+    {
+      "id": "motorsport-8bb0e104-eb61-4d5b-a013-cafecb120187",
+      "title": "Drift Masters: Italy · Qualifying (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:8bb0e104-eb61-4d5b-a013-cafecb120187:en-INT"
+        }
+      ],
+      "date": "2026-05-01"
+    },
+    {
+      "id": "motorsport-be26062a-8e9c-4eb1-94df-5b78b2d89d8f",
+      "title": "Red Bull Erzbergrodeo (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:be26062a-8e9c-4eb1-94df-5b78b2d89d8f:en-INT"
+        }
+      ],
+      "date": "2026-06-07"
+    },
+    {
+      "id": "motorsport-2381ee61-35e7-427c-8d07-ba5e6476c3ce",
+      "title": "Drift Masters: Germany · Top 16 (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:2381ee61-35e7-427c-8d07-ba5e6476c3ce:en-INT"
+        }
+      ],
+      "date": "2026-08-15"
+    },
+    {
+      "id": "motorsport-15610588-db82-4a88-bbd0-f312c64b527a",
+      "title": "Red Bull Drift Masters Grand Finale: Poland Top 16 (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:15610588-db82-4a88-bbd0-f312c64b527a:en-INT"
+        }
+      ],
+      "date": "2026-09-12"
+    },
+    {
+      "id": "motorsport-8522d7df-638e-4a6c-9c5e-190ddb5fcf85",
+      "title": "Red Bull Drift Masters Grand Finale: Poland Top 32 (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:8522d7df-638e-4a6c-9c5e-190ddb5fcf85:en-INT"
+        }
+      ],
+      "date": "2026-09-12"
+    },
+    {
+      "id": "motorsport-a8c59eb1-2441-4a69-b607-852096d49d13",
+      "title": "Drift Masters: Latvia · Top 16 (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:a8c59eb1-2441-4a69-b607-852096d49d13:en-INT"
+        }
+      ],
+      "date": "2026-07-25"
+    },
+    {
+      "id": "motorsport-24f5e8cd-8150-42b5-8040-54bd9dfe948b",
+      "title": "Drift Masters: Latvia · Top 32 (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:24f5e8cd-8150-42b5-8040-54bd9dfe948b:en-INT"
+        }
+      ],
+      "date": "2026-07-25"
+    },
+    {
+      "id": "motorsport-618ec147-d2c6-4860-85ef-aa1cf298cf29",
+      "title": "Drift Masters: Germany · Top 32 (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:618ec147-d2c6-4860-85ef-aa1cf298cf29:en-INT"
+        }
+      ],
+      "date": "2026-08-15"
+    },
+    {
+      "id": "motorsport-10daac36-c057-45bc-8226-3b5bfebf7171",
+      "title": "Drift Masters: Finland · Top 16 (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:10daac36-c057-45bc-8226-3b5bfebf7171:en-INT"
+        }
+      ],
+      "date": "2026-07-12"
+    },
+    {
+      "id": "motorsport-939e882e-bd1c-4bf4-a88e-d97554c6f8ba",
+      "title": "Drift Masters: Finland · Top 32 (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:939e882e-bd1c-4bf4-a88e-d97554c6f8ba:en-INT"
+        }
+      ],
+      "date": "2026-07-12"
+    },
+    {
+      "id": "motorsport-4f447bca-0dea-4497-bf0a-7cbd6544e575",
+      "title": "Drift Masters: Ireland · Top 16 (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:4f447bca-0dea-4497-bf0a-7cbd6544e575:en-INT"
+        }
+      ],
+      "date": "2026-06-14"
+    },
+    {
+      "id": "motorsport-6b131545-35ae-4163-9fb9-d9969a0b0074",
+      "title": "Drift Masters: Ireland · Top 32 (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:6b131545-35ae-4163-9fb9-d9969a0b0074:en-INT"
+        }
+      ],
+      "date": "2026-06-14"
+    },
+    {
+      "id": "motorsport-70056abf-8106-4d9b-8da4-9a5e2ae9f139",
+      "title": "Drift Masters: Spain · Top 16 (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:70056abf-8106-4d9b-8da4-9a5e2ae9f139:en-INT"
+        }
+      ],
+      "date": "2026-05-17"
+    },
+    {
+      "id": "motorsport-97dde4bc-942d-465a-a4f1-0d2eb98cdaf6",
+      "title": "Drift Masters: Spain · Top 32 (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:97dde4bc-942d-465a-a4f1-0d2eb98cdaf6:en-INT"
+        }
+      ],
+      "date": "2026-05-17"
+    },
+    {
+      "id": "motorsport-bc527910-4861-49a5-b0d1-1624aae698cc",
+      "title": "Drift Masters: Italy · Top 16 (2026)",
+      "sport": "motorsport",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:bc527910-4861-49a5-b0d1-1624aae698cc:en-INT"
+        }
+      ],
+      "date": "2026-05-02"
+    },
+    {
+      "id": "cycling-cc998b7b-dea1-4b75-a9d7-6efaef939ce3",
+      "title": "Red Bull Genova Cerro Abajo (2026)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:cc998b7b-dea1-4b75-a9d7-6efaef939ce3:en-INT"
+        }
+      ],
+      "date": "2026-06-28"
+    },
+    {
+      "id": "cycling-f961f1ef-cd8b-41e7-80c2-0986409c6ae2",
+      "title": "Red Bull Stuttgart Cerro Abajo (2026)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:f961f1ef-cd8b-41e7-80c2-0986409c6ae2:en-INT"
+        }
+      ],
+      "date": "2026-09-06"
+    },
+    {
+      "id": "skateboarding-e7f52320-c0a9-40d5-9fc6-cfca383ef2f0",
+      "title": "Kasso Fest Skate & Sound (2026)",
+      "sport": "skateboarding",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:e7f52320-c0a9-40d5-9fc6-cfca383ef2f0:en-INT"
+        }
+      ],
+      "date": "2026-03-22"
+    },
+    {
+      "id": "wintersports-af96a446-efa8-4a9d-9e00-ba4a7ebda492",
+      "title": "Red Bull Target Jumping (2026)",
+      "sport": "wintersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:af96a446-efa8-4a9d-9e00-ba4a7ebda492:en-INT"
+        }
+      ],
+      "date": "2026-04-01"
+    },
+    {
+      "id": "wintersports-37f657d5-0a6b-4b83-b838-5bd3e41e7b2d",
+      "title": "Red Bull Unrailistic (2026)",
+      "sport": "wintersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:37f657d5-0a6b-4b83-b838-5bd3e41e7b2d:en-INT"
+        }
+      ],
+      "date": "2026-05-01"
+    },
+    {
+      "id": "watersports-8f23d4b6-fb51-45d6-bfe9-2b10b0dda152",
+      "title": "Red Bull Cliff Diving · Italy (2026)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:8f23d4b6-fb51-45d6-bfe9-2b10b0dda152:en-INT"
+        }
+      ],
+      "date": "2026-09-27"
+    },
+    {
+      "id": "watersports-5262ed5f-2e79-4233-8792-34db6e125a91",
+      "title": "Red Bull Cliff Diving · Mostar (2026)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:5262ed5f-2e79-4233-8792-34db6e125a91:en-INT"
+        }
+      ],
+      "date": "2026-08-01"
+    },
+    {
+      "id": "watersports-d3a81513-bee0-4e3e-8ab7-6465c0b743dd",
+      "title": "Red Bull Cliff Diving · Denmark (2026)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:d3a81513-bee0-4e3e-8ab7-6465c0b743dd:en-INT"
+        }
+      ],
+      "date": "2026-06-27"
+    },
+    {
+      "id": "watersports-2b0abb66-e0c3-4746-89a2-cc2568a01abf",
+      "title": "Red Bull Cliff Diving · USA (2026)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:2b0abb66-e0c3-4746-89a2-cc2568a01abf:en-INT"
+        }
+      ],
+      "date": "2026-06-06"
+    },
+    {
+      "id": "watersports-acf695d8-3ff0-491e-ba24-a58fd71adc92",
+      "title": "Red Bull Cliff Diving · Indonesia (2026)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:acf695d8-3ff0-491e-ba24-a58fd71adc92:en-INT"
+        }
+      ],
+      "date": "2026-05-24"
+    },
+    {
+      "id": "climbing-46142c1c-4db2-48d5-b273-00f6933c74f1",
+      "title": "Pro Climbing League London (2026)",
+      "sport": "climbing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:46142c1c-4db2-48d5-b273-00f6933c74f1:en-INT"
+        }
+      ],
+      "date": "2026-02-28"
+    },
+    {
+      "id": "cycling-6f4be763-1404-4be3-932a-dc63e8dd2d50",
+      "title": "Red Bull District Ride (2026)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:6f4be763-1404-4be3-932a-dc63e8dd2d50:en-INT"
+        }
+      ],
+      "date": "2026-07-25"
+    },
+    {
+      "id": "athletics-f9683888-9747-4276-a6d3-060e1e77d949",
+      "title": "Global live (EN): Wings for Life World Run (2026)",
+      "sport": "athletics",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:f9683888-9747-4276-a6d3-060e1e77d949:en-INT"
+        }
+      ],
+      "date": "2026-05-10"
+    },
+    {
+      "id": "wintersports-8e792d4a-cb21-4a2a-9024-78e97991248a",
+      "title": "Laax Open 2026 Snowboard Slopestyle Women's Finals",
+      "sport": "wintersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:8e792d4a-cb21-4a2a-9024-78e97991248a:en-INT"
+        }
+      ],
+      "date": "2026-01-18"
+    },
+    {
+      "id": "surfing-a8e0ea8e-91bf-45ac-8323-4e97834cdb94",
+      "title": "WSL Señoritas Open Pro 2026 presented by Wong",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:a8e0ea8e-91bf-45ac-8323-4e97834cdb94:en-INT"
+        }
+      ],
+      "date": "2026-02-28"
+    },
+    {
+      "id": "cycling-fe9f1088-7f9a-41a1-8caa-ab0d76acad4d",
+      "title": "Red Bull Valparaíso Cerro Abajo (2026)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:fe9f1088-7f9a-41a1-8caa-ab0d76acad4d:en-INT"
+        }
+      ],
+      "date": "2026-02-15"
+    },
+    {
+      "id": "wintersports-9b39fb1f-9227-484b-9986-618516e80bef",
+      "title": "Snowboard Slopestyle Men's Finals by The Bomb Hole (2026)",
+      "sport": "wintersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:9b39fb1f-9227-484b-9986-618516e80bef:en-INT"
+        }
+      ],
+      "date": "2026-01-18"
+    },
+    {
+      "id": "wintersports-7799b4d7-20f7-4805-a04b-b71a2077acd2",
+      "title": "Snowboard Halfpipe presented by The Bomb Hole (2026)",
+      "sport": "wintersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:7799b4d7-20f7-4805-a04b-b71a2077acd2:en-INT"
+        }
+      ],
+      "date": "2026-01-17"
+    },
+    {
+      "id": "wintersports-6c41196b-bc9f-48aa-b26b-6e803ec95dcb",
+      "title": "Freeski Slopestyle · Laax Open (2026)",
+      "sport": "wintersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:6c41196b-bc9f-48aa-b26b-6e803ec95dcb:en-INT"
+        }
+      ],
+      "date": "2026-01-17"
+    },
+    {
+      "id": "watersports-2a8814c2-9e6b-49e6-9341-8ddd2e00115d",
+      "title": "Red Bull King of the Air Day 3 (2025)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:2a8814c2-9e6b-49e6-9341-8ddd2e00115d:en-INT"
+        }
+      ],
+      "date": "2025-11-26"
+    },
+    {
+      "id": "watersports-0512581d-48a3-4f17-9ae0-21e70803b3cf",
+      "title": "Red Bull King of the Air Day 2 (2025)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:0512581d-48a3-4f17-9ae0-21e70803b3cf:en-INT"
+        }
+      ],
+      "date": "2025-11-24"
+    },
+    {
+      "id": "watersports-41e00e51-992d-4026-b16c-4726c4ce10ce",
+      "title": "Red Bull King of the Air (2025)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:41e00e51-992d-4026-b16c-4726c4ce10ce:en-INT"
+        }
+      ],
+      "date": "2025-11-22"
+    },
+    {
+      "id": "surfing-2687571a-ded5-432f-9f79-fb1594da42f5",
+      "title": "TUDOR Nazaré Big Wave Challenge (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:2687571a-ded5-432f-9f79-fb1594da42f5:en-INT"
+        }
+      ],
+      "date": "2025-12-13"
+    },
+    {
+      "id": "skateboarding-c4db7ff7-4558-492f-825f-695074690798",
+      "title": "Red Bull Building Drop (2025)",
+      "sport": "skateboarding",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:c4db7ff7-4558-492f-825f-695074690798:en-INT"
+        }
+      ],
+      "date": "2025-09-25"
+    },
+    {
+      "id": "cycling-84d2d305-fce5-4f0d-be00-05efc8ccec20",
+      "title": "Men's Red Bull Rampage (2025)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:84d2d305-fce5-4f0d-be00-05efc8ccec20:en-INT"
+        }
+      ],
+      "date": "2025-10-19"
+    },
+    {
+      "id": "cycling-98d8e86c-2f26-4c1f-8ed9-afc24acd9bc4",
+      "title": "Women's Red Bull Rampage (2025)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:98d8e86c-2f26-4c1f-8ed9-afc24acd9bc4:en-INT"
+        }
+      ],
+      "date": "2025-10-17"
+    },
+    {
+      "id": "cycling-348950c1-0b41-46f6-92d6-a2f2fdfd6fbb",
+      "title": "Castle Ride BCVS (2025)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:348950c1-0b41-46f6-92d6-a2f2fdfd6fbb:en-INT"
+        }
+      ],
+      "date": "2025-08-30"
+    },
+    {
+      "id": "soccer-04832fa0-1f3a-45eb-8280-1a7b5dab1708",
+      "title": "Red Bull X1 (2025)",
+      "sport": "soccer",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:04832fa0-1f3a-45eb-8280-1a7b5dab1708:en-INT"
+        }
+      ],
+      "date": "2025-08-09"
+    },
+    {
+      "id": "soccer-ccd477e4-ea32-47f0-8d8f-fa0b391d4303",
+      "title": "RB Leipzig vs Atalanta BC (2025)",
+      "sport": "soccer",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:ccd477e4-ea32-47f0-8d8f-fa0b391d4303:en-INT"
+        }
+      ],
+      "date": "2025-08-02"
+    },
+    {
+      "id": "cycling-86419c07-ac58-48ad-839e-17b6aa39a09b",
+      "title": "Red Bull Genova Cerro Abajo (2025)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:86419c07-ac58-48ad-839e-17b6aa39a09b:en-INT"
+        }
+      ],
+      "date": "2025-08-24"
+    },
+    {
+      "id": "cycling-0b709d8f-6fef-4677-b227-b2934ba88115",
+      "title": "Red Bull Hardline UK (2025)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:0b709d8f-6fef-4677-b227-b2934ba88115:en-INT"
+        }
+      ],
+      "date": "2025-07-27"
+    },
+    {
+      "id": "watersports-110b84e4-8b65-4649-9b5e-eea4934a973c",
+      "title": "Munich Mash: Men's wakeboarding final (2025)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:110b84e4-8b65-4649-9b5e-eea4934a973c:en-INT"
+        }
+      ],
+      "date": "2025-06-29"
+    },
+    {
+      "id": "skateboarding-338e2dea-b32c-4833-ab4e-a81064bd19b8",
+      "title": "Munich Mash: Women's skateboarding warm-up & final (2025)",
+      "sport": "skateboarding",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:338e2dea-b32c-4833-ab4e-a81064bd19b8:en-INT"
+        }
+      ],
+      "date": "2025-06-29"
+    },
+    {
+      "id": "cycling-42f2addc-fd17-45b3-a22b-67ebd782b907",
+      "title": "Munich Mash: Men's BMX final (2025)",
+      "sport": "cycling",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:42f2addc-fd17-45b3-a22b-67ebd782b907:en-INT"
+        }
+      ],
+      "date": "2025-06-29"
+    },
+    {
+      "id": "watersports-ea6cda82-b2aa-4c13-9132-044c42006447",
+      "title": "Munich Mash: Women's wakeboarding final (2025)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:ea6cda82-b2aa-4c13-9132-044c42006447:en-INT"
+        }
+      ],
+      "date": "2025-06-28"
+    },
+    {
+      "id": "skateboarding-dc1ee359-403c-4616-8a8b-4dc2d58d3cb7",
+      "title": "Munich Mash: Male skate warm-up, final, best trick (2025)",
+      "sport": "skateboarding",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:dc1ee359-403c-4616-8a8b-4dc2d58d3cb7:en-INT"
+        }
+      ],
+      "date": "2025-06-28"
+    },
+    {
+      "id": "skateboarding-496b78d4-11a6-48a0-b8f8-1c9718520b74",
+      "title": "Mystic Sk8 Cup Day 2: Street, Bowl and Best Trick (2025)",
+      "sport": "skateboarding",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:496b78d4-11a6-48a0-b8f8-1c9718520b74:en-INT"
+        }
+      ],
+      "date": "2025-06-29"
+    },
+    {
+      "id": "skateboarding-2348745a-4405-490f-a882-ac6dda2f19f6",
+      "title": "Mystic Sk8 Cup Day 1: Vert Legends and Finals (2025)",
+      "sport": "skateboarding",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:2348745a-4405-490f-a882-ac6dda2f19f6:en-INT"
+        }
+      ],
+      "date": "2025-06-28"
+    },
+    {
+      "id": "soccer-d27c6968-8d9e-4da3-a37d-f18b6fe1593f",
+      "title": "Santos FC vs RB Leipzig (2025)",
+      "sport": "soccer",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:d27c6968-8d9e-4da3-a37d-f18b6fe1593f:en-INT"
+        }
+      ],
+      "date": "2025-05-28"
+    },
+    {
+      "id": "surfing-48f18cd1-7b8e-42d7-9fbe-d267a0267ead",
+      "title": "Rip Curl Pro Bells Beach Finals surfing (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:48f18cd1-7b8e-42d7-9fbe-d267a0267ead:en-INT"
+        }
+      ],
+      "date": "2025-04-26"
+    },
+    {
+      "id": "surfing-8fd837e6-aa30-45b1-9251-37caece72893",
+      "title": "WSL Surf City El Salvador Pro Day 7 (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:8fd837e6-aa30-45b1-9251-37caece72893:en-INT"
+        }
+      ],
+      "date": "2025-04-11"
+    },
+    {
+      "id": "surfing-81cffc6b-0a4a-45c5-8cf4-03aa515cba06",
+      "title": "Day 6 of Surf City El Salvador Pro surfing (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:81cffc6b-0a4a-45c5-8cf4-03aa515cba06:en-INT"
+        }
+      ],
+      "date": "2025-04-10"
+    },
+    {
+      "id": "athletics-bfb823d4-5402-4b44-815f-8c2e52a9fa21",
+      "title": "Adizero: Road to Records (2025)",
+      "sport": "athletics",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:bfb823d4-5402-4b44-815f-8c2e52a9fa21:en-INT"
+        }
+      ],
+      "date": "2025-04-26"
+    },
+    {
+      "id": "surfing-e0499b6f-193e-4060-986f-ab36d2346d08",
+      "title": "Day 5 of Surf City El Salvador Pro surfing (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:e0499b6f-193e-4060-986f-ab36d2346d08:en-INT"
+        }
+      ],
+      "date": "2025-04-07"
+    },
+    {
+      "id": "watersports-3797a0ea-2f4e-4f62-9d31-bdfcfc01eef7",
+      "title": "Red Bull Megaloop (2025)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:3797a0ea-2f4e-4f62-9d31-bdfcfc01eef7:en-INT"
+        }
+      ],
+      "date": "2025-09-15"
+    },
+    {
+      "id": "wintersports-3678bfe6-a0eb-475f-ac57-809a53742e07",
+      "title": "YETI Natural Selection Ski (2025)",
+      "sport": "wintersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:3678bfe6-a0eb-475f-ac57-809a53742e07:en-INT"
+        }
+      ],
+      "date": "2025-04-17"
+    },
+    {
+      "id": "wintersports-90a59042-3b0b-4bf0-a717-8fa3198c90b9",
+      "title": "Red Bull Target Jumping (2025)",
+      "sport": "wintersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:90a59042-3b0b-4bf0-a717-8fa3198c90b9:en-INT"
+        }
+      ],
+      "date": "2025-04-05"
+    },
+    {
+      "id": "watersports-0401f504-edc7-4f05-bcf4-232801061bc8",
+      "title": "Cliff Diving Boston (2025)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:0401f504-edc7-4f05-bcf4-232801061bc8:en-INT"
+        }
+      ],
+      "date": "2025-09-20"
+    },
+    {
+      "id": "watersports-b017891f-cda3-465a-a7a5-f8fb0629adbf",
+      "title": "Cliff Diving Mostar (2025)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:b017891f-cda3-465a-a7a5-f8fb0629adbf:en-INT"
+        }
+      ],
+      "date": "2025-09-06"
+    },
+    {
+      "id": "watersports-782679c2-5069-4610-b646-519c6e079df8",
+      "title": "Cliff Diving Polignano a Mare (2025)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:782679c2-5069-4610-b646-519c6e079df8:en-INT"
+        }
+      ],
+      "date": "2025-06-29"
+    },
+    {
+      "id": "watersports-6f22e442-3bbb-4f61-b328-49948cb5bd99",
+      "title": "Red Bull Cliff Diving Philippines (2025)",
+      "sport": "watersports",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:6f22e442-3bbb-4f61-b328-49948cb5bd99:en-INT"
+        }
+      ],
+      "date": "2025-04-13"
+    },
+    {
+      "id": "surfing-3de932ba-67c3-4279-bcfc-bad02d85834d",
+      "title": "J-Bay Open Finals surfing (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:3de932ba-67c3-4279-bcfc-bad02d85834d:en-INT"
+        }
+      ],
+      "date": "2025-07-18"
+    },
+    {
+      "id": "surfing-28d76ec2-208c-4b0c-a295-8a461f7727e1",
+      "title": "Day 3 of J-Bay Open surfing (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:28d76ec2-208c-4b0c-a295-8a461f7727e1:en-INT"
+        }
+      ],
+      "date": "2025-07-13"
+    },
+    {
+      "id": "surfing-83cc0ed0-b63b-431b-9555-0416215fd8b4",
+      "title": "Day 2 of J-Bay Open surfing (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:83cc0ed0-b63b-431b-9555-0416215fd8b4:en-INT"
+        }
+      ],
+      "date": "2025-07-12"
+    },
+    {
+      "id": "surfing-d69129cf-7560-4ff6-a8ed-b94d35dc5eec",
+      "title": "Day 1 of J-Bay Open surfing (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:d69129cf-7560-4ff6-a8ed-b94d35dc5eec:en-INT"
+        }
+      ],
+      "date": "2025-07-11"
+    },
+    {
+      "id": "surfing-4f996cd9-253f-4ac6-8c02-60c244b72d14",
+      "title": "WSL Finals · Fiji · Day 2 (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:4f996cd9-253f-4ac6-8c02-60c244b72d14:en-INT"
+        }
+      ],
+      "date": "2025-09-01"
+    },
+    {
+      "id": "surfing-3452c4ad-6124-4580-9a06-9fe3794a0a83",
+      "title": "Tahiti Pro Finals surfing (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:3452c4ad-6124-4580-9a06-9fe3794a0a83:en-INT"
+        }
+      ],
+      "date": "2025-08-13"
+    },
+    {
+      "id": "surfing-a92ad96c-6f47-4811-a497-69b91c5225bd",
+      "title": "Day 2 of Tahiti Pro surfing (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:a92ad96c-6f47-4811-a497-69b91c5225bd:en-INT"
+        }
+      ],
+      "date": "2025-08-08"
+    },
+    {
+      "id": "surfing-403c91c2-864f-4deb-98ee-db2564cd3c3c",
+      "title": "Day 1 of Tahiti Pro surfing (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:403c91c2-864f-4deb-98ee-db2564cd3c3c:en-INT"
+        }
+      ],
+      "date": "2025-08-07"
+    },
+    {
+      "id": "surfing-3397bd6f-19aa-4f31-a27d-6e4c67b37e2d",
+      "title": "Vivo Rio Pro Finals surfing (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:3397bd6f-19aa-4f31-a27d-6e4c67b37e2d:en-INT"
+        }
+      ],
+      "date": "2025-06-29"
+    },
+    {
+      "id": "surfing-5d6e1244-7ea2-441d-938d-cff1838347b5",
+      "title": "Day 3 of Vivo Rio Pro surfing (2025)",
+      "sport": "surfing",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:5d6e1244-7ea2-441d-938d-cff1838347b5:en-INT"
+        }
+      ],
+      "date": "2025-06-26"
+    },
+    {
+      "id": "tennis-ff5c9b2f-5b5d-40bb-bf19-7c7d68227a63",
+      "title": "Red Bull Bassline · Vienna (2022)",
+      "sport": "tennis",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:ff5c9b2f-5b5d-40bb-bf19-7c7d68227a63:en-INT"
+        }
+      ],
+      "date": "2022-10-21"
+    },
+    {
+      "id": "hockey-2d4f9402-4d90-4ad9-a061-d2bb3bc98b65",
+      "title": "SAP Garden Opening · Red Bull Munich vs Buffalo Sabres (2024)",
+      "sport": "hockey",
+      "kind": "replay",
+      "provider": "Red Bull TV",
+      "sources": [
+        {
+          "type": "redbull",
+          "label": "Red Bull TV",
+          "videoId": "rrn:content:live-videos:2d4f9402-4d90-4ad9-a061-d2bb3bc98b65:en-INT"
+        }
+      ],
+      "date": "2024-09-27"
     }
   ]
 }

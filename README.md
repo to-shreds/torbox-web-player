@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.1**, frontend startup build **release-1.2.1-startup.1**
+Current version: **1.2.2**, frontend startup build **release-1.2.1-startup.1**
 
 Deployment status: the startup frontend is live at both root and `/key/`, and the Render backend is live on v1.2.1 with multi-provider lookup enabled. Release, Pages, mirror and Render build checks passed. My Workspace is the user's confirmed standing Render choice. See [HANDOFF.md](HANDOFF.md) for deployment evidence and remaining account/device acceptance.
 

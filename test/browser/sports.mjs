@@ -26,21 +26,21 @@ async function sportsPage(t,{blocked=false,slowReplay=false}={}){
   await context.route('https://amg01444-tennischannel-amg01444c2-lg-us-959.playouts.now.amagi.tv/**',mediaRoute);
   await context.route('https://play.redbull.com/**',mediaRoute);
   await context.route('https://api-player.redbull.com/**',async route=>{apiRequests++;assert.equal(route.request().headers().authorization,undefined);assert.equal(route.request().headers().cookie,undefined);if(slowReplay)await new Promise(r=>setTimeout(r,400));return route.fulfill({json:{videoUrl:'https://play.redbull.com/fixture/playlist.m3u8',playabilityErrors:[],description:'WINNER SPOILER'},headers:{'Access-Control-Allow-Origin':'*'}});});
-  await page.goto(fixture.origin);await page.locator('#open-sports').click();await page.waitForSelector('.sports-card');
+  await page.goto(fixture.origin+'/#sports');await page.waitForSelector('.sports-card');
   return {context,page,mediaRequests:()=>mediaRequests,apiRequests:()=>apiRequests};
 }
 test('sports opens and plays HLS tennis while private startup is hung, with no TorBox login or media relay',async t=>{
   const {page,mediaRequests}=await sportsPage(t);await page.locator('[data-sports-id="t2"]').click();
-  await page.waitForFunction(()=>document.querySelector('#sports-video').currentTime>0);
+  await page.waitForFunction(()=>document.querySelector('#sports-player-frame').contentDocument?.querySelector('#sports-video').currentTime>0);
   assert.ok(mediaRequests()>1);assert.equal(fixture.control.playbackCalls,0);assert.equal(fixture.control.mediaFetches,0);assert.equal(fixture.control.logins,0);
-  await page.locator('#close-sports-player').click();assert.equal(await page.locator('#sports-video').getAttribute('src'),null);assert.equal(await page.locator('#sports-panel').isVisible(),true);
+  await page.locator('#close-sports-player').click();assert.equal(await page.frameLocator('#sports-player-frame').locator('#sports-video').getAttribute('src'),null);assert.equal(await page.locator('#sports-panel').isVisible(),true);
 });
 test('padel full replay resolves anonymously, resumes and starts over without showing result text',async t=>{
   const {page,apiRequests}=await sportsPage(t);const replay=catalog.items.find(x=>x.kind==='replay');
   await page.evaluate(id=>localStorage.setItem('tw-sports-resume:'+id,JSON.stringify({position:20,duration:60})),replay.id);
   await page.locator('[data-sports-mode="replay"]').click();await page.locator('#sports-sport').selectOption('padel');await page.locator(`[data-sports-id="${replay.id}"]`).click();
-  await page.waitForFunction(()=>document.querySelector('#sports-video').currentTime>=15);assert.equal(apiRequests(),1);assert.equal((await page.locator('#sports-panel').textContent()).includes('WINNER SPOILER'),false);
-  await page.locator('#sports-start-over').click();await page.waitForFunction(()=>{const v=document.querySelector('#sports-video');return v.currentTime>0&&v.currentTime<10;});
+  await page.waitForFunction(()=>document.querySelector('#sports-player-frame').contentDocument?.querySelector('#sports-video').currentTime>=15);assert.equal(apiRequests(),1);assert.equal((await page.locator('#sports-panel').textContent()).includes('WINNER SPOILER'),false);
+  await page.locator('#sports-start-over').click();await page.waitForFunction(()=>{const v=document.querySelector('#sports-player-frame').contentDocument?.querySelector('#sports-video');return v.currentTime>0&&v.currentTime<10;});
   assert.equal(await page.locator('#sports-live-edge').isVisible(),false);
 });
 test('closing a resolving sports replay prevents late media and leaves the catalog usable',async t=>{
@@ -52,6 +52,26 @@ test('failed sports HLS reports retry and remains bounded',async t=>{
 });
 test('Sports requires an adult viewer so it cannot bypass Kid Mode allowances',async t=>{
   const {page}=await sportsPage(t);await page.locator('#open-cinema').click();
-  await page.evaluate(async()=>{const {updateKidProfile}=await import('./parental-controls.js?v=release-1.2.1-startup.1');updateKidProfile('viewer-1',{enabled:true});});
+  await page.evaluate(async()=>{const {updateKidProfile}=await import('./parental-controls.js?v=release-1.2.2-sports.1');updateKidProfile('viewer-1',{enabled:true});});
   await page.locator('#open-sports').click();assert.equal(await page.locator('#sports-panel').isVisible(),false);assert.match(await page.locator('#sports-nav-message').textContent(),/adult viewer/);
+});
+test('expanded Sports filters expose football/hockey replays without a TorBox key or availability notice',async t=>{
+  const {page}=await sportsPage(t);
+  assert.equal(await page.locator('#sports-live-count').textContent(),'(36)');
+  assert.equal(await page.locator('#sports-replay-count').textContent(),'(157)');
+  assert.equal((await page.locator('#sports-panel').textContent()).includes('Free feeds can vary'),false);
+  await page.locator('[data-sports-mode="replay"]').click();await page.locator('#sports-sport').selectOption('football');
+  assert.equal(await page.locator('.sports-card').count(),12);
+  await page.locator('#sports-sport').selectOption('hockey');assert.equal(await page.locator('.sports-card').count(),1);
+  assert.match(await page.locator('.sports-card').textContent(),/Buffalo Sabres/);
+});
+test('a canceled old Play rejection cannot overwrite the next Sports playback',async t=>{
+  const {page}=await sportsPage(t);
+  await page.addInitScript(()=>{const original=HTMLMediaElement.prototype.play;let first=true;HTMLMediaElement.prototype.play=function(){if(window.parent!==window&&first){first=false;return new Promise((resolve,reject)=>{window.rejectOldSportsPlay=()=>reject(new DOMException('Blocked old Play','NotAllowedError'));});}return original.apply(this,arguments);};});
+  await page.locator('[data-sports-id="t2"]').click();
+  await page.waitForFunction(()=>typeof document.querySelector('#sports-player-frame').contentWindow.rejectOldSportsPlay==='function');
+  await page.locator('#close-sports-player').click();await page.locator('[data-sports-mode="replay"]').click();await page.locator('.sports-card').first().click();
+  await page.waitForFunction(()=>document.querySelector('#sports-player-frame').contentDocument.querySelector('#sports-video').currentTime>0);
+  await page.locator('#sports-player-frame').evaluate(frame=>frame.contentWindow.rejectOldSportsPlay());
+  await page.waitForTimeout(100);assert.match(await page.locator('#sports-player-message').textContent(),/^Replay/);
 });

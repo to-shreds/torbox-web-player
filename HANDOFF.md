@@ -6,6 +6,16 @@ Read this first. The code repository controls implementation; `to-shreds/Project
 
 The user explicitly confirmed **My Workspace** (`tea-dakujgmk1f9s73d2v8ng`) on 2026-10-10 and requested blanket confirmation because this is the account's only workspace. Reuse that workspace for authorized Render work without asking again unless the user changes the choice. Pass its ID explicitly on Render calls.
 
+## Expanded Sports release · 2026-10-11
+
+Prepared runtime **1.2.2**, frontend **release-1.2.2-sports.1**. Web offers 36 live channels, 48 live stream choices and 157 dated full replays across 25 sport filters. Independent native APK 0.2.3 offers 39 channels, 51 stream choices and the same 157 replays across 26 filters. Anonymous Sports entry avoids private-service startup; the requested availability section is removed. Adult/Kid Mode checks, replay bookmarks and the earlier movie startup/state guards remain.
+
+The sports player is isolated in a separate same-origin document whose exact media/connect policies exclude Render and self. Approved CDN redirects work under that document's destination checks; Red Bull metadata rejects redirects. Offline navigation returns the isolated cached player or 503, never the movie shell. The regression suite also checks obsolete play rejection handling.
+
+Local syntax/diff checks passed; **367 Node tests registered, 361 passed, 0 failed, 6 optional live/account checks skipped**. Browser routing and UI verification and publication are pending release CI. Local Chromium installation was blocked by a truncated download; CI uses the existing release workflow. Native 0.2.3 APK and source were recovered unchanged with matching original checksums, with their original build/test/signature evidence intact. Physical Firestick testing remains unverified.
+
+Report: [docs/SPORTS-2026-10-11.md](docs/SPORTS-2026-10-11.md). The previous main is archived at `archive/web-before-sports-expansion-2026-10-11`, SHA `39bfdae262b99b9c6589bd532e4971ad9ba07cd7`.
+
 ## Playback startup patch · 2026-10-11
 
 Backend source **1.2.1**, published frontend **release-1.2.1-startup.1**, prepared from main `644faeddaccb9e2f1a152dade1c034cf077d5bd2`. Runtime commit `2a3f8c3f84e108178477c0fb4a8ee23a235d0e12` is on main and `release/v1.2.1-startup`. This section supersedes the preceding runtime version descriptions. Both frontend and Render backend are now live on the 1.2.1 release.

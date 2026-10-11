@@ -1,13 +1,13 @@
 const CACHE_PREFIX='torbox-player:'+self.registration.scope+':';
-const CACHE=CACHE_PREFIX+'release-1.2.1-startup.1';
-const BUILD='release-1.2.1-startup.1';
+const CACHE=CACHE_PREFIX+'release-1.2.2-sports.1';
+const BUILD='release-1.2.2-sports.1';
 const SHELL=[
   './','./index.html',
   `./style.css?v=${BUILD}`,`./discover.css?v=${BUILD}`,`./boot.js?v=${BUILD}`,`./app.js?v=${BUILD}`,
   `./playback-lifecycle.js?v=${BUILD}`,`./runtime.js?v=${BUILD}`,`./history.js?v=${BUILD}`,`./settings.js?v=${BUILD}`,`./vault.js?v=${BUILD}`,
   `./watchlist.js?v=${BUILD}`,`./search-history.js?v=${BUILD}`,`./source-memory.js?v=${BUILD}`,`./parental-controls.js?v=${BUILD}`,
   `./device-transfer.js?v=${BUILD}`,`./playback-errors.js?v=${BUILD}`,`./discover.js?v=${BUILD}`,`./source-client.js?v=${BUILD}`,
-  `./sports.js?v=${BUILD}`,`./sports-core.js?v=${BUILD}`,`./sports.css?v=${BUILD}`,`./sports-catalog.json?v=${BUILD}`,`./hls.min.js?v=${BUILD}`,
+  `./sports-player.html?v=${BUILD}`,`./sports-player.js?v=${BUILD}`,`./sports-player.css?v=${BUILD}`,`./sports.js?v=${BUILD}`,`./sports-core.js?v=${BUILD}`,`./sports.css?v=${BUILD}`,`./sports-catalog.json?v=${BUILD}`,`./hls.min.js?v=${BUILD}`,
   `./manifest.webmanifest?v=${BUILD}`,'./icon.svg'
 ];
 const shellUrls=new Set(SHELL.map(path=>new URL(path,self.registration.scope).href));
@@ -23,5 +23,5 @@ self.addEventListener('fetch',event=>{
   event.respondWith(fresh(event.request).then(response=>{
     if(response.ok&&shellUrls.has(event.request.url)){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put(event.request,copy)));}
     return response;
-  }).catch(()=>event.request.mode==='navigate'?caches.open(CACHE).then(cache=>cache.match('./')):caches.open(CACHE).then(cache=>cache.match(event.request))));
+  }).catch(()=>caches.open(CACHE).then(async cache=>{if(url.pathname.endsWith('/sports-player.html'))return (await cache.match(event.request))||new Response('Sports player unavailable offline.',{status:503});return event.request.mode==='navigate'?cache.match('./'):cache.match(event.request);})));
 });
