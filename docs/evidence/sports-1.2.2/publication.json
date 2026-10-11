@@ -1,0 +1,161 @@
+{
+  "verified_at": "2026-10-11T13:54:16.390381+00:00",
+  "build": "release-1.2.2-sports.1",
+  "assets": [
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/index.html?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 28050,
+      "sha256": "170cdc60ed7da1e2309b6acae000d97a1c638229f0329315bbaf994f7fb2e68f",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/boot.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 2993,
+      "sha256": "060785ef8b1f9f685b949cebba6befee983a503d65ca3c7213cb85343ad1bbca",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/app.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 78218,
+      "sha256": "e5a1f339c20559105240023c13997e541151aa646642fc29ded7c957bc309a51",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/source-client.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 10223,
+      "sha256": "6b506122921b40816d7951e60726fc331ae874916caaf90f301d56cfdb580cf1",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/sports.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 12080,
+      "sha256": "d19d07fe31878d1d509b0f221357cda9ef7ac6e6ed7485b1259ce78caa385643",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/sports-core.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 5267,
+      "sha256": "bbb9ac3ee55efc3425c15c0fe0abddf7d611a17939a5d01df03a47cee63e060a",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/sports-catalog.json?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 85102,
+      "sha256": "62138495be241725e3e39d3f34a92bde30f95c8d6d5eef02c3c832fed392ecc7",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/sports-player.html?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 4660,
+      "sha256": "dacdbec4f306f4c53108f81350821b5918973d4d0906f6e36180a8782af79aef",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/sports-player.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 971,
+      "sha256": "c26b18bb1da5d6df4a61c419628c99728f9b0acbd2c34598013cec215e6d1b9b",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/sports-player.css?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 155,
+      "sha256": "4aa0cf00b5a8424c20e31dac28d693ec0d6dfa1e846186447de8a2c500497e0d",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/sw.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 2564,
+      "sha256": "0e36818dc95e8b61d17b2b28ab6e535bfecef86e1cade9d8025a71ae347e71f7",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/index.html?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 28050,
+      "sha256": "170cdc60ed7da1e2309b6acae000d97a1c638229f0329315bbaf994f7fb2e68f",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/boot.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 2993,
+      "sha256": "060785ef8b1f9f685b949cebba6befee983a503d65ca3c7213cb85343ad1bbca",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/app.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 78218,
+      "sha256": "e5a1f339c20559105240023c13997e541151aa646642fc29ded7c957bc309a51",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/source-client.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 10223,
+      "sha256": "6b506122921b40816d7951e60726fc331ae874916caaf90f301d56cfdb580cf1",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/sports.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 12080,
+      "sha256": "d19d07fe31878d1d509b0f221357cda9ef7ac6e6ed7485b1259ce78caa385643",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/sports-core.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 5267,
+      "sha256": "bbb9ac3ee55efc3425c15c0fe0abddf7d611a17939a5d01df03a47cee63e060a",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/sports-catalog.json?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 85102,
+      "sha256": "62138495be241725e3e39d3f34a92bde30f95c8d6d5eef02c3c832fed392ecc7",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/sports-player.html?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 4660,
+      "sha256": "dacdbec4f306f4c53108f81350821b5918973d4d0906f6e36180a8782af79aef",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/sports-player.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 971,
+      "sha256": "c26b18bb1da5d6df4a61c419628c99728f9b0acbd2c34598013cec215e6d1b9b",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/sports-player.css?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 155,
+      "sha256": "4aa0cf00b5a8424c20e31dac28d693ec0d6dfa1e846186447de8a2c500497e0d",
+      "matches_tested_source": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/sw.js?verification=release-1.2.2-sports.1",
+      "status": 200,
+      "bytes": 2564,
+      "sha256": "0e36818dc95e8b61d17b2b28ab6e535bfecef86e1cade9d8025a71ae347e71f7",
+      "matches_tested_source": true
+    }
+  ],
+  "all_assets_match": true
+}
