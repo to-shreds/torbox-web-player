@@ -1,13 +1,13 @@
-import { createDiscoveryUI } from './discover.js?v=release-1.2.0';
-import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.0';
-import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.0';
-import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.0';
-import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.0';
-import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.0';
-import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.0';
-import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=release-1.2.0';
-import { clearSearchHistory } from './search-history.js?v=release-1.2.0';
-import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.0';
+import { createDiscoveryUI, bindArtworkImage } from './discover.js?v=release-1.2.1-startup.1';
+import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.1-startup.1';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.1-startup.1';
+import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.1-startup.1';
+import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.1-startup.1';
+import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.1-startup.1';
+import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.1-startup.1';
+import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=release-1.2.1-startup.1';
+import { clearSearchHistory } from './search-history.js?v=release-1.2.1-startup.1';
+import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.1-startup.1';
 const $ = id => document.getElementById(id);
 let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null, fullscreenExitControlTimer = null;
 let discoveryUI;
@@ -212,7 +212,7 @@ function renderRecent() {
     const entry = document.createElement('div'); entry.className = 'recent-entry';
     const card = document.createElement('button'); card.type = 'button'; card.className = 'recent-card';
     card.title=item.type==='series'?'Hold for episode list':'Hold for title details';
-    if (item.poster) { const img = document.createElement('img'); img.className = 'recent-thumb'; img.src = item.poster; img.alt = ''; img.referrerPolicy = 'no-referrer'; card.append(img); }
+    { const img = document.createElement('img'); img.className = 'recent-thumb'; img.alt = ''; bindArtworkImage(img,item.poster,item.id); card.append(img); }
     const copy = document.createElement('span'); copy.className = 'recent-copy';
     const title = document.createElement('strong'); title.className = 'recent-title'; title.textContent = item.title;
     const meta = document.createElement('span'); meta.className = 'recent-meta'; meta.textContent = recentLabel(item); copy.append(title, meta);
@@ -561,6 +561,9 @@ function updateNextEpisodePrompt(context){
   if(active!==context||!context.ready||context.nextTransitionStarted||!queuedNext(context))return;
   const video=context.video,duration=Number(video.duration),current=Number(video.currentTime);
   if(!Number.isFinite(duration)||duration<=0||!Number.isFinite(current)||video.ended)return;
+  if(getSettings().autoNext&&!context.nextWarmAttempted&&current>=Math.min(30,duration/2)){
+    context.nextWarmAttempted=true;void ensureNextPrepared(context);
+  }
   if(context.nextWatchCredits)return;
   const lead=effectiveCreditsLead(duration,getSettings().creditsLeadSeconds);
   if(!lead)return;
@@ -682,6 +685,7 @@ async function detachPlayback({preserveVideo=false}={}) {
 }
 async function stopPlayback() { playGeneration++; playbackRequestAbort?.abort(); discoveryUI?.cancelPlayback(); hideResumeOverlay(); clearStillWatchingTimer(); hideStillWatchingPrompt(); await exitPlayerPresentationModes(); await detachPlayback(); }
 async function startPlayback(file, playbackContext = null) {
+  window.dispatchEvent(new CustomEvent('cinema-playback-start'));
   if(document.fullscreenElement===playerMediaShell()||document.fullscreenElement===active?.video){fullscreenIntent=true;fullscreenRestoreDeadline=Date.now()+6000;}
   if(!guestMode){
     const block=canStartKidPlayback(viewer,playbackContext);
@@ -701,7 +705,7 @@ async function startPlayback(file, playbackContext = null) {
     const video = reusableVideo || document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.playbackRate=getSettings().playbackRate;
     try{video.controlsList.remove('nofullscreen');}catch{}
     try{video.disablePictureInPicture=false;}catch{}
-    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, startupTimer:null, sourceLearned:false, lastTime:0, nextPromptActive:false, nextCountdownStart:null, nextWatchCredits:false, nextTransitionStarted:false, nextEnded:false, nextPrepareAbort:null, nextPreparePromise:null, nextPrepared:null, nextPrepareError:'', completedRecorded:false, eventAbort:new AbortController() };
+    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, startupTimer:null, sourceLearned:false, lastTime:0, nextPromptActive:false, nextCountdownStart:null, nextWatchCredits:false, nextTransitionStarted:false, nextEnded:false, nextWarmAttempted:false, nextPrepareAbort:null, nextPreparePromise:null, nextPrepared:null, nextPrepareError:'', completedRecorded:false, eventAbort:new AbortController() };
     active = context;if(video.parentElement!==$('video-slot'))$('video-slot').replaceChildren(video);setHealthSource(context);updatePlayerModeActions();
     const listen=(name,handler)=>video.addEventListener(name,handler,{signal:context.eventAbort.signal});
     const clearBuffer = () => { clearTimeout(context.bufferTimer); context.bufferTimer = null; };
@@ -1051,4 +1055,5 @@ $('settings-check-status').addEventListener('click',async()=>{text('settings-mes
 $('retry-torbox-status').addEventListener('click',()=>checkTorBoxStatus(true));
 discoveryUI = createDiscoveryUI({ api, play: startPlayback, guard: ensureTorBoxReady, resumeActivity:{ show:showResumeOverlay, update:updateResumeOverlay, hide:hideResumeOverlay } });
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+window.addEventListener('sports-playback-start',()=>{void stopPlayback();if($('player').open)$('player').close();});
 bootstrap();

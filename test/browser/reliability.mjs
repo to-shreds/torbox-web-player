@@ -8,7 +8,7 @@ const media=await readFile(new URL('../fixtures/fixture.mp4',import.meta.url));
 before(async()=>{browser=await chromium.launch({headless:true,...(process.env.CHROME_EXECUTABLE?{executablePath:process.env.CHROME_EXECUTABLE}:{}),args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});fixture=await startFixture();});
 after(async()=>{await browser?.close();await fixture?.close();});
 async function pageFor(t,{saved=false,mediaMode='play',speedTimeouts=false,signedIn=true}={}){
-  Object.assign(fixture.control,{sessionDelay:0,progressDelay:0,statusDelay:0,lookupDelay:0,cached:true,created:false,creates:0,playbackCalls:0,mediaFetches:0,logins:0});
+  Object.assign(fixture.control,{sessionDelay:0,progressDelay:0,statusDelay:0,lookupDelay:0,cached:true,created:false,creates:0,lookupCalls:0,prepareCalls:0,playbackCalls:0,mediaFetches:0,logins:0});
   fixture.discovery.tickets.clear();fixture.discovery.operations.clear();
   const context=await browser.newContext({viewport:{width:412,height:915},isMobile:true,hasTouch:true,serviceWorkers:'block'});
   const page=await context.newPage(),errors=[];page.setDefaultTimeout(8000);
@@ -38,7 +38,7 @@ async function pageFor(t,{saved=false,mediaMode='play',speedTimeouts=false,signe
   if(saved){
     // Seed through the real history API once the origin is available, then reload.
     await page.goto(fixture.origin);await page.waitForSelector('#workspace:not([hidden])');
-    await page.evaluate(async()=>{const {recordRecent}=await import('./history.js?v=release-1.2.0');recordRecent({current:{type:'series',id:'tt1234567',season:1,episode:1},title:'Fixture Show',episodeName:'One'},40,120);});
+    await page.evaluate(async()=>{const {recordRecent}=await import('./history.js?v=release-1.2.1-startup.1');recordRecent({current:{type:'series',id:'tt1234567',season:1,episode:1},title:'Fixture Show',episodeName:'One'},40,120);});
   }
   return{page,context,token,errors};
 }
@@ -47,15 +47,44 @@ async function home(page){await page.goto(fixture.origin);await seriesHome(page)
 async function playEpisode(page,number=1){
   await page.locator('#catalog-grid button').first().click();
   await page.locator('#episode-area button').filter({hasText:/^Play$/}).nth(number-1).click();
-  await page.waitForFunction(()=>document.querySelector('video')?.currentTime>0);
+  await page.waitForFunction(()=>document.querySelector('#video-slot video')?.currentTime>0);
 }
+
+const artworkPixel=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aH0cAAAAASUVORK5CYII=','base64');
+async function mountArtwork(page,url){
+  await page.evaluate(async url=>{
+    const {bindArtworkImage}=await import('./discover.js?v=release-1.2.1-startup.1');
+    const img=document.createElement('img');img.id='artwork-regression';img.alt='Artwork fixture';img.style.cssText='position:fixed;top:0;left:0;width:40px;height:60px';document.body.append(img);
+    bindArtworkImage(img,url,'tt6933238');
+  },url);
+}
+test('browser loads artwork at the actual redirect destination under the production image CSP',async t=>{
+  const {page,context}=await pageFor(t);let liveRequests=0;
+  // Playwright interception handles only the first URL of a redirected request.
+  // Probe the real chain separately and test its destination against real CSP.
+  await context.route('https://live.metahub.space/poster/small/tt6933238/img',route=>{liveRequests++;return route.fulfill({contentType:'image/png',body:artworkPixel});});
+  await page.goto(fixture.origin);await page.waitForSelector('#workspace:not([hidden])');
+  await mountArtwork(page,'https://live.metahub.space/poster/small/tt6933238/img');
+  await page.waitForFunction(()=>document.querySelector('#artwork-regression')?.naturalWidth===1);
+  assert.equal(liveRequests,1);assert.equal(await page.locator('#artwork-regression').isVisible(),true);
+});
+test('browser blocks an untrusted redirect and recovers with the title-specific medium poster',async t=>{
+  const {page,context}=await pageFor(t);let evilRequests=0,mediumRequests=0;
+  await context.route('https://images.metahub.space/poster/small/tt6933238/img',route=>route.fulfill({status:307,headers:{location:'https://evil.example/poster.jpg'}}));
+  await context.route('https://evil.example/**',route=>{evilRequests++;return route.abort();});
+  await context.route('https://images.metahub.space/poster/medium/tt6933238/img',route=>{mediumRequests++;return route.fulfill({contentType:'image/png',body:artworkPixel});});
+  await page.goto(fixture.origin);await page.waitForSelector('#workspace:not([hidden])');
+  await mountArtwork(page,'https://images.metahub.space/poster/small/tt6933238/img');
+  await page.waitForFunction(()=>document.querySelector('#artwork-regression')?.naturalWidth===1);
+  assert.equal(evilRequests,0);assert.equal(mediumRequests,1);
+});
 
 test('full UI login, browse, playback and seeking verify the CDN redirect with synthetic media',async t=>{
   const {page}=await pageFor(t,{signedIn:false});await page.goto(fixture.origin);
   await page.locator('#api-key').fill('fixture-master-key');await page.locator('#login-form button[type=submit]').click();
   await seriesHome(page);await playEpisode(page);
-  await page.evaluate(()=>{document.querySelector('video').currentTime=30;});
-  await page.waitForFunction(()=>document.querySelector('video').currentTime>=30);
+  await page.evaluate(()=>{document.querySelector('#video-slot video').currentTime=30;});
+  await page.waitForFunction(()=>document.querySelector('#video-slot video').currentTime>=30);
   assert.equal(fixture.control.mediaFetches,0);assert.equal(fixture.control.playbackCalls,1);
 });
 
@@ -68,9 +97,9 @@ test('catalog renders while a slow TorBox health check is still pending',async t
 test('resume keeps the local rewind position and a visible overlay until real playback',async t=>{
   const {page}=await pageFor(t,{saved:true});await home(page);
   await page.locator('#recent-list .recent-card').click();
-  await page.waitForFunction(()=>document.querySelector('video')?.currentTime>=30);
+  await page.waitForFunction(()=>document.querySelector('#video-slot video')?.currentTime>=30&&document.querySelector('#resume-overlay').hidden);
   assert.ok(await page.locator('#resume-overlay').isHidden());
-  const position=await page.locator('video').evaluate(video=>video.currentTime);assert.ok(position>=30&&position<35);
+  const position=await page.locator('#video-slot video').evaluate(video=>video.currentTime);assert.ok(position>=30&&position<35);
 });
 
 test('canceling Resume during slow source lookup cannot reopen the player',async t=>{
@@ -87,23 +116,74 @@ test('closing a title during a slow Play request prevents late playback',async t
   assert.equal(fixture.control.playbackCalls,0);assert.equal(await page.locator('#player').evaluate(el=>el.open),false);
 });
 
+test('details prepare the exact ready episode before Play and reuse the result without another lookup',async t=>{
+  const {page}=await pageFor(t);fixture.control.lookupDelay=1000;await home(page);
+  const prepared=page.waitForResponse(response=>response.url().includes('/api/discover/prepare')&&response.status()===200);
+  await page.locator('#catalog-grid button').first().click();await prepared;
+  assert.equal(fixture.control.playbackCalls,0);assert.equal(fixture.control.lookupCalls,1);assert.equal(fixture.control.prepareCalls,1);
+  const start=performance.now();await page.locator('#episode-area button').filter({hasText:/^Play$/}).first().click();
+  await page.waitForFunction(()=>document.querySelector('#video-slot video')?.currentTime>0);
+  const elapsed=performance.now()-start;t.diagnostic(`Warmed Play to first synthetic video frame: ${Math.round(elapsed)}ms; source lookup fixture delay: 1000ms.`);
+  assert.ok(elapsed<900,'warmed playback should skip the synthetic 1-second lookup');
+  assert.equal(fixture.control.lookupCalls,1);assert.equal(fixture.control.prepareCalls,1);assert.equal(fixture.control.mediaFetches,0);
+});
+
+for(const identityMismatch of [false,true])test(`${identityMismatch?'a mismatched':'an uncached'} fast batch waits for later cached exact results before offering preparation`,async t=>{
+  const {page,context}=await pageFor(t);let early=0,complete=0;
+  await context.route('**/api/discover/lookup?**',async route=>{
+    const url=new URL(route.request().url()),full=url.searchParams.get('complete')==='1';
+    if(full){complete++;await new Promise(resolve=>setTimeout(resolve,250));}else early++;
+    const filename=!full&&identityMismatch?'Fixture.Show.S01E02.Two.720p.H264.AAC.mp4':'Fixture.Show.S01E01.One.720p.H264.AAC.mp4';
+    return route.fulfill({contentType:'application/json',body:JSON.stringify({complete:full,sources:[{hash:(full?'a':'d').repeat(40),title:filename,filename,resolution:'720p',videoCodec:'H264',audioCodecs:['AAC'],provider:'Fixture'}]})});
+  });
+  await home(page);await playEpisode(page);
+  assert.equal(early,1);assert.equal(complete,1);assert.equal(fixture.control.prepareCalls,1);assert.equal(fixture.control.creates,0);
+  assert.equal(fixture.control.playbackCalls,1);assert.equal(await page.locator('#play-fallback').textContent(),'');
+});
+
+test('uncached details prefetch never starts a TorBox download or opens the player',async t=>{
+  const {page}=await pageFor(t);fixture.control.cached=false;await home(page);
+  const sources=page.waitForResponse(response=>response.url().includes('/api/discover/sources')&&response.status()===200);
+  await page.locator('#catalog-grid button').first().click();await sources;await page.waitForTimeout(100);
+  assert.equal(fixture.control.creates,0);assert.equal(fixture.control.prepareCalls,0);assert.equal(fixture.control.playbackCalls,0);
+  assert.equal(await page.locator('#player').evaluate(el=>el.open),false);
+});
+
+test('closing details cancels warm work without late preparation or playback',async t=>{
+  const {page}=await pageFor(t);fixture.control.lookupDelay=650;await home(page);
+  await page.locator('#catalog-grid button').first().click();await page.locator('#close-title').click();await page.waitForTimeout(900);
+  assert.equal(fixture.control.prepareCalls,0);assert.equal(fixture.control.playbackCalls,0);
+});
+
+test('next episode warms before the credits window and is reused during auto-next',async t=>{
+  const {page}=await pageFor(t);await home(page);await playEpisode(page);
+  fixture.control.lookupDelay=500;
+  const prepared=page.waitForResponse(response=>response.url().includes('/api/discover/prepare')&&response.status()===200);
+  await page.locator('#video-slot video').evaluate(video=>{video.currentTime=32;});await prepared;
+  assert.equal(await page.locator('#up-next-card').isVisible(),false);assert.equal(fixture.control.lookupCalls,2);
+  await page.locator('#video-slot video').evaluate(video=>{video.currentTime=112;});
+  await page.locator('#play-next-now').waitFor({state:'visible'});await page.locator('#play-next-now').click();
+  await page.waitForFunction(()=>document.querySelector('#playing-title').textContent.includes('S01E02')&&document.querySelector('#video-slot video')?.currentTime>0);
+  assert.equal(fixture.control.lookupCalls,2);assert.equal(fixture.control.mediaFetches,0);
+});
+
 test('slow progress saves do not block auto-next and the actual video element survives',async t=>{
   const {page}=await pageFor(t);await home(page);await playEpisode(page);
   fixture.control.progressDelay=6000;
-  const oldSource=await page.locator('video').evaluate(video=>video.src);
-  await page.locator('video').evaluate(video=>{video.dataset.identity='original';video.currentTime=112;});
+  const oldSource=await page.locator('#video-slot video').evaluate(video=>video.src);
+  await page.locator('#video-slot video').evaluate(video=>{video.dataset.identity='original';video.currentTime=112;});
   await page.locator('#play-next-now').waitFor({state:'visible'});
   const start=performance.now();await page.locator('#play-next-now').click();
-  await page.waitForFunction(old=>{const v=document.querySelector('video');return document.querySelector('#playing-title').textContent.includes('S01E02')&&v?.src!==old&&v.currentTime>0&&v.currentTime<5&&!v.paused;},oldSource);
-  assert.ok(performance.now()-start<3000);assert.equal(await page.locator('video').getAttribute('data-identity'),'original');
+  await page.waitForFunction(old=>{const v=document.querySelector('#video-slot video');return document.querySelector('#playing-title').textContent.includes('S01E02')&&v?.src!==old&&v.currentTime>0&&v.currentTime<5&&!v.paused;},oldSource);
+  assert.ok(performance.now()-start<3000);assert.equal(await page.locator('#video-slot video').getAttribute('data-identity'),'original');
 });
 
 test('an expired background progress session does not stop a playing video',async t=>{
   const {page,token}=await pageFor(t);await home(page);await playEpisode(page);
   fixture.sessions.revoke(fixture.sessions.read(token).id);
-  await page.locator('video').evaluate(video=>{video.currentTime=20;});await page.waitForTimeout(400);
+  await page.locator('#video-slot video').evaluate(video=>{video.currentTime=20;});await page.waitForTimeout(400);
   assert.equal(await page.locator('#player').evaluate(el=>el.open),true);assert.ok(await page.locator('#login').isHidden());
-  assert.equal(await page.locator('video').evaluate(video=>video.paused),false);
+  assert.equal(await page.locator('#video-slot video').evaluate(video=>video.paused),false);
 });
 
 test('hung initial media reaches a bounded failure and clears the resume overlay',async t=>{
@@ -117,7 +197,7 @@ test('Resume offers in-app preparation, with no uncached write until explicitly 
   const {page}=await pageFor(t,{saved:true});fixture.control.cached=false;await home(page);
   await page.locator('#recent-list .recent-card').click();await page.locator('#play-fallback button').first().waitFor();
   assert.equal(fixture.control.creates,0);assert.ok(await page.locator('#resume-overlay').isHidden());
-  await page.locator('#play-fallback button').first().click();await page.waitForFunction(()=>document.querySelector('video')?.currentTime>0);
+  await page.locator('#play-fallback button').first().click();await page.waitForFunction(()=>document.querySelector('#video-slot video')?.currentTime>0);
   assert.equal(fixture.control.creates,1);
 });
 
@@ -132,14 +212,14 @@ test('rapid episode choices play only the last selected episode',async t=>{
   await page.locator('#catalog-grid button').first().click();
   const choices=page.locator('#episode-area .episode-actions button.primary');
   await choices.nth(0).click();await choices.nth(1).click();
-  await page.waitForFunction(()=>document.querySelector('video')?.currentTime>0);
+  await page.waitForFunction(()=>document.querySelector('#video-slot video')?.currentTime>0);
   assert.match(await page.locator('#playing-title').textContent(),/S01E02/);
   assert.equal(fixture.control.playbackCalls,1);
 });
 
 test('a remembered encrypted key reconnects after a backend session restart',async t=>{
   const {page}=await pageFor(t);await home(page);
-  await page.evaluate(async()=>{const {rememberApiKey}=await import('./vault.js?v=release-1.2.0');await rememberApiKey('fixture-master-key');});
+  await page.evaluate(async()=>{const {rememberApiKey}=await import('./vault.js?v=release-1.2.1-startup.1');await rememberApiKey('fixture-master-key');});
   fixture.sessions.revokeAll();
   await page.locator('#catalog-grid button').first().click();
   await page.locator('#episode-area button').filter({hasText:/^Play$/}).first().waitFor();

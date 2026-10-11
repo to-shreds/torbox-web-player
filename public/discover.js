@@ -1,15 +1,40 @@
-import { LatestPlaybackAction } from './playback-lifecycle.js?v=release-1.2.0';
-import { loadPublicSources, browserContainerHints } from './source-client.js?v=release-1.2.0';
-import { getSettings, updateSettings } from './settings.js?v=release-1.2.0';
-import { listRecent, formatResumeTime } from './history.js?v=release-1.2.0';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=release-1.2.0';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=release-1.2.0';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=release-1.2.0';
+import { LatestPlaybackAction, PlaybackPreparationCache } from './playback-lifecycle.js?v=release-1.2.1-startup.1';
+import { loadPublicSources, browserContainerHints } from './source-client.js?v=release-1.2.1-startup.1';
+import { getSettings, updateSettings } from './settings.js?v=release-1.2.1-startup.1';
+import { listRecent, formatResumeTime } from './history.js?v=release-1.2.1-startup.1';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=release-1.2.1-startup.1';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=release-1.2.1-startup.1';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=release-1.2.1-startup.1';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
 const button = (label, fn, primary = false) => { const b = element('button', label, primary ? 'primary' : ''); b.type = 'button'; b.addEventListener('click', fn); return b; };
-const image = (url, label, className) => { const i = element('img', '', className); i.alt = label; i.loading = 'lazy'; i.referrerPolicy = 'no-referrer'; i.src = url; i.addEventListener('error', () => { i.hidden = true; }); return i; };
+export const ARTWORK_HOSTS = Object.freeze(['images.metahub.space','live.metahub.space','image.tmdb.org','m.media-amazon.com']);
+export function artworkCandidates(value, id) {
+  const urls=[];
+  try { const u=new URL(value); if(String(value).length<=2048&&u.protocol==='https:'&&!u.username&&!u.password&&!u.port&&ARTWORK_HOSTS.includes(u.hostname)) urls.push(u.href); } catch {}
+  if(/^tt[0-9]{5,12}$/.test(id||''))urls.push(`https://images.metahub.space/poster/medium/${id}/img`);
+  return [...new Set(urls)].slice(0,2);
+}
+export function bindArtworkImage(img, value, id, timers=globalThis) {
+  const candidates=artworkCandidates(value,id),attempts=[...candidates];
+  if(candidates.length){const retry=new URL(candidates[0]);retry.searchParams.set('_artwork_retry','1');attempts.push(retry.href);}
+  let index=0,timer=null;
+  const cleanup=()=>{if(timer!==null)timers.clearTimeout(timer);timer=null;img.removeEventListener('error',failed);img.removeEventListener('load',loaded);};
+  const loaded=()=>{img.hidden=false;cleanup();};
+  const failed=()=>{
+    if(timer!==null)timers.clearTimeout(timer);timer=null;
+    if(!img.isConnected){cleanup();return;}
+    if(index>=attempts.length){img.hidden=true;cleanup();return;}
+    if(index===attempts.length-1){timer=timers.setTimeout(()=>{timer=null;if(img.isConnected)next();else cleanup();},350);}
+    else next();
+  };
+  const next=()=>{img.hidden=false;img.src=attempts[index++];};
+  img.loading='lazy';img.referrerPolicy='no-referrer';
+  if(!attempts.length){img.hidden=true;return;}
+  img.addEventListener('error',failed);img.addEventListener('load',loaded);next();
+}
+const image = (url, label, className, id) => { const i = element('img', '', className); i.alt = label; bindArtworkImage(i,url,id); return i; };
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 const resolutionOf = s => String(s?.resolution || s?.quality || '').toLowerCase();
 export function sourceMatchesResolution(source, resolution = 'auto') {
@@ -165,13 +190,14 @@ function createResolutionSelect(value = getResolution()) {
 
 export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity }) {
   const playbackActions=new LatestPlaybackAction();
+  const preparations=new PlaybackPreparationCache();
   let closingTitleForPlayback=false;
   const cancelPlayback=()=>{playbackActions.cancel();resumeActivity?.hide?.();};
   let active=false, guestMode=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0, nextUpGeneration=0;
   let catalogAbort,titleAbort,sourceAbort,searchTimer,pollTimer,metas=[],nextSkip=null,currentMeta;
 
   function cancelSource(){++preparationGeneration;++sourceGeneration;sourceAbort?.abort();clearTimeout(pollTimer);}
-  function cancelTitle(){++titleGeneration;titleAbort?.abort();cancelSource();}
+  function cancelTitle(){++titleGeneration;titleAbort?.abort();preparations.cancelPending();cancelSource();}
   function message(id,text,error=false){$(id).textContent=text;$(id).classList.toggle('error',error);}
   function savedResumeForTarget(target){
     if(!target)return null;
@@ -232,7 +258,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
         const data=await api(`/api/discover/meta?type=series&id=${item.id}`,{signal:AbortSignal.timeout(12000)}),meta=data.meta;
         const next=episodeQueue(meta,{type:'series',id:item.id,season:item.season,episode:item.episode})[0];if(!next)continue;
         const episode=meta.episodes.find(e=>e.season===next.season&&e.episode===next.episode),card=element('article','','next-up-card');
-        if(meta.poster)card.append(image(meta.poster,'','next-up-thumb'));
+        card.append(image(meta.poster,'','next-up-thumb',meta.id));
         const copy=element('div','','next-up-copy');copy.append(element('strong',meta.name),element('span',`S${next.season}E${next.episode} · ${episode?.name||next.name||'Next episode'}`,'muted'));
         const playButton=button('Play',()=>quickPlay(meta,next,episode?.name||next.name||'',playButton),true);card.append(copy,playButton);cards.push(card);
         if(cards.length>=settings.nextUpLimit)break;
@@ -265,7 +291,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   function posterCard(meta){
     let longPressed=false,timer=null;
     const card=button('',()=>{if(longPressed){longPressed=false;return;}showTitle(meta)});card.className='poster-card';card.setAttribute('aria-label',`Open ${meta.name}`);
-    const art=element('div','','poster-art');if(meta.poster)art.append(image(meta.poster,'','poster-image'));art.append(element('span',meta.name,'poster-fallback'));
+    const art=element('div','','poster-art');art.append(image(meta.poster,'','poster-image',meta.id));art.append(element('span',meta.name,'poster-fallback'));
     card.append(art,element('strong',meta.name),element('span',meta.year||(meta.type==='series'?'Show':'Movie'),'muted'));
     const cancel=()=>{if(timer)clearTimeout(timer);timer=null;};
     card.addEventListener('pointerdown',event=>{if(!getSettings().longPressShortcuts||event.button>0)return;cancel();timer=setTimeout(()=>{longPressed=true;openQuickActions(meta);},550);});
@@ -319,10 +345,10 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   const closeTitleForPlayback = () => { if (!guestMode && $('title-dialog').open) {closingTitleForPlayback=true;$('title-dialog').close();} };
 
   async function ensureService(){ if(typeof guard==='function') await guard(); }
-  async function registeredSources(target, signal){
-    const sources=await loadPublicSources(target,{signal,api});if(!sources.length)throw new Error('No source found.');
+  async function registeredSources(target, signal, {fast=false,complete=false}={}){
+    const lookup=await loadPublicSources(target,{signal,api,fast,complete,withMetadata:true}),sources=lookup.sources;if(!sources.length)throw new Error('No source found.');
     const result=await api('/api/discover/sources',{method:'POST',data:{target,sources},signal:signal?AbortSignal.any([signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000)});
-    if(!result.sources?.length)throw new Error('No supported source found.');return {...result,sources:applySourceMemory(target,result.sources)};
+    if(!result.sources?.length){const error=new Error('No supported source found.');error.code='NO_CACHED_BROWSER_SOURCE';error.complete=lookup.complete;throw error;}return {...result,complete:lookup.complete,sources:applySourceMemory(target,result.sources)};
   }
 
   async function readyFile(source, { signal, unattended=false, allowBrowserUnsupported=false, waitForPreparation=true, initialTimeoutMs=waitForPreparation?60000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } = {}){
@@ -350,6 +376,34 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
 
   async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES}={}){
     return resolveAutomaticCachedSource(sources,target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,onRejected:(source,error)=>{if(error?.code==='BROWSER_CONTAINER_UNSUPPORTED')setSourceBad(target,source,true);},prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false})});
+  }
+
+  async function preparedPlayback(target,resolution,{signal,onCandidate}={}){
+    const key=JSON.stringify([target.type,target.id,target.season??null,target.episode??null,resolution,getSettings().sourceSizeProfile,$('viewer').value]);
+    const notify=source=>{if(!signal?.aborted)onCandidate?.(source);};
+    const prepared=await preparations.get(key,async backgroundSignal=>{
+      const bounded=AbortSignal.any([backgroundSignal,AbortSignal.timeout(45000)]);
+      let registered;
+      try{
+        registered=await registeredSources(target,bounded,{fast:true});
+        try{return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify}),registered};}
+        catch(error){if(error?.code!=='NO_CACHED_BROWSER_SOURCE'||registered.complete)throw error;}
+      }catch(error){if(error?.code!=='NO_CACHED_BROWSER_SOURCE'||error.complete!==false){error.registered=registered;throw error;}}
+      // The first index may have only uncached or incompatible results. Wait
+      // for the existing search rather than hiding a slower correct source.
+      registered=await registeredSources(target,bounded,{complete:true});
+      try{return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify}),registered};}
+      catch(error){error.registered=registered;throw error;}
+    },{signal});
+    const remembered=applySourceMemory(target,[prepared.source])[0];
+    if(remembered.memoryBad||remembered.memoryAudio==='bad'){
+      preparations.delete(key);return preparedPlayback(target,resolution,{signal,onCandidate});
+    }
+    return prepared;
+  }
+  function warmPlayback(target){
+    if(!active)return;
+    void preparedPlayback(target,getResolution(target)).catch(()=>{});
   }
 
   function clearPlaybackFallback(){const area=$('play-fallback');if(area)area.replaceChildren();}
@@ -418,11 +472,12 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Checking the player connection.');
       await ensureService();action.check();
       if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Finding a playable source.');
-      resolution=getResolution(target);registered=await registeredSources(target,bounded(45000));
-      const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:bounded(330000),onCandidate:()=>{
+      resolution=getResolution(target);
+      const {source:best,result,registered:readySources}=await preparedPlayback(target,resolution,{signal:bounded(45000),onCandidate:()=>{
         action.check();message('detail-message','Checking cached browser-compatible source…');
         if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Checking a ready browser-compatible version.');
       }});
+      registered=readySources;
       action.check();
       const context=buildContext(meta,target,episodeName,resolution,best);
       if(resumeRow)context.resumeIntent=true;
@@ -430,7 +485,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
       action.check();action.finish();
       const moved=await play(result.file,context);if(!moved)resumeActivity?.hide?.();return moved;
-    }catch(e){if(!action.current())return false;action.finish();
+    }catch(e){if(!action.current())return false;action.finish();registered=e.registered||registered;
       resumeActivity?.hide?.();
       if(e?.code==='NO_CACHED_BROWSER_SOURCE'&&registered?.sources?.length&&renderPlaybackFallback(meta,target,episodeName,resolution,registered.sources)){
         message('detail-message','Choose a browser-compatible version below.');
@@ -473,7 +528,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     try{
       const data=await api(`/api/discover/meta?type=${meta.type}&id=${meta.id}`,{signal:AbortSignal.any([titleAbort.signal,AbortSignal.timeout(20000)])});
       if(generation!==titleGeneration||!$('title-dialog').open||!active)return;currentMeta=data.meta;updateWatchlistButton();
-      const summary=element('div','','title-summary');if(currentMeta.poster)summary.append(image(currentMeta.poster,currentMeta.name,'detail-poster'));
+      const summary=element('div','','title-summary');summary.append(image(currentMeta.poster,currentMeta.name,'detail-poster',currentMeta.id));
       const copy=element('div','','title-copy');copy.append(element('p',[currentMeta.year,currentMeta.runtime,...currentMeta.genres].filter(Boolean).join(' · '),'muted'),element('p',currentMeta.description||'','title-description'));summary.append(copy);
       $('title-content').replaceChildren(summary);message('detail-message','');
       if(currentMeta.type==='movie')renderMovieActions(currentMeta);else renderEpisodes(currentMeta,preferredSeason);
@@ -486,6 +541,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     const playButton=button('Play',()=>quickPlay(meta,target,'',playButton),true);
     const shareButton=button('Share',()=>quickDriveShare(meta,target,'',shareButton));shareButton.hidden=guestMode||typeof driveTest!=='function';shareButton.classList.add('advanced-only');
     const options=button('Options',()=>openOptions(meta,target));options.classList.add('advanced-only');actions.append(playButton,shareButton,options);bar.append(actions);$('episode-area').replaceChildren(bar);
+    warmPlayback(target);
   }
 
   function renderEpisodes(meta,preferredSeason=null){
@@ -503,6 +559,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
         if(progress){const label=progress.completed?'Watched':progress.position>0?`Resume ${formatResumeTime(progress.position)}`:'';if(label)info.append(element('span',label,'episode-progress-text'));}
         const actions=element('div','','episode-actions');const target={type:'series',id:meta.id,season:episode.season,episode:episode.episode};
         const playButton=button('Play',()=>quickPlay(meta,target,episode.name,playButton),true);
+        const warm=()=>{if(active&&$('title-dialog').open)warmPlayback(target);};playButton.addEventListener('focus',warm);playButton.addEventListener('pointerenter',warm);
         const shareButton=button('Share',()=>quickDriveShare(meta,target,episode.name,shareButton));shareButton.hidden=guestMode||typeof driveTest!=='function';shareButton.classList.add('advanced-only');
         const more=button('Options',()=>openOptions(meta,target,episode.name));more.setAttribute('aria-label',`More options for ${episode.name}`);more.classList.add('advanced-only');
         actions.append(playButton,shareButton,more);row.append(number,info,actions);
@@ -512,6 +569,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     };
     seasonSelect.addEventListener('change',render);$('episode-area').replaceChildren(controls,list);
     if(!seasons.length){$('episode-area').append(element('p','No episode list is available.'));return;}render();
+    void resolveQuickTarget(meta).then(resolved=>{if(active&&currentMeta===meta&&$('title-dialog').open)warmPlayback(resolved.target);}).catch(()=>{});
   }
 
   async function openOptions(meta,target,episodeName=''){
@@ -578,8 +636,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     const bounded=signal?AbortSignal.any([signal,AbortSignal.timeout(20000)]):AbortSignal.timeout(20000);
     try{
       const meta=await api(`/api/discover/meta?type=series&id=${next.id}`,{signal:bounded});
-      const registered=await registeredSources(next,bounded);
-      const {source:best,result}=await readyBrowserSource(registered.sources,next,context.resolution||'auto',{signal:bounded});if(best.audioRisk)return null;
+      const {source:best,result}=await preparedPlayback(next,context.resolution||'auto',{signal:bounded});if(best.audioRisk)return null;
       return{file:result.file,context:{...buildContext(meta.meta,next,next.name||'',context.resolution||getResolution(next),best),poster:meta.meta.poster||context.poster,queue:rest}};
     }catch(error){
       if(error?.name==='AbortError'||error?.name==='TimeoutError')throw error;
@@ -599,7 +656,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     if(!active||!context?.current)return false;
     try{
       const bounded=AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(25000)]);
-      const registered=await registeredSources(context.current,bounded);
+      const registered=await registeredSources(context.current,bounded,{complete:true});
       const failedKey=sourceRecoveryKey(context.sourceInfo),attempted=new Set(Array.isArray(context.recoveryTried)?context.recoveryTried:[]);if(failedKey)attempted.add(failedKey);context.recoveryTried=[...attempted];
       const candidates=boundedRecoverySourceOrder(registered.sources.filter(source=>source.cached===true),context,context.current.type,getSettings().sourceSizeProfile).slice(0,3),budgetSignal=AbortSignal.any([bounded,AbortSignal.timeout(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS)]);
       for(const best of candidates){
@@ -638,14 +695,14 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       target=entry.type==='series'?{type:'series',id:entry.id,season:entry.season,episode:entry.episode}:{type:'movie',id:entry.id};
       name=entry.type==='series'?(meta.episodes.find(e=>e.season===entry.season&&e.episode===entry.episode)?.name||entry.episodeName):'';
       resumeActivity?.update?.(startOver?'Starting '+resumeTitle(meta,target,name)+' over…':'Resuming '+resumeTitle(meta,target,name)+'…','Finding a playable source.');
-      registered=await registeredSources(target,bounded(45000));resolution=entry.resolution||getResolution(target);
-      const {source:best,result}=await readyBrowserSource(registered.sources,target,resolution,{signal:bounded(330000),onCandidate:()=>resumeActivity?.update?.(startOver?'Starting '+resumeTitle(meta,target,name)+' over…':'Resuming '+resumeTitle(meta,target,name)+'…','Checking a ready browser-compatible version.')});
+      resolution=entry.resolution||getResolution(target);
+      const {source:best,result,registered:readySources}=await preparedPlayback(target,resolution,{signal:bounded(45000),onCandidate:()=>resumeActivity?.update?.(startOver?'Starting '+resumeTitle(meta,target,name)+' over…':'Resuming '+resumeTitle(meta,target,name)+'…','Checking a ready browser-compatible version.')});registered=readySources;
       action.check();
       const context=buildContext(meta,target,name,resolution,best);context.forceStartOver=startOver;context.rewindOnResumeSeconds=startOver?0:getSettings().resumeRewindSeconds;context.resumeIntent=!startOver;context.startOverIntent=startOver;
       resumeActivity?.update?.(startOver?'Starting '+resumeTitle(meta,target,name)+' over…':'Resuming '+resumeTitle(meta,target,name)+'…','Opening the video.');
       action.check();action.finish();
       const moved=await play(result.file,context);if(!moved)resumeActivity?.hide?.();message('catalog-message','');return moved;
-    }catch(e){if(!action.current())return false;action.finish();resumeActivity?.hide?.();
+    }catch(e){if(!action.current())return false;action.finish();resumeActivity?.hide?.();registered=e.registered||registered;
       if(e?.code==='NO_CACHED_BROWSER_SOURCE'&&meta&&registered?.sources?.length){
         await showTitle(meta,target?.season);
         if(renderPlaybackFallback(meta,target,name,resolution,registered.sources,{forceStartOver:startOver,startOverIntent:startOver,resumeIntent:!startOver,rewindOnResumeSeconds:startOver?0:getSettings().resumeRewindSeconds})){message('detail-message','Choose a browser-compatible version below.');return false;}
@@ -667,18 +724,18 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     if(guestMode)return;++catalogGeneration;catalogAbort?.abort();browse();
   });
   $('search').addEventListener('focus',renderSearchHistory);
-  $('close-title').addEventListener('click',()=>$('title-dialog').close());$('title-dialog').addEventListener('close',()=>{++titleGeneration;titleAbort?.abort();if(closingTitleForPlayback)closingTitleForPlayback=false;else cancelPlayback();});
+  $('close-title').addEventListener('click',()=>$('title-dialog').close());$('title-dialog').addEventListener('close',()=>{++titleGeneration;titleAbort?.abort();preparations.cancelPending();if(closingTitleForPlayback)closingTitleForPlayback=false;else cancelPlayback();});
   $('close-source').addEventListener('click',()=>$('source-dialog').close());$('source-dialog').addEventListener('close',cancelSource);
   $('close-quick-actions').addEventListener('click',()=>$('quick-actions-dialog').close());
   $('toggle-watchlist').addEventListener('click',()=>{if(guestMode||!currentMeta)return;toggleWatchlist($('viewer').value,currentMeta);updateWatchlistButton();renderWatchlist();});
-  $('viewer').addEventListener('change',()=>{cancelTitle();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();renderWatchlist();renderSearchHistory();renderNextUp();});
+  $('viewer').addEventListener('change',()=>{preparations.clear();cancelTitle();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();renderWatchlist();renderSearchHistory();renderNextUp();});
   return {
     async activate(){guestMode=false;active=true;await openDiscover();},
     async activateGuest(scope){
       guestMode=true;active=true;
       await showTitle({type:scope.type,id:scope.id,name:scope.name||'Shared title',poster:scope.poster||''});
     },
-    cancelPlayback,prepareNext,playPreparedNext,playNext,recoverPlayback,openHistoryTitle,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
-    suspend(){cancelPlayback();active=false;guestMode=false;document.body.classList.remove('search-mode');++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
+    cancelPlayback,prepareNext,playPreparedNext,playNext,recoverPlayback,openHistoryTitle,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){preparations.clear();renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
+    suspend(){preparations.clear();cancelPlayback();active=false;guestMode=false;document.body.classList.remove('search-mode');++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
   };
 }
