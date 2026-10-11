@@ -4,7 +4,7 @@ The browser-key player is the production codebase. `main` is authoritative. The 
 
 Current version: **1.2.1**, frontend startup build **release-1.2.1-startup.1**
 
-Deployment status: this startup patch is prepared and locally tested. The last confirmed published frontend is the Sports build and the live Render backend remains v1.1.0 pending the Render connector's required workspace confirmation. See [HANDOFF.md](HANDOFF.md) for the exact deployment state.
+Deployment status: the startup frontend is tested and live at both root and `/key/`, with release and Pages checks passed. The live Render backend remains v1.1.0; activating the prepared v1.2.1 backend requires the Render connector's workspace confirmation. See [HANDOFF.md](HANDOFF.md) for the exact deployment state.
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/` (legacy mirror: `/key/`)
 
