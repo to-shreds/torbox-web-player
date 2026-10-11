@@ -1,5 +1,5 @@
 // Shared source normalization and authenticated backend lookup. No provider keys here.
-import { apiUrl, apiMode, getSessionToken, credentialsMode } from './runtime.js?v=release-1.2.0-sports.1';
+import { apiUrl, apiMode, getSessionToken, credentialsMode } from './runtime.js?v=release-1.2.1-startup.1';
 export const SOURCE_PATH = '/api/discover/lookup';
 export const MAX_SOURCES = 40;
 export function targetOf(input) {
@@ -101,11 +101,12 @@ export function normalizeSources(raw) {
   }
   return [...map.values()].sort((a, b) => b.score - a.score || (a.size || Infinity) - (b.size || Infinity)).slice(0, MAX_SOURCES);
 }
-export async function loadPublicSources(input, { signal, fetchFn = fetch, api } = {}) {
+export async function loadPublicSources(input, { signal, fetchFn = fetch, api, fast = false, complete = false, withMetadata = false } = {}) {
   const target = targetOf(input);
   const params = new URLSearchParams({ type: target.type, id: target.id });
   if (target.type === 'series') { params.set('season', target.season); params.set('episode', target.episode); }
-  if(api){const data=await api(`${SOURCE_PATH}?${params}`,{signal});return normalizeSources(data?.sources);}
+  if(fast)params.set('fast','1');if(complete)params.set('complete','1');
+  if(api){const data=await api(`${SOURCE_PATH}?${params}`,{signal});const sources=normalizeSources(data?.sources);return withMetadata?{sources,complete:data?.complete!==false}:sources;}
   let response;
   try {
     const token = getSessionToken();
@@ -129,6 +130,6 @@ export async function loadPublicSources(input, { signal, fetchFn = fetch, api } 
     if (!response.ok) throw new Error(cleanText(data?.message, 500) || `Source lookup failed (HTTP ${response.status}). No torrent has been added.`);
     const sources = normalizeSources(data?.sources);
     if (!sources.length && Array.isArray(data?.sources) && data.sources.length) throw new Error('The provider returned no supported torrent hashes for this title. No download was started.');
-    return sources;
+    return withMetadata?{sources,complete:data?.complete!==false}:sources;
   } finally { try { if (!response.bodyUsed) await response.body?.cancel(); } catch {} }
 }

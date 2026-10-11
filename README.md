@@ -2,13 +2,17 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.0**, frontend sports build **release-1.2.0-sports.1**
+Current version: **1.2.1**, frontend startup build **release-1.2.1-startup.1**
 
-Deployment status: the v1.2.0 frontend is live and the backend release has passed CI, but the live Render backend remains v1.1.0 pending the Render connector's required workspace confirmation. See [HANDOFF.md](HANDOFF.md) for the exact deployment state.
+Deployment status: this startup patch is prepared and locally tested. The last confirmed published frontend is the Sports build and the live Render backend remains v1.1.0 pending the Render connector's required workspace confirmation. See [HANDOFF.md](HANDOFF.md) for the exact deployment state.
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/` (legacy mirror: `/key/`)
 
 Backend: `https://torbox-web-player-key.onrender.com`
+
+## Playback startup patch
+
+Title details now prepare cached movie/episode files before Play, reuse the completed work briefly and prepare auto-next earlier. The new backend also returns a useful first provider batch promptly and retains slower results for safe fallback and Options. Exact identity/episode checks and cached-only automatic playback remain. See [the startup report](docs/STARTUP-1.2.1.md) for timing fixtures, test results and the separate backend publication gate.
 
 ## Sports
 

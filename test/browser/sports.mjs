@@ -52,6 +52,6 @@ test('failed sports HLS reports retry and remains bounded',async t=>{
 });
 test('Sports requires an adult viewer so it cannot bypass Kid Mode allowances',async t=>{
   const {page}=await sportsPage(t);await page.locator('#open-cinema').click();
-  await page.evaluate(async()=>{const {updateKidProfile}=await import('./parental-controls.js?v=release-1.2.0-sports.1');updateKidProfile('viewer-1',{enabled:true});});
+  await page.evaluate(async()=>{const {updateKidProfile}=await import('./parental-controls.js?v=release-1.2.1-startup.1');updateKidProfile('viewer-1',{enabled:true});});
   await page.locator('#open-sports').click();assert.equal(await page.locator('#sports-panel').isVisible(),false);assert.match(await page.locator('#sports-nav-message').textContent(),/adult viewer/);
 });

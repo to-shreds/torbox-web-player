@@ -1,6 +1,6 @@
 const CACHE_PREFIX='torbox-player:'+self.registration.scope+':';
-const CACHE=CACHE_PREFIX+'release-1.2.0-sports.1';
-const BUILD='release-1.2.0-sports.1';
+const CACHE=CACHE_PREFIX+'release-1.2.1-startup.1';
+const BUILD='release-1.2.1-startup.1';
 const SHELL=[
   './','./index.html',
   `./style.css?v=${BUILD}`,`./discover.css?v=${BUILD}`,`./boot.js?v=${BUILD}`,`./app.js?v=${BUILD}`,

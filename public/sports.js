@@ -1,5 +1,5 @@
-import {cleanSportsCatalog, resolveSportsSource, sportsMediaUrl, replayResume} from './sports-core.js?v=release-1.2.0-sports.1';
-import {getKidProfile} from './parental-controls.js?v=release-1.2.0-sports.1';
+import {cleanSportsCatalog, resolveSportsSource, sportsMediaUrl, replayResume} from './sports-core.js?v=release-1.2.1-startup.1';
+import {getKidProfile} from './parental-controls.js?v=release-1.2.1-startup.1';
 
 const $=id=>document.getElementById(id);
 let catalog=null, loadPromise=null, selection=null, hls=null, abort=null, generation=0, deadline=null, bufferDeadline=null;
@@ -79,7 +79,7 @@ function render(){
 async function load(){
   if(catalog)return render();if(loadPromise)return loadPromise;
   loadPromise=(async()=>{try{
-    const response=await fetch('./sports-catalog.json?v=release-1.2.0-sports.1',{credentials:'omit',signal:AbortSignal.timeout(10000)});
+    const response=await fetch('./sports-catalog.json?v=release-1.2.1-startup.1',{credentials:'omit',signal:AbortSignal.timeout(10000)});
     if(!response.ok)throw new Error();catalog=cleanSportsCatalog(await response.json());render();
   }catch{$('sports-message').textContent='Sports could not load. Press Refresh to try again.';}finally{loadPromise=null;}})();
   return loadPromise;

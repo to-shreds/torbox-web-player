@@ -19,7 +19,7 @@ test('service worker activation preserves other GitHub Pages apps and the legacy
   const source = await readFile(new URL('../public/sw.js', import.meta.url), 'utf8');
   const scope = 'https://to-shreds.github.io/torbox-web-player/';
   const own = 'torbox-player:' + scope + ':';
-  const names = [own + 'old', own + 'release-1.2.0-sports.1', 'arcade-v1', 'facebatch-assets', 'torbox-player:' + scope + 'key/:old'];
+  const names = [own + 'old', own + 'release-1.2.1-startup.1', 'arcade-v1', 'facebatch-assets', 'torbox-player:' + scope + 'key/:old'];
   const deleted = [], handlers = {};
   const self = { registration: { scope }, clients: { claim: async () => {} }, addEventListener: (name, handler) => { handlers[name] = handler; } };
   vm.runInNewContext(source, { self, URL, Request, caches: { keys: async () => names, delete: async name => { deleted.push(name); } } });
