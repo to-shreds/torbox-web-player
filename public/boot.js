@@ -1,4 +1,4 @@
-const BUILD='release-1.2.1-startup.1';
+const BUILD='release-1.2.2-sports.1';
 const startedAt=Date.now();
 let startupTimer=null;
 const stageNode=()=>document.querySelector('#startup-stage');
@@ -45,14 +45,14 @@ function showStartupFailure(){
 // Sports initializes independently, before any private service request.
 try{await import(`./sports.js?v=${BUILD}`);}catch{const message=document.querySelector('#sports-nav-message');if(message)message.textContent='Sports could not start. Reload to retry.';}
 
-// Wake the backend immediately, but keep service-worker refresh off the critical startup path.
-warmBackend();
-setStartupStage('Loading player…','Connecting to the private player service.');
-try{
-  await import(`./app.js?v=${BUILD}`);
-  void refreshServiceWorker();
-}catch(error){
-  console.error('player_boot_failed',error);
-  void refreshServiceWorker();
-  showStartupFailure();
+let cinemaStarted=false;
+async function startCinema(){
+  if(cinemaStarted)return;
+  cinemaStarted=true;startStartupTimer();warmBackend();
+  setStartupStage('Loading player…','Connecting to the private player service.');
+  try{await import(`./app.js?v=${BUILD}`);}
+  catch(error){console.error('player_boot_failed',error);cinemaStarted=false;showStartupFailure();}
 }
+document.querySelector('#open-cinema')?.addEventListener('click',()=>void startCinema());
+if(location.hash==='#sports')stopStartupTimer();else void startCinema();
+void refreshServiceWorker();

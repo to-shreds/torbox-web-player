@@ -25,6 +25,9 @@ const publicFiles = new Map([
   ['/sports.js', ['sports.js', 'text/javascript; charset=utf-8']],
   ['/sports-core.js', ['sports-core.js', 'text/javascript; charset=utf-8']],
   ['/sports.css', ['sports.css', 'text/css; charset=utf-8']],
+  ['/sports-player.html', ['sports-player.html', 'text/html; charset=utf-8']],
+  ['/sports-player.js', ['sports-player.js', 'text/javascript; charset=utf-8']],
+  ['/sports-player.css', ['sports-player.css', 'text/css; charset=utf-8']],
   ['/sports-catalog.json', ['sports-catalog.json', 'application/json; charset=utf-8']],
   ['/hls.min.js', ['hls.min.js', 'text/javascript; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
@@ -211,7 +214,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.2.1', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.2.2', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/relay/health') {
         if(!corsAllowed)throw new AppError('BAD_ORIGIN','This frontend is not allowed to use the TorBox bridge.',403);
         response.setHeader('X-TorBox-Bridge','render');
@@ -226,6 +229,12 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
         if(filename==='index.html'){const html=await readFile(join(root,'public',filename),'utf8');const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];if(csp)response.setHeader('Content-Security-Policy',csp+"; frame-ancestors 'none'");response.setHeader('Content-Type',type);return response.end(html);}
+        if(filename==='sports-player.html'){
+          const html=await readFile(join(root,'public',filename),'utf8');
+          const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];
+          if(csp)response.setHeader('Content-Security-Policy',csp+"; frame-ancestors 'self'");
+          response.setHeader('X-Frame-Options','SAMEORIGIN');response.setHeader('Content-Type',type);return response.end(html);
+        }
         response.setHeader('Content-Type', type); return response.end(await readFile(join(root, 'public', filename)));
       }
 
@@ -492,6 +501,6 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.2.1' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.2.2' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }

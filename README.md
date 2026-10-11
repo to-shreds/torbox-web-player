@@ -2,9 +2,9 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.1**, frontend startup build **release-1.2.1-startup.1**
+Current version: **1.2.2**, frontend Sports build **release-1.2.2-sports.1**
 
-Deployment status: this startup patch is prepared and locally tested. The last confirmed published frontend is the Sports build and the live Render backend remains v1.1.0 pending the Render connector's required workspace confirmation. See [HANDOFF.md](HANDOFF.md) for the exact deployment state.
+Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/` (legacy mirror: `/key/`)
 
@@ -16,9 +16,9 @@ Title details now prepare cached movie/episode files before Play, reuse the comp
 
 ## Sports
 
-Open **Sports** in the top navigation, or use `#sports` in the app URL. Sports opens without a TorBox login or a running private backend. It bundles T2 tennis, Red Bull TV, Pickleball TV and NHL classics/coverage, plus sixteen full Premier Padel replays. No additional subscription, login or VPN is needed by the app. Regional rights still apply, and free channels do not cover every paid event. The replay collection is a release snapshot.
+Open **Sports** in the top navigation, or use `#sports` in the app URL. Sports opens without a TorBox login or a running private backend. It bundles 36 live channels with 48 stream choices and 157 dated full event/session replays across 25 sports. Channels include tennis, NFL/NBA classics, MLB, motorsport, golf, rugby, cricket, combat and more. Replays include American football and hockey as well as padel and other sports. No additional subscription, login or VPN is needed by the app. Regional rights still apply, and free channels do not cover every paid event. The replay collection is a release snapshot.
 
-Sports has live/replay and sport filters, text search, 720p by default with quality choices, Go Live, replay resume/Start Over, and clear Retry/channel alternatives. Catalogs omit scores, descriptions and result images. Sports is available to adult viewers. Direct public HLS uses the bundled Apache-licensed hls.js 1.6.15; the native browser HLS fallback selects quality itself. No sports video is relayed through Render. See [the sports report](docs/SPORTS-2026-10-10.md).
+Sports has live/replay, sport and channel filters, text search, 720p by default with quality choices, Go Live, replay resume/Start Over, and clear Retry/channel alternatives. Catalogs omit scores, descriptions and result images. Sports is available to adult viewers. Direct public HLS uses the bundled Apache-licensed hls.js 1.6.15; the native browser HLS fallback selects quality itself. No sports video is relayed through Render. See [the sports expansion report](docs/SPORTS-2026-10-11.md).
 
 ## Artwork patch
 

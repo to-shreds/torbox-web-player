@@ -22,9 +22,9 @@ Closing a title aborts pending warm work. Closing/canceling a sole Play/Resume/n
 
 - `npm run check` and `git diff --check`: passed.
 - Full Node suite: 364 registered, **358 passed, 0 failed, 6 optional live/account checks skipped**.
-- Full browser suite: **25 passed, 0 failed**, followed by one additional passing exact-episode identity fallback scenario; the current suite has 26 scenarios. Actual app UI/API/CSP and generated local media were used, with the production header-only CDN redirect verified before the synthetic media substitution.
+- Full browser suite on the published commit: **26 passed, 0 failed**, verified in release CI. Actual app UI/API/CSP and generated local media were used, with the production header-only CDN redirect verified before the synthetic media substitution.
 - Backend slow-provider fixture: a single useful provider returned the fast batch in approximately **203ms** while another was held. The complete request retained both providers without duplicate lookups. Unsupported-only early results waited for a useful provider. Incomplete-cache expiry, hard bounds, four-target concurrency and authentication/identity contracts passed.
-- Browser details warm with a **1,000ms synthetic source-lookup delay**: Play reached the first synthetic frame in **50ms** on the final run, with one lookup and one preparation total. This measures removing already-finished source work, not TorBox CDN or physical device performance.
+- Browser details warm with a **1,000ms synthetic source-lookup delay**: Play reached the first synthetic frame in **50ms** locally and **55ms** in release CI, with one lookup and one preparation total. This measures removing already-finished source work, not TorBox CDN or physical device performance.
 - Fast uncached-first / later cached exact-source browser test: complete batch used, one cached preparation, zero uncached creations, successful playback, no premature fallback chooser.
 - Uncached details warm: zero preparation calls, zero creates, no player open. Closing pending warm and canceled Resume prevented late playback. Next episode warmed before credits and reused its file at the transition.
 - Existing resume/seek, rapid episode selection, session recovery, fullscreen/PiP DOM preservation, Kid Mode, artwork and Sports regressions passed.
@@ -32,8 +32,24 @@ Closing a title aborts pending warm work. Closing/canceling a sole Play/Resume/n
 
 ## Publication and practical limits
 
-This report records the tested local tree. Root publication and CI checks are recorded in HANDOFF after they complete. The previous runtime is preserved by `archive/web-before-startup-2026-10-10` at the baseline SHA. Do not reset shared history to roll back; restore the archived tree as a new commit.
+Runtime commit `2a3f8c3f84e108178477c0fb4a8ee23a235d0e12` is published on main and `release/v1.2.1-startup`. Release reliability run [38105436191](https://github.com/to-shreds/torbox-web-player/actions/runs/38105436191) succeeded with 358 Node tests passing, six optional checks skipped and all 26 browser scenarios passing. Pages verification/deployment run [38105435564](https://github.com/to-shreds/torbox-web-player/actions/runs/38105435564) also succeeded on the same commit, including its verification and deploy jobs.
 
-The frontend remains compatible with the last observed live 1.1.0 backend. That backend safely ignores the new optional lookup parameters and lacks completion metadata, so title/episode warming still works, while the new 200ms provider-return path requires the 1.2.1 backend deployment. The existing Render connector workspace confirmation gate remains in force. No backend deployment is claimed by these local tests.
+Live asset verification at `2026-10-11T03:15:45Z` fetched the following paths from both `https://to-shreds.github.io/torbox-web-player/` and its `/key/` entry. All fourteen responses returned HTTP 200 and matched the tested repository bytes exactly. HTML, boot, app, source-client and service worker contain the current `release-1.2.1-startup.1` token.
+
+| Path at each entry | Verified SHA-256 |
+| --- | --- |
+| `index.html` | `eb3820be4ae0cf20c23072890be96932737ba4040716190d20eda21736771861` |
+| `boot.js` | `4a3a945d82d91c289f9ff75a27503076d56cd00ff54ea97945bda224153168c7` |
+| `app.js` | `7013fc6bb3c0cce6e8cf090ef15bbf4e55dafde4bbec94aa185885a8f25354bf` |
+| `source-client.js` | `edf5b68e68002248117f2e80a63f0dfe64a0c17bdfc54c086e64eee794f2f531` |
+| `playback-lifecycle.js` | `5c05c804601cdc2f63dcc7a478ad7812b38e867f0d1fe6249a2834171ff632a1` |
+| `sw.js` | `6b0e56af13acf0b857d226267bb76f3100ff558ce4d12f7e2b344553153307b7` |
+| `recover/index.html` | `39af51066679a7bbc164eeedc0270d8b2dd2db64253d0585b491782a382bb06d` |
+
+The previous runtime is preserved by `archive/web-before-startup-2026-10-10` at baseline SHA `644faeddaccb9e2f1a152dade1c034cf077d5bd2`. Do not reset shared history to roll back; restore the archived tree as a new commit.
+
+The backend rollout is complete. Deployment `dep-db5g8ng473hc73b26ukg` is live from mirror `df150eebe184711772c01faca3a5a0bab15da404`, using exactly tested tree `5d5b2fce9bd1200442e3247bef9d985a59291634`. Mirror CI [38108844386](https://github.com/to-shreds/torbox-web-player/actions/runs/38108844386) succeeded. Render's build reran 364 Node tests: 358 passed, zero failed, six optional checks skipped. The required `SOURCE_PROVIDER=multi` setting was merged without replacing other environment variables and triggered the deployment after the branch push produced no automatic deployment. No redundant manual deployment was triggered.
+
+At 2026-10-11T03:38:11Z, production health returned HTTP 200 and `{"ok":true,"version":"1.2.1","stage":"catalog-first-preview"}`. Session inspection retained `authMode=api-key` and no setup requirement; unauthenticated fast source lookup returned 401. The source-client asset served HTTP 200 with the current startup token. Recent post-deploy error logs were empty. The user confirmed My Workspace and requested it as the standing selection for future authorized Render work; that former gate is resolved.
 
 No real TorBox credential, authenticated CDN start, physical Android/Firestick measurement or promise of instant playback is included. Slow TorBox preparation, source availability, CDN response, device decoding and the existing service-readiness check can still contribute delay. There is no new service, bandwidth relay, persistent video storage or transcoding. Sports, history/settings/PIN formats, TorBox key isolation, cached-only automatic selection and explicit uncached preparation remain intact.

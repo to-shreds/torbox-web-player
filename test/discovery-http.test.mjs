@@ -66,7 +66,12 @@ test('same-origin modules and sports are served with a fixed public host policy 
   assert.ok(policy.includes("media-src 'self'")); assert.ok(policy.includes('https://*.tb-cdn.io'));
   assert.ok(policy.includes("connect-src 'self'"));
   assert.ok(policy.includes('https://api-player.redbull.com'));
-  assert.ok(policy.includes('https://play.redbull.com'));
+  const frame=await call('/sports-player.html');
+  assert.equal(frame.status,200);assert.equal(frame.headers.get('x-frame-options'),'SAMEORIGIN');
+  const framePolicy=frame.headers.get('content-security-policy');
+  assert.ok(framePolicy.includes('https://play.redbull.com'));
+  const directives=Object.fromEntries(framePolicy.split(';').map(part=>{const [key,...values]=part.trim().split(/\s+/);return [key,values];}));
+  for(const key of ['connect-src','media-src']){assert.ok(!directives[key].includes("'self'"));assert.ok(!directives[key].some(value=>value.includes('onrender.com')||value.includes('*')));}
   assert.ok(!policy.includes('connect-src https:'));
   assert.ok((await call('/api/discover/catalog')).headers.get('content-security-policy').includes("connect-src 'self';"));
   assert.ok(!policy.includes('api.torbox.app'));

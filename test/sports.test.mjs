@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {sportsMediaUrl,cleanSportsCatalog,resolveSportsSource,replayResume,SPORTS_MEDIA_HOSTS} from '../public/sports-core.js';
 const raw=JSON.parse(await readFile(new URL('../public/sports-catalog.json',import.meta.url),'utf8'));
-test('bundled sports includes four anonymous live feeds and sixteen full padel replays',()=>{
+test('bundled sports preserves original feeds and expands to 36 live channels and 157 full replays',()=>{
   const catalog=cleanSportsCatalog(raw);
-  assert.equal(catalog.items.filter(x=>x.kind==='live').length,4);
-  assert.equal(catalog.items.filter(x=>x.kind==='replay').length,16);
+  assert.equal(catalog.items.filter(x=>x.kind==='live').length,36);
+  assert.equal(catalog.items.filter(x=>x.kind==='replay').length,157);
   assert.ok(catalog.items.some(x=>x.kind==='live'&&x.sport==='tennis'));
   for(const item of catalog.items){assert.equal('description' in item,false);assert.equal('poster' in item,false);for(const s of item.sources)assert.ok(s.type==='redbull'||sportsMediaUrl(s.url));}
 });
@@ -35,6 +35,11 @@ test('replay resume rewinds five seconds and excludes finished or invalid positi
 test('sports assets are independent of movie credentials and startup',async()=>{
   const [boot,html,sw]=await Promise.all(['boot.js','index.html','sw.js'].map(name=>readFile(new URL('../public/'+name,import.meta.url),'utf8')));
   assert.ok(boot.indexOf('import(`./sports.js')<boot.indexOf('warmBackend();'));
-  for(const host of SPORTS_MEDIA_HOSTS)assert.ok(html.includes('https://'+host));
+  const frame=await readFile(new URL('../public/sports-player.html',import.meta.url),'utf8');
+  for(const host of SPORTS_MEDIA_HOSTS)assert.ok(frame.includes('https://'+host));
+  assert.ok(!frame.includes('onrender.com'));assert.ok(!frame.includes("connect-src 'self'"));assert.ok(!frame.includes("media-src 'self'"));
+  assert.ok(html.includes('sports-player-frame'));assert.ok(!html.includes('Free feeds can vary'));
   assert.ok(html.includes("media-src 'self' blob:"));assert.ok(html.includes("script-src 'self'"));assert.ok(sw.includes('./sports-catalog.json?v=${BUILD}'));
 });
+
+test('expanded catalog retains unique spoiler-free identities and dated American football/hockey replays',()=>{const items=cleanSportsCatalog(raw).items;assert.equal(items.length,193);assert.equal(new Set(items.map(x=>x.id)).size,193);assert.equal(new Set(items.map(x=>x.sport)).size,25);assert.equal(items.filter(x=>x.kind==='live').reduce((n,x)=>n+x.sources.length,0),48);for(const item of items.filter(x=>x.kind==='replay'))assert.match(item.date,/^\d{4}-\d{2}-\d{2}$/);assert.ok(items.some(x=>x.kind==='replay'&&x.sport==='football'));assert.ok(items.some(x=>x.kind==='replay'&&x.sport==='hockey'));});
