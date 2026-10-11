@@ -31,7 +31,7 @@ async function sportsPage(t,{blocked=false,slowReplay=false}={}){
 }
 test('sports opens and plays HLS tennis while private startup is hung, with no TorBox login or media relay',async t=>{
   const {page,mediaRequests}=await sportsPage(t);await page.locator('[data-sports-id="t2"]').click();
-  await page.waitForFunction(()=>document.querySelector('#sports-player-frame').contentDocument?.querySelector('#sports-video').currentTime>0);
+  await page.waitForFunction(()=>document.querySelector('#sports-player-frame').contentDocument?.querySelector('#sports-video')?.currentTime>0);
   assert.ok(mediaRequests()>1);assert.equal(fixture.control.playbackCalls,0);assert.equal(fixture.control.mediaFetches,0);assert.equal(fixture.control.logins,0);
   await page.locator('#close-sports-player').click();assert.equal(await page.frameLocator('#sports-player-frame').locator('#sports-video').getAttribute('src'),null);assert.equal(await page.locator('#sports-panel').isVisible(),true);
 });
@@ -39,7 +39,7 @@ test('padel full replay resolves anonymously, resumes and starts over without sh
   const {page,apiRequests}=await sportsPage(t);const replay=catalog.items.find(x=>x.kind==='replay');
   await page.evaluate(id=>localStorage.setItem('tw-sports-resume:'+id,JSON.stringify({position:20,duration:60})),replay.id);
   await page.locator('[data-sports-mode="replay"]').click();await page.locator('#sports-sport').selectOption('padel');await page.locator(`[data-sports-id="${replay.id}"]`).click();
-  await page.waitForFunction(()=>document.querySelector('#sports-player-frame').contentDocument?.querySelector('#sports-video').currentTime>=15);assert.equal(apiRequests(),1);assert.equal((await page.locator('#sports-panel').textContent()).includes('WINNER SPOILER'),false);
+  await page.waitForFunction(()=>document.querySelector('#sports-player-frame').contentDocument?.querySelector('#sports-video')?.currentTime>=15);assert.equal(apiRequests(),1);assert.equal((await page.locator('#sports-panel').textContent()).includes('WINNER SPOILER'),false);
   await page.locator('#sports-start-over').click();await page.waitForFunction(()=>{const v=document.querySelector('#sports-player-frame').contentDocument?.querySelector('#sports-video');return v.currentTime>0&&v.currentTime<10;});
   assert.equal(await page.locator('#sports-live-edge').isVisible(),false);
 });
@@ -71,7 +71,7 @@ test('a canceled old Play rejection cannot overwrite the next Sports playback',a
   await page.locator('[data-sports-id="t2"]').click();
   await page.waitForFunction(()=>typeof document.querySelector('#sports-player-frame').contentWindow.rejectOldSportsPlay==='function');
   await page.locator('#close-sports-player').click();await page.locator('[data-sports-mode="replay"]').click();await page.locator('.sports-card').first().click();
-  await page.waitForFunction(()=>document.querySelector('#sports-player-frame').contentDocument.querySelector('#sports-video').currentTime>0);
+  await page.waitForFunction(()=>document.querySelector('#sports-player-frame').contentDocument.querySelector('#sports-video')?.currentTime>0);
   await page.locator('#sports-player-frame').evaluate(frame=>frame.contentWindow.rejectOldSportsPlay());
   await page.waitForTimeout(100);assert.match(await page.locator('#sports-player-message').textContent(),/^Replay/);
 });
