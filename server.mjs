@@ -23,6 +23,7 @@ const publicFiles = new Map([
   ['/recover/index.html', ['recover/index.html', 'text/html; charset=utf-8']],
   ['/boot.js', ['boot.js', 'text/javascript; charset=utf-8']],
   ['/sports.js', ['sports.js', 'text/javascript; charset=utf-8']],
+  ['/buffstreams.js', ['buffstreams.js', 'text/javascript; charset=utf-8']],
   ['/sports-core.js', ['sports-core.js', 'text/javascript; charset=utf-8']],
   ['/sports.css', ['sports.css', 'text/css; charset=utf-8']],
   ['/sports-player.html', ['sports-player.html', 'text/html; charset=utf-8']],

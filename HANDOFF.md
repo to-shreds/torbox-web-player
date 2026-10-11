@@ -8,7 +8,7 @@ The user explicitly confirmed **My Workspace** (`tea-dakujgmk1f9s73d2v8ng`) on 2
 
 ## Buffstreams new-tab update · 2026-10-11
 
-The user explicitly accepts opening Buffstreams in a new browser tab. Frontend **release-1.2.2-buffstreams.1** adds **Sports → Buffstreams**, with All live sports, NFL, College football and NHL hockey shortcuts. They open provider directory pages; the viewer chooses a game there. Current native app and in-app Sports catalog/playback are independent. No backend or media policy change is required.
+The user explicitly accepts opening Buffstreams in a new browser tab. Frontend **release-1.2.2-buffstreams.1** adds **Sports → Buffstreams**, with All live sports, NFL, College football and NHL hockey shortcuts. They open provider directory pages; the viewer chooses a game there. Current native app and in-app Sports catalog/playback are independent. The static server allowlist includes the new module for same-origin loading; no backend deployment or media policy change is required.
 
 The current provider navigation supplies `/nflstreams2`, `/cfbstreams2` and `/nhlstreams2`, each verified HTTP 200 on the configured default `https://mybuffstreams.plus`. Root remains a fallback if category paths change. Provider listing CORS is uneven: `/home6` permits the Pages origin, but the root redirect and category pages do not reliably do so. No live-game scraping, embedding or football archive is claimed.
 
