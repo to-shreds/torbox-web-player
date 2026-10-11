@@ -45,8 +45,22 @@ test('published HTML uses project-relative assets and the public Render API orig
   const { call }=await fixture(t);
   const html=await (await call('/')).text();
   assert.ok(html.includes('name="api-origin" content="https://torbox-web-player-key.onrender.com"'));
-  assert.ok(html.includes('href="./style.css?v=release-1.2.2-buffstreams.1"')); assert.ok(html.includes('src="./boot.js?v=release-1.2.2-buffstreams.1"'));
+  assert.ok(html.includes('href="./style.css?v=release-1.2.2-buffstreams-desk.1"')); assert.ok(html.includes('src="./boot.js?v=release-1.2.2-buffstreams-desk.1"'));
   assert.ok(!html.includes('src="/boot.js')); assert.ok(!html.includes('href="/style.css'));
+});
+test('Buffstreams support assets are served as isolated HTML, JavaScript and CSS', async t => {
+  const { call }=await fixture(t);
+  for (const [path,type,marker] of [
+    ['/buffstreams.js','javascript','sports-desk-links.onrender.com'],
+    ['/buffstreams-ui.js','javascript','createBuffstreamsDesk'],
+    ['/buffstreams-opening.html','text/html','Opening game player'],
+    ['/buffstreams-opening.css','text/css','color-scheme'],
+  ]) {
+    const response=await call(path);
+    assert.equal(response.status,200);
+    assert.ok(response.headers.get('content-type').includes(type));
+    assert.ok((await response.text()).includes(marker));
+  }
 });
 test('GitHub Pages bearer session receives an opaque direct media ticket', async t => {
   const { call }=await fixture(t);

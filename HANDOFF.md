@@ -6,6 +6,20 @@ Read this first. The code repository controls implementation; `to-shreds/Project
 
 The user explicitly confirmed **My Workspace** (`tea-dakujgmk1f9s73d2v8ng`) on 2026-10-10 and requested blanket confirmation because this is the account's only workspace. Reuse that workspace for authorized Render work without asking again unless the user changes the choice. Pass its ID explicitly on Render calls.
 
+## Buffstreams in-site game browser · 2026-10-11
+
+Frontend **release-1.2.2-buffstreams-desk.1** corrects the earlier directory-shortcut release to the user's Sports Desk setup: search, sport filters and game selection stay inside TorBox; **Watch** opens only the chosen direct player in a new tab. No provider directory or event page is navigated. This section supersedes the historical shortcut scope below.
+
+The controlling adapter contract is the existing `to-shreds/Misc/SportsDesk/server.py`, README and HANDOFF. TorBox reuses the existing free `https://sports-desk-links.onrender.com` helper with anonymous, bounded `POST /api/catalog` and `POST /api/player` requests. The helper fetches public listing/event HTML only. No new service, backend deployment, paid subscription or video-byte relay is added. Existing TorBox Render API remains 1.2.2.
+
+The game browser strips scores/results and extra fields, validates same-source event identities, retains effective canonical sources and labels original clock strings as source time. Search and filters run locally. A failed, empty, malformed, cancelled or superseded refresh/source change leaves saved games and source intact. The 80-second deadline accommodates free-service startup; Cancel aborts work. Lists older than five minutes are labelled saved and never represented as currently live.
+
+Watch synchronously opens an isolated same-origin waiting tab, clears its opener, resolves the exact selected event and navigates only that tab to a recognized direct-player URL. Popup blocking produces a protected direct-player fallback link, never a provider directory/event link. Leaving Sports closes only pending waiting tabs and cancels obsolete work. Every network action and player fallback rechecks Adult/Kid Mode. External requests omit credentials, cookies and referrers. The isolated offline opener uses its own cached document or fails with 503 rather than loading the movie shell.
+
+The previous main is archived at `archive/web-before-buffstreams-desk-2026-10-11`, SHA `1539f8f0239d6012ba9fee2281104429071ae4bc`. Existing 36-channel/157-replay catalogs, movie startup logic, history, credential and parental-control formats remain intact. All startup import/cache tokens are updated together. Live helper metadata at `2026-10-11T19:29:01.623915+00:00` returned HTTP 200 with 20 validated games across four sports; the selected player response returned HTTP 200 and passed direct-player validation. Neither the player nor video was fetched for that probe.
+
+Local syntax and diff checks passed. **380 Node tests registered, 374 passed, zero failed, six optional live/account checks skipped**. The complete browser suite and publication identifiers will be recorded here after verification. Do not describe this candidate as published until that evidence is added.
+
 ## Buffstreams new-tab update · 2026-10-11
 
 The user explicitly accepts opening Buffstreams in a new browser tab. Frontend **release-1.2.2-buffstreams.1** adds **Sports → Buffstreams**, with All live sports, NFL, College football and NHL hockey shortcuts. They open provider directory pages; the viewer chooses a game there. Current native app and in-app Sports catalog/playback are independent. The static server allowlist includes the new module for same-origin loading; no backend deployment or media policy change is required.

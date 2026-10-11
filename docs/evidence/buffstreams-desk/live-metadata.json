@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-11T19:29:01.623915+00:00",
+  "helper": "https://sports-desk-links.onrender.com",
+  "catalogHTTP": 200,
+  "allowOrigin": "*",
+  "validatedEvents": 20,
+  "sports": 4,
+  "playerHTTP": 200,
+  "validatedPlayerHost": "gooz.aapmains.net",
+  "playback": "source-page",
+  "playerFetched": false,
+  "videoFetched": false,
+  "method": "Catalog and selected-event metadata through existing Sports Desk helper, passed TorBox frontend validators; titles and result data omitted."
+}

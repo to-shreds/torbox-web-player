@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.2**, frontend build **release-1.2.2-buffstreams.1**
+Current version: **1.2.2**, frontend build **release-1.2.2-buffstreams-desk.1**
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
@@ -20,7 +20,9 @@ Open **Sports** in the top navigation, or use `#sports` in the app URL. Sports o
 
 Sports has live/replay, sport and channel filters, text search, 720p by default with quality choices, Go Live, replay resume/Start Over, and clear Retry/channel alternatives. Catalogs omit scores, descriptions and result images. Sports is available to adult viewers. Direct public HLS uses the bundled Apache-licensed hls.js 1.6.15; the native browser HLS fallback selects quality itself. No sports video is relayed through Render. See [the sports expansion report](docs/SPORTS-2026-10-11.md).
 
-The **Buffstreams** tab within Sports opens the current NFL, college-football, NHL and all-sports pages in separate browser tabs. Choose the game on Buffstreams. **Change Buffstreams address** remembers a new HTTPS provider root on this device; **Use default** restores `https://mybuffstreams.plus`. Links omit the referrer and cannot access the TorBox tab. These are external live-sport directories, not embedded streams or a replay archive. Existing channels and replays still use the in-app player.
+The **Buffstreams games** tab within Sports loads the game list inside TorBox. Search teams or games, filter by sport or **Live now**, then press **Watch** to open only the selected direct player in a new tab. No provider directory or event page is opened. The existing [Sports Desk](https://to-shreds.github.io/Misc/SportsDesk/) metadata helper supplies the list and resolves the selected player; it never relays video. Scores, results, descriptions and images are omitted.
+
+**Change Buffstreams address → Check & save** verifies a new HTTPS source before replacing the saved list. Failed, empty, malformed, cancelled or obsolete responses preserve the previous source and games. Saved lists older than five minutes are clearly labelled and do not appear as currently live. A blocked popup exposes a direct-player link. TorBox credentials, cookies and referrer data are excluded from external requests. Existing channels and replays still use the in-app player.
 
 ## Artwork patch
 
