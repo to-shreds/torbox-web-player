@@ -2,9 +2,13 @@
 
 Read this first. The code repository controls implementation; `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md` controls readiness and the next action.
 
+## Standing Render workspace choice
+
+The user explicitly confirmed **My Workspace** (`tea-dakujgmk1f9s73d2v8ng`) on 2026-10-10 and requested blanket confirmation because this is the account's only workspace. Reuse that workspace for authorized Render work without asking again unless the user changes the choice. Pass its ID explicitly on Render calls.
+
 ## Playback startup patch · 2026-10-11
 
-Backend source **1.2.1**, published frontend **release-1.2.1-startup.1**, prepared from main `644faeddaccb9e2f1a152dade1c034cf077d5bd2`. Runtime commit `2a3f8c3f84e108178477c0fb4a8ee23a235d0e12` is on main and `release/v1.2.1-startup`. This section supersedes the preceding runtime version descriptions. The frontend is live; the Render backend remains 1.1.0 pending its existing workspace confirmation gate.
+Backend source **1.2.1**, published frontend **release-1.2.1-startup.1**, prepared from main `644faeddaccb9e2f1a152dade1c034cf077d5bd2`. Runtime commit `2a3f8c3f84e108178477c0fb4a8ee23a235d0e12` is on main and `release/v1.2.1-startup`. This section supersedes the preceding runtime version descriptions. Both frontend and Render backend are now live on the 1.2.1 release.
 
 The browser baseline already retained provider caches, stopped after its first usable cached preparation and warmed auto-next during credits. Its remaining delay was the aggregate lookup holding one useful provider behind stalled providers until the ten-second deadline, plus no movie/details-page preparation. New `fast=1` lookup returns useful public metadata after a 200ms grace while remaining providers keep enriching the same cache. `complete=1` waits for the bounded current job; automatic playback falls back to this full batch if the early results are uncached, incompatible or fail catalog/episode identity checks. Recovery also requests complete results. Normal Options behavior, provider identity checks and four-target concurrency remain.
 
@@ -16,7 +20,7 @@ Publication is verified. Release reliability run [38105436191](https://github.co
 
 Report: [docs/STARTUP-1.2.1.md](docs/STARTUP-1.2.1.md). Prior Sports/artwork, state/PIN/history formats, cached-only automatic selection, exact year/episode/browser-container checks, source feedback, credits behavior, same video DOM and direct TorBox media delivery remain intact. The independent native app is maintained separately.
 
-The frontend accepts the 1.1.0 backend's existing API responses, including absent completion metadata. Its details/next preparation improvements work with that backend; the new 200ms provider-return path requires deploying 1.2.1. A fresh `/healthz` probe returned HTTP 200 and version `1.1.0` during this verification. The Render workspace confirmation gate below remains unresolved and must not be bypassed; `browser-key-clone` was left unchanged. No real TorBox account/CDN or physical Android/Firestick speed is claimed. Root must update ProjectStatus last; activate the prepared backend only after the existing workspace gate is satisfied.
+Backend activation verified at 2026-10-11T03:38:11Z. Render deployment `dep-db5g8ng473hc73b26ukg` is live from mirror commit `df150eebe184711772c01faca3a5a0bab15da404`, whose tree exactly matches tested release `2a3f8c3f84e108178477c0fb4a8ee23a235d0e12`. The branch update produced no automatic deployment during repeated checks. Merging the required non-secret `SOURCE_PROVIDER=multi` setting triggered one deployment, which passed 358 Node tests with zero failures. No separate manual deployment was triggered. Production `/healthz` returned HTTP 200 and version 1.2.1; `/api/session` retained API-key mode, source lookup without login returned 401, and the served source-client asset has the current startup token. No recent post-deploy error logs were returned. Real authenticated TorBox/CDN and physical device timing remain unmeasured.
 
 ## Buffstreams investigation · 2026-10-10
 
@@ -50,23 +54,17 @@ The previous main tree is preserved before publication at an archive branch and 
 
 ## Current work
 
-Release 1.2.1 is implemented and independently verified. The frontend is live on GitHub Pages, but the Render backend is still v1.1.0. Backend activation is the sole blocked implementation step: the Render connector requires the user to confirm its workspace before deployment can proceed. Do not claim that the 1.2.1 fast provider-return path or the preceding direct-only guest policy is live yet.
+Release 1.2.1 startup implementation and publication are complete. Frontend `release-1.2.1-startup.1` is live on GitHub Pages; Render runtime 1.2.1 is live with `SOURCE_PROVIDER=multi`. Workspace confirmation is resolved and recorded above. Authenticated account/device acceptance remains separate.
 
-- Frontend: https://to-shreds.github.io/torbox-web-player/
-- Equivalent legacy entry: `/key/`; permanent recovery entry: `/recover/`.
+- Frontend: https://to-shreds.github.io/torbox-web-player/ and equivalent `/key/`; recovery `/recover/`.
 - Backend: https://torbox-web-player-key.onrender.com
-- Render service: `torbox-web-player-key`, `srv-damu91142hec73chb7qg`.
-- `main` is authoritative. Render still watches `browser-key-clone`; publish a matching runtime tree there.
-- Current frontend build: `release-1.2.1-startup.1`; scope-specific service worker cache.
-- Verified release runtime: `2a3f8c3f84e108178477c0fb4a8ee23a235d0e12`, on main and `release/v1.2.1-startup`.
-- Existing Render mirror: `7dfdac6ba47158c24e4af1601910c9e94872c356`, still the preceding 1.2.0 tree. It was deliberately left unchanged while workspace confirmation remains unresolved. The tested 1.2.1 runtime is concrete and reviewable on the release branch.
-- Current release CI `38105436191` and Pages verification/deployment `38105435564` succeeded. Preceding 1.2.0 release CI `36814630892`, Pages run `36814776986` and mirror CI `36814779367` also succeeded.
-- Both published root and `/key/` core assets match the 1.2.1 tested files, including the `release-1.2.1-startup.1` boot token.
-- The last inspected Render deployment was `dep-dau627hsrm7s73au7bg0`, from the prior mirror. A fresh `/healthz` check during current verification still reports `1.1.0`.
-- The exact existing service was inspected: `plan: free`, branch `browser-key-clone`, auto-deploy enabled. No automatic deployment appeared after publication. The manual trigger returned `INVALID_ARGUMENT` because no workspace was confirmed; it did not start a deployment.
-- The connector lists one workspace, `My Workspace` (`tea-dakujgmk1f9s73d2v8ng`). It explicitly requires asking the user before selecting or passing that workspace. Do not bypass this gate with another deployment path.
-- Exact prior source archive: `archive/v1.1.0-before-reliability-2026-10-01`, commit `c978c143cf5362a5c7ddd1bcee34811ca5a0f219`.
-- Prior Render runtime: `1fa271e8418105431a2aae079538e28de3cf2d81`. It differs from the archive only in docs/config comments.
+- Service: `srv-damu91142hec73chb7qg`, plan free, branch `browser-key-clone`.
+- Tested runtime: `2a3f8c3f84e108178477c0fb4a8ee23a235d0e12`, tree `5d5b2fce9bd1200442e3247bef9d985a59291634`.
+- Live mirror: `df150eebe184711772c01faca3a5a0bab15da404`, identical tested runtime tree; prior mirror `7dfdac6ba47158c24e4af1601910c9e94872c356` is retained as its parent.
+- Live deployment: `dep-db5g8ng473hc73b26ukg`, completed 2026-10-11T03:37:34Z. Health/version and API-key guards verified.
+- Mirror CI [38108844386](https://github.com/to-shreds/torbox-web-player/actions/runs/38108844386) succeeded. Original release/Pages CI `38105436191`/`38105435564` and asset verification remain valid.
+- Earlier production deployment `dep-dau627hsrm7s73au7bg0`, runtime `1fa271e8418105431a2aae079538e28de3cf2d81`, remains historical rollback evidence.
+- Existing startup archive `archive/web-before-startup-2026-10-10` preserves `644faeddaccb9e2f1a152dade1c034cf077d5bd2`. Earlier archive `archive/v1.1.0-before-reliability-2026-10-01` preserves `c978c143cf5362a5c7ddd1bcee34811ca5a0f219`.
 
 ## Implemented v1.2.0 contract
 
@@ -94,6 +92,6 @@ The baseline had 316 passing tests and six skipped optional checks. Seven new HT
 
 ## Next action
 
-Ask the user to confirm `My Workspace` for deployment of the already verified `torbox-web-player-key` service. Once confirmed, recheck deployments first to avoid duplicating a late automatic deploy, then mirror the tested 1.2.1 runtime tree from `2a3f8c3f84e108178477c0fb4a8ee23a235d0e12` to `browser-key-clone` if still necessary. Observe its automatic deployment, verify the deployed tree and `/healthz` version 1.2.1, then update this handoff and ProjectStatus last. Do not use a second deployment route to bypass the workspace confirmation gate.
+No implementation or deployment gate remains for this startup release. Use the existing confirmed workspace for future authorized Render work. Preserve the tested runtime tree and prior archives; do not change video delivery into a Render relay.
 
-After publication, confirm live Android start, resume, seeking, fullscreen/PiP episode transition, and actual Render bandwidth after playback. No live TorBox credential was supplied to the stress-test fixtures. A read-only live source probe returned only 11 Zilean rows for The Office S4E3, with no known browser container in public metadata; cache availability and matching playable files were not checked. Do not claim that specific title's live issue is resolved.
+Next acceptance checks are live Android start, Resume, seeking, fullscreen/PiP episode transition and actual Render bandwidth after playback. No live TorBox credential was supplied to the stress-test fixtures or production verification. The previous Office S4E3 source/cache case has not been retested against an authenticated account; do not claim that specific title's live issue is resolved. Update ProjectStatus last after any new acceptance evidence.

@@ -4,7 +4,7 @@ The browser-key player is the production codebase. `main` is authoritative. The 
 
 Current version: **1.2.1**, frontend startup build **release-1.2.1-startup.1**
 
-Deployment status: the startup frontend is tested and live at both root and `/key/`, with release and Pages checks passed. The live Render backend remains v1.1.0; activating the prepared v1.2.1 backend requires the Render connector's workspace confirmation. See [HANDOFF.md](HANDOFF.md) for the exact deployment state.
+Deployment status: the startup frontend is live at both root and `/key/`, and the Render backend is live on v1.2.1 with multi-provider lookup enabled. Release, Pages, mirror and Render build checks passed. My Workspace is the user's confirmed standing Render choice. See [HANDOFF.md](HANDOFF.md) for deployment evidence and remaining account/device acceptance.
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/` (legacy mirror: `/key/`)
 
