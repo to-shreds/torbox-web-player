@@ -1,6 +1,6 @@
 const CACHE_PREFIX='torbox-player:'+self.registration.scope+':';
-const CACHE=CACHE_PREFIX+'release-1.2.2-buffstreams-desk.1';
-const BUILD='release-1.2.2-buffstreams-desk.1';
+const CACHE=CACHE_PREFIX+'release-1.2.2-games.1';
+const BUILD='release-1.2.2-games.1';
 const SHELL=[
   './','./index.html',
   `./style.css?v=${BUILD}`,`./discover.css?v=${BUILD}`,`./boot.js?v=${BUILD}`,`./app.js?v=${BUILD}`,
@@ -9,6 +9,8 @@ const SHELL=[
   `./device-transfer.js?v=${BUILD}`,`./playback-errors.js?v=${BUILD}`,`./discover.js?v=${BUILD}`,`./source-client.js?v=${BUILD}`,
   `./sports-player.html?v=${BUILD}`,`./sports-player.js?v=${BUILD}`,`./sports-player.css?v=${BUILD}`,`./sports.js?v=${BUILD}`,`./sports-core.js?v=${BUILD}`,`./sports.css?v=${BUILD}`,`./sports-catalog.json?v=${BUILD}`,`./hls.min.js?v=${BUILD}`,
   `./buffstreams.js?v=${BUILD}`,`./buffstreams-ui.js?v=${BUILD}`,`./buffstreams-opening.html?v=${BUILD}`,`./buffstreams-opening.css?v=${BUILD}`,
+  `./games-nav.js?v=${BUILD}`,`./games.js?v=${BUILD}`,`./games-core.js?v=${BUILD}`,`./games.css?v=${BUILD}`,`./games-catalog.json?v=${BUILD}`,
+  './vendor/jsnes-2.1.0.min.js?v=2.1.0',`./vendor/nes-audio-worklet.js?v=${BUILD}`,
   `./manifest.webmanifest?v=${BUILD}`,'./icon.svg'
 ];
 const shellUrls=new Set(SHELL.map(path=>new URL(path,self.registration.scope).href));

@@ -1,4 +1,4 @@
-import { getSettings } from './settings.js?v=release-1.2.2-buffstreams-desk.1';
+import { getSettings } from './settings.js?v=release-1.2.2-games.1';
 const STORAGE_KEY = 'torbox-recent-v1';
 const MAX_ITEMS = 20;
 const clean = (value, max = 240) => typeof value === 'string' ? value.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, max) : '';

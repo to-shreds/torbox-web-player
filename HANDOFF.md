@@ -6,6 +6,20 @@ Read this first. The code repository controls implementation; `to-shreds/Project
 
 The user explicitly confirmed **My Workspace** (`tea-dakujgmk1f9s73d2v8ng`) on 2026-10-10 and requested blanket confirmation because this is the account's only workspace. Reuse that workspace for authorized Render work without asking again unless the user changes the choice. Pass its ID explicitly on Render calls.
 
+## NES Games tab · 2026-10-13
+
+Frontend **release-1.2.2-games.1** adds **GAMES** beside Movies & shows and Sports, with anonymous direct `#games` entry. The pinned, self-hosted Apache-2.0 JSNES 2.1.0 engine emulates NES on the device, including self-hosted AudioWorklet sound. No new service, TorBox account/API call, video delivery change, native app change or Render deployment is required. Existing movie/Sports catalogs and credentials/history/settings formats are preserved.
+
+Repo-hosted `.nes` files are listed in `public/games-catalog.json` and stored under `public/roms/`, with an alphabetic searchable picker. The production catalog is deliberately empty until Jon supplies ROMs; local `.nes` imports already work without uploading. Catalog files use strict flat safe names, omit credentials, reject redirects and cap ROM downloads at 16 MiB. Standard NTSC/compatible iNES and ordinary NES 2.0 formats are supported subject to the engine's mapper support; recognized PAL/Dendy, exotic submappers and incomplete files fail clearly. Files committed to this public repo are publicly downloadable.
+
+The player has simultaneous touch/diagonal controls, scoped keyboard shortcuts, two standard gamepads, full screen and portrait/landscape layouts. Automatic state saves every 15 seconds and at pause/close; a separate manual Save/Load slot survives automatic saves. State is deep-snapshotted into a separate IndexedDB store keyed by viewer and ROM SHA-256. Clearing site data removes saves; no cloud sync is claimed. Games currently requires an adult viewer, matching Sports, so it cannot bypass existing Kid Mode movie allowances. Audio, held inputs and emulation stop on tab/app departure. Stale ROM and manual-save responses cannot replace a newer game or Start fresh.
+
+Tab-switch testing also fixed movie auto-next/recovery resuming over Games during delayed presentation exit, and an obsolete delayed stop removing a newer movie. Public tab routes update correctly while preserving existing nonpublic fragments. Root and `/key/` still publish identical sources; all startup/cache tokens were bumped together. The service worker caches the exact versioned game engine/worklet shell assets but excludes ROM payloads.
+
+Local verification passed: syntax/diff checks; **390 Node tests registered, 384 passed, zero failed, six optional live/account checks skipped**; **54 existing Chromium scenarios plus all 14 new Games scenarios passed**. Tests execute an original generated NES program, check actual PPU pixels and controls, pause, manual/automatic restore, viewer separation, malformed/cancelled loads, path rejection, Kid Mode, navigation and the delayed PiP auto-next race. Desktop, portrait and landscape screenshots were visually checked. Evidence: `docs/evidence/nes-games/`. No commercial ROM or physical-device acceptance is claimed.
+
+Previous main is preserved at `archive/web-before-nes-games-2026-10-13`, SHA `ca2c9e3f40bd26caad279575fea83b2c5d553580`. Restore as a new commit. Local implementation is verified; publication verification will be recorded below after Pages deployment. Next: Jon supplies ROMs, then validate them, add safe filenames/catalog entries, and test compatibility. The independent native APK and broader live TorBox/physical Firestick acceptance are unchanged.
+
 ## Buffstreams in-site game browser · 2026-10-11
 
 Frontend **release-1.2.2-buffstreams-desk.1** corrects the earlier directory-shortcut release to the user's Sports Desk setup: search, sport filters and game selection stay inside TorBox; **Watch** opens only the chosen direct player in a new tab. No provider directory or event page is navigated. This section supersedes the historical shortcut scope below.

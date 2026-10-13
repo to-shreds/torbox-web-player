@@ -1,13 +1,13 @@
-import { createDiscoveryUI, bindArtworkImage } from './discover.js?v=release-1.2.2-buffstreams-desk.1';
-import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.2-buffstreams-desk.1';
-import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.2-buffstreams-desk.1';
-import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.2-buffstreams-desk.1';
-import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.2-buffstreams-desk.1';
-import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.2-buffstreams-desk.1';
-import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.2-buffstreams-desk.1';
-import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=release-1.2.2-buffstreams-desk.1';
-import { clearSearchHistory } from './search-history.js?v=release-1.2.2-buffstreams-desk.1';
-import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.2-buffstreams-desk.1';
+import { createDiscoveryUI, bindArtworkImage } from './discover.js?v=release-1.2.2-games.1';
+import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.2-games.1';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.2-games.1';
+import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.2-games.1';
+import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.2-games.1';
+import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.2-games.1';
+import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.2-games.1';
+import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=release-1.2.2-games.1';
+import { clearSearchHistory } from './search-history.js?v=release-1.2.2-games.1';
+import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.2-games.1';
 const $ = id => document.getElementById(id);
 let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null, fullscreenExitControlTimer = null;
 let discoveryUI;
@@ -541,17 +541,18 @@ function ensureNextPrepared(context){
 }
 async function openNextEpisode(context,{fromEnded=false}={}){
   if(active!==context||context.nextTransitionStarted||!queuedNext(context))return false;
+  const generation=playGeneration;
   const completionDuration=Number.isFinite(context.video?.duration)&&context.video.duration>0?context.video.duration:null;
   context.nextTransitionStarted=true;renderUpNextCard(context,{ended:fromEnded||context.nextEnded===true});
   text('player-message','Opening next episode…');
   let moved=false;
   try{
     const prepared=context.nextPrepared||await ensureNextPrepared(context);
-    if(active!==context)return false;
+    if(active!==context||generation!==playGeneration)return false;
     moved=prepared?await discoveryUI.playPreparedNext(prepared):await discoveryUI.playNext(context.playbackContext);
   }catch{}
   if(moved){markPlaybackCompleted(context,completionDuration);return true;}
-  if(active===context){
+  if(active===context&&generation===playGeneration){
     context.nextTransitionStarted=false;renderUpNextCard(context,{ended:fromEnded||context.nextEnded===true});
     text('player-message','Next episode could not be selected automatically.',true);
   }
@@ -683,8 +684,9 @@ async function detachPlayback({preserveVideo=false}={}) {
   if(!preserveVideo){old.video.removeAttribute('src');old.video.load();old.video.remove();}
   return preserveVideo?(old.video||$('video-slot').querySelector('video')):null;
 }
-async function stopPlayback() { playGeneration++; playbackRequestAbort?.abort(); discoveryUI?.cancelPlayback(); hideResumeOverlay(); clearStillWatchingTimer(); hideStillWatchingPrompt(); await exitPlayerPresentationModes(); await detachPlayback(); }
+async function stopPlayback() { const generation=++playGeneration,context=active; playbackRequestAbort?.abort(); abortNextPreparation(context); context?.eventAbort?.abort(); context?.video?.pause(); discoveryUI?.cancelPlayback(); hideResumeOverlay(); clearStillWatchingTimer(); hideStillWatchingPrompt(); await exitPlayerPresentationModes(); if(generation!==playGeneration||active!==context)return; await detachPlayback(); }
 async function startPlayback(file, playbackContext = null) {
+  if(document.body.classList.contains('games-active'))return false;
   window.dispatchEvent(new CustomEvent('cinema-playback-start'));
   if(document.fullscreenElement===playerMediaShell()||document.fullscreenElement===active?.video){fullscreenIntent=true;fullscreenRestoreDeadline=Date.now()+6000;}
   if(!guestMode){
@@ -779,9 +781,11 @@ $('watch-credits').addEventListener('click',()=>{
 });
 async function rejectCurrentSource(kind){
   const context=active,playback=context?.playbackContext,source=playback?.sourceInfo;if(!context||!playback?.current||!source)return;
+  const generation=playGeneration;
   if(kind==='audio')setAudioFeedback(playback.current,source,'bad');else setSourceBad(playback.current,source,true);
   setPlaybackHealth('Recovering',kind==='audio'?'Remembered: no sound. Finding another source…':'Source blocked on this device. Finding another source…');
-  await saveProgress(context);context.video.pause();const moved=await discoveryUI.recoverPlayback(playback);
+  await saveProgress(context);if(active!==context||generation!==playGeneration)return;
+  context.video.pause();const moved=await discoveryUI.recoverPlayback(playback,{signal:context.eventAbort.signal});
   if(!moved&&active===context){setPlaybackHealth('Needs attention','No acceptable alternative source was found.');text('player-message','That source is now avoided, but no automatic alternative was available.',true);}
 }
 $('health-sound-good').addEventListener('click',()=>{const p=active?.playbackContext;if(!p?.sourceInfo)return;setAudioFeedback(p.current,p.sourceInfo,'good');rememberSourceSuccess(p.current,p.sourceInfo);active.sourceLearned=true;setPlaybackHealth('Playing','Sound confirmed on this device.');});
@@ -1056,4 +1060,5 @@ $('retry-torbox-status').addEventListener('click',()=>checkTorBoxStatus(true));
 discoveryUI = createDiscoveryUI({ api, play: startPlayback, guard: ensureTorBoxReady, resumeActivity:{ show:showResumeOverlay, update:updateResumeOverlay, hide:hideResumeOverlay } });
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 window.addEventListener('sports-playback-start',()=>{void stopPlayback();if($('player').open)$('player').close();});
+window.addEventListener('games-playback-start',()=>{void stopPlayback();if($('player').open)$('player').close();for(const id of ['title-dialog','source-dialog','quick-actions-dialog'])if($(id).open)$(id).close();});
 bootstrap();

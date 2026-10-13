@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.2**, frontend build **release-1.2.2-buffstreams-desk.1**
+Current version: **1.2.2**, frontend build **release-1.2.2-games.1**
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
@@ -13,6 +13,14 @@ Backend: `https://torbox-web-player-key.onrender.com`
 ## Playback startup patch
 
 Title details now prepare cached movie/episode files before Play, reuse the completed work briefly and prepare auto-next earlier. The new backend also returns a useful first provider batch promptly and retains slower results for safe fallback and Options. Exact identity/episode checks and cached-only automatic playback remain. See [the startup report](docs/STARTUP-1.2.1.md) for timing fixtures, test results and the separate backend publication gate.
+
+## Games
+
+Open **GAMES** in the top navigation, or use `#games` in the app URL. NES games run directly in your browser without a TorBox login, backend request, or extra service. The catalog is alphabetical and searchable. Open a local uncompressed `.nes` file, or choose a game added to the repository's `public/roms/` folder and `public/games-catalog.json`. No commercial game files are bundled with this release. Catalog entries and safe file naming are described in [the ROM folder README](public/roms/README.md).
+
+The player supports touch controls including diagonals and simultaneous buttons, keyboard input, and up to two standard gamepads. Automatic saves resume each viewer's game on the same browser. Save and Load save use a separate manual slot. Game saves use their own IndexedDB store and do not alter movie history or credential storage. Full screen retains the controls; rotating the device gives a landscape layout. Leaving Games or hiding the app pauses emulation and sound.
+
+Games initially follows Sports' adult-viewer restriction, so it cannot bypass Kid Mode's existing viewing allowances. This release does not add gaming to those allowance rules. Actual ROM compatibility and physical controller/touch/audio behavior still depend on the game and device. The pinned JSNES 2.1.0 engine and Apache 2.0 license are self-hosted under `public/vendor/`. ROM payloads are not added to the application-shell cache.
 
 ## Sports
 

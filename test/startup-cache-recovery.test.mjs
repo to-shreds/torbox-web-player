@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const BUILD='release-1.2.2-buffstreams-desk.1';
+const BUILD='release-1.2.2-games.1';
 
 test('published page boots through a versioned recovery loader instead of directly importing app.js',async()=>{
   const [html,boot]=await Promise.all([

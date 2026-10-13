@@ -22,6 +22,14 @@ const publicFiles = new Map([
   ['/recover/', ['recover/index.html', 'text/html; charset=utf-8']],
   ['/recover/index.html', ['recover/index.html', 'text/html; charset=utf-8']],
   ['/boot.js', ['boot.js', 'text/javascript; charset=utf-8']],
+  ['/games-nav.js', ['games-nav.js', 'text/javascript; charset=utf-8']],
+  ['/games.js', ['games.js', 'text/javascript; charset=utf-8']],
+  ['/games-core.js', ['games-core.js', 'text/javascript; charset=utf-8']],
+  ['/games.css', ['games.css', 'text/css; charset=utf-8']],
+  ['/games-catalog.json', ['games-catalog.json', 'application/json; charset=utf-8']],
+  ['/vendor/jsnes-2.1.0.min.js', ['vendor/jsnes-2.1.0.min.js', 'text/javascript; charset=utf-8']],
+  ['/vendor/nes-audio-worklet.js', ['vendor/nes-audio-worklet.js', 'text/javascript; charset=utf-8']],
+  ['/vendor/jsnes-2.1.0.LICENSE.txt', ['vendor/jsnes-2.1.0.LICENSE.txt', 'text/plain; charset=utf-8']],
   ['/sports.js', ['sports.js', 'text/javascript; charset=utf-8']],
   ['/buffstreams.js', ['buffstreams.js', 'text/javascript; charset=utf-8']],
   ['/buffstreams-ui.js', ['buffstreams-ui.js', 'text/javascript; charset=utf-8']],
@@ -230,6 +238,11 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         return sendRelay(response,relayed);
       }
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
+      // Public ROMs are flat, explicitly named files. Never resolve caller paths.
+      if (method === 'GET' && /^\/roms\/[A-Za-z0-9][A-Za-z0-9._-]{0,199}\.nes$/i.test(path)) {
+        try { const data=await readFile(join(root,'public','roms',path.slice('/roms/'.length)));response.setHeader('Content-Type','application/octet-stream');return response.end(data); }
+        catch(error) { if(error.code==='ENOENT')throw new AppError('NOT_FOUND','That game file was not found.',404);throw error; }
+      }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
         if(filename==='index.html'){const html=await readFile(join(root,'public',filename),'utf8');const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];if(csp)response.setHeader('Content-Security-Policy',csp+"; frame-ancestors 'none'");response.setHeader('Content-Type',type);return response.end(html);}

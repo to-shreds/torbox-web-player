@@ -1,6 +1,6 @@
-import {cleanSportsCatalog, resolveSportsSource, replayResume} from './sports-core.js?v=release-1.2.2-buffstreams-desk.1';
-import {getKidProfile} from './parental-controls.js?v=release-1.2.2-buffstreams-desk.1';
-import {createBuffstreamsDesk} from './buffstreams-ui.js?v=release-1.2.2-buffstreams-desk.1';
+import {cleanSportsCatalog, resolveSportsSource, replayResume} from './sports-core.js?v=release-1.2.2-games.1';
+import {getKidProfile} from './parental-controls.js?v=release-1.2.2-games.1';
+import {createBuffstreamsDesk} from './buffstreams-ui.js?v=release-1.2.2-games.1';
 
 const $=id=>document.getElementById(id);
 let catalog=null, loadPromise=null, selection=null, hls=null, abort=null, generation=0, deadline=null, bufferDeadline=null;
@@ -20,7 +20,7 @@ function ensurePlayer(){
         playerWindow=frame.contentWindow;video=playerWindow.document.getElementById('sports-video');resolve(playerWindow);
       }catch{reject(new Error('The sports player could not open. Try Reload.'));}
     },{once:true});
-    frame.src='./sports-player.html?v=release-1.2.2-buffstreams-desk.1';
+    frame.src='./sports-player.html?v=release-1.2.2-games.1';
   }).catch(error=>{playerPromise=null;throw error;});
   return playerPromise;
 }
@@ -124,18 +124,20 @@ function fillFilters(){
 async function load(){
   if(catalog)return render();if(loadPromise)return loadPromise;
   loadPromise=(async()=>{try{
-    const response=await fetch('./sports-catalog.json?v=release-1.2.2-buffstreams-desk.1',{credentials:'omit',signal:AbortSignal.timeout(10000)});
+    const response=await fetch('./sports-catalog.json?v=release-1.2.2-games.1',{credentials:'omit',signal:AbortSignal.timeout(10000)});
     if(!response.ok)throw new Error();catalog=cleanSportsCatalog(await response.json());fillFilters();render();
   }catch{$('sports-message').textContent='Sports could not load. Press Refresh to try again.';}finally{loadPromise=null;}})();
   return loadPromise;
 }
 function openSports(){
   if(!adult()){$('sports-nav-message').textContent='Switch to an adult viewer to open Sports.';return;}
-  $('sports-nav-message').textContent='';document.body.classList.add('sports-active');$('sports-panel').hidden=false;$('open-sports').setAttribute('aria-pressed','true');$('open-cinema').setAttribute('aria-pressed','false');if(!location.hash||location.hash==='#sports')history.replaceState(null,'',location.pathname+location.search+'#sports');void load();
+  window.dispatchEvent(new CustomEvent('sports-tab-open'));
+  $('sports-nav-message').textContent='';document.body.classList.add('sports-active');$('sports-panel').hidden=false;$('open-sports').setAttribute('aria-pressed','true');$('open-cinema').setAttribute('aria-pressed','false');if(!location.hash||location.hash==='#sports'||location.hash==='#games')history.replaceState(null,'',location.pathname+location.search+'#sports');void load();
 }
 $('open-sports').addEventListener('click',openSports);
 $('login-sports').addEventListener('click',openSports);
-$('open-cinema').addEventListener('click',()=>{buffstreamsDesk.leave();stopSports();document.body.classList.remove('sports-active');$('sports-panel').hidden=true;$('open-sports').setAttribute('aria-pressed','false');$('open-cinema').setAttribute('aria-pressed','true');if(location.hash==='#sports')history.replaceState(null,'',location.pathname+location.search);});
+export function leaveSports(){buffstreamsDesk.leave();stopSports();document.body.classList.remove('sports-active');$('sports-panel').hidden=true;$('open-sports').setAttribute('aria-pressed','false');}
+$('open-cinema').addEventListener('click',()=>{leaveSports();$('open-cinema').setAttribute('aria-pressed','true');if(location.hash==='#sports')history.replaceState(null,'',location.pathname+location.search);});
 $('sports-refresh').addEventListener('click',()=>{if(mode==='buffstreams'){buffstreamsDesk.refresh();return;}catalog=null;void load();});
 $('sports-search').addEventListener('input',render);$('sports-sport').addEventListener('change',()=>{sport=$('sports-sport').value;render();});
 $('sports-provider').addEventListener('change',()=>{provider=$('sports-provider').value;render();});
@@ -147,6 +149,7 @@ $('sports-live-edge').addEventListener('click',()=>{if(!video)return;if(hls?.liv
 $('sports-quality').addEventListener('change',()=>{quality=Number($('sports-quality').value);setQuality();});
 $('sports-fullscreen').addEventListener('click',()=>{if(video)void(video.requestFullscreen?.()||video.webkitEnterFullscreen?.());});
 window.addEventListener('cinema-playback-start',stopSports);
+window.addEventListener('games-playback-start',stopSports);
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&selection){saveBookmark();video?.pause();clearTimeout(bufferDeadline);clearTimeout(deadline);}});
 window.addEventListener('pagehide',stopSports);
 if(location.hash==='#sports')openSports();

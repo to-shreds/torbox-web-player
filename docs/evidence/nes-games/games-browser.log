@@ -1,0 +1,22 @@
+✔ anonymous Games executes the original ROM with real PPU output and keyboard input without TorBox calls (927.906152ms)
+✔ manual save and restore recover emulated CPU and PPU state, and reopening offers the saved state (1123.919917ms)
+✔ toolbar focus preserves game keys while Enter activates its focused Pause control (607.699428ms)
+✔ a delayed manual Load cannot overwrite a newer Start fresh action (1104.86689ms)
+✔ standard controller A reaches the emulator and disconnecting releases the held button (591.803615ms)
+✔ automatic saves stay separate for the two viewers (755.899498ms)
+✔ local ROM import renders a game and malformed files report a useful error (614.84942ms)
+✔ a canceled slow ROM cannot replace a newer game or reopen its closed player (885.215691ms)
+✔ closing Games releases keyboard interception and switching to Sports stops its emulator (883.532705ms)
+✔ mobile portrait and landscape keep the emulator and touch controls inside the viewport (821.334229ms)
+✔ unsafe catalog entries never request private APIs or external ROM hosts (311.917404ms)
+✔ direct Games links respect Kid Mode and finish the normal movie startup after denial (174.542895ms)
+✔ an existing movie fragment still boots Cinema and is preserved when returning from Games (261.697586ms)
+✔ pending movie auto-next cannot reopen Cinema over Games while presentation exit is delayed (1007.349626ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11771.736164
