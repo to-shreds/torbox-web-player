@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.2**, frontend build **release-1.2.2-games.2**
+Current version: **1.2.2**, frontend build **release-1.2.2-games.3**
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
@@ -19,6 +19,8 @@ Title details now prepare cached movie/episode files before Play, reuse the comp
 Open **GAMES** in the top navigation, or use `#games` in the app URL. NES games run directly in your browser without a TorBox login, backend request, or extra service. The catalog is alphabetical and searchable. Open a local uncompressed `.nes` file, or choose a game added to the repository's `public/roms/` folder and `public/games-catalog.json`. The menu currently includes the user-supplied Super Mario Bros. / Duck Hunt cartridge, Super Mario Bros. 3, and Teenage Mutant Ninja Turtles II: The Arcade Game. Catalog entries and safe file naming are described in [the ROM folder README](public/roms/README.md).
 
 The player supports touch controls including diagonals and simultaneous buttons, keyboard input, and up to two standard gamepads. Automatic saves resume each viewer's game on the same browser. Save and Load save use a separate manual slot. Game saves use their own IndexedDB store and do not alter movie history or credential storage. Full screen retains the controls; rotating the device gives a landscape layout. Leaving Games or hiding the app pauses emulation and sound. For Duck Hunt, choose it inside the combined cartridge, turn on **Light gun**, then click or tap the game screen to aim and shoot.
+
+Open **Cheats** in any game to manage NES Game Genie codes. Six-letter and eight-letter codes are supported, including the eight-letter original-byte comparison. You can paste several codes, name them, edit/remove them, switch each code or the whole list on/off, and import/export JSON lists. Lists are saved separately for each viewer and exact ROM on this browser, including local ROM files. The game pauses while the manager is open; **Done & Resume** returns to play. Raw ROM patches accept `AAAA:VV` or `AAAA:VV?CC` with CPU addresses `$8000` through `$FFFF`. Codes apply to ROM reads immediately; codes affecting startup may require **Start fresh**, and effects already written to game RAM can remain until restart. Use codes for the exact game revision. This NES player uses Game Genie formats; codes for GameShark on other consoles are not compatible. If enabled codes overlap, the first matching code in the list wins. Up to 128 codes can be stored per game; ROM files and the save-state format remain unchanged.
 
 Games initially follows Sports' adult-viewer restriction, so it cannot bypass Kid Mode's existing viewing allowances. This release does not add gaming to those allowance rules. Actual ROM compatibility and physical controller/touch/audio behavior still depend on the game and device. The pinned JSNES 2.1.0 engine and Apache 2.0 license are self-hosted under `public/vendor/`. ROM payloads are not added to the application-shell cache.
 

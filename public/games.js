@@ -1,6 +1,7 @@
-import {ENGINE_VERSION, MAX_ROM_BYTES, MAX_CATALOG_BYTES, cleanGamesCatalog, validateRom, romHash, saveIdentity, makeSaveRecord, validSaveRecord, fetchBytes, createStateStore} from './games-core.js?v=release-1.2.2-games.2';
-import {getKidProfile} from './parental-controls.js?v=release-1.2.2-games.2';
-import {nesPointerPosition} from './games-pointer.js?v=release-1.2.2-games.2';
+import {ENGINE_VERSION, MAX_ROM_BYTES, MAX_CATALOG_BYTES, cleanGamesCatalog, validateRom, romHash, saveIdentity, makeSaveRecord, validSaveRecord, fetchBytes, createStateStore} from './games-core.js?v=release-1.2.2-games.3';
+import {getKidProfile} from './parental-controls.js?v=release-1.2.2-games.3';
+import {nesPointerPosition} from './games-pointer.js?v=release-1.2.2-games.3';
+import {emptyCheats, normalizeCheatSet, parseCheatLines, applyCheats, readCheats, writeCheats, importCheats, exportCheats} from './games-cheats.js?v=release-1.2.2-games.3';
 
 const $ = id => document.getElementById(id);
 const dialog = $('games-player');
@@ -9,6 +10,8 @@ const context = canvas.getContext('2d', {alpha: false});
 const image = context.createImageData(256, 240);
 const pixels = new Uint32Array(image.data.buffer);
 const store = createStateStore();
+const cheatsPanel = $('games-cheats-panel');
+let cheatSet = emptyCheats(), editingCheat = null;
 let catalog = null, catalogPromise = null, enginePromise = null;
 let tabOpen = false, generation = 0, actionGeneration = 0, abort = null;
 let nes = null, selection = null, running = false, fatal = false, resumeSaved = null;
@@ -33,7 +36,7 @@ function status(message) { $('games-player-message').textContent = message; }
 function state(value) { dialog.dataset.state = value; }
 function textFocused(target) { return target?.closest?.('input,textarea,select,[contenteditable="true"]') || target?.isContentEditable; }
 function actionKey(event) { return event.code === 'Enter' && event.target?.closest?.('button,a,summary'); }
-function controls(enabled) { for (const id of ['games-pause','games-save','games-load','games-start-fresh','games-zapper']) if ($(id)) $(id).disabled = !enabled; }
+function controls(enabled) { for (const id of ['games-pause','games-save','games-load','games-start-fresh','games-zapper','games-cheats']) if ($(id)) $(id).disabled = !enabled; }
 function clearScreen() { pixels.fill(0xff000000); context.putImageData(image, 0, 0); canvas.dataset.frames = '0'; }
 
 class AudioOutput {
@@ -46,7 +49,7 @@ class AudioOutput {
       if (!AudioContextClass) throw new Error();
       this.context = new AudioContextClass();
       if (!this.context.audioWorklet) throw new Error();
-      this.ready = this.context.audioWorklet.addModule('./vendor/nes-audio-worklet.js?v=release-1.2.2-games.2').then(() => {
+      this.ready = this.context.audioWorklet.addModule('./vendor/nes-audio-worklet.js?v=release-1.2.2-games.3').then(() => {
         if (this.closed) return;
         this.node = new AudioWorkletNode(this.context, 'torbox-nes-audio', {outputChannelCount:[2]});
         this.node.connect(this.context.destination);
@@ -199,11 +202,11 @@ function pauseGame({save = true} = {}) {
 }
 function startGame() {
   if (!tabOpen || !adult() || selection?.viewer !== viewer()) { closeGame(); $('games-message').textContent = 'Switch to an adult viewer to play Games.'; return; }
-  if (!nes || fatal || running || document.hidden) return;
+  if (!nes || fatal || running || document.hidden || !cheatsPanel.hidden) return;
   actionGeneration++;
   if (resumeSaved) {
-    try { nes.fromJSON(resumeSaved.state); resumeSaved = null; }
-    catch { resumeSaved = null; nes.reloadROM(); status('The saved game could not resume. Started from the beginning.'); }
+    try { nes.fromJSON(resumeSaved.state); applyCheats(nes,cheatSet); resumeSaved = null; }
+    catch { resumeSaved = null; nes.reloadROM(); applyCheats(nes,cheatSet); status('The saved game could not resume. Started from the beginning.'); }
   }
   releaseInputs(); running = true; lastFrame = 0; accumulator = 0;
   state('playing'); $('games-pause').textContent = 'Pause';
@@ -216,6 +219,7 @@ export function closeGame() {
   pauseGame(); generation++; actionGeneration++; abort?.abort(); abort = null;
   sound?.close(); sound = null; nes = null; selection = null; resumeSaved = null; fatal = false;
   zapperEnabled = false; showZapperMode();
+  hideCheats(); cheatSet = emptyCheats(); cancelCheatEdit(); $('games-cheat-list').replaceChildren(); $('games-cheat-message').textContent = '';
   controls(false); state('closed'); delete dialog.dataset.saveKey;
   if (dialog.open) dialog.close();
   if (document.fullscreenElement === dialog) void document.exitFullscreen().catch(() => {});
@@ -245,8 +249,10 @@ async function play(item, file = null) {
     if (!tabOpen || !adult() || selectedViewer !== viewer()) { closeGame(); $('games-message').textContent = 'Switch to an adult viewer to play Games.'; return; }
     selection = {title:item.title,viewer:selectedViewer,hash,identity:saveIdentity(selectedViewer,hash)};
     dialog.dataset.saveKey = selection.identity;
+    cheatSet = readCheats(selection.identity);
     nes = new engine.NES({onFrame:draw,onAudioSample:(left,right) => sound?.write(left,right),sampleRate:sound?.context?.sampleRate || 48000});
     nes.loadROM(valid.bytes);
+    applyCheats(nes,cheatSet);
     await saveTail;
     let saved = null;
     try { saved = await store.get(selection.identity); }
@@ -273,7 +279,9 @@ async function loadManual() {
     const record = await store.get(identity,'manual');
     if (current !== generation || action !== actionGeneration) return;
     if (!validSaveRecord(record,selectedViewer,hash)) { status('No manual save exists for this game and viewer. Press Resume to continue.'); return; }
-    nes.fromJSON(record.state); fatal = false; resumeSaved = null; releaseInputs(); startGame();
+    nes.fromJSON(record.state); applyCheats(nes,cheatSet); fatal = false; resumeSaved = null; releaseInputs(); controls(true);
+    if (!cheatsPanel.hidden) pauseGame({save:false});
+    startGame();
     status('Loaded your manual save.');
   } catch { if (current === generation && action === actionGeneration) status('This save could not load. Press Resume or Start fresh.'); }
   finally { if (current === generation) $('games-load').disabled = !nes; }
@@ -282,8 +290,82 @@ function freshGame() {
   if (!nes || !adult()) return;
   actionGeneration++;
   pauseGame({save:false}); resumeSaved = null; fatal = false;
-  try { nes.reloadROM(); frameCount = 0; controls(true); clearScreen(); startGame(); }
+  try { nes.reloadROM(); applyCheats(nes,cheatSet); frameCount = 0; controls(true); clearScreen(); if (!cheatsPanel.hidden) pauseGame({save:false}); startGame(); if (!cheatsPanel.hidden) status('Started fresh. Finish editing codes, then press Resume.'); }
   catch { fatal = true; controls(false); state('error'); status('This ROM could not restart. Close it and try another game.'); }
+}
+
+function hideCheats() {
+  actionGeneration++;
+  cheatsPanel.hidden = true; $('games-cheats').setAttribute('aria-expanded','false'); dialog.classList.remove('games-cheats-open');
+}
+function cancelCheatEdit() {
+  actionGeneration++;
+  editingCheat = null; $('games-cheat-name').value = ''; $('games-cheat-codes').value = '';
+  $('games-cheat-submit').textContent = 'Add codes'; $('games-cheat-cancel-edit').hidden = true;
+}
+function canEditCheats() {
+  if (!nes || !selection?.identity) return false;
+  if (!adult() || selection.viewer !== viewer()) { closeGame(); $('games-message').textContent = 'Switch to an adult viewer to play Games.'; return false; }
+  return true;
+}
+function renderCheats() {
+  $('games-cheats-enabled').checked = cheatSet.enabled;
+  const active = cheatSet.enabled ? cheatSet.codes.filter(row => row.enabled).length : 0;
+  $('games-cheat-count').textContent = `${active} active / ${cheatSet.codes.length} saved ${cheatSet.codes.length === 1 ? 'code' : 'codes'}`;
+  $('games-cheats-clear').disabled = !cheatSet.codes.length;
+  $('games-cheat-list').replaceChildren(...cheatSet.codes.map((entry,index) => {
+    const row = document.createElement('div'); row.className = 'games-cheat-row'; row.dataset.cheatCode = entry.code;
+    const label = document.createElement('label'); label.className = 'games-cheat-toggle';
+    const toggle = document.createElement('input'); toggle.type = 'checkbox'; toggle.className = 'games-cheat-enabled'; toggle.checked = entry.enabled;
+    toggle.setAttribute('aria-label','Enable '+(entry.name || entry.code));
+    const content = document.createElement('span'); content.className = 'games-cheat-copy';
+    const name = document.createElement('strong'); name.textContent = entry.name || `Code ${index+1}`;
+    const code = document.createElement('code'); code.textContent = entry.code; content.append(name,code); label.append(toggle,content);
+    toggle.addEventListener('change',() => setCheats({...cheatSet,codes:cheatSet.codes.map((item,i) => i === index ? {...item,enabled:toggle.checked} : item)},'Code updated.'));
+    const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'games-cheat-edit'; edit.textContent = 'Edit';
+    edit.addEventListener('click',() => { actionGeneration++; editingCheat = entry.code; $('games-cheat-name').value = entry.name; $('games-cheat-codes').value = entry.code; $('games-cheat-submit').textContent = 'Save change'; $('games-cheat-cancel-edit').hidden = false; $('games-cheat-codes').focus(); });
+    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'games-cheat-remove'; remove.textContent = 'Remove';
+    remove.addEventListener('click',() => { setCheats({...cheatSet,codes:cheatSet.codes.filter((_,i) => i !== index)},'Code removed.'); if (editingCheat === entry.code) cancelCheatEdit(); });
+    row.append(label,edit,remove); return row;
+  }));
+}
+function setCheats(raw, message = 'Codes saved.') {
+  if (!canEditCheats()) return false;
+  actionGeneration++;
+  try {
+    const model = normalizeCheatSet(raw);
+    applyCheats(nes,model); cheatSet = model; renderCheats();
+    try { writeCheats(selection.identity,model); $('games-cheat-message').textContent = message+(model.enabled ? '' : ' Cheats are off until you enable them.'); }
+    catch { $('games-cheat-message').textContent = 'Codes applied for this session, but this browser could not save them.'; }
+    return true;
+  } catch (error) { renderCheats(); $('games-cheat-message').textContent = error.message || 'These codes could not be applied.'; return false; }
+}
+function openCheats() {
+  if (!canEditCheats()) return;
+  actionGeneration++; pauseGame();
+  cheatsPanel.hidden = false; $('games-cheats').setAttribute('aria-expanded','true'); dialog.classList.add('games-cheats-open');
+  $('games-cheat-message').textContent = ''; renderCheats();
+  status('Paused for Game Genie. Press Resume when you are finished.');
+  $('games-cheat-codes').focus({preventScroll:true}); dialog.scrollTop = 0;
+}
+function resumeFromCheats() {
+  if (!canEditCheats()) return;
+  hideCheats(); canvas.focus({preventScroll:true}); startGame();
+  if (fatal) status('This game stopped. Choose Start fresh to restart it with your current codes.');
+}
+async function importCheatFile(file) {
+  if (!file || !canEditCheats()) return;
+  if (file.size > 64*1024) { $('games-cheat-message').textContent = 'Choose a code JSON file no larger than 64 KiB.'; return; }
+  const current = generation, identity = selection.identity, action = ++actionGeneration;
+  let timer;
+  try {
+    $('games-cheat-message').textContent = 'Importing codes…';
+    const text = await Promise.race([file.text(),new Promise((_,reject) => { timer = setTimeout(() => reject(new Error('The code file did not load in time. Try again.')),10000); })]);
+    if (current !== generation || action !== actionGeneration || selection?.identity !== identity) return;
+    const model = importCheats(text);
+    if (setCheats(model,'Code list imported.')) cancelCheatEdit();
+  } catch (error) { if (current === generation && action === actionGeneration && selection?.identity === identity) $('games-cheat-message').textContent = error.message || 'This code file could not import.'; }
+  finally { clearTimeout(timer); }
 }
 
 function render() {
@@ -304,7 +386,7 @@ async function loadCatalog() {
   catalogPromise = (async () => {
     render();
     try {
-      const bytes = await fetchBytes('./games-catalog.json?v=release-1.2.2-games.2',{maxBytes:MAX_CATALOG_BYTES,timeoutMs:10000});
+      const bytes = await fetchBytes('./games-catalog.json?v=release-1.2.2-games.3',{maxBytes:MAX_CATALOG_BYTES,timeoutMs:10000});
       catalog = cleanGamesCatalog(JSON.parse(new TextDecoder().decode(bytes))); render();
     } catch { $('games-message').textContent = 'The game list could not load. Press Refresh, or open a game file from your device.'; }
     finally { catalogPromise = null; }
@@ -323,10 +405,39 @@ $('games-file').addEventListener('change',event => {
 });
 $('close-games-player').addEventListener('click',closeGame);
 dialog.addEventListener('cancel',event => { event.preventDefault(); closeGame(); });
-$('games-pause').addEventListener('click',() => running ? pauseGame() : startGame());
+$('games-pause').addEventListener('click',() => running ? pauseGame() : cheatsPanel.hidden ? startGame() : resumeFromCheats());
 $('games-save').addEventListener('click',() => void saveGame('manual',true));
 $('games-load').addEventListener('click',() => void loadManual());
 $('games-start-fresh').addEventListener('click',freshGame);
+$('games-cheats').addEventListener('click',() => { if (cheatsPanel.hidden) openCheats(); else { hideCheats(); canvas.focus({preventScroll:true}); } });
+$('games-cheats-done').addEventListener('click',resumeFromCheats);
+$('games-cheats-enabled').addEventListener('change',event => setCheats({...cheatSet,enabled:event.target.checked},'Cheat switch updated.'));
+$('games-cheat-cancel-edit').addEventListener('click',cancelCheatEdit);
+for (const id of ['games-cheat-name','games-cheat-codes']) $(id).addEventListener('input',() => { actionGeneration++; });
+$('games-cheat-form').addEventListener('submit',event => {
+  event.preventDefault();
+  if (!canEditCheats()) return;
+  try {
+    const entries = parseCheatLines($('games-cheat-codes').value,$('games-cheat-name').value);
+    if (!entries.length) throw new Error('Enter at least one code.');
+    let codes;
+    if (editingCheat) {
+      if (entries.length !== 1) throw new Error('Edit one code at a time. Cancel edit to add several codes.');
+      codes = cheatSet.codes.map(entry => entry.code === editingCheat ? {...entries[0],enabled:entry.enabled} : entry);
+    } else codes = [...cheatSet.codes,...entries];
+    if (setCheats({...cheatSet,codes},editingCheat ? 'Code changed.' : 'Codes added.')) cancelCheatEdit();
+  } catch (error) { $('games-cheat-message').textContent = error.message || 'Check your code format and try again.'; }
+});
+$('games-cheats-clear').addEventListener('click',() => { if (setCheats({...cheatSet,codes:[]},'All codes removed.')) cancelCheatEdit(); });
+$('games-cheats-import').addEventListener('change',event => { const file = event.target.files?.[0]; event.target.value = ''; void importCheatFile(file); });
+$('games-cheats-export').addEventListener('click',() => {
+  if (!canEditCheats()) return;
+  try {
+    const blob = new Blob([exportCheats(cheatSet)],{type:'application/json'}), url = URL.createObjectURL(blob);
+    const link = document.createElement('a'); link.href = url; link.download = `nes-cheats-${selection.hash.slice(0,12)}.json`; link.click();
+    setTimeout(() => URL.revokeObjectURL(url),1000); $('games-cheat-message').textContent = 'Code list exported.';
+  } catch { $('games-cheat-message').textContent = 'The code list could not export. Try again.'; }
+});
 $('games-fullscreen').addEventListener('click',() => {
   const task = document.fullscreenElement === dialog ? document.exitFullscreen() : dialog.requestFullscreen?.();
   if (task) void task.catch(() => status('Full screen is unavailable. Rotate your device for a wider layout.'));

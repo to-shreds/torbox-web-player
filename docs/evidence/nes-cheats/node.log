@@ -1,0 +1,1008 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> torbox-web-player@1.2.2 test
+> node --test test/*.test.mjs
+
+✔ clone requires no Render-stored household password or TorBox key (40.118953ms)
+{"event":"request_failed","code":"INTERNAL_ERROR"}
+✔ TorBox API key is the login credential and a wrong key is rejected (24.107963ms)
+✔ validated key stays in server process session and is not returned by normal API calls (15.019746ms)
+{"event":"media_redirect_issued","ranged":false}
+✔ API-key playback returns an opaque ticket that redirects directly to TorBox (17.687056ms)
+✔ logout clears API access for the in-memory key session (16.704075ms)
+✔ actual live artwork redirect is allowed by the production image CSP without allowing scripts (13.141406ms)
+✔ live poster metadata is accepted but lookalike hosts, cleartext and credentials are rejected (1.203564ms)
+✔ missing poster uses the exact title ID and an existing medium URL is deduplicated (0.445591ms)
+✔ primary success does not add requests or retries (0.72996ms)
+✔ failed or undecodable primary tries another size without hiding the card (0.408486ms)
+✔ persistent failure makes at most three requests, then reveals the existing text fallback (0.63068ms)
+✔ navigation away cancels a delayed retry and does not start obsolete downloads (0.323017ms)
+✔ successful transient retry remains visible (0.213462ms)
+✔ H.264 plus AAC is strongly preferred for browser playback (3.114754ms)
+✔ Dolby and DTS names are recognized as possible silent-audio risks (0.450509ms)
+✔ Zilean structured codec metadata survives normalization (1.217455ms)
+✔ source normalization retains safe structured codec fields only (0.250237ms)
+✔ preferred source chooses cached browser-friendly audio over cached Dolby audio (0.543679ms)
+✔ preferred source chooses browser-friendly source even when it needs preparation (0.117868ms)
+✔ registration compatibility outranks cache convenience (1.213989ms)
+✔ ready risky source is identified before silent playback (1.232578ms)
+✔ credits window defaults to 45 seconds and accepts only supported choices (1.017063ms)
+✔ Up Next UI supports immediate skip and explicit credits viewing without Stay here (4.811472ms)
+✔ auto-next is media-time driven during credits and ended is only the safety net (2.834622ms)
+✔ next episode can be prepared during credits without exposing source options (1.683417ms)
+✔ source migration accepts public DNS domains and normalizes their root (2.146165ms)
+✔ source URLs reject credentials, queries, fragments, private/IP hosts and malformed DNS (1.319779ms)
+✔ catalog preserves effective source and returns only whitelisted metadata (2.545546ms)
+✔ catalog supports domain migration, preseason categories and named events (0.899816ms)
+✔ malformed, empty, duplicate and foreign catalogs cannot replace a working list (1.368082ms)
+✔ score and result titles are omitted without discarding clean events (1.027859ms)
+✔ only matching direct player responses can open a tab (0.652344ms)
+✔ transport posts whitelisted metadata only to the fixed helper (8.527672ms)
+✔ transport rejects non-JSON, malformed and oversized response bodies (5.437745ms)
+✔ transport errors are bounded and cancellation propagates (1.168942ms)
+✔ browse falls back from Popular to Featured without turning search into an error (7.68356ms)
+✔ New browse uses the current-year Cinemeta catalog (0.878444ms)
+✔ browse accepts current Cinemeta imdb_id catalog rows (0.893947ms)
+✔ browse follows only the trusted Cinemeta catalogs redirect used by no-query feeds (1.833293ms)
+✔ browse rejects redirects outside the Cinemeta allowlist (2.026323ms)
+✔ metadata follows the exact Cinemeta live redirect but still rejects other hosts (5.980443ms)
+✔ server search rejects query-ignoring results and uses the prefixed Cinemeta route (1.600142ms)
+✔ server cross-type search returns movies and shows from one request (14.587104ms)
+✔ IMDb suggestion fallback recovers Elena when Cinemeta ignores the query (2.219705ms)
+✔ a fast IMDb suggestion cannot beat a slower relevant Cinemeta search (21.400643ms)
+✔ Family Guy search prunes the empty exact duplicate without metadata delay and the surviving card opens (1.682165ms)
+✔ complete same-title movie and series cards are both retained (1.153709ms)
+✔ cross-type identity conflicts are corrected through flexible metadata verification (1.676136ms)
+✔ IMDb suggestions ignore people and the wrong media type (0.724422ms)
+✔ IMDb fallback does not surface cards that Cinemeta cannot open (1.509766ms)
+﹣ opt-in public sample catalog-to-TorBox integration observation (0.987558ms) # SKIP
+✔ Continue Watching keeps only the newest entry for each show (1.818972ms)
+✔ a completed newest episode suppresses older unfinished episodes from the same show (0.259851ms)
+✔ Continue Watching remains bounded after show-level deduplication (0.315886ms)
+✔ Continue Watching UI never offers finished-title mode and supports long-press title navigation (16.864496ms)
+✔ removing a show-level Continue Watching card removes every stored episode for that show (1.596697ms)
+✔ password hashes round trip and wrong passwords fail (491.858087ms)
+✔ sessions expire and are individually revocable (0.997453ms)
+✔ session revocation does not accept arbitrary tokens (0.216145ms)
+✔ limiter expires its window (0.224538ms)
+✔ ready means both finished and present, not the textual state (4.568606ms)
+✔ files preserve zero IDs and do not return private provider fields (0.70942ms)
+✔ unknown non-video files are not offered for playback (0.854568ms)
+✔ reject malformed IDs without permitting provider path injection (0.598021ms)
+✔ URL checks block master-key leaks and unverified destinations (1.894816ms)
+✔ direct browser URL validation accepts TorBox CDN key-bearing URLs but not unrelated hosts (0.275014ms)
+✔ media tickets are opaque, session-bound, expiring and revocable (0.694177ms)
+✔ media range and safe content-type fallbacks are narrowly constrained (0.552302ms)
+✔ TorBox account output is whitelist-only (9.377463ms)
+✔ library caches and coalesces concurrent calls (13.637093ms)
+✔ failed refresh preserves cached files with an explicit stale warning (0.751162ms)
+✔ uncached failure is an error, not an empty successful library (0.427204ms)
+✔ HTTP 429 establishes a bounded provider cooldown (1.370215ms)
+✔ provider timeout is distinct and redacted (0.3253ms)
+✔ malformed JSON and false success do not become empty results (0.712353ms)
+✔ resolve revalidates the account and requests a server-only fresh link (7.139099ms)
+✔ browser resolver intentionally retains the master token in the returned TorBox URL (0.847377ms)
+✔ removed or unready files never receive a link (0.727236ms)
+✔ correct namespace parameters for web downloads and Usenet (0.726074ms)
+✔ progress is independent across viewers and survives a new lease (0.559112ms)
+✔ stale sessions, sequence numbers and zero loading events cannot reset progress (0.145779ms)
+✔ only an explicit start-over resets a resume point (0.1126ms)
+✔ progress validation rejects NaN, negative times, unknown duration and overruns (0.15905ms)
+✔ new playback intents invalidate older async requests only for that viewer (0.204067ms)
+✔ guest resolver follows only the TorBox redirect metadata and returns a key-free CDN URL (0.712164ms)
+✔ guest resolver fails closed if TorBox redirect target contains the master key (0.617551ms)
+✔ setup transfer encrypts credential and portable state but leaves device source learning behind (63.384096ms)
+✔ wrong transfer code cannot decrypt a package (123.433782ms)
+✔ transfer links keep the secret in the URL fragment and hashes round-trip (44.111626ms)
+✔ all new catalog/source/preparation/status APIs require login (49.660193ms)
+✔ source registration and preparation require exact origin and CSRF (24.685223ms)
+✔ catalog and metadata route through the separate adapter without preparation (8.182482ms)
+✔ POST registration is read-only availability work; prepare is a separate explicit call (7.289456ms)
+✔ source request body size is bounded before any provider call (5.645558ms)
+✔ logout revokes discovery tickets along with existing session access (8.805741ms)
+✔ same-origin modules and sports are served with a fixed public host policy while API responses stay local (39.153178ms)
+✔ revocation during an in-flight discovery request prevents returning its data (4.128643ms)
+✔ simultaneous source registrations cannot overrun capacity while availability is pending (15.552489ms)
+✔ catalog validates identities before making requests (2.36849ms)
+✔ catalog broad search is encoded and independent of TorBox files (6.551053ms)
+✔ catalog IMDb search resolves metadata rather than partial text matches (1.491858ms)
+✔ catalog handles empty results separately from failed or malformed requests (2.70073ms)
+✔ catalog caches and coalesces repeated requests (7.167392ms)
+✔ catalog pagination never skips entries truncated by its size bound (3.776291ms)
+✔ metadata refuses a different title or content type (0.228144ms)
+✔ episodes are numeric, stable and deduplicated; mismatched IDs are omitted (0.548366ms)
+✔ poster URLs permit only expected HTTPS image hosts (0.277788ms)
+✔ bounded JSON readers reject oversized payloads (0.520555ms)
+✔ target validation keeps specials and rejects ambiguous series requests (0.259801ms)
+✔ source normalization preserves zero index and strips URLs and unrecognized fields (2.150481ms)
+✔ source normalization deduplicates and bounds results (1.598899ms)
+✔ episode-title guard rejects a mismatched numbering release but keeps the selected episode title (0.4114ms)
+✔ source identity guard rejects an alternate-series year while allowing the selected show years (0.965475ms)
+✔ registration drops a source with conflicting catalog year before TorBox availability checks (1.69886ms)
+✔ registration drops a source whose filename clearly names another episode (0.407555ms)
+✔ source hints identify likely browser-friendly audio without promising universal compatibility (0.1988ms)
+✔ container hints reject AVI and MKV even when codec names look friendly (0.162224ms)
+✔ source lookup uses the authenticated same-origin website and no TorBox credentials (0.893036ms)
+✔ source lookup treats provider denial as an error, never no sources (6.233505ms)
+✔ cache calls go only to TorBox and preserve hash query repetitions (0.798013ms)
+✔ file-aware cache checks retain only safe file metadata needed for source selection (0.733035ms)
+✔ torrent creation uses only a hash magnet, with cached-only explicit option (0.730882ms)
+✔ unconfirmed creation never turns into an automatically retried write (0.765965ms)
+✔ unreadable or missing-hash account rows stop duplicate reconciliation (0.219951ms)
+✔ registering sources and checking availability never enqueues (0.211549ms)
+✔ re-registering a source preserves its hash-based bad-source memory (0.999036ms)
+✔ availability failure preserves sources and marks cached state unknown (0.237348ms)
+✔ preparation is idempotent across concurrent sessions for the same hash (18.440777ms)
+✔ existing account torrent is reused before a mutation (0.416668ms)
+✔ actual AVI file is rejected before browser playback even when source metadata was unknown (0.271069ms)
+✔ cached file preflight identifies an exact browser-playable episode without adding the torrent (0.387714ms)
+✔ registration exposes file-aware cached browser compatibility for automatic ranking (0.191458ms)
+✔ source tickets are session-bound and revoked on logout (0.314073ms)
+✔ source tickets expire instead of becoming permanent playback URLs (0.262615ms)
+✔ series episode must exist in authoritative metadata (0.146591ms)
+✔ future episodes cannot start preparation (0.169175ms)
+✔ returned torrent identity must match the originally selected hash (3.741338ms)
+✔ provider preparation percentages are not invented (4.142833ms)
+✔ fileIndex zero is not interpreted as a TorBox file ID (0.173151ms)
+✔ episode matching cannot switch season or episode (0.21847ms)
+✔ multiple movie files and multi-episode files require explicit choice (0.164007ms)
+✔ samples and trailers never beat the selected full video (0.079781ms)
+✔ alternate numeric episode form and specials are recognized (0.283046ms)
+✔ TorBox Google success URL yields a short-lived Google token without accepting arbitrary origins (1.538709ms)
+✔ expired TorBox Google success tokens are rejected (0.382977ms)
+✔ Drive file IDs are extracted only from Google Drive URLs (0.394104ms)
+✔ integration job selection ignores old jobs and keeps the matching fresh Google upload (0.793355ms)
+✔ Google Drive client sends bearer token and permanent DELETE without returning the token (3.432694ms)
+✔ TorBox Google Drive queue sends exact file identity and short-lived Google token (1.259959ms)
+✔ easy Drive transfer measures upload and processing, publishes once, and permanently deletes (1.962307ms)
+✔ easy Drive timing test rejects too-long cleanup and guest access (0.496308ms)
+✔ Game Genie normalization accepts exactly 6 or 8 alphabet letters and canonicalizes separators (1.836608ms)
+✔ raw ROM codes require exact CPU cartridge addresses and one-byte value/optional compare (36.163101ms)
+✔ cheat models preserve order, names and disabled states, with strict booleans and bounded unique codes (1.658229ms)
+✔ multi-line additions validate the entire bounded batch before returning any codes (0.572713ms)
+✔ real CPU execution uses raw ROM patches while the stored ROM bytes remain intact (63.781275ms)
+✔ native 6-letter and 8-letter codes retain compare semantics and first matching priority (15.194439ms)
+✔ strict validation is atomic and cannot replace working patches with a partly invalid list (19.977068ms)
+✔ unexpected native callbacks or addCode failures roll back patches and CPU interception together (45.229965ms)
+✔ known Game Genie codes intercept native CPU cartridge reads across every supported mapper (398.391333ms)
+✔ reset and saved-state restore reattach native CPU interception without accumulating wrappers (81.233315ms)
+✔ ROM masking cannot alias cheats into mapper RAM, PPU registers or APU registers (11.208712ms)
+✔ actual mapper RAM, PPU status and APU status reads match an unpatched native engine (19.511075ms)
+✔ DMC sample fetches receive one compared patch while preserving native DMA timing and address wrap (14.022784ms)
+✔ new DMC channels created by reload and fromJSON receive current patches after resynchronization (61.905147ms)
+✔ persistent lists are separated by viewer and ROM hash and preserve disabled names/states (1.201911ms)
+✔ storage denial and malformed records have finite behavior without destroying a valid existing list (1.196554ms)
+✔ portable JSON contains only normalized cheat settings and strictly rejects corrupt or oversized imports (0.754978ms)
+✔ light-gun aims map centered rendered image pixels, independent of scale (1.783368ms)
+✔ wide fullscreen and tall portrait letterbox regions cannot aim at a wrong image pixel (0.343468ms)
+✔ invalid or hidden canvas geometry cannot generate off-image coordinates (0.204278ms)
+✔ Games assets and repo ROM bytes are available without a TorBox session (112.224868ms)
+✔ every versioned service-worker shell asset exists on disk (36.616896ms)
+✔ catalog allows only flat same-site NES paths and alphabetic unique game identities (10.551522ms)
+✔ ROM validation checks true magic, complete banks, trainers, mapper and bounds (0.688988ms)
+✔ ordinary NES2 files load; exotic size, unsupported console/submapper and PAL fail clearly (0.431099ms)
+✔ ROM content hash stays stable across filenames and isolates changed bytes and viewers (16.837921ms)
+✔ pinned self-hosted engine actually executes original ROM and save snapshot does not mutate (322.92637ms)
+✔ ROM fetching uses no credentials, blocks redirects, applies deadline and bounds streamed body (18.506972ms)
+✔ unavailable IndexedDB is a finite error and invalid save keys never open storage (0.80943ms)
+✔ bundled game catalog resolves to valid local ROMs and emulation has no TorBox dependency (15.087203ms)
+✔ temporary invite token expires and is stored hashed (2.048327ms)
+✔ owner can create a title-scoped temporary guest session without exposing TorBox key (62.980918ms)
+✔ guest is blocked from browsing, owner tools, library, other titles and arbitrary playback ids (40.624124ms)
+✔ owner sign-out invalidates existing guest sessions and invitation links (18.946219ms)
+{"event":"media_redirect_issued","ranged":false}
+✔ guest playback redirects only to a safe TorBox link and never relays video (19.63394ms)
+✔ canonical recent key follows movie or exact episode identity (1.124275ms)
+✔ recent playback survives source changes because it is not keyed to TorBox file id (1.162132ms)
+✔ completed or nearly-finished content restarts while interrupted content resumes (0.247272ms)
+✔ recent history is bounded and clearable (5.429543ms)
+✔ resume time formatting is compact (0.21197ms)
+✔ one recent item can be removed without clearing the rest (0.347023ms)
+✔ starting the next episode cleans up an earlier completed episode by default (0.324248ms)
+✔ signed-out browsers cannot access protected API routes (67.927182ms)
+✔ invalid/missing configuration fails closed and exposes no secret (18.875332ms)
+✔ login rejects a forged origin and wrong password (91.978215ms)
+✔ login cookie is Secure, HttpOnly and SameSite; logout revokes it (135.711279ms)
+✔ CSRF token is required on every authenticated mutation (100.864713ms)
+✔ owner tools require password re-entry; revoke-all invalidates both sessions (342.068083ms)
+✔ arbitrary URL proxy and directory traversal are not exposed (103.117838ms)
+✔ private responses disable caching and frames (3.803141ms)
+✔ playback returns an opaque ticket for direct delivery and progress resumes (144.058725ms)
+{"event":"media_playback_rejected","code":"BROWSER_CONTAINER_UNSUPPORTED","container":"avi"}
+✔ playback refuses an actual AVI before creating a browser media ticket (114.699343ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ media ticket redirects range-preserving to TorBox without relaying video bytes (110.576279ms)
+✔ media tickets reject another signed-in session and malformed ranges (217.156424ms)
+{"event":"media_redirect_issued","ranged":false}
+✔ owner direct redirect can carry the account key without returning it in playback JSON (102.988589ms)
+✔ Kid Mode UI exposes per-viewer limits and Parent PIN controls (9.411023ms)
+✔ Kid Mode persists viewer choice and gates protected actions (5.703926ms)
+✔ playback is checked before starting and actual advancing playback is consumed (3.872001ms)
+✔ limit screen cannot be dismissed with Escape and parent extensions are PIN gated (3.845095ms)
+✔ Kid Mode module is served and included in the static PWA shell (1.947215ms)
+✔ title UI exposes immediate play/more-options architecture without old custom player buttons (4.995499ms)
+✔ native video controls are retained while custom pause information is layered around them (2.953972ms)
+✔ browser support modules are served as same-origin JavaScript (83.152819ms)
+﹣ opt-in read-only anonymous source aggregation observation (0.657471ms) # SKIP
+✔ anonymous Stremio adapter uses only its fixed approved endpoint and no credentials (8.705991ms)
+✔ anonymous stream normalizer ignores URL-only streams and parses provider metadata (0.704262ms)
+✔ MediaFusion Torznab normalization keeps only hashes and useful metadata (1.373881ms)
+✔ Torrentio adapter uses the fixed anonymous episode endpoint and preserves exact filenames (1.218797ms)
+✔ MediaFusion Torznab adapter sends anonymous IMDb/episode metadata query only (1.382964ms)
+✔ MediaFusion Torznab requires a matching IMDb identity and accepts its numeric live format (0.46432ms)
+✔ multi lookup aggregates two primary indexes in parallel and deduplicates by hash (2.711917ms)
+✔ configured fallback providers run concurrently and contribute metadata (1.457146ms)
+✔ an empty concurrent fallback is not reported as used (1.345167ms)
+✔ twenty unsupported primary results do not hide a playable fallback (1.948186ms)
+✔ twenty fast unsupported results wait for a delayed playable fallback (221.009196ms)
+✔ provider merge deduplicates the same torrent and keeps richer metadata plus provenance (0.347774ms)
+✔ all provider failures are unavailable rather than a fake empty success (0.624501ms)
+✔ all successful empty providers return an honest empty result (0.180311ms)
+✔ one empty provider plus a stalled provider reports timeout instead of caching an empty result (31.257593ms)
+✔ a stalled provider cannot hold lookup beyond the configured bound (30.464082ms)
+✔ enough browser candidates return after a brief grace without waiting for the hard bound (151.381125ms)
+✔ one browser source plus a second empty success finishes after grace (602.285259ms)
+✔ an AVI source plus an empty success still waits for a delayed browser source (350.873909ms)
+✔ two AVI providers do not hide a delayed browser source (351.416653ms)
+✔ two source-yielding providers with plausible unknown containers finish after grace (601.245236ms)
+✔ mobile source chooser is paginated and non-scrolling (8.389063ms)
+✔ owner Share buttons route to Drive while guests do not get them (12.339226ms)
+✔ Drive test uses TorBox Google OAuth with one success-URL paste and no Apps Script setup (2.440128ms)
+✔ browser-key clone is discovery-only and does not display TorBox library (1.044384ms)
+✔ Continue Watching is removable with confirmation and no clear-all control (3.634077ms)
+✔ settings and TorBox outage preflight are visible while old connection checker is gone (1.096903ms)
+✔ Recently Played resume carries configurable rewind and player has a pause overlay (1.759182ms)
+✔ Parent PIN is derived, never stored in plaintext, and verifies (91.986196ms)
+✔ daily allowance resets across calendar days but manual allowance persists (5.764017ms)
+✔ episode is charged after 5 minutes or 20 percent, whichever comes first (0.489598ms)
+✔ long episodes charge at five actual watched minutes (0.218519ms)
+✔ movie is charged after ten actual watched minutes and the same movie remains resumable (0.258349ms)
+✔ time allowance stops immediately and parent extensions restore access (0.43163ms)
+✔ episode and movie extensions only expand their own allowance (0.333884ms)
+✔ manual reset clears usage, charged content, and temporary extensions (0.880027ms)
+✔ per-title quality is stored at show/movie level (1.383014ms)
+✔ successful and audio-confirmed sources earn local recommendation preference (2.910286ms)
+✔ manual bad source and no-sound feedback remove a source from automatic recommendation (0.434395ms)
+✔ search history is per viewer, deduplicated, and individually removable (1.646201ms)
+✔ PiP playback does not explicitly surrender the screen wake lock when the page is hidden (4.998493ms)
+✔ fullscreen exposes a dedicated exit control and shields the first reveal tap from seeking (1.940384ms)
+✔ all static app element lookups point to published HTML ids (3.439143ms)
+✔ MP4 filtering is case insensitive and never labels MKV or AVI as MP4 (1.058545ms)
+✔ MP4 filter tolerates missing titles without claiming compatibility (0.134463ms)
+✔ only verified TorBox CDN URLs and opaque Render tickets are trusted media (0.526894ms)
+✔ user cancellation remains distinct (0.13981ms)
+✔ network media error identifies the protected redirect without exposing its upstream URL (0.181824ms)
+✔ browser codec rejection states that transport does not convert the file (0.209436ms)
+✔ unknown direct failure remains a direct network failure (0.120241ms)
+✔ details warm and Play share one preparation, retained until its short expiry (2.073995ms)
+✔ canceling one Play waiter cannot deliver late playback or cancel a shared title warm (0.901108ms)
+✔ title close aborts pending work while successful preparation remains reusable (0.505622ms)
+✔ session/viewer cache clear aborts work and discards all prepared identities (0.375586ms)
+✔ canceling the sole foreground or next-episode waiter aborts its upstream work (0.576268ms)
+✔ failed preparations never poison the cache, and the row count stays bounded (0.399923ms)
+✔ fast source response retains completion metadata for safe slower-provider fallback (2.603734ms)
+✔ player uses a stable fullscreen container instead of the replaceable video element (6.213965ms)
+✔ player offers picture in picture only when the browser exposes the standard API (6.652857ms)
+﹣ opt-in read-only external provider observations (0.931954ms) # SKIP
+✔ movie recommendation prefers cached 720p under about 3 GB (2.662703ms)
+✔ show recommendation prefers cached 720p under about 1 GB (0.195074ms)
+✔ browser-friendly uncached source beats cached known-silent audio when necessary (0.266541ms)
+✔ known MP4 source beats cached AVI and unsupported containers never enter automatic order (0.817613ms)
+✔ cached plausible source is tried before an uncached MP4 (0.351409ms)
+✔ TorBox file-aware cache verification outranks an unknown cached source (0.272931ms)
+✔ automatic playback skips a cached source whose cached file list proves it is not browser-playable (0.25844ms)
+✔ explicit browser preparation fallback chooses uncached browser files and avoids alternate cuts when possible (0.540074ms)
+✔ no-cache Play failure renders in-app Prepare-and-Play choices instead of requiring TorBox or a browser confirm (9.704876ms)
+✔ automatic playback never prepares an uncached source (0.870212ms)
+✔ automatic playback skips a cached source whose real file is AVI (0.854758ms)
+✔ automatic playback advances past a stale TorBox cache result (0.375075ms)
+✔ automatic cached checks share one total timeout budget (31.290387ms)
+✔ automatic playback stays bounded and never opens the technical source picker (2.185754ms)
+✔ automatic package selection prefers a browser-playable episode file and rejects all-unsupported choices (1.026096ms)
+✔ resolution filter supports exact 720/1080 and 4K alias (0.219811ms)
+✔ episode queue crosses seasons and skips unreleased episodes (0.454455ms)
+✔ source size parser handles provider string sizes (0.500825ms)
+✔ Zilean release metadata exposes size/quality while absent seeders stay unknown (1.694333ms)
+✔ playback recovery walks strictly down the resolution ladder (0.170437ms)
+✔ playback recovery tries other safe sources after a 480p source fails (0.505622ms)
+✔ automatic playback recovery can open at most three sources total (0.551942ms)
+✔ source size profile can favor a smaller data-saver source or a larger quality source (0.213982ms)
+✔ memory-blacklisted and known-no-sound sources are not auto-selected (0.200953ms)
+✔ permanent recovery page always jumps to a uniquely cache-busted root navigation (7.025248ms)
+✔ Render static mirror serves the permanent recovery page (1.601855ms)
+✔ slow playback on one device is not superseded by another device using Viewer 1 (40.64758ms)
+✔ two devices retain independent progress leases and private resume positions (28.883139ms)
+✔ one busy device cannot exhaust another device playback allowance (81.356647ms)
+{"event":"media_redirect_issued","ranged":false}
+✔ guest media redirects without any server media fetch when TorBox supplies a safe link (5.266928ms)
+✔ guest key-bearing links fail closed with no ticket, redirect, or byte relay (4.747946ms)
+✔ every startup module is served on the backend mirror, including vault (3.824534ms)
+✔ range validation rejects reversed, zero-suffix and unsafe-integer ranges before redirect (7.48473ms)
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ 24 devices can start 12 episodes and seek repeatedly without relaying any media (673.741897ms)
+ℹ {"devices":24,"playbackStarts":288,"seekRedirects":576,"mediaBodyBytes":0,"upstreamMediaFetches":0,"durationMs":672,"p50Ms":48,"p95Ms":81}
+✔ a burst of status checks shares one account check and one public status request (67.419586ms)
+✔ public catalog cache is shared between separately authenticated devices (38.366432ms)
+✔ quota-limited Drive exports cannot start in this release (3.437931ms)
+✔ resume actions use a prominent activity overlay until playback begins (7.766755ms)
+✔ search field advertises a mobile Search action and has a focused results heading (4.701245ms)
+✔ active search hides home-only rows and browse filters (4.005963ms)
+✔ Android Search or Enter submits immediately and dismisses the keyboard (2.040305ms)
+✔ clearing search restores Home and refreshes browse immediately (1.387071ms)
+✔ text search spans movies and shows instead of inheriting hidden browse filters (1.437958ms)
+✔ stable release metadata is 1.2.2 (4.783199ms)
+✔ 100 rapid playback choices cancel older work and only the latest can commit (3.633406ms)
+✔ offline sports-player.html uses its isolated shell (12.381129ms)
+✔ offline sports-player.html fails closed without the movie shell (3.441717ms)
+✔ offline buffstreams-opening.html uses its isolated shell (4.782067ms)
+✔ offline buffstreams-opening.html fails closed without the movie shell (2.026644ms)
+✔ service worker activation preserves other GitHub Pages apps and the legacy key scope (1.976219ms)
+✔ settings default to simple family-friendly mode with smart automation (0.894608ms)
+✔ expanded settings persist allowed values and reject arbitrary values (0.875409ms)
+✔ remembered browse values are constrained (0.229005ms)
+✔ reset restores defaults (0.196746ms)
+✔ setup transfers require an authenticated creator and are one-time public redemptions (49.608645ms)
+✔ setup transfer endpoint rejects malformed encrypted envelopes (22.353089ms)
+﹣ opt-in TorBox source-access observations (0.766986ms) # SKIP
+✔ source lookup cannot be used without household authentication (33.462471ms)
+✔ authenticated lookup returns source data through same-origin route without adding torrents (15.927013ms)
+✔ missing series season is invalid rather than silently becoming specials (5.075278ms)
+✔ same-origin lookup cannot fetch an arbitrary URL (5.148765ms)
+✔ lookup method does not accept POST source additions (9.571921ms)
+✔ provider lookup failures retain sanitized specific status codes (4.748642ms)
+✔ logout revocation during source lookup prevents returning its result (3.639064ms)
+✔ source responses disable shared caching (4.788377ms)
+﹣ opt-in real source lookup and TorBox availability pipeline (0.658563ms) # SKIP
+✔ source index enforces exact IMDb identity and valid torrent hash (2.534259ms)
+✔ source index does not treat release titles or add-on indexes as filenames (0.534105ms)
+✔ episode filters reject other seasons and episodes (0.214523ms)
+✔ series packs retain identity and defer individual file choice to existing selector (0.333322ms)
+✔ known size strings are parsed while unknown sizes stay unknown (0.873576ms)
+✔ real empty result remains distinct from a malformed or mismatched result (1.129072ms)
+✔ normalized results are bounded to forty distinct source hashes (3.2909ms)
+✔ invalid target is rejected before any network request (0.958535ms)
+✔ fixed public endpoint receives no household cookies or TorBox credentials (3.826517ms)
+✔ series request uses validated numeric season and episode parameters (2.250762ms)
+✔ repeated lookup coalesces requests and caches successful results (11.443536ms)
+✔ movie and episode cache identities do not collide (3.453115ms)
+✔ empty results expire sooner and get rechecked (0.615808ms)
+✔ successful source metadata expires after fifteen minutes (0.891554ms)
+✔ source denial does not become empty results or a proxy retry (1.071775ms)
+✔ server errors and non-JSON responses remain clear failures (0.841388ms)
+✔ rate limiting honors Retry-After without retrying from another destination (1.075431ms)
+✔ network and timeout errors are redacted and distinguishable (0.445642ms)
+✔ failed lookups are cached and provider cooldown prevents hammering (0.300323ms)
+✔ bounded response reading rejects oversized source responses (4.39207ms)
+✔ at most four different upstream lookups run concurrently (3.717382ms)
+✔ unsupported configured provider fails closed (0.139831ms)
+✔ browser source lookup only sends an authenticated same-origin request (0.745915ms)
+✔ browser distinguishes expired login and server provider errors (0.439001ms)
+✔ browser rejects malformed response but accepts real empty source list (0.49108ms)
+✔ obsolete browser lookups honor cancellation without rewriting the error (0.400173ms)
+✔ browser network failures do not expose raw fetch exception text (0.140833ms)
+✔ fast source lookup returns one usable provider while full lookup shares and retains the late provider (211.79846ms)
+✔ fast source lookup never finishes on only known unsupported containers (220.731829ms)
+✔ fast source lookup exposes a bounded incomplete result when a provider stalls (33.521335ms)
+✔ background provider enrichment retains the four-target concurrency bound after fast responses (205.360778ms)
+✔ full lookup bypasses incomplete cached data after the provider collection deadline (21.165955ms)
+✔ HTTP fast and complete flags preserve validated targets and household authentication (129.247573ms)
+✔ GitHub Pages origin receives narrowly scoped CORS preflight (41.917854ms)
+✔ unapproved frontends do not get CORS access (18.458929ms)
+✔ cross-site login returns an opaque bearer and API works without Render cookies (147.349274ms)
+✔ bearer mutations require the approved frontend but not a third-party cookie or CSRF token (114.622146ms)
+✔ published HTML uses project-relative assets and the public Render API origin (14.913767ms)
+✔ Buffstreams support assets are served as isolated HTML, JavaScript and CSS (14.402376ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ GitHub Pages bearer session receives an opaque direct media ticket (119.579833ms)
+✔ an invented Render media ticket cannot be used (3.067633ms)
+✔ bearer logout revokes both API access and the opaque media ticket (121.573353ms)
+✔ bundled sports preserves original feeds and expands to 36 live channels and 157 full replays (3.083167ms)
+✔ sports rejects untrusted hosts, credentials, lookalikes, ports and cleartext (0.588908ms)
+✔ replay resolver sends public identity only and refuses geo-blocked media (6.122838ms)
+✔ catalog discards invalid entries and result-bearing fields rather than exposing them (0.346112ms)
+✔ replay resume rewinds five seconds and excludes finished or invalid positions (0.206972ms)
+✔ sports assets are independent of movie credentials and startup (14.075753ms)
+✔ expanded catalog retains unique spoiler-free identities and dated American football/hockey replays (1.802427ms)
+✔ published page boots through a versioned recovery loader instead of directly importing app.js (7.880107ms)
+✔ opening screen reports live startup stages and elapsed time (8.066767ms)
+✔ startup module graph is cache-busted consistently (6.587568ms)
+✔ service worker bypasses HTTP cache for shell refresh and contains the recovery loader (2.19606ms)
+✔ still-watching guard defaults to 90 minutes and validates supported choices (1.557497ms)
+✔ settings UI exposes Off, 60, 75, 90, and 120 minute still-watching choices (13.715861ms)
+✔ unattended-playback guard survives auto-next and requires explicit Keep watching (3.366153ms)
+✔ stateless Render relay exposes health and forwards allowlisted TorBox reads without a player session (46.239177ms)
+✔ relay rejects unapproved origins, missing credentials, routes, and query keys (24.487034ms)
+✔ relay constructs create-torrent form from a bounded hash-only JSON request (7.505802ms)
+✔ requestdl relay injects the API key only into the upstream TorBox token query (3.117198ms)
+✔ metadata bridge refuses video before reading its body (4.116023ms)
+✔ TorBox official status parser recognizes operational and issue states (1.076832ms)
+✔ availability check requires the account API to work even if status page says online (3.465503ms)
+✔ official issue is a warning when authenticated TorBox API is still reachable (0.561456ms)
+✔ Simple mode is default and Full mode is available in Settings (5.418266ms)
+✔ home experience includes My list, Next Up, Continue Watching, and removable search history (3.221255ms)
+✔ Full mode exposes per-title quality, source feedback, and playback health without adding requested exclusions 12 or 13 (2.512557ms)
+✔ PWA shell is installable and refuses to cache API or video traffic (1.822917ms)
+﹣ opt-in Zilean source availability (0.71013ms) # SKIP
+ℹ tests 410
+ℹ suites 0
+ℹ pass 404
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 6
+ℹ todo 0
+ℹ duration_ms 4135.685752

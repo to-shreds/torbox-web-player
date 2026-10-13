@@ -1,0 +1,24 @@
+✔ light gun mouse click reaches the native NES trigger and releases across pause (1201.558562ms)
+✔ light gun touch tap reaches the native NES trigger and releases across pause (1111.305338ms)
+✔ anonymous Games executes the original ROM with real PPU output and keyboard input without TorBox calls (819.864289ms)
+✔ manual save and restore recover emulated CPU and PPU state, and reopening offers the saved state (1008.216689ms)
+✔ toolbar focus preserves game keys while Enter activates its focused Pause control (597.250724ms)
+✔ a delayed manual Load cannot overwrite a newer Start fresh action (1099.009733ms)
+✔ standard controller A reaches the emulator and disconnecting releases the held button (578.579168ms)
+✔ automatic saves stay separate for the two viewers (754.523719ms)
+✔ local ROM import renders a game and malformed files report a useful error (634.835578ms)
+✔ a canceled slow ROM cannot replace a newer game or reopen its closed player (863.684395ms)
+✔ closing Games releases keyboard interception and switching to Sports stops its emulator (904.934833ms)
+✔ mobile portrait and landscape keep the emulator and touch controls inside the viewport (804.170345ms)
+✔ unsafe catalog entries never request private APIs or external ROM hosts (270.925258ms)
+✔ direct Games links respect Kid Mode and finish the normal movie startup after denial (183.583535ms)
+✔ an existing movie fragment still boots Cinema and is preserved when returning from Games (258.483207ms)
+✔ pending movie auto-next cannot reopen Cinema over Games while presentation exit is delayed (1007.174498ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13785.547578

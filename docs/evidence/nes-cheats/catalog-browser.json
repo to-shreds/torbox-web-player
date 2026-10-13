@@ -1,0 +1,81 @@
+{
+  "checkedAt": "2026-10-13T23:55:40.640Z",
+  "url": "http://127.0.0.1:4190",
+  "environmentProxyCertificateException": false,
+  "menu": [
+    "Super Mario Bros. / Duck Hunt",
+    "Super Mario Bros. 3",
+    "Teenage Mutant Ninja Turtles II: The Arcade Game"
+  ],
+  "games": [
+    {
+      "id": "super-mario-bros-duck-hunt",
+      "address": 40962,
+      "original": 36,
+      "value": 37,
+      "code": "IZEZZAGZ",
+      "mapper": 66,
+      "actualRomReadPatched": true,
+      "masterOffRestoresRead": true,
+      "ioAliasUntouched": true,
+      "editorPaused": true,
+      "manualRestoreResync": true,
+      "reopenPersists": true,
+      "automaticRestoreResync": true
+    },
+    {
+      "id": "super-mario-bros-3",
+      "address": 40962,
+      "original": 5,
+      "value": 4,
+      "code": "GAEZZAIA",
+      "mapper": 4,
+      "actualRomReadPatched": true,
+      "masterOffRestoresRead": true,
+      "ioAliasUntouched": true,
+      "editorPaused": true,
+      "manualRestoreResync": true,
+      "reopenPersists": true,
+      "automaticRestoreResync": true
+    },
+    {
+      "id": "tmnt-ii-arcade-game",
+      "address": 40962,
+      "original": 1,
+      "value": 0,
+      "code": "AAEZZAPA",
+      "mapper": 4,
+      "actualRomReadPatched": true,
+      "masterOffRestoresRead": true,
+      "ioAliasUntouched": true,
+      "editorPaused": true,
+      "manualRestoreResync": true,
+      "reopenPersists": true,
+      "automaticRestoreResync": true
+    },
+    {
+      "id": "original-local-cheat-test",
+      "operand": 32818,
+      "sha256": "c48cf2d12b5ccf7648eee8d1ba7c871854b8923156d34be5babf297d07a86326",
+      "code": "ALLAZA",
+      "initialPixel": [
+        188,
+        25,
+        0,
+        255
+      ],
+      "patchedPixel": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "actualPpuEffect": true,
+      "manualRestorePreservesEffect": true,
+      "masterOffRestoresEffect": true
+    }
+  ],
+  "errors": [],
+  "privateRequests": [],
+  "success": true
+}

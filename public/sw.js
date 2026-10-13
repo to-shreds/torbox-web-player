@@ -1,6 +1,6 @@
 const CACHE_PREFIX='torbox-player:'+self.registration.scope+':';
-const CACHE=CACHE_PREFIX+'release-1.2.2-games.2';
-const BUILD='release-1.2.2-games.2';
+const CACHE=CACHE_PREFIX+'release-1.2.2-games.3';
+const BUILD='release-1.2.2-games.3';
 const SHELL=[
   './','./index.html',
   `./style.css?v=${BUILD}`,`./discover.css?v=${BUILD}`,`./boot.js?v=${BUILD}`,`./app.js?v=${BUILD}`,
@@ -11,6 +11,7 @@ const SHELL=[
   `./buffstreams.js?v=${BUILD}`,`./buffstreams-ui.js?v=${BUILD}`,`./buffstreams-opening.html?v=${BUILD}`,`./buffstreams-opening.css?v=${BUILD}`,
   `./games-nav.js?v=${BUILD}`,`./games.js?v=${BUILD}`,`./games-core.js?v=${BUILD}`,`./games.css?v=${BUILD}`,`./games-catalog.json?v=${BUILD}`,
   `./games-pointer.js?v=${BUILD}`,
+  `./games-cheats.js?v=${BUILD}`,
   './vendor/jsnes-2.1.0.min.js?v=2.1.0',`./vendor/nes-audio-worklet.js?v=${BUILD}`,
   `./manifest.webmanifest?v=${BUILD}`,'./icon.svg'
 ];
