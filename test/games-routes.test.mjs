@@ -9,7 +9,7 @@ test('Games assets and repo ROM bytes are available without a TorBox session',as
   t.after(()=>{server.closeAllConnections();server.close();});
   const origin=`http://127.0.0.1:${server.address().port}`;
   for(const [path,type] of [
-    ['/games-nav.js','javascript'],['/games.js','javascript'],['/games-core.js','javascript'],
+    ['/games-nav.js','javascript'],['/games.js','javascript'],['/games-core.js','javascript'],['/games-pointer.js','javascript'],
     ['/games.css','text/css'],['/games-catalog.json','application/json'],
     ['/vendor/jsnes-2.1.0.min.js','javascript'],['/vendor/nes-audio-worklet.js','javascript'],
   ]){

@@ -1,6 +1,6 @@
-import {cleanSportsCatalog, resolveSportsSource, replayResume} from './sports-core.js?v=release-1.2.2-games.1';
-import {getKidProfile} from './parental-controls.js?v=release-1.2.2-games.1';
-import {createBuffstreamsDesk} from './buffstreams-ui.js?v=release-1.2.2-games.1';
+import {cleanSportsCatalog, resolveSportsSource, replayResume} from './sports-core.js?v=release-1.2.2-games.2';
+import {getKidProfile} from './parental-controls.js?v=release-1.2.2-games.2';
+import {createBuffstreamsDesk} from './buffstreams-ui.js?v=release-1.2.2-games.2';
 
 const $=id=>document.getElementById(id);
 let catalog=null, loadPromise=null, selection=null, hls=null, abort=null, generation=0, deadline=null, bufferDeadline=null;
@@ -20,7 +20,7 @@ function ensurePlayer(){
         playerWindow=frame.contentWindow;video=playerWindow.document.getElementById('sports-video');resolve(playerWindow);
       }catch{reject(new Error('The sports player could not open. Try Reload.'));}
     },{once:true});
-    frame.src='./sports-player.html?v=release-1.2.2-games.1';
+    frame.src='./sports-player.html?v=release-1.2.2-games.2';
   }).catch(error=>{playerPromise=null;throw error;});
   return playerPromise;
 }
@@ -124,7 +124,7 @@ function fillFilters(){
 async function load(){
   if(catalog)return render();if(loadPromise)return loadPromise;
   loadPromise=(async()=>{try{
-    const response=await fetch('./sports-catalog.json?v=release-1.2.2-games.1',{credentials:'omit',signal:AbortSignal.timeout(10000)});
+    const response=await fetch('./sports-catalog.json?v=release-1.2.2-games.2',{credentials:'omit',signal:AbortSignal.timeout(10000)});
     if(!response.ok)throw new Error();catalog=cleanSportsCatalog(await response.json());fillFilters();render();
   }catch{$('sports-message').textContent='Sports could not load. Press Refresh to try again.';}finally{loadPromise=null;}})();
   return loadPromise;

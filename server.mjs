@@ -25,6 +25,7 @@ const publicFiles = new Map([
   ['/games-nav.js', ['games-nav.js', 'text/javascript; charset=utf-8']],
   ['/games.js', ['games.js', 'text/javascript; charset=utf-8']],
   ['/games-core.js', ['games-core.js', 'text/javascript; charset=utf-8']],
+  ['/games-pointer.js', ['games-pointer.js', 'text/javascript; charset=utf-8']],
   ['/games.css', ['games.css', 'text/css; charset=utf-8']],
   ['/games-catalog.json', ['games-catalog.json', 'application/json; charset=utf-8']],
   ['/vendor/jsnes-2.1.0.min.js', ['vendor/jsnes-2.1.0.min.js', 'text/javascript; charset=utf-8']],

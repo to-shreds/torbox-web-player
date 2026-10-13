@@ -1,0 +1,29 @@
+[
+  {
+    "title": "Super Mario Bros. / Duck Hunt",
+    "file": "public/roms/super-mario-bros-duck-hunt.nes",
+    "originalFilename": "Super Mario Bros. + Duck Hunt (USA).nes",
+    "bytes": 81936,
+    "sha256": "23ec3f6bb68f8774070ce936869e7f62ac3490449f58e62d6ed33a0fb385d456",
+    "header": "4e45531a040221400000000000000000",
+    "mapper": 66
+  },
+  {
+    "title": "Super Mario Bros. 3",
+    "file": "public/roms/super-mario-bros-3.nes",
+    "originalFilename": "Super Mario Bros. 3 (USA) (Rev 1).nes",
+    "bytes": 393232,
+    "sha256": "4377a7f5e6eb50bdd2ac6f249bf1a7085500aca8eb41f38545c3a2731c51a579",
+    "header": "4e45531a101040000000000000000000",
+    "mapper": 4
+  },
+  {
+    "title": "Teenage Mutant Ninja Turtles II: The Arcade Game",
+    "file": "public/roms/tmnt-ii-arcade-game.nes",
+    "originalFilename": "Teenage Mutant Ninja Turtles II - The Arcade Game (USA).nes",
+    "bytes": 524304,
+    "sha256": "637fa9d773cb39fcd4e55faf46bc53f82ac9d7706f8473adeb06e2b9e95c2414",
+    "header": "4e45531a102040000000000000000000",
+    "mapper": 4
+  }
+]

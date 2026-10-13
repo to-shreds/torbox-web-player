@@ -1,5 +1,6 @@
-import {ENGINE_VERSION, MAX_ROM_BYTES, MAX_CATALOG_BYTES, cleanGamesCatalog, validateRom, romHash, saveIdentity, makeSaveRecord, validSaveRecord, fetchBytes, createStateStore} from './games-core.js?v=release-1.2.2-games.1';
-import {getKidProfile} from './parental-controls.js?v=release-1.2.2-games.1';
+import {ENGINE_VERSION, MAX_ROM_BYTES, MAX_CATALOG_BYTES, cleanGamesCatalog, validateRom, romHash, saveIdentity, makeSaveRecord, validSaveRecord, fetchBytes, createStateStore} from './games-core.js?v=release-1.2.2-games.2';
+import {getKidProfile} from './parental-controls.js?v=release-1.2.2-games.2';
+import {nesPointerPosition} from './games-pointer.js?v=release-1.2.2-games.2';
 
 const $ = id => document.getElementById(id);
 const dialog = $('games-player');
@@ -13,6 +14,8 @@ let tabOpen = false, generation = 0, actionGeneration = 0, abort = null;
 let nes = null, selection = null, running = false, fatal = false, resumeSaved = null;
 let frameRequest = 0, frameCount = 0, lastFrame = 0, accumulator = 0, saveTimer = null;
 let saveTail = Promise.resolve(), soundEnabled = true, sound = null;
+let zapperEnabled = false, zapperReleaseTimer = null, zapperStartedAt = 0;
+const zapperPointers = new Set();
 const held = new Map();
 const pointerKeys = new Map();
 const activePointers = new Set();
@@ -30,7 +33,7 @@ function status(message) { $('games-player-message').textContent = message; }
 function state(value) { dialog.dataset.state = value; }
 function textFocused(target) { return target?.closest?.('input,textarea,select,[contenteditable="true"]') || target?.isContentEditable; }
 function actionKey(event) { return event.code === 'Enter' && event.target?.closest?.('button,a,summary'); }
-function controls(enabled) { for (const id of ['games-pause','games-save','games-load','games-start-fresh']) $(id).disabled = !enabled; }
+function controls(enabled) { for (const id of ['games-pause','games-save','games-load','games-start-fresh','games-zapper']) if ($(id)) $(id).disabled = !enabled; }
 function clearScreen() { pixels.fill(0xff000000); context.putImageData(image, 0, 0); canvas.dataset.frames = '0'; }
 
 class AudioOutput {
@@ -43,7 +46,7 @@ class AudioOutput {
       if (!AudioContextClass) throw new Error();
       this.context = new AudioContextClass();
       if (!this.context.audioWorklet) throw new Error();
-      this.ready = this.context.audioWorklet.addModule('./vendor/nes-audio-worklet.js?v=release-1.2.2-games.1').then(() => {
+      this.ready = this.context.audioWorklet.addModule('./vendor/nes-audio-worklet.js?v=release-1.2.2-games.2').then(() => {
         if (this.closed) return;
         this.node = new AudioWorkletNode(this.context, 'torbox-nes-audio', {outputChannelCount:[2]});
         this.node.connect(this.context.destination);
@@ -99,7 +102,34 @@ function releaseSource(source) {
 function releaseInputs() {
   if (nes) for (let player = 1; player <= 2; player++) for (let button = 0; button < 10; button++) nes.buttonUp(player,button);
   held.clear(); pointerKeys.clear(); activePointers.clear();
+  resetZapper();
   for (const button of dialog.querySelectorAll('.games-touch-key')) button.classList.remove('is-pressed');
+}
+function resetZapper() {
+  clearTimeout(zapperReleaseTimer); zapperReleaseTimer = null; zapperPointers.clear();
+  nes?.zapperFireUp();
+  nes?.zapperMove(zapperEnabled ? -1 : null,zapperEnabled ? -1 : null);
+}
+function showZapperMode() {
+  canvas.classList.toggle('games-zapper-active',zapperEnabled);
+  if ($('games-zapper')) {
+    $('games-zapper').setAttribute('aria-pressed',String(zapperEnabled));
+    $('games-zapper').textContent = zapperEnabled ? 'Light gun: On' : 'Light gun: Off';
+  }
+}
+function aimZapper(event) {
+  const position = nesPointerPosition(canvas.getBoundingClientRect(),event.clientX,event.clientY);
+  nes?.zapperMove(position?.x ?? -1,position?.y ?? -1);
+  return position;
+}
+function finishZapperPointer(event) {
+  if (!zapperPointers.has(event.pointerId)) return;
+  zapperPointers.delete(event.pointerId);
+  if (zapperPointers.size) return;
+  // Keep a quick tap visible to the next emulated controller read.
+  clearTimeout(zapperReleaseTimer);
+  const delay = Math.max(0,100-(performance.now()-zapperStartedAt));
+  zapperReleaseTimer = setTimeout(() => { zapperReleaseTimer = null; if (!zapperPointers.size) nes?.zapperFireUp(); },delay);
 }
 function gamepads() {
   const activeSources = new Set();
@@ -185,6 +215,7 @@ function startGame() {
 export function closeGame() {
   pauseGame(); generation++; actionGeneration++; abort?.abort(); abort = null;
   sound?.close(); sound = null; nes = null; selection = null; resumeSaved = null; fatal = false;
+  zapperEnabled = false; showZapperMode();
   controls(false); state('closed'); delete dialog.dataset.saveKey;
   if (dialog.open) dialog.close();
   if (document.fullscreenElement === dialog) void document.exitFullscreen().catch(() => {});
@@ -273,7 +304,7 @@ async function loadCatalog() {
   catalogPromise = (async () => {
     render();
     try {
-      const bytes = await fetchBytes('./games-catalog.json?v=release-1.2.2-games.1',{maxBytes:MAX_CATALOG_BYTES,timeoutMs:10000});
+      const bytes = await fetchBytes('./games-catalog.json?v=release-1.2.2-games.2',{maxBytes:MAX_CATALOG_BYTES,timeoutMs:10000});
       catalog = cleanGamesCatalog(JSON.parse(new TextDecoder().decode(bytes))); render();
     } catch { $('games-message').textContent = 'The game list could not load. Press Refresh, or open a game file from your device.'; }
     finally { catalogPromise = null; }
@@ -305,6 +336,23 @@ $('games-mute').addEventListener('click',() => {
   soundEnabled = !soundEnabled; $('games-mute').textContent = soundEnabled ? 'Mute' : 'Unmute'; $('games-mute').setAttribute('aria-pressed',String(!soundEnabled));
   if (soundEnabled && running) sound?.resume(); else sound?.pause();
 });
+$('games-zapper')?.addEventListener('click',() => {
+  zapperEnabled = !zapperEnabled; resetZapper(); showZapperMode();
+  status(zapperEnabled ? 'Light gun on. Aim on the game screen, then click or tap to shoot.' : 'Light gun off.');
+});
+canvas.addEventListener('pointermove',event => {
+  if (zapperEnabled && running && tabOpen) { if (event.pointerType === 'touch') event.preventDefault(); aimZapper(event); }
+});
+canvas.addEventListener('pointerdown',event => {
+  if (!zapperEnabled || !running || !tabOpen || event.button > 0 || !aimZapper(event)) return;
+  event.preventDefault(); clearTimeout(zapperReleaseTimer); zapperReleaseTimer = null;
+  canvas.focus({preventScroll:true});
+  zapperPointers.add(event.pointerId); zapperStartedAt = performance.now();
+  canvas.setPointerCapture(event.pointerId); nes.zapperFireDown(); sound?.resume();
+});
+for (const type of ['pointerup','pointercancel','lostpointercapture']) canvas.addEventListener(type,finishZapperPointer);
+canvas.addEventListener('pointerleave',event => { if (zapperEnabled && running && event.pointerType !== 'touch' && !zapperPointers.has(event.pointerId)) nes?.zapperMove(-1,-1); });
+canvas.addEventListener('contextmenu',event => { if (zapperEnabled) event.preventDefault(); });
 document.addEventListener('keydown',event => {
   if (!tabOpen || !dialog.open || !running || textFocused(event.target) || actionKey(event) || event.ctrlKey || event.altKey || event.metaKey) return;
   const binding = keys.get(event.code); if (!binding) return;

@@ -1,0 +1,23 @@
+[
+  {
+    "id": "super-mario-bros-duck-hunt",
+    "mapper": 66,
+    "frames": 600,
+    "distinctFrameColors": 7,
+    "accepted": true
+  },
+  {
+    "id": "super-mario-bros-3",
+    "mapper": 4,
+    "frames": 600,
+    "distinctFrameColors": 11,
+    "accepted": true
+  },
+  {
+    "id": "tmnt-ii-arcade-game",
+    "mapper": 4,
+    "frames": 600,
+    "distinctFrameColors": 12,
+    "accepted": true
+  }
+]

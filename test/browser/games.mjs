@@ -7,7 +7,7 @@ import {startFixture} from './fixture.mjs';
 // Original, generated NROM test program, written here instead of including a
 // third-party game. Its 6502 code reads controller A and changes the actual PPU
 // backdrop on a rising edge. Save/restore assertions observe rendered pixels.
-function makeROM(initialColor=0x16) {
+function makeROM(initialColor=0x16,zapper=false) {
   const code=[],labels=new Map(),fixups=[];
   const emit=(...bytes)=>code.push(...bytes);
   const label=name=>labels.set(name,0x8000+code.length);
@@ -22,7 +22,7 @@ function makeROM(initialColor=0x16) {
   lda(0x0a);sta(0x2001); // Enable background rendering including left edge.
   label('frame');emit(0x2c,0x02,0x20);branch(0x10,'frame');
   lda(1);sta(0x4016);lda(0);sta(0x4016);
-  emit(0xad,0x16,0x40,0x29,1,0x85,0x02); // Poll the real serial controller.
+  emit(0xad,zapper?0x17:0x16,0x40,0x29,zapper?0x10:1,0x85,0x02); // Poll controller A or the native Zapper trigger.
   branch(0xf0,'remember');emit(0xa5,0x00);branch(0xd0,'remember');
   emit(0xa5,0x01,0x49,0x26,0x85,0x01); // Red <-> white on A press.
   label('remember');emit(0xa5,0x02,0x85,0x00);
@@ -37,7 +37,7 @@ function makeROM(initialColor=0x16) {
   for(const offset of [0x3ffa,0x3ffc,0x3ffe]){prg[offset]=0;prg[offset+1]=0x80;}
   return Buffer.concat([Buffer.from([0x4e,0x45,0x53,0x1a,1,1,0,0,0,0,0,0,0,0,0,0]),prg,Buffer.alloc(8192)]);
 }
-const redROM=makeROM(),greenROM=makeROM(0x1a);
+const redROM=makeROM(),greenROM=makeROM(0x1a),zapperROM=makeROM(0x16,true);
 const catalog={version:1,items:[
   {id:'original-red',title:'Original Red Test',rom:'roms/original-red.nes'},
   {id:'original-green',title:'Original Green Test',rom:'roms/original-green.nes'}
@@ -61,6 +61,7 @@ async function gamesPage(t,{mobile=false,catalogBody=catalog,hash='#games',signe
   await context.route('**/games-catalog.json*',route=>route.fulfill({json:catalogBody}));
   await context.route('**/roms/original-red.nes',route=>route.fulfill({contentType:'application/octet-stream',body:redROM}));
   await context.route('**/roms/original-green.nes',route=>route.fulfill({contentType:'application/octet-stream',body:greenROM}));
+  await context.route('**/roms/original-zapper.nes',route=>route.fulfill({contentType:'application/octet-stream',body:zapperROM}));
   await page.goto(fixture.origin+'/'+hash);if(waitForGames)await page.waitForSelector('#games-panel:not([hidden])');
   return{context,page,requests};
 }
@@ -77,6 +78,28 @@ async function waitPixel(page,expected){await page.waitForFunction(expected=>{
   return Array.from(canvas.getContext('2d').getImageData(128,120,1,1).data).every((value,index)=>value===expected[index]);
 },expected);}
 async function toggleA(page){await page.locator('#games-canvas').focus();await page.keyboard.down('x');await page.waitForTimeout(100);await page.keyboard.up('x');await page.waitForTimeout(100);}
+
+for(const mobile of [false,true])test(`light gun ${mobile?'touch tap':'mouse click'} reaches the native NES trigger and releases across pause`,async t=>{
+  const {page,requests}=await gamesPage(t,{mobile,catalogBody:{version:1,items:[{id:'original-zapper',title:'Original Light Gun Test',rom:'roms/original-zapper.nes'}]}});
+  await openGame(page,'original-zapper');const first=await pixel(page);
+  const shoot=async()=>{
+    const box=await page.locator('#games-canvas').boundingBox();
+    if(mobile)await page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);
+    else await page.mouse.click(box.x+box.width/2,box.y+box.height/2);
+  };
+  await shoot();await page.waitForTimeout(150);assert.deepEqual(await pixel(page),first,'disabled light gun must not fire');
+  await page.locator('#games-zapper').click();assert.equal(await page.locator('#games-zapper').getAttribute('aria-pressed'),'true');
+  await shoot();await page.waitForFunction(first=>{
+    const c=document.querySelector('#games-canvas');const current=Array.from(c.getContext('2d').getImageData(128,120,1,1).data);
+    return current.some((v,i)=>v!==first[i]);
+  },first);
+  const changed=await pixel(page);await page.locator('#games-pause').click();
+  await page.waitForTimeout(150);await page.locator('#games-pause').click();await page.waitForTimeout(150);
+  assert.deepEqual(await pixel(page),changed,'resuming must not repeat a released shot');
+  await shoot();await waitPixel(page,first);
+  await page.locator('#close-games-player').click();
+  assert.equal(await page.locator('#games-zapper').getAttribute('aria-pressed'),'false');assert.equal(privateCalls(requests).length,0);
+});
 
 test('anonymous Games executes the original ROM with real PPU output and keyboard input without TorBox calls',async t=>{
   const {page,requests}=await gamesPage(t);await openGame(page);

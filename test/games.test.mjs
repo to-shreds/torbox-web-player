@@ -104,9 +104,11 @@ test('unavailable IndexedDB is a finite error and invalid save keys never open s
   assert.equal(opened,false);
 });
 
-test('game catalog starts empty and emulation has no TorBox or external dependency',async () => {
+test('bundled game catalog resolves to valid local ROMs and emulation has no TorBox dependency',async () => {
   const raw = JSON.parse(await readFile(new URL('../public/games-catalog.json',import.meta.url),'utf8'));
-  assert.deepEqual(cleanGamesCatalog(raw),{version:1,items:[]});
+  const clean=cleanGamesCatalog(raw);
+  assert.equal(clean.items.length,raw.items.length,'all bundled entries must pass catalog validation');
+  for(const item of clean.items)validateRom(await readFile(new URL('../public/'+item.rom,import.meta.url)));
   const source = await readFile(new URL('../public/games.js',import.meta.url),'utf8');
   assert.ok(source.includes('games-tab-open')); assert.ok(source.includes('games-tab-close'));
   assert.ok(source.includes('games-playback-start')); assert.ok(source.includes('cinema-playback-start'));
