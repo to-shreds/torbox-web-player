@@ -1,0 +1,27 @@
+✔ self-hosted DOSBox WASM executes real COM graphics and keyboard input under scoped CSP (502.785801ms)
+✔ pause and restart stop input and reboot the same approved DOS program (902.649312ms)
+✔ legacy key subpath uses only relative local emulator and bundle assets (279.635757ms)
+✔ unknown game identifiers and Kid Mode fail before a bundle or emulator can run (400.945107ms)
+✔ only the same-origin parent can send emulator commands and receives actual frame status (787.615528ms)
+✔ extra and NES catalogs combine alphabetically with platform filtering and literal titles (469.658837ms)
+✔ an extra catalog outage preserves working NES cards and shows one finite refresh message (251.198799ms)
+✔ child source and origin are enforced, pause and mute do not form message loops (1130.00842ms)
+✔ touch controls deliver exact child key values and restart rejects an older frame source (459.162417ms)
+✔ viewer changes close child playback, and leaving Games removes the iframe source (596.724289ms)
+✔ extra player fits portrait and landscape without horizontal overflow (399.210859ms)
+✔ the real ski simulation steers, jumps, tracks distance and restarts through parent controls (1743.42794ms)
+✔ pause and close stop frames and held keys; manual pause cannot be resumed by a movement command (1035.822622ms)
+✔ idempotent mute commands do not create a parent status feedback loop (1337.513908ms)
+✔ commands from another window or another origin cannot start the paused game (535.659988ms)
+✔ Kid Mode and an adult-viewer change stop the child and reject further starts (715.453726ms)
+✔ stored scores with invalid shapes cannot break the actual title screen or a new run (337.980584ms)
+✔ mobile touch controls and portrait/landscape layouts fit the actual canvas and toolbar (710.91722ms)
+✔ the native monster chase starts after real simulated skiing reaches 2000 meters (7710.090106ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 21728.096161

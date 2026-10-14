@@ -1,0 +1,16 @@
+✔ self-hosted DOSBox WASM executes real COM graphics and keyboard input under scoped CSP (460.388059ms)
+✔ pause and restart stop input and reboot the same approved DOS program (892.884065ms)
+✔ legacy key subpath uses only relative local emulator and bundle assets (270.877197ms)
+✔ unknown game identifiers and Kid Mode fail before a bundle or emulator can run (183.188584ms)
+✔ only the same-origin parent can send emulator commands and receives actual frame status (446.714583ms)
+✔ Master Mind short-click pulse reaches the actual DOS mouse driver, while other games release normally (1042.212806ms)
+✔ pausing during a pending mouse pulse forces native release before resume and a new press (1241.023808ms)
+✔ canceling a Master Mind pointer before delayed down cannot fire a later native click (543.027227ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5598.897524

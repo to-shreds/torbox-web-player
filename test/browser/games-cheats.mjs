@@ -36,7 +36,7 @@ for(const [code,value,key]of [[sixWhite,0x30,undefined],[eightGreen,0x1a,0x16],[
 }
 const catalog={version:1,items:[{id:'cheat-red',title:'Original Palette Red',rom:'roms/cheat-red.nes'},{id:'cheat-green',title:'Original Palette Green',rom:'roms/cheat-green.nes'}]};
 let fixture,browser;
-before(async()=>{browser=await chromium.launch({headless:true,...(process.env.CHROME_EXECUTABLE?{executablePath:process.env.CHROME_EXECUTABLE}:{}),args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});fixture=await startFixture(4187);});
+before(async()=>{browser=await chromium.launch({headless:true,...(process.env.CHROME_EXECUTABLE?{executablePath:process.env.CHROME_EXECUTABLE}:{}),args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});fixture=await startFixture(4198);});
 after(async()=>{await browser?.close();await fixture?.close();});
 async function cheatsPage(t,{mobile=false}={}){
   const context=await browser.newContext({viewport:mobile?{width:412,height:915}:{width:1000,height:760},isMobile:mobile,hasTouch:mobile,serviceWorkers:'block'}),page=await context.newPage();page.setDefaultTimeout(12000);

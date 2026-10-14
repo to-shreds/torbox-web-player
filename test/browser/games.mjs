@@ -2,7 +2,9 @@ import test,{before,after} from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdir,readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
+import {createRequire} from 'node:module';
 import {startFixture} from './fixture.mjs';
+const {PNG}=createRequire(import.meta.url)('../../node_modules/playwright-core/lib/utilsBundle.js');
 
 // Original, generated NROM test program, written here instead of including a
 // third-party game. Its 6502 code reads controller A and changes the actual PPU
@@ -110,6 +112,44 @@ test('anonymous Games executes the original ROM with real PPU output and keyboar
   await page.waitForTimeout(150);assert.equal(await page.locator('#games-canvas').getAttribute('data-frames'),frames);
   await page.locator('#games-pause').click();await page.waitForFunction(old=>Number(document.querySelector('#games-canvas').dataset.frames)>Number(old),frames);
   assert.equal(privateCalls(requests).length,0);
+});
+
+test('NES full screen uses the supported root, keeps touch and cheats usable, and exits on close',async t=>{
+  const {page}=await gamesPage(t);await openGame(page);
+  assert.equal(await page.evaluate(()=>document.fullscreenEnabled),true);
+  await page.locator('#games-fullscreen').click();
+  await page.waitForFunction(()=>document.fullscreenElement===document.documentElement&&document.body.classList.contains('nes-game-fullscreen'));
+  await page.waitForTimeout(250);
+  await page.waitForFunction(()=>{const canvas=document.querySelector('#games-canvas'),box=canvas.getBoundingClientRect();return document.elementFromPoint(box.x+box.width/2,box.y+box.height/2)===canvas;});
+  assert.equal(await page.locator('#close-games-player').evaluate(button=>{const box=button.getBoundingClientRect();return document.elementFromPoint(box.x+box.width/2,box.y+box.height/2)===button;}),true);
+  const geometry=await page.locator('#games-player').evaluate(dialog=>{const box=dialog.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width,height:box.height,viewportWidth:innerWidth,viewportHeight:innerHeight};});
+  assert.equal(geometry.x,0);assert.equal(geometry.y,0);assert.equal(geometry.width,geometry.viewportWidth);assert.equal(geometry.height,geometry.viewportHeight);
+  const canvasBox=await page.locator('#games-canvas').boundingBox(),painted=PNG.sync.read(await page.screenshot());
+  const scale=painted.width/geometry.viewportWidth,at=(Math.floor((canvasBox.y+canvasBox.height/2)*scale)*painted.width+Math.floor((canvasBox.x+canvasBox.width/2)*scale))*4;
+  assert.deepEqual(Array.from(painted.data.subarray(at,at+4)),await pixel(page),'the visible screenshot must contain the native game framebuffer, not a covered modal');
+  const before=await pixel(page),touch=page.locator('[data-nes-button="A"]'),bounds=await touch.boundingBox();
+  assert.ok(bounds.y>=0&&bounds.y+bounds.height<=geometry.viewportHeight);
+  if(await page.locator('#games-player').getAttribute('data-state')==='paused')await page.locator('#games-pause').click();
+  await page.mouse.click(bounds.x+bounds.width/2,bounds.y+bounds.height/2,{delay:100});await page.waitForTimeout(100);
+  assert.notDeepEqual(await pixel(page),before,'full screen touch input must reach the real NES program');
+  await page.locator('#games-cheats').click();assert.equal(await page.locator('#games-cheats-panel').isVisible(),true);
+  const done=await page.locator('#games-cheats-done').boundingBox();assert.ok(done.y>=0&&done.y+done.height<=geometry.viewportHeight);
+  await page.locator('#games-cheats-done').click();assert.equal(await page.evaluate(()=>document.fullscreenElement===document.documentElement),true);
+  await page.locator('#games-fullscreen').click();await page.waitForFunction(()=>!document.fullscreenElement&&!document.body.classList.contains('nes-game-fullscreen'));
+  assert.equal(await page.locator('#games-player').evaluate(dialog=>dialog.open),true);assert.equal(await page.evaluate(()=>document.body.classList.contains('nes-game-fullscreen')),false);
+  await page.locator('#games-fullscreen').click();await page.waitForFunction(()=>document.fullscreenElement===document.documentElement);
+  await page.locator('#close-games-player').click();await page.waitForFunction(()=>!document.fullscreenElement);
+  assert.equal(await page.evaluate(()=>document.body.classList.contains('nes-game-fullscreen')),false);
+  await openGame(page,'original-green');assert.equal(await page.evaluate(()=>!!document.fullscreenElement||document.body.classList.contains('nes-game-fullscreen')),false);
+});
+
+test('closing NES leaves a real fullscreen session owned by another element intact',async t=>{
+  const {page}=await gamesPage(t);await openGame(page);
+  await page.evaluate(()=>{const button=document.createElement('button');button.id='other-fullscreen';button.textContent='Other feature fullscreen';button.addEventListener('click',()=>void document.body.requestFullscreen());document.querySelector('#games-player').append(button);});
+  await page.locator('#other-fullscreen').click();await page.waitForFunction(()=>document.fullscreenElement===document.body);
+  assert.equal(await page.evaluate(()=>document.body.classList.contains('nes-game-fullscreen')),false);
+  await page.locator('#close-games-player').click();assert.equal(await page.evaluate(()=>document.fullscreenElement===document.body),true);
+  await page.evaluate(()=>document.exitFullscreen());
 });
 
 test('manual save and restore recover emulated CPU and PPU state, and reopening offers the saved state',async t=>{

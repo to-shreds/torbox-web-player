@@ -1,0 +1,16 @@
+✔ the real ski simulation steers, jumps, tracks distance and restarts through parent controls (1717.590689ms)
+✔ pause and close stop frames and held keys; manual pause cannot be resumed by a movement command (963.063389ms)
+✔ idempotent mute commands do not create a parent status feedback loop (1284.650766ms)
+✔ commands from another window or another origin cannot start the paused game (592.452161ms)
+✔ Kid Mode and an adult-viewer change stop the child and reject further starts (699.008452ms)
+✔ stored scores with invalid shapes cannot break the actual title screen or a new run (303.037048ms)
+✔ mobile touch controls and portrait/landscape layouts fit the actual canvas and toolbar (678.292326ms)
+✔ the native monster chase starts after real simulated skiing reaches 2000 meters (7119.690208ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13739.89637

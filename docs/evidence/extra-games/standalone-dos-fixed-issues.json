@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "allResolved": true,
+  "issues": [
+    {
+      "id": "http-csp-blocked-wasm",
+      "observed": "Actual DOS Defender boot failed before frames with WebAssembly.Module refusing script-src self.",
+      "cause": "The server HTTP CSP was stricter than the child meta policy.",
+      "fix": "The DOS child route received its own wasm-unsafe-eval CSP header, preserving same-origin framing and the main application policy.",
+      "verification": "All three actual DOS titles subsequently booted, with no page errors."
+    },
+    {
+      "id": "master-mind-first-short-click",
+      "observed": "The fresh first 120 ms desktop/mobile press highlighted Start but did not activate it. A 1000 ms fresh first touch also failed. A temporary 50000-cycle test and 350 ms minimum press alone did not fix the behavior.",
+      "cause": "The native GUI required time to process mouse motion before the button-down edge.",
+      "fix": "Master Mind input sends motion and neutral button-up, waits 150 ms, then sends a native down with a 350 ms minimum pulse. Physical short taps complete the queued native click; lifecycle cancellation is separately regression tested.",
+      "verification": "Fresh first 120 ms desktop click and mobile touch succeeded, followed by four-pin guesses and feedback using only 120 ms inputs.",
+      "bundleUnchanged": true,
+      "retainedCycles": 12000
+    }
+  ]
+}

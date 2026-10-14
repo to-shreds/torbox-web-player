@@ -1,0 +1,854 @@
+{
+  "checks": [
+    {
+      "name": "actual catalog merged and sorted",
+      "titles": [
+        "DOS Defender",
+        "Master Mind (1999)",
+        "SkiFree (browser remake)",
+        "Super Mario Bros. / Duck Hunt",
+        "Super Mario Bros. 3",
+        "Teenage Mutant Ninja Turtles II: The Arcade Game",
+        "Zmiy Snake"
+      ]
+    },
+    {
+      "name": "platform filters",
+      "counts": {
+        "nes": 3,
+        "dos": 3,
+        "web": 1,
+        "all": 7
+      }
+    },
+    {
+      "name": "DOS Defender native mouse steering and held fire",
+      "before": {
+        "n": 48,
+        "x": 320.5,
+        "y": 200.5
+      },
+      "after": {
+        "n": 48,
+        "x": 332.5,
+        "y": 206.5
+      },
+      "image": {
+        "width": 640,
+        "height": 400,
+        "frames": "33",
+        "hash": 107343621,
+        "colors": [
+          [
+            1053712,
+            255044
+          ],
+          [
+            5264632,
+            756
+          ],
+          [
+            11031552,
+            96
+          ],
+          [
+            43008,
+            48
+          ],
+          [
+            16317520,
+            48
+          ],
+          [
+            16317688,
+            8
+          ]
+        ],
+        "distinct": 6
+      }
+    },
+    {
+      "name": "parent pause stops native frames",
+      "game": "DOS Defender",
+      "frames": "41"
+    },
+    {
+      "name": "close removes active iframe"
+    },
+    {
+      "name": "Zmiy parent arrows change native canvas",
+      "before": {
+        "width": 720,
+        "height": 400,
+        "frames": "4",
+        "hash": 772252165,
+        "colors": [
+          [
+            168,
+            258173
+          ],
+          [
+            11031552,
+            18144
+          ],
+          [
+            11053224,
+            10729
+          ],
+          [
+            0,
+            791
+          ],
+          [
+            16317520,
+            144
+          ],
+          [
+            5307472,
+            19
+          ]
+        ],
+        "distinct": 6
+      },
+      "down": {
+        "width": 720,
+        "height": 400,
+        "frames": "7",
+        "hash": 931563061,
+        "colors": [
+          [
+            168,
+            263717
+          ],
+          [
+            11031552,
+            18288
+          ],
+          [
+            11053224,
+            5251
+          ],
+          [
+            0,
+            509
+          ],
+          [
+            16317520,
+            216
+          ],
+          [
+            5307472,
+            19
+          ]
+        ],
+        "distinct": 6
+      },
+      "right": {
+        "width": 720,
+        "height": 400,
+        "frames": "13",
+        "hash": 1712993589,
+        "colors": [
+          [
+            168,
+            263573
+          ],
+          [
+            11031552,
+            18288
+          ],
+          [
+            11053224,
+            5251
+          ],
+          [
+            0,
+            509
+          ],
+          [
+            16317520,
+            360
+          ],
+          [
+            5307472,
+            19
+          ]
+        ],
+        "distinct": 6
+      }
+    },
+    {
+      "name": "parent pause stops native frames",
+      "game": "Zmiy Snake",
+      "frames": "14"
+    },
+    {
+      "name": "fullscreen screenshot contains actual native canvas",
+      "kind": "dos",
+      "color": "a8",
+      "matching": 476092
+    },
+    {
+      "name": "extra-game parent native fullscreen entry/exit"
+    },
+    {
+      "name": "parent pause stops native frames",
+      "game": "Zmiy Snake",
+      "frames": "19"
+    },
+    {
+      "name": "close removes active iframe"
+    },
+    {
+      "name": "Ski parent steering and jump change real simulation",
+      "before": {
+        "state": "PLAYING",
+        "paused": false,
+        "closed": false,
+        "frames": 0,
+        "distance": 0,
+        "style": 0,
+        "speed": 155,
+        "playerX": 0,
+        "playerY": 0,
+        "playerState": "SKIING",
+        "jumpHeight": 0,
+        "fastMode": false,
+        "monsterActive": false,
+        "monsterMode": "STALK",
+        "monsterCycle": "WAIT",
+        "keys": []
+      },
+      "after": {
+        "state": "PLAYING",
+        "paused": false,
+        "closed": false,
+        "frames": 17,
+        "distance": 10,
+        "style": 0,
+        "speed": 159.05133771444562,
+        "playerX": 20.663277086853284,
+        "playerY": 41.91671027384822,
+        "playerState": "SKIING",
+        "jumpHeight": 0,
+        "fastMode": false,
+        "monsterActive": false,
+        "monsterMode": "STALK",
+        "monsterCycle": "WAIT",
+        "keys": []
+      },
+      "jump": {
+        "state": "PLAYING",
+        "paused": false,
+        "closed": false,
+        "frames": 21,
+        "distance": 13,
+        "style": 0,
+        "speed": 159.90301450690637,
+        "playerX": 25.29589923252379,
+        "playerY": 52.577201318441276,
+        "playerState": "JUMPING",
+        "jumpHeight": 2.173877480734756,
+        "fastMode": false,
+        "monsterActive": false,
+        "monsterMode": "STALK",
+        "monsterCycle": "WAIT",
+        "keys": [
+          "Space"
+        ]
+      }
+    },
+    {
+      "name": "parent pause stops native frames",
+      "game": "SkiFree (browser remake)",
+      "frames": "27"
+    },
+    {
+      "name": "Ski real touch releases parent key",
+      "before": {
+        "state": "PLAYING",
+        "paused": false,
+        "closed": false,
+        "frames": 28,
+        "distance": 17,
+        "style": 0,
+        "speed": 161.07464148959272,
+        "playerX": 29.071946975761957,
+        "playerY": 68.63680660176902,
+        "playerState": "JUMPING",
+        "jumpHeight": 14.700051654117928,
+        "fastMode": false,
+        "monsterActive": false,
+        "monsterMode": "STALK",
+        "monsterCycle": "WAIT",
+        "keys": []
+      },
+      "after": {
+        "state": "PLAYING",
+        "paused": false,
+        "closed": false,
+        "frames": 48,
+        "distance": 30,
+        "style": 0,
+        "speed": 164.2390963648391,
+        "playerX": 4.424251079174439,
+        "playerY": 122.90511558882177,
+        "playerState": "JUMPING",
+        "jumpHeight": 33.601534408531855,
+        "fastMode": false,
+        "monsterActive": false,
+        "monsterMode": "STALK",
+        "monsterCycle": "WAIT",
+        "keys": []
+      },
+      "portrait": {
+        "viewport": {
+          "width": 412,
+          "height": 915
+        },
+        "dialog": {
+          "x": 19,
+          "y": 89.546875,
+          "width": 374,
+          "height": 735.890625
+        },
+        "iframe": {
+          "x": 28,
+          "y": 150.046875,
+          "width": 356,
+          "height": 512.390625
+        }
+      }
+    },
+    {
+      "name": "parent pause stops native frames",
+      "game": "SkiFree (browser remake)",
+      "frames": "54"
+    },
+    {
+      "name": "Ski landscape bounds",
+      "viewport": {
+        "width": 915,
+        "height": 412
+      },
+      "dialog": {
+        "x": 19,
+        "y": 4.125,
+        "width": 877,
+        "height": 403.75
+      },
+      "iframe": {
+        "x": 30,
+        "y": 56.3125,
+        "width": 855,
+        "height": 270
+      }
+    },
+    {
+      "name": "parent pause stops native frames",
+      "game": "SkiFree (browser remake)",
+      "frames": "65"
+    },
+    {
+      "name": "close removes active iframe"
+    },
+    {
+      "name": "Master Mind real first120ms touch, four colored pins and feedback",
+      "menu": {
+        "width": 640,
+        "height": 400,
+        "frames": "243",
+        "hash": 1102573445,
+        "colors": [
+          [
+            4202504,
+            50188
+          ],
+          [
+            3676168,
+            26288
+          ],
+          [
+            3677192,
+            24180
+          ],
+          [
+            4727816,
+            23120
+          ],
+          [
+            3151880,
+            21168
+          ],
+          [
+            2625544,
+            18568
+          ],
+          [
+            3150856,
+            18064
+          ],
+          [
+            4728840,
+            15040
+          ],
+          [
+            5253136,
+            12460
+          ],
+          [
+            2099200,
+            12116
+          ],
+          [
+            5778448,
+            6500
+          ],
+          [
+            2100224,
+            4236
+          ]
+        ],
+        "distinct": 150
+      },
+      "start": {
+        "width": 640,
+        "height": 400,
+        "frames": "279",
+        "hash": 3931186949,
+        "colors": [
+          [
+            0,
+            103172
+          ],
+          [
+            4202504,
+            15364
+          ],
+          [
+            4214896,
+            12072
+          ],
+          [
+            4728840,
+            11792
+          ],
+          [
+            5778448,
+            11200
+          ],
+          [
+            5253136,
+            9956
+          ],
+          [
+            5779472,
+            9816
+          ],
+          [
+            4727816,
+            9404
+          ],
+          [
+            6830096,
+            9292
+          ],
+          [
+            6303760,
+            8792
+          ],
+          [
+            6304784,
+            6400
+          ],
+          [
+            3677192,
+            3700
+          ]
+        ],
+        "distinct": 157
+      },
+      "pins": {
+        "width": 640,
+        "height": 400,
+        "frames": "299",
+        "hash": 146246917,
+        "colors": [
+          [
+            0,
+            103396
+          ],
+          [
+            4202504,
+            15016
+          ],
+          [
+            4214896,
+            12072
+          ],
+          [
+            4728840,
+            11660
+          ],
+          [
+            5778448,
+            11092
+          ],
+          [
+            5253136,
+            9856
+          ],
+          [
+            5779472,
+            9724
+          ],
+          [
+            6830096,
+            9268
+          ],
+          [
+            4727816,
+            9228
+          ],
+          [
+            6303760,
+            8748
+          ],
+          [
+            6304784,
+            6368
+          ],
+          [
+            3677192,
+            3560
+          ]
+        ],
+        "distinct": 157
+      },
+      "feedback": {
+        "width": 640,
+        "height": 400,
+        "frames": "319",
+        "hash": 3388756933,
+        "colors": [
+          [
+            0,
+            103380
+          ],
+          [
+            4202504,
+            15040
+          ],
+          [
+            4214896,
+            11896
+          ],
+          [
+            4728840,
+            11672
+          ],
+          [
+            5778448,
+            11128
+          ],
+          [
+            5253136,
+            9860
+          ],
+          [
+            5779472,
+            9728
+          ],
+          [
+            6830096,
+            9276
+          ],
+          [
+            4727816,
+            9228
+          ],
+          [
+            6303760,
+            8776
+          ],
+          [
+            6304784,
+            6384
+          ],
+          [
+            3677192,
+            3568
+          ]
+        ],
+        "distinct": 157
+      }
+    },
+    {
+      "name": "parent pause stops native frames",
+      "game": "Master Mind (1999)",
+      "frames": "319"
+    },
+    {
+      "name": "close removes active iframe"
+    },
+    {
+      "name": "Zmiy real parent touch and portrait bounds",
+      "before": {
+        "width": 720,
+        "height": 400,
+        "frames": "3",
+        "hash": 400966693,
+        "colors": [
+          [
+            168,
+            258161
+          ],
+          [
+            11031552,
+            18144
+          ],
+          [
+            11053224,
+            10729
+          ],
+          [
+            0,
+            791
+          ],
+          [
+            16317520,
+            144
+          ],
+          [
+            5307472,
+            31
+          ]
+        ],
+        "distinct": 6
+      },
+      "down": {
+        "width": 720,
+        "height": 400,
+        "frames": "6",
+        "hash": 2986587541,
+        "colors": [
+          [
+            168,
+            263717
+          ],
+          [
+            11031552,
+            18288
+          ],
+          [
+            11053224,
+            5251
+          ],
+          [
+            0,
+            509
+          ],
+          [
+            16317520,
+            216
+          ],
+          [
+            5307472,
+            19
+          ]
+        ],
+        "distinct": 6
+      },
+      "right": {
+        "width": 720,
+        "height": 400,
+        "frames": "12",
+        "hash": 4017706133,
+        "colors": [
+          [
+            168,
+            263573
+          ],
+          [
+            11031552,
+            18288
+          ],
+          [
+            11053224,
+            5251
+          ],
+          [
+            0,
+            509
+          ],
+          [
+            16317520,
+            360
+          ],
+          [
+            5307472,
+            19
+          ]
+        ],
+        "distinct": 6
+      },
+      "viewport": {
+        "width": 412,
+        "height": 915
+      },
+      "dialog": {
+        "x": 19,
+        "y": 89.546875,
+        "width": 374,
+        "height": 735.890625
+      },
+      "iframe": {
+        "x": 28,
+        "y": 150.046875,
+        "width": 356,
+        "height": 512.390625
+      }
+    },
+    {
+      "name": "parent pause stops native frames",
+      "game": "Zmiy Snake",
+      "frames": "12"
+    },
+    {
+      "name": "Zmiy landscape bounds",
+      "viewport": {
+        "width": 915,
+        "height": 412
+      },
+      "dialog": {
+        "x": 19,
+        "y": 4.125,
+        "width": 877,
+        "height": 403.75
+      },
+      "iframe": {
+        "x": 30,
+        "y": 56.3125,
+        "width": 855,
+        "height": 270
+      }
+    },
+    {
+      "name": "Sports hash tears down native iframe"
+    },
+    {
+      "name": "NES cheat add/remove and native resume preserved",
+      "before": 12,
+      "after": 14
+    },
+    {
+      "name": "fullscreen screenshot contains actual native canvas",
+      "kind": "nes",
+      "color": "bc1900",
+      "matching": 101640
+    },
+    {
+      "name": "NES native fullscreen closes cleanly"
+    }
+  ],
+  "failures": [],
+  "errors": [],
+  "privateCalls": [],
+  "external": [],
+  "responses": [],
+  "requests": [
+    "http://127.0.0.1:4193/",
+    "http://127.0.0.1:4193/style.css?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/discover.css?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/sports.css?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/games.css?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/boot.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/sports.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/sports-core.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/parental-controls.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/buffstreams-ui.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/buffstreams.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/games-nav.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/games.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/games-core.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/games-pointer.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/games-cheats.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/extra-games-core.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/extra-games.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/games-catalog.json?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/extra-games-catalog.json?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/dos-player.html?game=dosdefender&v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/dos-player.css?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/dos-player.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/parental-controls.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/extra-games-catalog.json?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/vendor/dos/emulators.js?v=8.5.2",
+    "http://127.0.0.1:4193/games-data/dosdefender.jsdos",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.wasm?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.js?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wlibzip.wasm?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wlibzip.js?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.js?v=8.5.2",
+    "blob:http://127.0.0.1:4193/85ab9c04-7ca5-49d1-9da8-69097c43c15d",
+    "http://127.0.0.1:4193/dos-player.html?game=zmiy&v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/dos-player.css?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/dos-player.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/parental-controls.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/extra-games-catalog.json?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/vendor/dos/emulators.js?v=8.5.2",
+    "http://127.0.0.1:4193/games-data/zmiy.jsdos",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.wasm?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.js?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wlibzip.wasm?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wlibzip.js?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.js?v=8.5.2",
+    "blob:http://127.0.0.1:4193/c2520b77-ccdc-4933-87ba-0c7a4e40e7f3",
+    "http://127.0.0.1:4193/dos-player.html?game=zmiy&v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/dos-player.css?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/dos-player.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/parental-controls.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/extra-games-catalog.json?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/vendor/dos/emulators.js?v=8.5.2",
+    "http://127.0.0.1:4193/games-data/zmiy.jsdos",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.wasm?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.js?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wlibzip.wasm?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wlibzip.js?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.js?v=8.5.2",
+    "blob:http://127.0.0.1:4193/e1dcd7b8-5f5f-4007-b720-b454f1eaccae",
+    "http://127.0.0.1:4193/games-web/skifree/index.html?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/games-web/skifree/style.css?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/games-web/skifree/game.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/parental-controls.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/dos-player.html?game=master-mind&v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/dos-player.css?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/dos-player.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/parental-controls.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/extra-games-catalog.json?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/vendor/dos/emulators.js?v=8.5.2",
+    "http://127.0.0.1:4193/games-data/master-mind.jsdos",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.wasm?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.js?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wlibzip.wasm?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wlibzip.js?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.js?v=8.5.2",
+    "blob:http://127.0.0.1:4193/2b1820ad-7d88-48c7-89bd-cdb143ad28e4",
+    "http://127.0.0.1:4193/dos-player.html?game=zmiy&v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/dos-player.css?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/dos-player.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/parental-controls.js?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/extra-games-catalog.json?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/vendor/dos/emulators.js?v=8.5.2",
+    "http://127.0.0.1:4193/games-data/zmiy.jsdos",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.wasm?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.js?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wlibzip.wasm?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wlibzip.js?v=8.5.2",
+    "http://127.0.0.1:4193/vendor/dos/wdosbox.js?v=8.5.2",
+    "blob:http://127.0.0.1:4193/0fd94048-f30a-4132-9870-471c0731f5e3",
+    "http://127.0.0.1:4193/sports-catalog.json?v=release-1.2.2-games.4",
+    "http://127.0.0.1:4193/vendor/jsnes-2.1.0.min.js?v=2.1.0",
+    "http://127.0.0.1:4193/roms/super-mario-bros-3.nes"
+  ],
+  "time": "2026-10-14T00:38:10.881Z"
+}

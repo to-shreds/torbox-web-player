@@ -1,0 +1,649 @@
+{
+  "version": 1,
+  "checkedAt": "2026-10-14",
+  "scope": "Actual bundled DOS programs in standalone browser child player. Real keyboard, mouse and CDP touch events; read-only DOM and canvas observations. No game memory or CPU manipulation.",
+  "environment": {
+    "browser": "Chromium /tmp/chromium, Playwright headless",
+    "fixturePort": 4192,
+    "desktopViewport": [
+      960,
+      760
+    ],
+    "mobileViewport": [
+      412,
+      915
+    ],
+    "mobileMode": "hasTouch=true, isMobile=true, CDP touchStart/touchEnd",
+    "bundleCycles": 12000
+  },
+  "result": "passed",
+  "checks": [
+    {
+      "id": "dosdefender",
+      "input": "desktop mouse and keyboard",
+      "result": "passed",
+      "boot": {
+        "state": "playing",
+        "frames": 23,
+        "width": 640,
+        "height": 400,
+        "pixelHash": "59f13585"
+      },
+      "actions": [
+        {
+          "command": "move",
+          "x": 140,
+          "y": 120,
+          "settle": 400,
+          "observed": {
+            "state": "playing",
+            "frames": 87,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "9bfac445"
+          }
+        },
+        {
+          "command": "click",
+          "x": 520,
+          "y": 280,
+          "hold": 650,
+          "settle": 20,
+          "observed": {
+            "state": "playing",
+            "frames": 140,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "48e26fc5"
+          }
+        }
+      ],
+      "pause": {
+        "passed": true,
+        "before": {
+          "state": "paused",
+          "frames": 2729,
+          "width": 640,
+          "height": 400,
+          "pixelHash": "11aed285"
+        },
+        "after700ms": {
+          "state": "paused",
+          "frames": 2729,
+          "width": 640,
+          "height": 400,
+          "pixelHash": "11aed285"
+        }
+      },
+      "resume": {
+        "passed": true,
+        "resumed": {
+          "state": "playing",
+          "frames": 2779,
+          "width": 640,
+          "height": 400,
+          "pixelHash": "3fc93585"
+        }
+      },
+      "findings": [
+        "Game boots into actual DOS Defender title and animated ship/enemy screen.",
+        "A fresh restart followed by real mouse movement and held left-button firing was captured; pause freezes frame count and pixels, Resume advances them.",
+        "Restart reloads the child and returns to the game title with frame counter reset."
+      ],
+      "restart": {
+        "passed": true,
+        "observed": {
+          "state": "playing",
+          "frames": 51,
+          "width": 640,
+          "height": 400,
+          "pixelHash": "df169185"
+        }
+      },
+      "screenshots": [
+        "dosdefender-live-movement.png",
+        "dosdefender-live-fire.png",
+        "dosdefender-restarted.png"
+      ]
+    },
+    {
+      "id": "zmiy",
+      "input": "desktop mouse and keyboard",
+      "result": "passed",
+      "boot": {
+        "state": "playing",
+        "frames": 13,
+        "width": 720,
+        "height": 400,
+        "pixelHash": "abe009e5"
+      },
+      "actions": [
+        {
+          "command": "key",
+          "key": "ArrowDown",
+          "hold": 200,
+          "settle": 700,
+          "observed": {
+            "state": "playing",
+            "frames": 22,
+            "width": 720,
+            "height": 400,
+            "pixelHash": "bcc42565"
+          }
+        },
+        {
+          "command": "key",
+          "key": "ArrowRight",
+          "hold": 200,
+          "settle": 700,
+          "observed": {
+            "state": "playing",
+            "frames": 31,
+            "width": 720,
+            "height": 400,
+            "pixelHash": "9ae70065"
+          }
+        }
+      ],
+      "pause": {
+        "passed": true,
+        "before": {
+          "state": "paused",
+          "frames": 32,
+          "width": 720,
+          "height": 400,
+          "pixelHash": "a5029565"
+        },
+        "after700ms": {
+          "state": "paused",
+          "frames": 32,
+          "width": 720,
+          "height": 400,
+          "pixelHash": "a5029565"
+        }
+      },
+      "resume": {
+        "passed": true,
+        "resumed": {
+          "state": "playing",
+          "frames": 38,
+          "width": 720,
+          "height": 400,
+          "pixelHash": "99ec1465"
+        }
+      },
+      "findings": [
+        "Actual Zmiy level1 boots, with score0 and a moving yellow snake on the blue text-mode board.",
+        "Real ArrowDown then ArrowRight inputs change the snake trajectory; screenshots capture the directional movement.",
+        "Pause freezes frame count/pixels; Resume advances gameplay. Restart returns to score0/level1 with the initial horizontal snake."
+      ],
+      "restart": {
+        "passed": true,
+        "observed": {
+          "state": "playing",
+          "frames": 14,
+          "width": 720,
+          "height": 400,
+          "pixelHash": "d5bf02f5"
+        }
+      },
+      "screenshots": [
+        "zmiy-steer-down.png",
+        "zmiy-steer-right.png",
+        "zmiy-restarted.png"
+      ]
+    },
+    {
+      "id": "master-mind",
+      "input": "mobile touch emulation",
+      "result": "passed",
+      "boot": {
+        "state": "playing",
+        "frames": 71,
+        "width": 640,
+        "height": 400,
+        "pixelHash": "6f2515c5"
+      },
+      "actions": [
+        {
+          "command": "touch",
+          "x": 520,
+          "y": 242,
+          "hold": 120,
+          "settle": 700,
+          "observed": {
+            "state": "playing",
+            "frames": 279,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "ea512705"
+          }
+        },
+        {
+          "command": "touch",
+          "x": 500,
+          "y": 90,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 282,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "70aee605"
+          }
+        },
+        {
+          "command": "touch",
+          "x": 156,
+          "y": 86,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 284,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "c0dd6145"
+          }
+        },
+        {
+          "command": "touch",
+          "x": 565,
+          "y": 120,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 286,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "d76ef005"
+          }
+        },
+        {
+          "command": "touch",
+          "x": 196,
+          "y": 86,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 288,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "2ddba9c5"
+          }
+        },
+        {
+          "command": "touch",
+          "x": 565,
+          "y": 170,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 290,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "bc946d05"
+          }
+        },
+        {
+          "command": "touch",
+          "x": 236,
+          "y": 86,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 292,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "e7296885"
+          }
+        },
+        {
+          "command": "touch",
+          "x": 500,
+          "y": 200,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 294,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "7d38a745"
+          }
+        },
+        {
+          "command": "touch",
+          "x": 276,
+          "y": 86,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 296,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "8b78d05"
+          }
+        },
+        {
+          "command": "touch",
+          "x": 500,
+          "y": 278,
+          "hold": 120,
+          "settle": 700,
+          "observed": {
+            "state": "playing",
+            "frames": 316,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "e4e295c5"
+          }
+        },
+        {
+          "command": "touch",
+          "x": 500,
+          "y": 90,
+          "hold": 120,
+          "settle": 700,
+          "observed": {
+            "state": "playing",
+            "frames": 318,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "efb13985"
+          }
+        }
+      ],
+      "pause": {
+        "passed": true,
+        "before": {
+          "state": "paused",
+          "frames": 316,
+          "width": 640,
+          "height": 400,
+          "pixelHash": "e4e295c5"
+        },
+        "after700ms": {
+          "state": "paused",
+          "frames": 316,
+          "width": 640,
+          "height": 400,
+          "pixelHash": "e4e295c5"
+        }
+      },
+      "resume": {
+        "passed": true,
+        "resumed": {
+          "state": "playing",
+          "frames": 316,
+          "width": 640,
+          "height": 400,
+          "pixelHash": "e4e295c5"
+        },
+        "afterRealInput": {
+          "state": "playing",
+          "frames": 318,
+          "width": 640,
+          "height": 400,
+          "pixelHash": "efb13985"
+        },
+        "note": "This static GUI sends new canvas frames only when pixels change. Resume was verified by a real touch or mouse move, not idle frame count."
+      },
+      "findings": [
+        "Fresh first physical touch of 120 ms accepted with ordering adapter and no prior manual hover.",
+        "Four pins placed and first guess submitted by ordinary 120 ms touch events; white/black feedback shown and active row advanced.",
+        "Pause froze frame count and canvas pixels; after Resume a real color-selection touch advanced frames. Static game screen naturally emits no frames without changed pixels."
+      ],
+      "screenshots": [
+        "master-mind-ordinary-mobile-first-tap.png",
+        "master-mind-ordinary-mobile-guess.png",
+        "master-mind-ordinary-mobile-feedback.png"
+      ]
+    },
+    {
+      "id": "master-mind",
+      "input": "desktop mouse and keyboard",
+      "result": "passed",
+      "boot": {
+        "state": "playing",
+        "frames": 71,
+        "width": 640,
+        "height": 400,
+        "pixelHash": "6f2515c5"
+      },
+      "actions": [
+        {
+          "command": "click",
+          "x": 520,
+          "y": 242,
+          "hold": 120,
+          "settle": 700,
+          "observed": {
+            "state": "playing",
+            "frames": 279,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "ea512705"
+          }
+        },
+        {
+          "command": "click",
+          "x": 500,
+          "y": 90,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 281,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "70aee605"
+          }
+        },
+        {
+          "command": "click",
+          "x": 156,
+          "y": 86,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 283,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "c0dd6145"
+          }
+        },
+        {
+          "command": "click",
+          "x": 565,
+          "y": 120,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 285,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "d76ef005"
+          }
+        },
+        {
+          "command": "click",
+          "x": 196,
+          "y": 86,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 287,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "2ddba9c5"
+          }
+        },
+        {
+          "command": "click",
+          "x": 565,
+          "y": 170,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 290,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "bc946d05"
+          }
+        },
+        {
+          "command": "click",
+          "x": 236,
+          "y": 86,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 292,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "e7296885"
+          }
+        },
+        {
+          "command": "click",
+          "x": 500,
+          "y": 200,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 294,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "7d38a745"
+          }
+        },
+        {
+          "command": "click",
+          "x": 276,
+          "y": 86,
+          "hold": 120,
+          "settle": 550,
+          "observed": {
+            "state": "playing",
+            "frames": 297,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "8b78d05"
+          }
+        },
+        {
+          "command": "click",
+          "x": 500,
+          "y": 278,
+          "hold": 120,
+          "settle": 700,
+          "observed": {
+            "state": "playing",
+            "frames": 317,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "e4e295c5"
+          }
+        },
+        {
+          "command": "move",
+          "x": 500,
+          "y": 90,
+          "settle": 400,
+          "observed": {
+            "state": "playing",
+            "frames": 322,
+            "width": 640,
+            "height": 400,
+            "pixelHash": "81a2f8c5"
+          }
+        }
+      ],
+      "pause": {
+        "passed": true,
+        "before": {
+          "state": "paused",
+          "frames": 317,
+          "width": 640,
+          "height": 400,
+          "pixelHash": "e4e295c5"
+        },
+        "after700ms": {
+          "state": "paused",
+          "frames": 317,
+          "width": 640,
+          "height": 400,
+          "pixelHash": "e4e295c5"
+        }
+      },
+      "resume": {
+        "passed": true,
+        "resumed": {
+          "state": "playing",
+          "frames": 317,
+          "width": 640,
+          "height": 400,
+          "pixelHash": "e4e295c5"
+        },
+        "afterRealInput": {
+          "state": "playing",
+          "frames": 322,
+          "width": 640,
+          "height": 400,
+          "pixelHash": "81a2f8c5"
+        },
+        "note": "This static GUI sends new canvas frames only when pixels change. Resume was verified by a real touch or mouse move, not idle frame count."
+      },
+      "findings": [
+        "Fresh first physical click of 120 ms accepted with ordering adapter and no prior manual hover.",
+        "Four pins placed and first guess submitted by ordinary 120 ms mouse clicks; feedback shown and active row advanced.",
+        "Pause froze frame count and canvas pixels; after Resume a real mouse move advanced frames. Static game screen naturally emits no frames without changed pixels.",
+        "Restart returned to the original animated intro. Executable and data unchanged; DOSBox cycles remains 12000."
+      ],
+      "restart": {
+        "passed": true,
+        "observed": {
+          "state": "playing",
+          "frames": 72,
+          "width": 640,
+          "height": 400,
+          "pixelHash": "2d8745c5"
+        },
+        "screenshotNote": "Restart screenshot was captured during an earlier lifecycle probe using the same unchanged 12000-cycle bundle; the final adapter restart was verified by the recorded native frame reset."
+      },
+      "screenshots": [
+        "master-mind-ordinary-desktop-first-click.png",
+        "master-mind-ordinary-desktop-guess.png",
+        "master-mind-ordinary-desktop-feedback.png",
+        "master-mind-restarted.png"
+      ]
+    }
+  ],
+  "network": {
+    "externalRequests": [],
+    "torboxRequests": [],
+    "httpErrors": [],
+    "note": "All emulator files and bundles loaded from the fixture origin; no TorBox API, healthz or media requests."
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "consoleNote": "Chromium emitted only the Canvas2D readback performance hint during pixel inspection.",
+  "limitations": [
+    "Standalone child runtime QA; integrated parent controls are covered separately.",
+    "Mobile touch emulation confirms input behavior, not physical-device performance or audio quality.",
+    "Verification covers these specific bundled titles and basic gameplay/lifecycle actions, not every DOS game."
+  ]
+}

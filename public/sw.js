@@ -1,6 +1,6 @@
 const CACHE_PREFIX='torbox-player:'+self.registration.scope+':';
-const CACHE=CACHE_PREFIX+'release-1.2.2-games.3';
-const BUILD='release-1.2.2-games.3';
+const CACHE=CACHE_PREFIX+'release-1.2.2-games.4';
+const BUILD='release-1.2.2-games.4';
 const SHELL=[
   './','./index.html',
   `./style.css?v=${BUILD}`,`./discover.css?v=${BUILD}`,`./boot.js?v=${BUILD}`,`./app.js?v=${BUILD}`,
@@ -12,6 +12,9 @@ const SHELL=[
   `./games-nav.js?v=${BUILD}`,`./games.js?v=${BUILD}`,`./games-core.js?v=${BUILD}`,`./games.css?v=${BUILD}`,`./games-catalog.json?v=${BUILD}`,
   `./games-pointer.js?v=${BUILD}`,
   `./games-cheats.js?v=${BUILD}`,
+  `./extra-games.js?v=${BUILD}`,`./extra-games-core.js?v=${BUILD}`,`./extra-games-catalog.json?v=${BUILD}`,
+  `./dos-player.html?v=${BUILD}`,`./dos-player.js?v=${BUILD}`,`./dos-player.css?v=${BUILD}`,
+  `./games-web/skifree/index.html?v=${BUILD}`,`./games-web/skifree/game.js?v=${BUILD}`,`./games-web/skifree/style.css?v=${BUILD}`,
   './vendor/jsnes-2.1.0.min.js?v=2.1.0',`./vendor/nes-audio-worklet.js?v=${BUILD}`,
   `./manifest.webmanifest?v=${BUILD}`,'./icon.svg'
 ];
@@ -28,5 +31,5 @@ self.addEventListener('fetch',event=>{
   event.respondWith(fresh(event.request).then(response=>{
     if(response.ok&&shellUrls.has(event.request.url)){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put(event.request,copy)));}
     return response;
-  }).catch(()=>caches.open(CACHE).then(async cache=>{if(url.pathname.endsWith('/sports-player.html')||url.pathname.endsWith('/buffstreams-opening.html'))return (await cache.match(event.request))||new Response('Sports player unavailable offline.',{status:503});return event.request.mode==='navigate'?cache.match('./'):cache.match(event.request);})));
+  }).catch(()=>caches.open(CACHE).then(async cache=>{if(url.pathname.endsWith('/sports-player.html')||url.pathname.endsWith('/buffstreams-opening.html'))return (await cache.match(event.request))||new Response('Sports player unavailable offline.',{status:503});if(url.pathname.endsWith('/dos-player.html')||url.pathname.includes('/games-web/'))return (await cache.match(event.request))||new Response('Game unavailable offline. Reconnect and open it again.',{status:503});return event.request.mode==='navigate'?cache.match('./'):cache.match(event.request);})));
 });

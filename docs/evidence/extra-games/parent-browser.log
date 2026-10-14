@@ -1,0 +1,15 @@
+✔ extra and NES catalogs combine alphabetically with platform filtering and literal titles (285.950452ms)
+✔ an extra catalog outage preserves working NES cards and shows one finite refresh message (187.25571ms)
+✔ child source and origin are enforced, pause and mute do not form message loops (1009.369864ms)
+✔ touch controls deliver exact child key values and restart rejects an older frame source (415.167209ms)
+✔ viewer changes close child playback, and leaving Games removes the iframe source (657.404582ms)
+✔ extra player fits portrait and landscape without horizontal overflow (384.439761ms)
+✔ focus lost before the child listener is ready preserves pause until explicit Resume (501.887433ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3825.929452

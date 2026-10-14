@@ -1,0 +1,34 @@
+✔ extra and NES catalogs combine alphabetically with platform filtering and literal titles (251.158864ms)
+✔ an extra catalog outage preserves working NES cards and shows one finite refresh message (171.098186ms)
+✔ child source and origin are enforced, pause and mute do not form message loops (1005.197125ms)
+✔ touch controls deliver exact child key values and restart rejects an older frame source (425.425379ms)
+✔ viewer changes close child playback, and leaving Games removes the iframe source (577.166539ms)
+✔ extra player fits portrait and landscape without horizontal overflow (389.915361ms)
+✔ focus lost before the child listener is ready preserves pause until explicit Resume (478.182324ms)
+✔ extra game fullscreen uses the supported root and preserves controls until close (1146.925248ms)
+✔ light gun mouse click reaches the native NES trigger and releases across pause (1293.269844ms)
+✔ light gun touch tap reaches the native NES trigger and releases across pause (1165.513345ms)
+✔ anonymous Games executes the original ROM with real PPU output and keyboard input without TorBox calls (919.882043ms)
+✔ NES full screen uses the supported root, keeps touch and cheats usable, and exits on close (1430.71181ms)
+✔ closing NES leaves a real fullscreen session owned by another element intact (488.941059ms)
+✔ manual save and restore recover emulated CPU and PPU state, and reopening offers the saved state (1114.877349ms)
+✔ toolbar focus preserves game keys while Enter activates its focused Pause control (617.088575ms)
+✔ a delayed manual Load cannot overwrite a newer Start fresh action (1150.980328ms)
+✔ standard controller A reaches the emulator and disconnecting releases the held button (590.349162ms)
+✔ automatic saves stay separate for the two viewers (768.934816ms)
+✔ local ROM import renders a game and malformed files report a useful error (614.079917ms)
+✔ a canceled slow ROM cannot replace a newer game or reopen its closed player (869.643085ms)
+✔ closing Games releases keyboard interception and switching to Sports stops its emulator (820.36239ms)
+✔ mobile portrait and landscape keep the emulator and touch controls inside the viewport (823.86919ms)
+✔ unsafe catalog entries never request private APIs or external ROM hosts (404.205023ms)
+✔ direct Games links respect Kid Mode and finish the normal movie startup after denial (175.959365ms)
+✔ an existing movie fragment still boots Cinema and is preserved when returning from Games (316.274234ms)
+✔ pending movie auto-next cannot reopen Cinema over Games while presentation exit is delayed (1024.460812ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 21101.841517

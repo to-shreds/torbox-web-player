@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.2**, frontend build **release-1.2.2-games.3**
+Current version: **1.2.2**, frontend build **release-1.2.2-games.4**
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
@@ -17,6 +17,10 @@ Title details now prepare cached movie/episode files before Play, reuse the comp
 ## Games
 
 Open **GAMES** in the top navigation, or use `#games` in the app URL. NES games run directly in your browser without a TorBox login, backend request, or extra service. The catalog is alphabetical and searchable. Open a local uncompressed `.nes` file, or choose a game added to the repository's `public/roms/` folder and `public/games-catalog.json`. The menu currently includes the user-supplied Super Mario Bros. / Duck Hunt cartridge, Super Mario Bros. 3, and Teenage Mutant Ninja Turtles II: The Arcade Game. Catalog entries and safe file naming are described in [the ROM folder README](public/roms/README.md).
+
+The same menu also includes **DOS Defender** (Unlicense/public-domain release), **Master Mind (1999)** (the creator's complete-game CC0 release), **Zmiy Snake** (BSD-2-Clause), and **SkiFree (browser remake)** (MIT). Use the All games / NES / DOS / Browser filter to browse platforms. DOS games run in a self-hosted, pinned DOSBox worker and support their own keyboard/mouse controls, including touch pointer input. The ski game uses a separately licensed canvas remake with freshly drawn graphics; the original Windows SkiFree executable is not included. Each extra player exposes Controls & credits, pause/resume, restart and fullscreen. Closing/restarting a DOS game begins a new session; DOS games do not have the NES save-state system. The ski remake keeps local high scores per viewer and has no audio.
+
+Exact game licenses and provenance are in `public/games-data/licenses/`, `docs/evidence/extra-games/licenses.json`, and `public/games-web/skifree/UPSTREAM.md`. The five unmodified GPL-2.0 DOS runtime files have matching source, original build scripts and dependency notices available under [the DOS source notice](public/vendor/dos/SOURCES.md), including the same-location source archive. The WASM/Blob-worker permissions are confined to the DOS child page; the main app's script policy stays unchanged. Game bundles, WASM and source archives are excluded from the app-shell cache. These games require an adult viewer like the existing Games tab.
 
 The player supports touch controls including diagonals and simultaneous buttons, keyboard input, and up to two standard gamepads. Automatic saves resume each viewer's game on the same browser. Save and Load save use a separate manual slot. Game saves use their own IndexedDB store and do not alter movie history or credential storage. Full screen retains the controls; rotating the device gives a landscape layout. Leaving Games or hiding the app pauses emulation and sound. For Duck Hunt, choose it inside the combined cartridge, turn on **Light gun**, then click or tap the game screen to aim and shoot.
 

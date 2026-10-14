@@ -27,6 +27,35 @@ const publicFiles = new Map([
   ['/games-core.js', ['games-core.js', 'text/javascript; charset=utf-8']],
   ['/games-pointer.js', ['games-pointer.js', 'text/javascript; charset=utf-8']],
   ['/games-cheats.js', ['games-cheats.js', 'text/javascript; charset=utf-8']],
+  ['/extra-games.js', ['extra-games.js', 'text/javascript; charset=utf-8']],
+  ['/extra-games-core.js', ['extra-games-core.js', 'text/javascript; charset=utf-8']],
+  ['/extra-games-catalog.json', ['extra-games-catalog.json', 'application/json; charset=utf-8']],
+  ['/dos-player.html', ['dos-player.html', 'text/html; charset=utf-8']],
+  ['/dos-player.js', ['dos-player.js', 'text/javascript; charset=utf-8']],
+  ['/dos-player.css', ['dos-player.css', 'text/css; charset=utf-8']],
+  ['/vendor/dos/emulators.js', ['vendor/dos/emulators.js', 'text/javascript; charset=utf-8']],
+  ['/vendor/dos/wdosbox.js', ['vendor/dos/wdosbox.js', 'text/javascript; charset=utf-8']],
+  ['/vendor/dos/wdosbox.wasm', ['vendor/dos/wdosbox.wasm', 'application/wasm']],
+  ['/vendor/dos/wlibzip.js', ['vendor/dos/wlibzip.js', 'text/javascript; charset=utf-8']],
+  ['/vendor/dos/wlibzip.wasm', ['vendor/dos/wlibzip.wasm', 'application/wasm']],
+  ['/vendor/dos/LICENSE', ['vendor/dos/LICENSE', 'text/plain; charset=utf-8']],
+  ['/vendor/dos/SOURCES.md', ['vendor/dos/SOURCES.md', 'text/markdown; charset=utf-8']],
+  ['/vendor/dos/THIRD-PARTY-NOTICES.txt', ['vendor/dos/THIRD-PARTY-NOTICES.txt', 'text/plain; charset=utf-8']],
+  ['/vendor/dos/SOURCE-PROVENANCE.json', ['vendor/dos/SOURCE-PROVENANCE.json', 'application/json; charset=utf-8']],
+  ['/vendor/dos/emulators-8.5.2-source.tar.gz', ['vendor/dos/emulators-8.5.2-source.tar.gz', 'application/gzip']],
+  ['/games-data/dosdefender.jsdos', ['games-data/dosdefender.jsdos', 'application/octet-stream']],
+  ['/games-data/master-mind.jsdos', ['games-data/master-mind.jsdos', 'application/octet-stream']],
+  ['/games-data/zmiy.jsdos', ['games-data/zmiy.jsdos', 'application/octet-stream']],
+  ['/games-data/licenses/dosdefender-UNLICENSE.txt', ['games-data/licenses/dosdefender-UNLICENSE.txt', 'text/plain; charset=utf-8']],
+  ['/games-data/licenses/master-mind-CC0-readme.txt', ['games-data/licenses/master-mind-CC0-readme.txt', 'text/plain; charset=utf-8']],
+  ['/games-data/licenses/zmiy-BSD-2-Clause-readme.txt', ['games-data/licenses/zmiy-BSD-2-Clause-readme.txt', 'text/plain; charset=utf-8']],
+  ['/games-data/sources/dosdefender-source-40e98d2.zip', ['games-data/sources/dosdefender-source-40e98d2.zip', 'application/zip']],
+  ['/games-data/sources/zmiy-freedos-source-and-binary-0.85.2a.zip', ['games-data/sources/zmiy-freedos-source-and-binary-0.85.2a.zip', 'application/zip']],
+  ['/games-web/skifree/index.html', ['games-web/skifree/index.html', 'text/html; charset=utf-8']],
+  ['/games-web/skifree/game.js', ['games-web/skifree/game.js', 'text/javascript; charset=utf-8']],
+  ['/games-web/skifree/style.css', ['games-web/skifree/style.css', 'text/css; charset=utf-8']],
+  ['/games-web/skifree/LICENSE', ['games-web/skifree/LICENSE', 'text/plain; charset=utf-8']],
+  ['/games-web/skifree/UPSTREAM.md', ['games-web/skifree/UPSTREAM.md', 'text/markdown; charset=utf-8']],
   ['/games.css', ['games.css', 'text/css; charset=utf-8']],
   ['/games-catalog.json', ['games-catalog.json', 'application/json; charset=utf-8']],
   ['/vendor/jsnes-2.1.0.min.js', ['vendor/jsnes-2.1.0.min.js', 'text/javascript; charset=utf-8']],
@@ -248,7 +277,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
         if(filename==='index.html'){const html=await readFile(join(root,'public',filename),'utf8');const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];if(csp)response.setHeader('Content-Security-Policy',csp+"; frame-ancestors 'none'");response.setHeader('Content-Type',type);return response.end(html);}
-        if(filename==='sports-player.html'){
+        if(filename==='sports-player.html'||filename==='dos-player.html'||filename==='games-web/skifree/index.html'){
           const html=await readFile(join(root,'public',filename),'utf8');
           const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];
           if(csp)response.setHeader('Content-Security-Policy',csp+"; frame-ancestors 'self'");

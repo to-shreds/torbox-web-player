@@ -1,7 +1,9 @@
-import {ENGINE_VERSION, MAX_ROM_BYTES, MAX_CATALOG_BYTES, cleanGamesCatalog, validateRom, romHash, saveIdentity, makeSaveRecord, validSaveRecord, fetchBytes, createStateStore} from './games-core.js?v=release-1.2.2-games.3';
-import {getKidProfile} from './parental-controls.js?v=release-1.2.2-games.3';
-import {nesPointerPosition} from './games-pointer.js?v=release-1.2.2-games.3';
-import {emptyCheats, normalizeCheatSet, parseCheatLines, applyCheats, readCheats, writeCheats, importCheats, exportCheats} from './games-cheats.js?v=release-1.2.2-games.3';
+import {ENGINE_VERSION, MAX_ROM_BYTES, MAX_CATALOG_BYTES, cleanGamesCatalog, validateRom, romHash, saveIdentity, makeSaveRecord, validSaveRecord, fetchBytes, createStateStore} from './games-core.js?v=release-1.2.2-games.4';
+import {getKidProfile} from './parental-controls.js?v=release-1.2.2-games.4';
+import {nesPointerPosition} from './games-pointer.js?v=release-1.2.2-games.4';
+import {emptyCheats, normalizeCheatSet, parseCheatLines, applyCheats, readCheats, writeCheats, importCheats, exportCheats} from './games-cheats.js?v=release-1.2.2-games.4';
+import {cleanExtraGamesCatalog} from './extra-games-core.js?v=release-1.2.2-games.4';
+import {playExtraGame, closeExtraGame} from './extra-games.js?v=release-1.2.2-games.4';
 
 const $ = id => document.getElementById(id);
 const dialog = $('games-player');
@@ -12,9 +14,11 @@ const pixels = new Uint32Array(image.data.buffer);
 const store = createStateStore();
 const cheatsPanel = $('games-cheats-panel');
 let cheatSet = emptyCheats(), editingCheat = null;
-let catalog = null, catalogPromise = null, enginePromise = null;
+let catalog = null, extraCatalog = null, catalogPromise = null, enginePromise = null;
+let catalogError = false, extraCatalogError = false;
 let tabOpen = false, generation = 0, actionGeneration = 0, abort = null;
 let nes = null, selection = null, running = false, fatal = false, resumeSaved = null;
+let nesFullscreenOwned = false;
 let frameRequest = 0, frameCount = 0, lastFrame = 0, accumulator = 0, saveTimer = null;
 let saveTail = Promise.resolve(), soundEnabled = true, sound = null;
 let zapperEnabled = false, zapperReleaseTimer = null, zapperStartedAt = 0;
@@ -49,7 +53,7 @@ class AudioOutput {
       if (!AudioContextClass) throw new Error();
       this.context = new AudioContextClass();
       if (!this.context.audioWorklet) throw new Error();
-      this.ready = this.context.audioWorklet.addModule('./vendor/nes-audio-worklet.js?v=release-1.2.2-games.3').then(() => {
+      this.ready = this.context.audioWorklet.addModule('./vendor/nes-audio-worklet.js?v=release-1.2.2-games.4').then(() => {
         if (this.closed) return;
         this.node = new AudioWorkletNode(this.context, 'torbox-nes-audio', {outputChannelCount:[2]});
         this.node.connect(this.context.destination);
@@ -216,13 +220,16 @@ function startGame() {
   frameRequest = requestAnimationFrame(frame);
 }
 export function closeGame() {
+  closeExtraGame();
   pauseGame(); generation++; actionGeneration++; abort?.abort(); abort = null;
   sound?.close(); sound = null; nes = null; selection = null; resumeSaved = null; fatal = false;
   zapperEnabled = false; showZapperMode();
   hideCheats(); cheatSet = emptyCheats(); cancelCheatEdit(); $('games-cheat-list').replaceChildren(); $('games-cheat-message').textContent = '';
   controls(false); state('closed'); delete dialog.dataset.saveKey;
   if (dialog.open) dialog.close();
-  if (document.fullscreenElement === dialog) void document.exitFullscreen().catch(() => {});
+  const ownedFullscreen = nesFullscreenOwned;
+  nesFullscreenOwned = false; document.body.classList.remove('nes-game-fullscreen');
+  if (ownedFullscreen && document.fullscreenElement === document.documentElement) void document.exitFullscreen().catch(() => {});
 }
 
 async function play(item, file = null) {
@@ -370,32 +377,42 @@ async function importCheatFile(file) {
 
 function render() {
   const query = $('games-search').value.trim().toLocaleLowerCase();
-  const items = (catalog?.items || []).filter(item => item.title.toLocaleLowerCase().includes(query));
+  const platform = $('games-platform').value;
+  const all = [...(catalog?.items || []).map(item => ({...item,platform:'nes'})),...(extraCatalog?.items || [])];
+  const items = all.filter(item => (platform === 'all' || platform === item.platform) && item.title.toLocaleLowerCase().includes(query)).sort((a,b) => a.title.localeCompare(b.title,undefined,{sensitivity:'base'}) || a.id.localeCompare(b.id));
   $('games-grid').replaceChildren(...items.map(item => {
-    const button = document.createElement('button'); button.type = 'button'; button.className = 'games-card'; button.dataset.gameId = item.id;
-    const badge = document.createElement('span'); badge.className = 'eyebrow'; badge.textContent = 'NES';
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'games-card'; button.dataset.gameId = item.id; button.dataset.gamePlatform = item.platform;
+    const badge = document.createElement('span'); badge.className = 'eyebrow'; badge.textContent = item.platform === 'web' ? 'BROWSER' : item.platform.toUpperCase();
     const title = document.createElement('strong'); title.textContent = item.title;
-    button.append(badge,title); button.addEventListener('click',() => void play(item)); return button;
+    button.append(badge,title); button.addEventListener('click',() => { if (item.platform === 'nes') void play(item); else { closeGame(); playExtraGame(item); } }); return button;
   }));
-  $('games-count').textContent = catalog ? `${items.length} ${items.length === 1 ? 'game' : 'games'}` : '';
-  $('games-message').textContent = catalog ? (items.length ? '' : catalog.items.length ? 'No matching games. Try another search.' : 'No games have been added yet. Open a .nes game file from your device to play.') : 'Loading games…';
+  $('games-count').textContent = catalog || extraCatalog ? `${items.length} ${items.length === 1 ? 'game' : 'games'}` : '';
+  $('games-message').textContent = catalogError ? 'The NES game list could not load. Press Refresh, or open a NES file from your device.' : items.length ? '' : all.length ? 'No matching games. Try another search or platform.' : catalog || extraCatalog ? 'No games have been added yet. Open a .nes game file from your device to play.' : 'Loading games…';
+  $('games-extra-message').textContent = extraCatalogError ? 'DOS and browser games could not load. Press Refresh to try again.' : '';
 }
 async function loadCatalog() {
-  if (catalog) { render(); return; }
+  if (catalog && extraCatalog) { render(); return; }
   if (catalogPromise) return catalogPromise;
   catalogPromise = (async () => {
     render();
-    try {
-      const bytes = await fetchBytes('./games-catalog.json?v=release-1.2.2-games.3',{maxBytes:MAX_CATALOG_BYTES,timeoutMs:10000});
-      catalog = cleanGamesCatalog(JSON.parse(new TextDecoder().decode(bytes))); render();
-    } catch { $('games-message').textContent = 'The game list could not load. Press Refresh, or open a game file from your device.'; }
-    finally { catalogPromise = null; }
+    const tasks = [];
+    if (!catalog) tasks.push((async () => { try {
+      const bytes = await fetchBytes('./games-catalog.json?v=release-1.2.2-games.4',{maxBytes:MAX_CATALOG_BYTES,timeoutMs:10000});
+      catalog = cleanGamesCatalog(JSON.parse(new TextDecoder().decode(bytes))); catalogError = false;
+    } catch { catalogError = true; } finally { render(); } })());
+    if (!extraCatalog) tasks.push((async () => { try {
+      const bytes = await fetchBytes('./extra-games-catalog.json?v=release-1.2.2-games.4',{maxBytes:MAX_CATALOG_BYTES,timeoutMs:10000});
+      extraCatalog = cleanExtraGamesCatalog(JSON.parse(new TextDecoder().decode(bytes))); extraCatalogError = false;
+    } catch { extraCatalogError = true; } finally { render(); } })());
+    await Promise.allSettled(tasks);
+    catalogPromise = null;
   })();
   return catalogPromise;
 }
 
 $('games-search').addEventListener('input',render);
-$('games-refresh').addEventListener('click',() => { if (!catalogPromise) { catalog = null; void loadCatalog(); } });
+$('games-platform').addEventListener('change',render);
+$('games-refresh').addEventListener('click',() => { if (!catalogPromise) { catalog = null; extraCatalog = null; catalogError = false; extraCatalogError = false; void loadCatalog(); } });
 $('games-file').addEventListener('change',event => {
   const file = event.target.files?.[0]; event.target.value = '';
   if (!file) return;
@@ -439,9 +456,31 @@ $('games-cheats-export').addEventListener('click',() => {
   } catch { $('games-cheat-message').textContent = 'The code list could not export. Try again.'; }
 });
 $('games-fullscreen').addEventListener('click',() => {
-  const task = document.fullscreenElement === dialog ? document.exitFullscreen() : dialog.requestFullscreen?.();
-  if (task) void task.catch(() => status('Full screen is unavailable. Rotate your device for a wider layout.'));
-  else status('Full screen is unavailable in this browser. Rotate your device for a wider layout.');
+  if (!adult() || selection?.viewer !== viewer()) { closeGame(); $('games-message').textContent = 'Switch to an adult viewer to play Games.'; return; }
+  const current = generation;
+  const wasRunning = running;
+  if (nesFullscreenOwned && document.fullscreenElement === document.documentElement) { void document.exitFullscreen().catch(() => { if (current === generation) status('Full screen could not close. Use your browser\'s exit full screen control.'); }); return; }
+  if (!document.documentElement.requestFullscreen) { status('Full screen is unavailable in this browser. Rotate your device for a wider layout.'); return; }
+  nesFullscreenOwned = true;
+  void document.documentElement.requestFullscreen().then(() => {
+    if (current !== generation || !dialog.open || !adult() || selection?.viewer !== viewer()) {
+      nesFullscreenOwned = false; document.body.classList.remove('nes-game-fullscreen');
+      if (document.fullscreenElement === document.documentElement && !document.body.classList.contains('extra-game-fullscreen')) void document.exitFullscreen().catch(() => {});
+      return;
+    }
+    document.body.classList.toggle('nes-game-fullscreen',document.fullscreenElement === document.documentElement);
+    // The fullscreen root is promoted above an existing modal in the browser's
+    // top layer. Re-promote this same dialog without replacing its emulator.
+    if (document.fullscreenElement === document.documentElement) {
+      dialog.close(); dialog.showModal();
+      (cheatsPanel.hidden ? canvas : $('games-cheat-codes')).focus({preventScroll:true});
+      if (wasRunning && !document.hidden && document.hasFocus()) startGame();
+    }
+  }).catch(() => { nesFullscreenOwned = false; document.body.classList.remove('nes-game-fullscreen'); if (current === generation) status('Full screen is unavailable. Rotate your device for a wider layout.'); });
+});
+document.addEventListener('fullscreenchange',() => {
+  if (document.fullscreenElement !== document.documentElement) nesFullscreenOwned = false;
+  document.body.classList.toggle('nes-game-fullscreen',nesFullscreenOwned && dialog.open && document.fullscreenElement === document.documentElement);
 });
 $('games-mute').addEventListener('click',() => {
   soundEnabled = !soundEnabled; $('games-mute').textContent = soundEnabled ? 'Mute' : 'Unmute'; $('games-mute').setAttribute('aria-pressed',String(!soundEnabled));

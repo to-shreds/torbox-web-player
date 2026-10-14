@@ -1,0 +1,27 @@
+✔ Buffstreams lists games and filters them locally while the private service is hung (548.389189ms)
+✔ Watch opens its own waiting page and navigates only that tab to the resolved direct player (412.085098ms)
+✔ a blocked popup still resolves the player and offers a protected direct-player link (410.045068ms)
+✔ a failed player lookup closes its waiting tab and does not fall back to the provider website (283.105413ms)
+✔ a replacement address is checked before saving and failed refreshes preserve the working catalog (822.214606ms)
+✔ canceling an address check discards a late result and leaves the saved games untouched (492.333973ms)
+✔ leaving Buffstreams cancels a pending player and keeps existing Sports counts unchanged (612.935574ms)
+✔ a delayed bundled Sports response cannot restart Buffstreams after switching to Movies (427.616867ms)
+✔ cached games and local filters survive reload without presenting stale entries as live (478.484676ms)
+✔ Kid Mode guards visible Watch buttons, refresh, address changes and a resolved fallback link (599.097431ms)
+✔ a six-letter Game Genie code patches the actual ROM read, with master and individual toggles (1800.167597ms)
+✔ eight-letter compare codes apply only to matching ROM bytes, and editing and removing use the new code (1218.742255ms)
+✔ bulk addition and portable JSON import/export preserve the list and reject bad input atomically (1006.066831ms)
+✔ cheats remain current across manual restore, Start fresh and reopening, and isolate viewers and ROMs (2789.217265ms)
+✔ the paused cheat panel accepts text keys without sending them to NES controllers (626.386747ms)
+✔ an unexpected native callback failure rolls back the engine, stored model and checkboxes (1284.013406ms)
+✔ a fatal opcode cheat stays editable and recovers through Start fresh and manual Load while editing (1450.946336ms)
+✔ a delayed JSON import from an old game cannot change the next game (1000.208485ms)
+✔ mobile portrait and landscape keep cheat editing inside the viewport (743.144247ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12440.545239

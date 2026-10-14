@@ -1,0 +1,9 @@
+# DOS game packages
+
+The three `.jsdos` files are deterministic ZIP archives with fixed 1980 timestamps, sorted names, and a `.jsdos/dosbox.conf` startup file. Game payloads are unmodified. Each bundle mounts its virtual root as C: and starts the game using DOSBox built-in DOS; no Microsoft operating-system files are included.
+
+- DOS Defender: unmodified mouse-capable upstream commit `40e98d22f8dd0f537a79e4f2730bc347f5b03ba4`, built with GCC compatibility flags documented in `licenses.json`. This exact revision includes the upstream Unlicense grant. `joysticktype=none` selects mouse movement and firing. Full pinned source archive and exact Unlicense text are available under `public/games-data/`. The original Makefile needs added PIE/PIC and stack-protector compatibility flags for this GCC toolchain.
+- Master Mind: complete creator ZIP, with patched `MASTER.EXE`, its required `MASTER.DAT`, and creator readme containing the explicit CC0 grant. `BUGGY.EXE` is excluded. The creator no longer has source code.
+- Zmiy: complete creator game binary from the official FreeDOS package, whose SHA1 matches the published package metadata. The binary, full BSD-2-Clause notice, and history are in the game bundle; full source is retained in the original FreeDOS archive.
+
+`licenses.json` records exact URLs and payload/archive/bundle SHA256 values. Actual Chromium gameplay verification is complete for all three bundled titles. `standalone-dos-gameplay.json` records real movement/firing, snake steering, desktop and mobile ordinary Master Mind taps through a complete guess and feedback, plus pause/resume/restart checks. `standalone-dos-fixed-issues.json` records the resolved HTTP CSP and Master Mind mouse-ordering issues. All game payloads and the retained 12000-cycle configurations are unchanged. This evidence covers these titles and basic gameplay, with mobile touch emulation rather than a physical-device performance check.

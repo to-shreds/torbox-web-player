@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="light"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>SkiFree (browser remake)</title><link rel="stylesheet" href="./style.css?v=release-1.2.2-games.4"><script type="module" src="./game.js?v=release-1.2.2-games.4"></script></head>
+<body data-state="loading">
+<main>
+  <header class="ski-toolbar"><strong>SkiFree</strong><div><button id="ski-pause" type="button">Start</button><button id="ski-restart" type="button">Restart</button><button id="ski-fast" type="button" aria-pressed="false">Fast</button></div></header>
+  <div class="ski-stage"><canvas id="game" tabindex="0" aria-label="SkiFree. Arrows steer, Space jumps, F switches fast mode, P pauses."></canvas></div>
+  <div class="ski-touch" aria-label="Touch controls"><button type="button" data-ski-key="37" aria-label="Steer left">← Left</button><button type="button" data-ski-key="32">Jump</button><button type="button" data-ski-key="40">Tuck</button><button type="button" data-ski-key="39" aria-label="Steer right">Right →</button></div>
+  <p id="ski-status" role="status" aria-live="polite">Loading SkiFree…</p><p id="status" class="sr-only" aria-live="off">Press Start to ski.</p>
+</main>
+</body>
+</html>
