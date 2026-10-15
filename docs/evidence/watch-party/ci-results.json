@@ -1,0 +1,20 @@
+{
+  "runtimeCommit": "345da16124644da1deb509662af07f4ee64079c6",
+  "tree": "ee4d0f0d59a12ef167f7e421b7994518438aa0fe",
+  "workflow": "https://github.com/to-shreds/torbox-web-player/actions/runs/38668937005",
+  "conclusion": "success",
+  "node": {
+    "registered": 472,
+    "passed": 466,
+    "failed": 0,
+    "skipped": 6,
+    "durationMs": 5206.673471
+  },
+  "chromium": {
+    "registered": 120,
+    "passed": 120,
+    "failed": 0,
+    "skipped": 0,
+    "durationMs": 352010.151418
+  }
+}

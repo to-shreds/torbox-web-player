@@ -1,0 +1,12 @@
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ watch party joins the exact file through each account and keeps credentials out of party JSON (3415.753097ms)
+ℹ Real-video drift on coordinated start: 0.075s; independent account-local IDs and direct CDN tickets confirmed.
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3769.612135

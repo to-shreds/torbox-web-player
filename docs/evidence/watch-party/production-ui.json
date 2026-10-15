@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-10-15T02:12:24.420Z",
+  "site": "https://to-shreds.github.io/torbox-web-player/",
+  "build": "release-1.2.3-party.1",
+  "scope": "Public production login/invitation UI and catalog only; no authenticated account or actual party was used.",
+  "environmentProxyCertificateException": true,
+  "invitationPreservedUntilLogin": true,
+  "noUnauthenticatedPartyRequest": true,
+  "catalog": [
+    "DOS Defender",
+    "Master Mind (1999)",
+    "MindMaze (Encarta browser recreation)",
+    "SkiFree (browser remake)",
+    "Super Mario Bros. / Duck Hunt",
+    "Super Mario Bros. 3",
+    "Teenage Mutant Ninja Turtles II: The Arcade Game",
+    "Zmiy Snake"
+  ],
+  "errors": [],
+  "success": true
+}
