@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.3**, frontend build **release-1.2.3-party.1**
+Current version: **1.2.4**, frontend build **release-1.2.4-recovery.1**
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 

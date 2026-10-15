@@ -1,5 +1,5 @@
 // Shared source normalization and authenticated backend lookup. No provider keys here.
-import { apiUrl, apiMode, getSessionToken, credentialsMode } from './runtime.js?v=release-1.2.3-party.1';
+import { apiUrl, apiMode, getSessionToken, credentialsMode } from './runtime.js?v=release-1.2.4-recovery.1';
 export const SOURCE_PATH = '/api/discover/lookup';
 export const MAX_SOURCES = 40;
 export function targetOf(input) {
@@ -101,11 +101,11 @@ export function normalizeSources(raw) {
   }
   return [...map.values()].sort((a, b) => b.score - a.score || (a.size || Infinity) - (b.size || Infinity)).slice(0, MAX_SOURCES);
 }
-export async function loadPublicSources(input, { signal, fetchFn = fetch, api, fast = false, complete = false, withMetadata = false } = {}) {
+export async function loadPublicSources(input, { signal, fetchFn = fetch, api, fast = false, complete = false, refresh = false, withMetadata = false } = {}) {
   const target = targetOf(input);
   const params = new URLSearchParams({ type: target.type, id: target.id });
   if (target.type === 'series') { params.set('season', target.season); params.set('episode', target.episode); }
-  if(fast)params.set('fast','1');if(complete)params.set('complete','1');
+  if(fast)params.set('fast','1');if(complete)params.set('complete','1');if(refresh)params.set('refresh','1');
   if(api){const data=await api(`${SOURCE_PATH}?${params}`,{signal});const sources=normalizeSources(data?.sources);return withMetadata?{sources,complete:data?.complete!==false}:sources;}
   let response;
   try {

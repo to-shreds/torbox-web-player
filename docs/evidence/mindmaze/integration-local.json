@@ -1,0 +1,107 @@
+{
+  "site": "http://127.0.0.1:4204/",
+  "expectedBuild": "release-1.2.3-party.1",
+  "checkedAt": "2026-10-15T02:02:01.124Z",
+  "cases": [
+    {
+      "name": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "input": "mouse",
+      "errors": [],
+      "failures": [
+        {
+          "url": "https://gorjan.rocks/cdn-cgi/rum",
+          "error": "net::ERR_ABORTED"
+        },
+        {
+          "url": "https://gorjan.rocks/cdn-cgi/rum",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "games": [
+        "dosdefender",
+        "master-mind",
+        "mindmaze-encarta",
+        "skifree-browser",
+        "super-mario-bros-duck-hunt",
+        "super-mario-bros-3",
+        "tmnt-ii-arcade-game",
+        "zmiy"
+      ],
+      "tourist": true,
+      "question": true,
+      "timerRuns": true,
+      "fullscreenColoredPixels": 443087,
+      "fullscreen": true,
+      "answerHandled": true,
+      "closed": true,
+      "existingSkiFree": true,
+      "ignoredUnloadTelemetry": [
+        {
+          "url": "https://gorjan.rocks/cdn-cgi/rum",
+          "error": "net::ERR_ABORTED"
+        },
+        {
+          "url": "https://gorjan.rocks/cdn-cgi/rum",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "otherRequestOrigins": [
+        "https://static.cloudflareinsights.com"
+      ]
+    },
+    {
+      "name": "portrait",
+      "viewport": {
+        "width": 412,
+        "height": 915
+      },
+      "input": "touchscreen tap",
+      "errors": [],
+      "failures": [
+        {
+          "url": "https://gorjan.rocks/cdn-cgi/rum",
+          "error": "net::ERR_ABORTED"
+        },
+        {
+          "url": "https://gorjan.rocks/cdn-cgi/rum",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "games": [
+        "dosdefender",
+        "master-mind",
+        "mindmaze-encarta",
+        "skifree-browser",
+        "super-mario-bros-duck-hunt",
+        "super-mario-bros-3",
+        "tmnt-ii-arcade-game",
+        "zmiy"
+      ],
+      "tourist": true,
+      "question": true,
+      "timerRuns": true,
+      "fitsPortrait": true,
+      "answerHandled": true,
+      "closed": true,
+      "ignoredUnloadTelemetry": [
+        {
+          "url": "https://gorjan.rocks/cdn-cgi/rum",
+          "error": "net::ERR_ABORTED"
+        },
+        {
+          "url": "https://gorjan.rocks/cdn-cgi/rum",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "otherRequestOrigins": [
+        "https://static.cloudflareinsights.com"
+      ]
+    }
+  ],
+  "limitation": "Disposable proxy test context accepts its proxy certificate. App TLS settings are unchanged. Embedded play is Tourist without persisted names or progress.",
+  "passed": true
+}

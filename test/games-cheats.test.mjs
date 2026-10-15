@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import {MAX_CHEATS, emptyCheats, normalizeCheatCode, normalizeCheatSet, parseCheatLines, applyCheats, cheatStorageKey, readCheats, writeCheats, importCheats, exportCheats} from '../public/games-cheats.js';
 import {SUPPORTED_MAPPERS} from '../public/games-core.js';
 
-const vendor = await readFile(new URL('../public/vendor/jsnes-2.1.0.min.js', import.meta.url), 'utf8');
+const vendor = await readFile(new URL('../public/vendor/jsnes-2.1.0-torbox.1.min.js', import.meta.url), 'utf8');
 function originalROM(mapper = 0) {
   // Original NROM program: read a ROM constant, store it in zero-page RAM,
   // and repeat. It lets the actual CPU, rather than a stub, prove interception.

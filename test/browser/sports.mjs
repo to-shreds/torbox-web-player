@@ -52,7 +52,7 @@ test('failed sports HLS reports retry and remains bounded',async t=>{
 });
 test('Sports requires an adult viewer so it cannot bypass Kid Mode allowances',async t=>{
   const {page}=await sportsPage(t);await page.locator('#open-cinema').click();
-  await page.evaluate(async()=>{const {updateKidProfile}=await import('./parental-controls.js?v=release-1.2.3-party.1');updateKidProfile('viewer-1',{enabled:true});});
+  await page.evaluate(async()=>{const {updateKidProfile}=await import('./parental-controls.js?v=release-1.2.4-recovery.1');updateKidProfile('viewer-1',{enabled:true});});
   await page.locator('#open-sports').click();assert.equal(await page.locator('#sports-panel').isVisible(),false);assert.match(await page.locator('#sports-nav-message').textContent(),/adult viewer/);
 });
 test('expanded Sports filters expose football/hockey replays without a TorBox key or availability notice',async t=>{

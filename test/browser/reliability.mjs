@@ -38,7 +38,7 @@ async function pageFor(t,{saved=false,mediaMode='play',speedTimeouts=false,signe
   if(saved){
     // Seed through the real history API once the origin is available, then reload.
     await page.goto(fixture.origin);await page.waitForSelector('#workspace:not([hidden])');
-    await page.evaluate(async()=>{const {recordRecent}=await import('./history.js?v=release-1.2.3-party.1');recordRecent({current:{type:'series',id:'tt1234567',season:1,episode:1},title:'Fixture Show',episodeName:'One'},40,120);});
+    await page.evaluate(async()=>{const {recordRecent}=await import('./history.js?v=release-1.2.4-recovery.1');recordRecent({current:{type:'series',id:'tt1234567',season:1,episode:1},title:'Fixture Show',episodeName:'One'},40,120);});
   }
   return{page,context,token,errors};
 }
@@ -53,7 +53,7 @@ async function playEpisode(page,number=1){
 const artworkPixel=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aH0cAAAAASUVORK5CYII=','base64');
 async function mountArtwork(page,url){
   await page.evaluate(async url=>{
-    const {bindArtworkImage}=await import('./discover.js?v=release-1.2.3-party.1');
+    const {bindArtworkImage}=await import('./discover.js?v=release-1.2.4-recovery.1');
     const img=document.createElement('img');img.id='artwork-regression';img.alt='Artwork fixture';img.style.cssText='position:fixed;top:0;left:0;width:40px;height:60px';document.body.append(img);
     bindArtworkImage(img,url,'tt6933238');
   },url);
@@ -219,7 +219,7 @@ test('rapid episode choices play only the last selected episode',async t=>{
 
 test('a remembered encrypted key reconnects after a backend session restart',async t=>{
   const {page}=await pageFor(t);await home(page);
-  await page.evaluate(async()=>{const {rememberApiKey}=await import('./vault.js?v=release-1.2.3-party.1');await rememberApiKey('fixture-master-key');});
+  await page.evaluate(async()=>{const {rememberApiKey}=await import('./vault.js?v=release-1.2.4-recovery.1');await rememberApiKey('fixture-master-key');});
   fixture.sessions.revokeAll();
   await page.locator('#catalog-grid button').first().click();
   await page.locator('#episode-area button').filter({hasText:/^Play$/}).first().waitFor();

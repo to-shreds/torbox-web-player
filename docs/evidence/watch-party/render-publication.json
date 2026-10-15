@@ -1,0 +1,65 @@
+{
+  "checkedAt": "2026-10-15T02:07:36.877963+00:00",
+  "runtimeCommit": "345da16124644da1deb509662af07f4ee64079c6",
+  "backendMirror": "a23ddbb200816074c0cfeaf3d7e87dfc16ecf4a2",
+  "deployment": "dep-db83a7689jmc73c1n3vg",
+  "checks": [
+    {
+      "name": "health",
+      "status": 200,
+      "version": "1.2.3",
+      "ok": true
+    },
+    {
+      "name": "api-key session boundary",
+      "status": 200,
+      "authenticated": false,
+      "authMode": "api-key",
+      "ok": true
+    },
+    {
+      "name": "unauthenticated create",
+      "status": 401,
+      "error": "LOGIN_REQUIRED",
+      "ok": true
+    },
+    {
+      "name": "unauthenticated join",
+      "status": 401,
+      "error": "LOGIN_REQUIRED",
+      "ok": true
+    },
+    {
+      "name": "unauthenticated prepare",
+      "status": 401,
+      "error": "LOGIN_REQUIRED",
+      "ok": true
+    },
+    {
+      "name": "unauthenticated sync",
+      "status": 401,
+      "error": "LOGIN_REQUIRED",
+      "ok": true
+    },
+    {
+      "name": "unauthenticated leave",
+      "status": 401,
+      "error": "LOGIN_REQUIRED",
+      "ok": true
+    },
+    {
+      "name": "foreign origin rejected",
+      "status": 403,
+      "error": "BAD_ORIGIN",
+      "ok": true
+    },
+    {
+      "name": "trusted CORS preflight",
+      "status": 204,
+      "allowOrigin": "https://to-shreds.github.io",
+      "ok": true
+    }
+  ],
+  "success": true,
+  "scope": "Public health, auth and CORS boundaries only; no real TorBox account or media was used."
+}

@@ -1,9 +1,9 @@
-import {ENGINE_VERSION, MAX_ROM_BYTES, MAX_CATALOG_BYTES, cleanGamesCatalog, validateRom, romHash, saveIdentity, makeSaveRecord, validSaveRecord, fetchBytes, createStateStore} from './games-core.js?v=release-1.2.3-party.1';
-import {getKidProfile} from './parental-controls.js?v=release-1.2.3-party.1';
-import {nesPointerPosition} from './games-pointer.js?v=release-1.2.3-party.1';
-import {emptyCheats, normalizeCheatSet, parseCheatLines, applyCheats, readCheats, writeCheats, importCheats, exportCheats} from './games-cheats.js?v=release-1.2.3-party.1';
-import {cleanExtraGamesCatalog} from './extra-games-core.js?v=release-1.2.3-party.1';
-import {playExtraGame, closeExtraGame} from './extra-games.js?v=release-1.2.3-party.1';
+import {ENGINE_ASSET_VERSION, MAX_ROM_BYTES, MAX_CATALOG_BYTES, cleanGamesCatalog, validateRom, romHash, saveIdentity, makeSaveRecord, validSaveRecord, fetchBytes, createStateStore} from './games-core.js?v=release-1.2.4-recovery.1';
+import {getKidProfile} from './parental-controls.js?v=release-1.2.4-recovery.1';
+import {nesPointerPosition} from './games-pointer.js?v=release-1.2.4-recovery.1';
+import {emptyCheats, normalizeCheatSet, parseCheatLines, applyCheats, readCheats, writeCheats, importCheats, exportCheats} from './games-cheats.js?v=release-1.2.4-recovery.1';
+import {cleanExtraGamesCatalog} from './extra-games-core.js?v=release-1.2.4-recovery.1';
+import {playExtraGame, closeExtraGame} from './extra-games.js?v=release-1.2.4-recovery.1';
 
 const $ = id => document.getElementById(id);
 const dialog = $('games-player');
@@ -53,7 +53,7 @@ class AudioOutput {
       if (!AudioContextClass) throw new Error();
       this.context = new AudioContextClass();
       if (!this.context.audioWorklet) throw new Error();
-      this.ready = this.context.audioWorklet.addModule('./vendor/nes-audio-worklet.js?v=release-1.2.3-party.1').then(() => {
+      this.ready = this.context.audioWorklet.addModule('./vendor/nes-audio-worklet.js?v=release-1.2.4-recovery.1').then(() => {
         if (this.closed) return;
         this.node = new AudioWorkletNode(this.context, 'torbox-nes-audio', {outputChannelCount:[2]});
         this.node.connect(this.context.destination);
@@ -82,7 +82,7 @@ function ensureEngine() {
   enginePromise = new Promise((resolve, reject) => {
     const script = document.createElement('script');
     const timer = setTimeout(() => { script.remove(); reject(new Error('The NES engine did not load. Close the game and try again.')); }, 10000);
-    script.src = `./vendor/jsnes-${ENGINE_VERSION}.min.js?v=${ENGINE_VERSION}`;
+    script.src = `./vendor/jsnes-${ENGINE_ASSET_VERSION}.min.js?v=${ENGINE_ASSET_VERSION}`;
     script.onload = () => { clearTimeout(timer); if (window.jsnes?.NES) resolve(window.jsnes); else reject(new Error('The NES engine could not start.')); };
     script.onerror = () => { clearTimeout(timer); script.remove(); reject(new Error('The NES engine could not load. Close the game and try again.')); };
     document.head.appendChild(script);
@@ -397,11 +397,11 @@ async function loadCatalog() {
     render();
     const tasks = [];
     if (!catalog) tasks.push((async () => { try {
-      const bytes = await fetchBytes('./games-catalog.json?v=release-1.2.3-party.1',{maxBytes:MAX_CATALOG_BYTES,timeoutMs:10000});
+      const bytes = await fetchBytes('./games-catalog.json?v=release-1.2.4-recovery.1',{maxBytes:MAX_CATALOG_BYTES,timeoutMs:10000});
       catalog = cleanGamesCatalog(JSON.parse(new TextDecoder().decode(bytes))); catalogError = false;
     } catch { catalogError = true; } finally { render(); } })());
     if (!extraCatalog) tasks.push((async () => { try {
-      const bytes = await fetchBytes('./extra-games-catalog.json?v=release-1.2.3-party.1',{maxBytes:MAX_CATALOG_BYTES,timeoutMs:10000});
+      const bytes = await fetchBytes('./extra-games-catalog.json?v=release-1.2.4-recovery.1',{maxBytes:MAX_CATALOG_BYTES,timeoutMs:10000});
       extraCatalog = cleanExtraGamesCatalog(JSON.parse(new TextDecoder().decode(bytes))); extraCatalogError = false;
     } catch { extraCatalogError = true; } finally { render(); } })());
     await Promise.allSettled(tasks);

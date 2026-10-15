@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-10-15T06:07:35.755599+00:00",
+  "build": "release-1.2.3-games.1",
+  "syntaxAndPatchReproduction": true,
+  "node": {
+    "registered": 474,
+    "passed": 468,
+    "failed": 0,
+    "optionalSkipped": 6
+  },
+  "existingGamesAndCheatBrowser": {
+    "tests": 27,
+    "passed": 27,
+    "failed": 0,
+    "durationMs": 28123.455817
+  },
+  "realCartridgeGraphicsBrowser": {
+    "tests": 4,
+    "passed": 4,
+    "failed": 0,
+    "durationMs": 13467.735752
+  },
+  "independentReview": "No implementation defects found; 18 focused checks passed and original upstream renderer fails the new 8x16 regression with 108 wrong pixels.",
+  "visualInspection": [
+    "smb3-fixed-390.png",
+    "smb3-fixed-600.png"
+  ],
+  "limits": "Chromium with mobile touch emulation; no physical Android/device acceptance or full game playthrough."
+}

@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-10-15T06:16:58.299808+00:00",
+  "runtimeCommit": "ee3740e796d27c0c0914ff3830d202bf7bc115d5",
+  "runtimeTree": "f71b848cfaae9b164bc4d0521c70e50e997dc546",
+  "build": "release-1.2.3-games.1",
+  "run": "https://github.com/to-shreds/torbox-web-player/actions/runs/38690744905",
+  "verificationJob": 116275812893,
+  "node": {
+    "registered": 474,
+    "passed": 468,
+    "failed": 0,
+    "optionalSkipped": 6,
+    "durationMs": 6729.454226
+  },
+  "browser": {
+    "registered": 124,
+    "passed": 124,
+    "failed": 0,
+    "skipped": 0,
+    "durationMs": 376034.239884
+  },
+  "syntaxAndReproduciblePatch": "passed",
+  "result": "success"
+}

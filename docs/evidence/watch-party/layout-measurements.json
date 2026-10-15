@@ -1,0 +1,134 @@
+{
+  "checks": [
+    {
+      "screenshot": "docs/evidence/watch-party/watch-party-desktop.png",
+      "viewport": {
+        "width": 1100,
+        "height": 820
+      },
+      "close": {
+        "x": 1047.609375,
+        "y": 9.59375,
+        "width": 42,
+        "height": 42
+      },
+      "controls": [
+        {
+          "id": "player-watch-party",
+          "bounds": {
+            "x": 758.484375,
+            "y": 0,
+            "width": 83.65625,
+            "height": 34
+          },
+          "overlapX": -205.46875,
+          "overlapY": 24.40625,
+          "overlapsClose": false
+        },
+        {
+          "id": "toggle-fullscreen",
+          "bounds": {
+            "x": 848.53125,
+            "y": 0,
+            "width": 76.046875,
+            "height": 34
+          },
+          "overlapX": -123.03125,
+          "overlapY": 24.40625,
+          "overlapsClose": false
+        },
+        {
+          "id": "toggle-pip",
+          "bounds": {
+            "x": 930.96875,
+            "y": 0,
+            "width": 109.03125,
+            "height": 34
+          },
+          "overlapX": -7.609375,
+          "overlapY": 24.40625,
+          "overlapsClose": false
+        }
+      ],
+      "violations": []
+    },
+    {
+      "screenshot": "docs/evidence/watch-party/watch-party-phone.png",
+      "viewport": {
+        "width": 412,
+        "height": 915
+      },
+      "close": {
+        "x": 369.609375,
+        "y": 9.59375,
+        "width": 42,
+        "height": 42
+      },
+      "controls": [
+        {
+          "id": "player-watch-party",
+          "bounds": {
+            "x": 107.9375,
+            "y": 11.5,
+            "width": 74.65625,
+            "height": 32
+          },
+          "overlapX": -187.015625,
+          "overlapY": 32,
+          "overlapsClose": false
+        },
+        {
+          "id": "toggle-fullscreen",
+          "bounds": {
+            "x": 187.0625,
+            "y": 11.5,
+            "width": 67.734375,
+            "height": 32
+          },
+          "overlapX": -114.8125,
+          "overlapY": 32,
+          "overlapsClose": false
+        },
+        {
+          "id": "toggle-pip",
+          "bounds": {
+            "x": 259.265625,
+            "y": 11.5,
+            "width": 97.734375,
+            "height": 32
+          },
+          "overlapX": -12.609375,
+          "overlapY": 32,
+          "overlapsClose": false
+        }
+      ],
+      "violations": []
+    }
+  ],
+  "generatedAt": "2026-10-15T02:02:33.513Z",
+  "sourceSha256": {
+    "public/watch-party.js": "16ec766c2892abdb1bf822b0d2ff1dfae8b0f728ca9eb223aa5c555caf85aedf",
+    "public/watch-party-core.js": "74e98fa0e18b9593e6c223fa7f8a8af9ca6076c748d3d65e4fc318d404d5f6a3",
+    "public/app.js": "7721e6ab09e3de2d87a426fce7c0cebb4343752a03355046cf140502351cc0ed",
+    "lib/watch-party.mjs": "e42fcac12f87599db9b18e07d7d57cbc8769e4f594fdb056671f321e51456011",
+    "server.mjs": "71d026527912a4ed488651e226b9a4865e081e58091d7e23e9f08539344efe08"
+  },
+  "playbackTiming": {
+    "driftSeconds": 0.07519400000000001,
+    "host": {
+      "time": 0.122854,
+      "paused": false,
+      "duration": 120,
+      "readyState": 4,
+      "rate": 1
+    },
+    "guest": {
+      "time": 0.04766,
+      "paused": false,
+      "duration": 120,
+      "readyState": 4,
+      "rate": 1
+    },
+    "separateProviderFilesAndTickets": true
+  }
+}
