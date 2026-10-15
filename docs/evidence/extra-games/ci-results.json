@@ -1,0 +1,20 @@
+{
+  "runtimeCommit": "8acf97558c9b16d7f7d692fb1ff79fa76b270040",
+  "tree": "99fdcb4a15d87da140bfdcbf1350006c33a86adf",
+  "workflow": "https://github.com/to-shreds/torbox-web-player/actions/runs/38492018539",
+  "conclusion": "success",
+  "deployedAt": "2026-10-14T00:51:44Z",
+  "node": {
+    "registered": 424,
+    "passed": 418,
+    "failed": 0,
+    "skipped": 6,
+    "durationMs": 5869.58605
+  },
+  "chromium": {
+    "registered": 105,
+    "passed": 105,
+    "failed": 0,
+    "durationMs": 278106.546955
+  }
+}
