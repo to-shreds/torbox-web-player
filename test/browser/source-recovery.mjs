@@ -117,7 +117,7 @@ for (const failure of ['incompatible', 'empty']) test(`${failure} source results
   const { page, context, prepareBodies, lookupQueries } = await pageFor(t); let recovered = false, lookups = 0;
   await context.route('**/api/discover/lookup?**', route => {
     lookups++;
-    return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ complete: true, sources: recovered ? [source()] : failure === 'incompatible' ? [source('mkv')] : [] }) });
+    return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ complete: true, sources: recovered ? [source()] : failure === 'incompatible' ? [source('avi')] : [] }) });
   });
   await chooseEpisode(page);
   const retry = page.locator('#play-fallback [data-action="retry-sources"]'); await fallbackVisible(page, t, retry);
@@ -207,7 +207,7 @@ for (const startOver of [false, true]) test(`${startOver ? 'Start over' : 'Resum
   await context.route('**/api/discover/lookup?**', route => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ complete: true, sources: recovered ? [source()] : [] }) }));
   await page.goto(fixture.origin); await page.waitForSelector('#workspace:not([hidden])');
   await page.evaluate(async () => {
-    const { recordRecent } = await import('./history.js?v=release-1.2.5-search.1');
+    const { recordRecent } = await import('./history.js?v=release-1.2.6-playback.1');
     recordRecent({ current: { type: 'series', id: 'tt1234567', season: 1, episode: 1 }, title: 'Fixture Show', episodeName: 'One' }, 40, 120);
   });
   await page.reload(); await page.waitForSelector('#workspace:not([hidden])');

@@ -1,0 +1,115 @@
+{
+  "input": "live-multisource.json examples",
+  "networkRequests": 0,
+  "scope": "Replayed actual captured provider metadata through updated language parser; no inferred release-group language.",
+  "rows": [
+    {
+      "provider": "stremthru.13377001.xyz",
+      "kind": "selectedDubExamples",
+      "filename": "Dexter.Resurrection.S01E01.WEB-DL.1080p.Dub.Dragon.Money.Studio.mp4",
+      "languages": [],
+      "languageEvidence": [],
+      "rawAudioLines": []
+    },
+    {
+      "provider": "stremthru.13377001.xyz",
+      "kind": "selectedDubExamples",
+      "filename": "Dexter.Resurrection.S01E01.1080p.H264.AAC.WEBRip.DUB.le-production.mp4",
+      "languages": [],
+      "languageEvidence": [],
+      "rawAudioLines": []
+    },
+    {
+      "provider": "stremthru.13377001.xyz",
+      "kind": "selectedNonDubExamples",
+      "filename": "Dexter.Resurrection.S01E01.2160p.WEB-DL.DV.P5[Ben The Men].mp4",
+      "languages": [
+        "en"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "rawAudioLines": [
+        "🎙️ 🇬🇧",
+        "💬 🇬🇧"
+      ]
+    },
+    {
+      "provider": "stremthru.13377001.xyz",
+      "kind": "selectedNonDubExamples",
+      "filename": "Dexter.Resurrection.S01E01.2160p.WEB-DL.DV.P5[Ben The Men].mp4",
+      "languages": [
+        "en"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "rawAudioLines": [
+        "🎙️ 🇬🇧",
+        "💬 🇬🇧"
+      ]
+    },
+    {
+      "provider": "stremthru.13377001.xyz",
+      "kind": "selectedNonDubExamples",
+      "filename": "Dexter.Resurrection.S01E01.1080p.H264.AAC.WEBRip.le-production.mp4",
+      "languages": [],
+      "languageEvidence": [],
+      "rawAudioLines": []
+    },
+    {
+      "provider": "stremthru.elfhosted.com",
+      "kind": "selectedDubExamples",
+      "filename": "Dexter.Resurrection.S01E01.WEB-DL.1080p.Dub.Dragon.Money.Studio.mp4",
+      "languages": [],
+      "languageEvidence": [],
+      "rawAudioLines": []
+    },
+    {
+      "provider": "stremthru.elfhosted.com",
+      "kind": "selectedDubExamples",
+      "filename": "Dexter.Resurrection.S01E01.1080p.H264.AAC.WEBRip.DUB.le-production.mp4",
+      "languages": [],
+      "languageEvidence": [],
+      "rawAudioLines": []
+    },
+    {
+      "provider": "stremthru.elfhosted.com",
+      "kind": "selectedNonDubExamples",
+      "filename": "Dexter.Resurrection.S01E01.2160p.WEB-DL.DV.P5[Ben The Men].mp4",
+      "languages": [
+        "en"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "rawAudioLines": [
+        "🎙️ 🇬🇧",
+        "💬 🇬🇧"
+      ]
+    },
+    {
+      "provider": "stremthru.elfhosted.com",
+      "kind": "selectedNonDubExamples",
+      "filename": "Dexter.Resurrection.S01E01.2160p.WEB-DL.DV.P5[Ben The Men].mp4",
+      "languages": [
+        "en"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "rawAudioLines": [
+        "🎙️ 🇬🇧",
+        "💬 🇬🇧"
+      ]
+    },
+    {
+      "provider": "stremthru.elfhosted.com",
+      "kind": "selectedNonDubExamples",
+      "filename": "Dexter.Resurrection.S01E01.1080p.H264.AAC.WEBRip.le-production.mp4",
+      "languages": [],
+      "languageEvidence": [],
+      "rawAudioLines": []
+    }
+  ]
+}

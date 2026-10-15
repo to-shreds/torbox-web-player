@@ -1,0 +1,42 @@
+{
+  "target": {
+    "type": "series",
+    "id": "tt33043892",
+    "season": 1,
+    "episode": 1
+  },
+  "method": "Observed direct public fetch comparison before implementation changes; recorded from tool output. Exact observation timestamp was not captured.",
+  "legacyPath": "/stream/series/tt33043892:1:1.json",
+  "configuredPath": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:1.json",
+  "comparisons": [
+    {
+      "provider": "StremThru Torz Main",
+      "mode": "configured path",
+      "status": 200,
+      "elapsedMs": 5164,
+      "rawStreams": 403
+    },
+    {
+      "provider": "StremThru Torz Main",
+      "mode": "legacy host-root path",
+      "status": 404,
+      "elapsedMs": 3752,
+      "body": "404 page not found"
+    },
+    {
+      "provider": "StremThru Torz ElfHosted",
+      "mode": "configured path",
+      "status": 200,
+      "elapsedMs": 6774,
+      "rawStreams": 409
+    },
+    {
+      "provider": "StremThru Torz ElfHosted",
+      "mode": "legacy host-root path",
+      "status": 404,
+      "elapsedMs": 4732,
+      "body": "404 page not found"
+    }
+  ],
+  "scope": "Public metadata endpoints only; no account/cache/media access."
+}

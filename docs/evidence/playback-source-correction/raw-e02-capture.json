@@ -1,0 +1,17 @@
+{
+  "capturedAt": "2026-10-15T20:37:18.825Z",
+  "provider": "StremThru Torz Main",
+  "publicEndpoint": "https://stremthru.13377001.xyz/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:2.json",
+  "target": {
+    "type": "series",
+    "id": "tt33043892",
+    "season": 1,
+    "episode": 2
+  },
+  "status": 200,
+  "elapsedMs": 5888,
+  "requestCount": 1,
+  "rawCount": 389,
+  "uniqueSyntheticHashes": 389,
+  "note": "Actual public provider metadata. Torrent hashes replaced with deterministic synthetic IDs, preserving same-hash relationships. Links and unrelated provider fields removed. Audio language is attested only where the original structured language fields or microphone audio lines state it. Subtitle flags and DUB labels do not attest audio language. No TorBox account, cache check, download, or media request."
+}

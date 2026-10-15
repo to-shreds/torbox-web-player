@@ -1,5 +1,5 @@
 // Shared source normalization and authenticated backend lookup. No provider keys here.
-import { apiUrl, apiMode, getSessionToken, credentialsMode } from './runtime.js?v=release-1.2.5-search.1';
+import { apiUrl, apiMode, getSessionToken, credentialsMode } from './runtime.js?v=release-1.2.6-playback.1';
 export const SOURCE_PATH = '/api/discover/lookup';
 export const MAX_SOURCES = 40;
 export function targetOf(input) {
@@ -12,8 +12,8 @@ export function targetOf(input) {
   return target;
 }
 export const cleanText = (s, max = 300) => typeof s === 'string' ? s.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, max) : '';
-const BROWSER_CONTAINERS = new Set(['mp4', 'm4v', 'webm']);
-const UNSUPPORTED_BROWSER_CONTAINERS = new Set(['avi', 'mkv', 'wmv', 'ts', 'm2ts', 'mts', 'mpg', 'mpeg', 'mov', 'ogv', 'ogg', 'iso', 'dmg']);
+const BROWSER_CONTAINERS = new Set(['mp4', 'm4v', 'webm', 'mkv']);
+const UNSUPPORTED_BROWSER_CONTAINERS = new Set(['avi', 'wmv', 'ts', 'm2ts', 'mts', 'mpg', 'mpeg', 'mov', 'ogv', 'ogg', 'iso', 'dmg']);
 const containerAlias = value => ({
   'x-msvideo': 'avi', 'msvideo': 'avi', 'matroska': 'mkv', 'x-matroska': 'mkv',
   'quicktime': 'mov', 'mp2t': 'ts', 'x-m4v': 'm4v', 'ogg': 'ogv'
@@ -28,7 +28,15 @@ export function browserContainerHints(source = {}) {
   const container = filenameExtension || declared || titleExtension || mimeContainer;
   const browserContainer = BROWSER_CONTAINERS.has(container);
   const browserUnsupported = UNSUPPORTED_BROWSER_CONTAINERS.has(container);
-  return { container, browserContainer, browserUnsupported, containerStatus: browserContainer ? 'supported' : browserUnsupported ? 'unsupported' : 'unknown' };
+  // Native Matroska decoding depends on codecs and the browser. Even an empty
+  // canPlayType() result can decode successfully, so let the actual player try
+  // a suitable file and use its existing bounded codec recovery on failure.
+  return { container, browserContainer, browserUnsupported, containerStatus: container === 'mkv' ? 'conditional' : browserContainer ? 'supported' : browserUnsupported ? 'unsupported' : 'unknown' };
+}
+export function normalizeSourceLanguages(value) {
+  const aliases={english:'en',eng:'en',french:'fr',fre:'fr',fra:'fr',spanish:'es',spa:'es',german:'de',ger:'de',deu:'de',russian:'ru',rus:'ru',italian:'it',ita:'it',portuguese:'pt',por:'pt',polish:'pl',pol:'pl',hindi:'hi',hin:'hi',japanese:'ja',jpn:'ja',korean:'ko',kor:'ko',chinese:'zh',chi:'zh',zho:'zh',arabic:'ar',ara:'ar',turkish:'tr',tur:'tr',ukrainian:'uk',ukr:'uk',dutch:'nl',dut:'nl',nld:'nl',swedish:'sv',swe:'sv',norwegian:'no',nor:'no',finnish:'fi',fin:'fi',danish:'da',dan:'da',czech:'cs',cze:'cs',ces:'cs',romanian:'ro',rum:'ro',ron:'ro',hungarian:'hu',hun:'hu',greek:'el',gre:'el',ell:'el',thai:'th',tha:'th',indonesian:'id',ind:'id',vietnamese:'vi',vie:'vi',lithuanian:'lt',lit:'lt'};
+  const known=new Set(['en','fr','es','de','ru','it','pt','pl','hi','ja','ko','zh','ar','tr','uk','nl','sv','no','fi','da','cs','ro','hu','el','th','id','vi','lt']);
+  return [...new Set((Array.isArray(value)?value:[]).slice(0,20).filter(item=>typeof item==='string').map(item=>item.trim().toLowerCase()).map(item=>aliases[item]||item).filter(item=>known.has(item)))].slice(0,12);
 }
 export function parseSizeBytes(value) {
   if (Number.isSafeInteger(value) && value > 0) return value;
@@ -48,27 +56,35 @@ export function sourceHints(source) {
   const h264 = /\b(h[ ._-]?264|x264|avc)\b/i.test(name);
   const hevc = /\b(hevc|h[ ._-]?265|x265)\b/i.test(name);
   const av1 = /\bav1\b/i.test(name);
+  const legacyVideo = /\b(?:xvid|divx|mpeg[ ._-]?4(?:[ ._-]?part[ ._-]?2)?)\b/i.test(name);
   const aac = /\baac\b/i.test(name);
   const mp3 = /\b(mp3|mpeg[ ._-]?audio)\b/i.test(name);
   const opus = /\bopus\b/i.test(name);
   const difficultAudio = /\b(dts(?:[ ._-]?hd)?|truehd|e[ ._-]?ac[ ._-]?3|ac[ ._-]?3|ddp|dd\+|dolby[ ._-]?digital(?:[ ._-]?plus)?|dolby[ ._-]?atmos)\b/i.test(name);
   const containerHints = browserContainerHints(source);
   const quality = cleanText(source.resolution, 20).toUpperCase() || /\b(2160p|1080p|720p|480p|4k)\b/i.exec(name)?.[1].toUpperCase() || '';
-  const browserFriendly = h264 && (aac || mp3) && !difficultAudio && !containerHints.browserUnsupported;
+  const browserFriendly = h264 && (aac || mp3 || (opus && containerHints.container === 'mkv')) && !hevc && !av1 && !legacyVideo && !difficultAudio && !containerHints.browserUnsupported;
   const audioRisk = difficultAudio;
-  const videoRisk = hevc || av1;
+  const videoRisk = hevc || av1 || legacyVideo;
+  const languages = normalizeSourceLanguages(source.languages);
+  const dubUnconfirmed = !languages.length && /\b(?:dub|dubbed)\b/i.test(`${source.filename || ''} ${source.title || ''}`);
+  // Preserve useful English choices before the bounded source list is sliced.
+  // DUB is a ranking warning, never evidence of any particular language.
+  const languageScore = languages.includes('en') ? (languages.length === 1 ? 140 : 120) : languages.length ? -160 : dubUnconfirmed ? -80 : 0;
   const score = (browserFriendly ? 120 : 0) + (h264 ? 35 : 0) + (aac ? 45 : 0) + (mp3 ? 25 : 0) + (opus ? 15 : 0) + (mp4 ? 20 : 0)
     + (containerHints.browserContainer ? 80 : 0) - (containerHints.browserUnsupported ? 500 : 0)
-    - (audioRisk ? 90 : 0) - (hevc ? 55 : 0) - (av1 ? 20 : 0)
-    + (['1080P', '720P'].includes(quality) ? 10 : 0) - (['2160P', '4K'].includes(quality) ? 8 : 0);
+    - (audioRisk ? 90 : 0) - (hevc ? 55 : 0) - (av1 ? 20 : 0) - (legacyVideo ? 100 : 0)
+    + (['1080P', '720P'].includes(quality) ? 10 : 0) - (['2160P', '4K'].includes(quality) ? 8 : 0) + languageScore;
   let hint = 'Codecs not confirmed';
   if (containerHints.browserUnsupported) hint = `${containerHints.container.toUpperCase()} container is not supported by Android Chrome`;
-  else if (browserFriendly) hint = 'Best browser bet · H.264 / AAC';
+  else if (browserFriendly) hint = containerHints.container === 'mkv' ? 'Matroska H.264 · browser and audio support vary' : 'Best browser bet · H.264 / AAC';
   else if (audioRisk) hint = 'Dolby/DTS audio may be silent in Chrome';
   else if (hevc) hint = 'HEVC/H.265 may not play in Chrome';
   else if (av1) hint = 'AV1 compatibility varies by device';
+  else if (legacyVideo) hint = 'Legacy MPEG-4 video may not play in this browser';
   else if (aac) hint = 'AAC audio indicated';
   else if (mp4) hint = 'MP4 container · audio codec unconfirmed';
+  else if (containerHints.container === 'mkv') hint = 'Matroska · browser and codec support vary';
   return { quality, score, hint, browserFriendly, audioRisk, videoRisk, ...containerHints };
 }
 export function normalizeSources(raw) {
@@ -94,7 +110,9 @@ export function normalizeSources(raw) {
     }
     const provider = cleanText(item.provider, 60);
     const providers = [...new Set([...(Array.isArray(item.providers) ? item.providers : []), provider].filter(v => typeof v === 'string').map(v => cleanText(v, 60)).filter(Boolean))].slice(0, 6);
-    const source = { hash, filename, title, label: cleanText(item.name || item.label, 80), provider, providers, fileIdx, size: parseSizeBytes(sizeValue), seeders, videoCodec, audioCodecs, resolution, releaseQuality, container };
+    const languages = normalizeSourceLanguages(item.languages);
+    const languageEvidence = [...new Set((Array.isArray(item.languageEvidence)?item.languageEvidence:[]).filter(value=>['structured:languages','structured:language','description:audio'].includes(value)))];
+    const source = { hash, filename, title, label: cleanText(item.name || item.label, 80), provider, providers, fileIdx, size: parseSizeBytes(sizeValue), seeders, videoCodec, audioCodecs, languages, languageEvidence, resolution, releaseQuality, container };
     // Source file indexes are not TorBox file IDs. Never treat them as interchangeable.
     const key = `${hash}:${filename}:${fileIdx}`;
     if (!map.has(key)) map.set(key, { ...source, ...sourceHints(source) });

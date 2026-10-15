@@ -1,0 +1,3804 @@
+{
+  "capturedAt": "2026-10-15T20:37:18.825Z",
+  "provider": "StremThru Torz Main",
+  "publicEndpoint": "https://stremthru.13377001.xyz/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:2.json",
+  "target": {
+    "type": "series",
+    "id": "tt33043892",
+    "season": 1,
+    "episode": 2
+  },
+  "status": 200,
+  "elapsedMs": 5888,
+  "requestCount": 1,
+  "rawCount": 389,
+  "uniqueSyntheticHashes": 389,
+  "note": "Actual public provider metadata. Torrent hashes replaced with deterministic synthetic IDs, preserving same-hash relationships. Links and unrelated provider fields removed. Audio language is attested only where the original structured language fields or microphone audio lines state it. Subtitle flags and DUB labels do not attest audio language. No TorBox account, cache check, download, or media request.",
+  "streams": [
+    {
+      "infoHash": "00000000000000000000000000000000000f4276",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10 🎧 5.1, stereo\n💾 9.7 GB 📦 105 GB 〽️ 3.6 MB/s 👤 56\n🎙️ 🇷🇺 🇺🇦 🇬🇧\n💬 🇷🇺 🇺🇦 🇬🇧\n🔍 Knaben\n📄 Dexter.Resurrection.S01E02.2160p.ATV.WEB-DL.DV.HDR.H.265.RGzsRutracker.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.ATV.WEB-DL.DV.HDR.H.265.RGzsRutracker.mkv",
+        "videoSize": 10373559720
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4241",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR10 🎧 5.1, stereo\n💾 9.5 GB 📦 91 GB 〽️ 3.6 MB/s\n🎙️ 🇷🇺 🇺🇦 🇬🇧\n💬 🇷🇺 🇬🇧 🇺🇦\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 10214984241
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f428b",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR10 🎧 5.1, stereo\n💾 9.5 GB 📦 83 GB 〽️ 3.6 MB/s\n🎙️ 🇷🇺 🇺🇦 🇬🇧\n💬 🇷🇺 🇬🇧 🇺🇦\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 10214984241
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4298",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR \n💾 9.5 GB 📦 52 GB 👤 4\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 10214984241
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f429b",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR \n💾 9.5 GB 📦 82 GB\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 10214984241
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42aa",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR \n💾 9.5 GB 📦 92 GB\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 10214984241
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4318",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR \n💾 9.5 GB 📦 101 GB\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 10214984241
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4338",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR10 🎧 5.1, stereo\n💾 9.5 GB 📦 74 GB 〽️ 3.6 MB/s 👤 1\n🎙️ 🇷🇺 🇺🇦 🇬🇧\n💬 🇷🇺 🇬🇧 🇺🇦\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 10214984241
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4377",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR \n💾 9.5 GB 📦 24 GB 👤 1\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 10214984241
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4379",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR \n💾 9.5 GB 📦 30 GB 👤 1\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 10214984241
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f437f",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR10 🎧 5.1, stereo\n💾 9.5 GB 📦 42 GB 〽️ 3.6 MB/s 👤 2\n🎙️ 🇷🇺 🇺🇦 🇬🇧\n💬 🇷🇺 🇬🇧 🇺🇦\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 10214984241
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4323",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR \n💾 9.1 GB 📦 22 GB\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 9759647810
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42ae",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR \n💾 8.8 GB 📦 18 GB 👤 1\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 9463564782
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43c4",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10 🎧 DDP | 5.1\n📦 8.6 GB 〽️ 3.2 MB/s\n🎙️ 🇫🇷 🇬🇧\n💬 🇬🇧 🇫🇷\n⚙️ BOUC \n📄 Dexter.Resurrection.S01E02.MULTi.2160p.DV.HDR.WEB-DL.DDP5.1.H265-BOUC.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.2160p.DV.HDR.WEB-DL.DDP5.1.H265-BOUC.mkv",
+        "videoSize": 9181289156
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42ec",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL \n📺 HDR \n💾 8.5 GB 📦 48 GB\n📄 Dexter. Resurrection (2025) S01E02 - Camera Shy.mkv",
+      "behaviorHints": {
+        "filename": "Dexter. Resurrection (2025) S01E02 - Camera Shy.mkv",
+        "videoSize": 9144523385
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f431d",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL \n📺 HDR \n💾 8.5 GB 📦 39 GB\n📄 Dexter. Resurrection (2025) S01E02 - Camera Shy.mkv",
+      "behaviorHints": {
+        "filename": "Dexter. Resurrection (2025) S01E02 - Camera Shy.mkv",
+        "videoSize": 9144523385
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4254",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR 🎧 DDP | 5.1\n💾 8.4 GB 📦 47 GB\n🌐 🇬🇧 🇮🇹\n⚙️ MeM \n📄 Dexter.Resurrection.S01E02.Assassino.in.incognito.ITA.ENG.2160p.ATV.WEB.DL.DDP5.1.DV.HDR.H.265-MeM.GP.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Assassino.in.incognito.ITA.ENG.2160p.ATV.WEB.DL.DDP5.1.DV.HDR.H.265-MeM.GP.mkv",
+        "videoSize": 9052497035
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4349",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10 🎧 DDP | 5.1\n💾 8.4 GB 📦 57 GB 〽️ 3.2 MB/s 👤 6\n🎙️ 🇮🇹 🇬🇧\n💬 🇮🇹 🇬🇧\n⚙️ MeM 🔍 Uindex\n📄 Dexter.Resurrection.S01E02.Assassino.in.incognito.ITA.ENG.2160p.ATV.WEB.DL.DDP5.1.DV.HDR.H.265-MeM.GP.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Assassino.in.incognito.ITA.ENG.2160p.ATV.WEB.DL.DDP5.1.DV.HDR.H.265-MeM.GP.mkv",
+        "videoSize": 9052497035
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4354",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10 🎧 DDP | 5.1\n💾 8.4 GB 📦 91 GB 〽️ 3.2 MB/s 👤 4\n🎙️ 🇬🇧 🇵🇱\n💬 🇬🇧 🇵🇱\n⚙️ Ralf 🔗 Ex-torrenty.org\n📄 Dexter.Resurrection.S01E02.Camera.Shy.MULTi.2160p.ATVP.WEB-DL.DDP5.1.DoVi.HDR10.HEVC-Ralf.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.MULTi.2160p.ATVP.WEB-DL.DDP5.1.DoVi.HDR10.HEVC-Ralf.mkv",
+        "videoSize": 8968766813
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4243",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10 🎧 Atmos, DD | 5.1\n📦 8.2 GB 〽️ 3.1 MB/s 👤 167\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ FLUX 🔍 TorrentGalaxyClone\n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DD5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DD5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+        "videoSize": 8825616149
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f426f",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR 🎧 Atmos, DDP | 5.1\n💾 8.2 GB 📦 90 GB 〽️ 3.1 MB/s\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ FLUX \n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DD5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DD5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+        "videoSize": 8825616149
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4275",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR 🎧 Atmos, DDP | 5.1\n💾 8.2 GB 📦 90 GB\n⚙️ FLUX \n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DD5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DD5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+        "videoSize": 8825616149
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4279",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR 🎧 Atmos, DDP | 5.1\n💾 8.2 GB 📦 90 GB\n⚙️ FLUX \n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DD5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DD5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+        "videoSize": 8825616149
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4285",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR 🎧 Atmos, DD | 5.1\n📦 8.2 GB\n⚙️ FLUX \n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DD5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DD5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+        "videoSize": 8825616149
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42be",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10 🎧 Atmos, DDP | 5.1\n📦 8.2 GB 〽️ 3.1 MB/s\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ Kitsune \n📄 Dexter Resurrection S01E02 Camera Shy 2160p ATV WEB-DL DDP5 1 Atmos DV HDR H 265-Kitsune.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 2160p ATV WEB-DL DDP5 1 Atmos DV HDR H 265-Kitsune.mkv",
+        "videoSize": 8824879971
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4369",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10 🎧 Atmos, DDP | 5.1\n💾 8.2 GB 📦 90 GB 〽️ 3.1 MB/s 👤 42\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ FLUX 🔍 TorrentGalaxyClone\n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DD5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DD5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+        "videoSize": 8825616149
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f424e",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n🎧 Atmos, DDP | 5.1\n💾 7.1 GB 📦 77 GB\n⚙️ KRATOS \n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DDP5.1.Atmos.H.265-KRATOS.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.ATV.WEB-DL.DDP5.1.Atmos.H.265-KRATOS.mkv",
+        "videoSize": 7600222769
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42cb",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 SDR 🎧 Atmos, DDP | 5.1\n💾 7.1 GB 📦 77 GB\n🌐 🇬🇧\n📄 Dexter - Resurrection (2025) S01E02 (2160p ATV WEB-DL H265 SDR DDP Atmos 5.1 English - HONE).mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter - Resurrection (2025) S01E02 (2160p ATV WEB-DL H265 SDR DDP Atmos 5.1 English - HONE).mkv",
+        "videoSize": 7600225688
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43b0",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n🎧 DD | 5.1\n💾 7.0 GB 📦 75 GB 〽️ 2.6 MB/s 👤 6\n🌐 🇬🇧\n⚙️ ColorTV 🔍 Knaben\n📄 Dexter.Resurrection.S01E02.2025.2160p.ATVP.WEB-DL.DD5.1.H.265-ColorTV.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2025.2160p.ATVP.WEB-DL.DD5.1.H.265-ColorTV.mkv",
+        "videoSize": 7463621261
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4340",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 SDR 🎧 5.1, stereo\n💾 6.6 GB 📦 72 GB 〽️ 2.5 MB/s 👤 2\n🎙️ 🇷🇺 🇺🇦 🇬🇧\n💬 🇷🇺 🇺🇦 🇬🇧\n🔍 Knaben\n📄 Dexter.Resurrection.S01E02.2160p.AMZN.WEB-DL.H.265.RGzsRutracker.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.AMZN.WEB-DL.H.265.RGzsRutracker.mkv",
+        "videoSize": 7134374863
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4249",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 SDR 🎧 stereo, 5.1\n💾 5.4 GB 📦 11 GB 〽️ 2.0 MB/s\n🎙️ 🇺🇦 🇬🇧\n💬 🇺🇦 🇬🇧\n📄 Dexter. Resurrection S01E02 - Camera Shy.mkv",
+      "behaviorHints": {
+        "filename": "Dexter. Resurrection S01E02 - Camera Shy.mkv",
+        "videoSize": 5757556771
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4261",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n🎧 DD | 5.1\n📦 5.2 GB 👤 2\n⚙️ playWEB 🔍 Knaben\n📄 Dexter Resurrection S01E02 Camera Shy 2160p AMZN WEB-DL DD 5 1 H 265-playWEB.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 2160p AMZN WEB-DL DD 5 1 H 265-playWEB.mkv",
+        "videoSize": 5540963858
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f434a",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n🎧 DDP | 5.1\n💾 5.2 GB 📦 56 GB 〽️ 2.0 MB/s\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ NTb \n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.AMZN.WEB-DL.DDP5.1.H.265-NTb.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.AMZN.WEB-DL.DDP5.1.H.265-NTb.mkv",
+        "videoSize": 5586450538
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f434d",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n🎧 DDP | 5.1\n📦 5.2 GB 〽️ 2.0 MB/s 👤 4\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ NTb 🔍 Torrents.csv\n📄 Dexter Resurrection S01E02 Camera Shy 2160p AMZN WEB-DL DDP5 1 H 265-NTb.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 2160p AMZN WEB-DL DDP5 1 H 265-NTb.mkv",
+        "videoSize": 5586450538
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4299",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR \n💾 3.5 GB 📦 7.8 GB\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 3761494895
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f432d",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n🎧 DDP | 5.1\n💾 3.5 GB 📦 34 GB 〽️ 1.3 MB/s\n🎙️ 🇬🇧\n💬 🇬🇧\n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.10bit.AMZN.WEB-DL.DDP5.1.HEVC-Vyndros.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.10bit.AMZN.WEB-DL.DDP5.1.HEVC-Vyndros.mkv",
+        "videoSize": 3748816829
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43b8",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n🎧 DDP | 5.1\n💾 3.5 GB 📦 34 GB 〽️ 1.3 MB/s 👤 71\n🎙️ 🇬🇧\n💬 🇬🇧\n🔍 Knaben\n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.10bit.AMZN.WEB-DL.DDP5.1.HEVC-Vyndros.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.10bit.AMZN.WEB-DL.DDP5.1.HEVC-Vyndros.mkv",
+        "videoSize": 3748816829
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f434e",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV 🎧 Atmos, DDP | 5.1\n💾 3.0 GB 📦 34 GB 〽️ 1.1 MB/s 👤 9\n🎙️ 🇬🇧\n💬 🇬🇧\n📄 Dexter.Resurrection.S01E02.2160p.WEB-DL.DV.P5[Ben The Men].mp4",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.WEB-DL.DV.P5[Ben The Men].mp4",
+        "videoSize": 3263409887
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4397",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV 🎧 Atmos, DDP | 5.1\n💾 3.0 GB 📦 34 GB 〽️ 1.1 MB/s 👤 5\n🎙️ 🇬🇧\n💬 🇬🇧\n🔍 Knaben\n📄 Dexter.Resurrection.S01E02.2160p.WEB-DL.DV.P5[Ben The Men].mp4",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.WEB-DL.DV.P5[Ben The Men].mp4",
+        "videoSize": 3263409887
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42d8",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR \n💾 2.9 GB 📦 6.3 GB\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 3135821568
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4270",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV 🎧 Atmos, DD | 5.1\n📦 2.8 GB 〽️ 1.0 MB/s 👤 1\n🎙️ 🇬🇧\n💬 🇬🇧 🇩🇪 🇪🇸 🇮🇹 🇵🇹\n⚙️ playWEB 🔍 Knaben\n📄 Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DD 5 1 Atmos DoVi H 265-playWEB.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DD 5 1 Atmos DoVi H 265-playWEB.mkv",
+        "videoSize": 2967904300
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4257",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV 🎧 DDP | 5.1\n📦 2.7 GB 〽️ 1.0 MB/s 👤 10\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ NTb 🔍 Knaben\n📄 Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 DV H 265-NTb.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 DV H 265-NTb.mkv",
+        "videoSize": 2918802897
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43a0",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV 🎧 Atmos, DDP | 5.1\n📦 2.7 GB 👤 21\n⚙️ STC 🔍 TheRARBG\n📄 Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 Atmos DV H 265-STC.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 Atmos DV H 265-STC.mkv",
+        "videoSize": 2918770328
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43a7",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV 🎧 Atmos, DDP | 5.1\n📦 2.7 GB 〽️ 1.0 MB/s 👤 25\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ FLUX 🔍 TheRARBG\n📄 Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 Atmos DV H 265-FLUX.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 Atmos DV H 265-FLUX.mkv",
+        "videoSize": 2918802868
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42c5",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR 🎧 DDP | 5.1\n📦 2.6 GB\n🌐 🇬🇧 🇩🇪\n⚙️ TvR \n📄 Dexter.Resurrection.2025.S01E02.Kamerascheu.Ger.Eng.5.1.UNTOUCHED.DUBBED.DL.EAC3.2160p.WEB-DL.DV.HDR.HEVC-TvR.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.2025.S01E02.Kamerascheu.Ger.Eng.5.1.UNTOUCHED.DUBBED.DL.EAC3.2160p.WEB-DL.DV.HDR.HEVC-TvR.mkv",
+        "videoSize": 2742301457
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4344",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR \n💾 2.6 GB 📦 6.0 GB 👤 1\n📄 Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.HDR.Master5.mkv",
+        "videoSize": 2771458316
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4244",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10 🎧 Atmos, DDP | 5.1\n💾 2.5 GB 📦 5.4 GB 〽️ 926 KB/s 👤 5\n🎙️ 🇵🇱 🇬🇧\n💬 🇵🇱\n🔗 DEVIL-TORRENTS.PL\n📄 Dexter.Resurrection.S01E02.MULTi.2160p.PMTP.WEB-DL.DV.HDR.H265.DDP5.1.Atmos-K83.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.2160p.PMTP.WEB-DL.DV.HDR.H265.DDP5.1.Atmos-K83.mkv",
+        "videoSize": 2634657514
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4266",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10 🎧 DDP | 5.1\n💾 2.5 GB 📦 5.6 GB 〽️ 941 KB/s 👤 12\n🎙️ 🇮🇹 🇬🇧\n💬 🇮🇹 🇬🇧\n🔍 Uindex\n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.PMTP.WEB-DL.DDP5.1.DV.HDR.H.265-G66.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.PMTP.WEB-DL.DDP5.1.DV.HDR.H.265-G66.mkv",
+        "videoSize": 2730330610
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4292",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10 🎧 DDP | 5.1\n📦 2.5 GB 〽️ 959 KB/s 👤 4\n🎙️ 🇮🇹 🇬🇧\n💬 🇮🇹 🇬🇧\n🔍 TheRARBG\n📄 Dexter.Resurrection.S01E02.Assassino.in.incognito.ITA.ENG.2160p.PMTP.WEB-DL.DDP5.1.DV.HDR.H.265-MeM.GP.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Assassino.in.incognito.ITA.ENG.2160p.PMTP.WEB-DL.DDP5.1.DV.HDR.H.265-MeM.GP.mkv",
+        "videoSize": 2725561563
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f429f",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL \n📺 HDR \n💾 2.5 GB 📦 5.4 GB 👤 1\n📄 Dexter. Resurrection (2025) S01E02 - Camera Shy.mkv",
+      "behaviorHints": {
+        "filename": "Dexter. Resurrection (2025) S01E02 - Camera Shy.mkv",
+        "videoSize": 2635094525
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42b3",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR 🎧 Atmos, DDP | 5.1\n💾 2.5 GB 📦 29 GB 👤 1\n🌐 🔊\n📄 Dexter.Resurrection.S01E02.MULTi.2160p.PMTP.WEB-DL.DV.HDR.H265.DDP5.1.Atmos-K83.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.2160p.PMTP.WEB-DL.DV.HDR.H265.DDP5.1.Atmos-K83.mkv",
+        "videoSize": 2634657514
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4324",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR 🎧 DDP | 5.1\n📦 2.5 GB\n🌐 🇬🇧 🇮🇹\n📄 Dexter.Resurrection.S01E02.Assassino.in.incognito.ITA.ENG.2160p.PMTP.WEB-DL.DDP5.1.DV.HDR.H.265-MeM.GP.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Assassino.in.incognito.ITA.ENG.2160p.PMTP.WEB-DL.DDP5.1.DV.HDR.H.265-MeM.GP.mkv",
+        "videoSize": 2725564184
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f437b",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10 🎧 Atmos, DDP | 5.1\n💾 2.5 GB 📦 29 GB 〽️ 926 KB/s 👤 3\n🎙️ 🇵🇱 🇬🇧\n💬 🇵🇱\n📄 Dexter.Resurrection.S01E02.MULTi.2160p.PMTP.WEB-DL.DV.HDR.H265.DDP5.1.Atmos-K83.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.2160p.PMTP.WEB-DL.DV.HDR.H265.DDP5.1.Atmos-K83.mkv",
+        "videoSize": 2634657514
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43bf",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR 🎧 Atmos, DDP | 5.1\n💾 2.5 GB 📦 5.4 GB 👤 3\n🌐 🔊\n🔗 BEST-TORRENTS.COM\n📄 Dexter.Resurrection.S01E02.MULTi.2160p.PMTP.WEB-DL.DV.HDR.H265.DDP5.1.Atmos-K83.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.2160p.PMTP.WEB-DL.DV.HDR.H265.DDP5.1.Atmos-K83.mkv",
+        "videoSize": 2634657514
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f431f",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR10 🎧 Atmos, DD | 5.1\n📦 2.4 GB 〽️ 875 KB/s 👤 37\n🎙️ 🇬🇧\n💬 🇬🇧 🇩🇪 🇪🇸 🇮🇹 🇵🇹\n⚙️ playWEB 🔍 TorrentGalaxyClone\n📄 Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DD 5 1 Atmos HDR H 265-playWEB.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DD 5 1 Atmos HDR H 265-playWEB.mkv",
+        "videoSize": 2535858675
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43a3",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR 🎧 Atmos, DDP | 5.1\n📦 2.4 GB\n⚙️ playWEB \n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.PMTP.WEB-DL.DD+5.1.Atmos.HDR.H.265-playWEB.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.PMTP.WEB-DL.DD+5.1.Atmos.HDR.H.265-playWEB.mkv",
+        "videoSize": 2535858675
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4259",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10+ 🎧 Atmos, DDP | 5.1\n💾 2.3 GB 📦 27 GB 〽️ 877 KB/s\n🎙️ 🇬🇧\n💬 🇬🇧\n📄 Dexter - Resurrection (2025) S01E02 (2160p PMTP WEB-DL Hybrid H265 DV HDR10+ DDP Atmos 5.1 English - HONE).mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter - Resurrection (2025) S01E02 (2160p PMTP WEB-DL Hybrid H265 DV HDR10+ DDP Atmos 5.1 English - HONE).mkv",
+        "videoSize": 2492956045
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42a6",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR 🎧 Atmos, DDP | 5.1\n📦 2.3 GB\n⚙️ STC \n📄 Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 Atmos HDR H 265-STC.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 Atmos HDR H 265-STC.mkv",
+        "videoSize": 2482110230
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42fb",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR 🎧 DDP | 5.1\n📦 2.3 GB\n⚙️ NTb \n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.PMTP.WEB-DL.DDP5.1.DV.HDR.H.265-NTb.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.PMTP.WEB-DL.DDP5.1.DV.HDR.H.265-NTb.mkv",
+        "videoSize": 2498122191
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4362",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10 🎧 Atmos, DDP | 5.1\n📦 2.3 GB 〽️ 879 KB/s 👤 47\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ FLUX 🔍 TorrentGalaxyClone\n📄 Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 Atmos DV HDR H 265-FLUX.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 Atmos DV HDR H 265-FLUX.mkv",
+        "videoSize": 2497955892
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f439a",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR10 🎧 DDP | 5.1\n📦 2.3 GB 〽️ 879 KB/s 👤 32\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ NTb 🔍 TheRARBG\n📄 Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 DV HDR H 265-NTb.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 DV HDR H 265-NTb.mkv",
+        "videoSize": 2498122191
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43a6",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 DV HDR 🎧 Atmos, DDP | 5.1\n📦 2.3 GB\n⚙️ FLUX \n📄 Dexter.Resurrection.S01E02.Camera.Shy.2160p.PMTP.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.2160p.PMTP.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-FLUX.mkv",
+        "videoSize": 2497955892
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43b5",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB-DL 🎞️ HEVC\n📺 HDR10 🎧 Atmos, DDP | 5.1\n📦 2.3 GB 〽️ 873 KB/s 👤 2\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ STC 🔍 Torrents.csv\n📄 Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 Atmos HDR H 265-STC.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 2160p PMTP WEB-DL DDP5 1 Atmos HDR H 265-STC.mkv",
+        "videoSize": 2482110230
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43b6",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEBRip 🎞️ HEVC\n📺 HDR 🎧 DDP | 5.1\n💾 1.4 GB 📦 14 GB\n🌐 🔊\n⚙️ Amen \n📄 Dexter Resurrection - S01E02 - Camera Shy 2160p.HDR.x265-Amen.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter Resurrection - S01E02 - Camera Shy 2160p.HDR.x265-Amen.mkv",
+        "videoSize": 1453302899
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4248",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB 🎞️ HEVC\n📺 DV \n📦 2.7 GB\n🌐 🇫🇷\n⚙️ TyHD \n📄 Dexter.Resurrection.S01E02.VOSTFR.FANSUB.DV.2160p.WEB.H265-TyHD.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.VOSTFR.FANSUB.DV.2160p.WEB.H265-TyHD.mkv",
+        "videoSize": 2918804709
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f425b",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB 🎞️ HEVC\n💾 156 MB 📦 6.8 GB\n⚙️ NHTFS \n📄 dexter.resurrection.s01e02.proper.2160p.web.h265-nhtfs-sample.mkv",
+      "behaviorHints": {
+        "filename": "dexter.resurrection.s01e02.proper.2160p.web.h265-nhtfs-sample.mkv",
+        "videoSize": 163513300
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f427a",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💿 WEB 🎞️ HEVC\n📺 HDR \n💾 90 MB 📦 2.3 GB\n⚙️ SuccessfulCrab \n📄 dexter.resurrection.s01e02.hdr.2160p.web.h265-successfulcrab-sample.mkv",
+      "behaviorHints": {
+        "filename": "dexter.resurrection.s01e02.hdr.2160p.web.h265-successfulcrab-sample.mkv",
+        "videoSize": 94410997
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4273",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💾 5.9 GB 📦 18 GB\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 6383456491
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f429a",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💾 5.9 GB 📦 57 GB\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 6383456491
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42bf",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💾 5.9 GB 📦 46 GB 👤 1\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 6383456491
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42c1",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "🎞️ HEVC\n💾 5.9 GB 📦 52 GB 〽️ 2.2 MB/s\n🎙️ 🇷🇺 🇬🇧\n💬 🇷🇺 🇬🇧\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 6383456491
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42d4",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💾 5.9 GB 📦 33 GB\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 6383456491
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42e7",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💾 5.9 GB 📦 26 GB 👤 1\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 6383456491
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42f7",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💾 5.9 GB 📦 57 GB\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 6383456491
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4312",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💾 5.9 GB 📦 46 GB 👤 1\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 6383456491
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f431a",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💾 5.9 GB 📦 19 GB\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 6383456491
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4341",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "🎞️ HEVC\n🎧 stereo, 5.1\n💾 5.9 GB 📦 63 GB 〽️ 2.2 MB/s 👤 5\n🎙️ 🇷🇺 🇬🇧\n💬 🇷🇺 🇬🇧\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 6383456491
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f436d",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💾 5.9 GB 📦 63 GB 👤 2\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 6383456491
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43a2",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "🎞️ HEVC\n🎧 stereo, 5.1\n💾 5.9 GB 📦 51 GB 〽️ 2.2 MB/s\n🎙️ 🇷🇺 🇬🇧\n💬 🇷🇺 🇬🇧\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 6383456491
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43af",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💾 5.9 GB 📦 40 GB 👤 2\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 6383456491
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f438c",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💾 5.5 GB 📦 11 GB\n📄 Dexter.Resurrection.S01E02.2160p.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p.mkv",
+        "videoSize": 5859800226
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4307",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "🎞️ HEVC\n🎧 5.1\n💾 5.3 GB 📦 58 GB 〽️ 2.0 MB/s 👤 17\n🎙️ 🇷🇺 🇬🇧\n💬 🇷🇺 🇬🇧\n📄 Dexter.Resurrection.S01E02.2160p-Morgann23.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.2160p-Morgann23.mkv",
+        "videoSize": 5723088533
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42cc",
+      "name": "[P2P]\nTorz\n4k",
+      "description": "💾 2.5 GB 📦 5.6 GB 👤 1\n🌐 🇷🇺\n📄 Dexter.Resurrection.2025.S01E02_4K_RHS_[scarfilm].mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.2025.S01E02_4K_RHS_[scarfilm].mkv",
+        "videoSize": 2725685563
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42c8",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 BluRay REMUX 🎞️ H264\n🎧 TrueHD | 5.1\n💾 12 GB 📦 118 GB 〽️ 4.4 MB/s\n🎙️ 🇬🇧\n💬 🇬🇧 🇦🇱 🇧🇦 🇧🇬 🇭🇷 🇨🇿 🇩🇰 🇳🇱 🇫🇮 🇭🇺 🇮🇹 🇲🇰 🇳🇴 🇵🇱 🇵🇹 🇷🇴 🇷🇸 🇸🇰 🇸🇮 🇪🇸 🇸🇪\n⚙️ dOwn \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.BluRay.REMUX.AVC.TrueHD.5.1-dOwn.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.BluRay.REMUX.AVC.TrueHD.5.1-dOwn.mkv",
+        "videoSize": 12549072662
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42d3",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 BluRay REMUX 🎞️ AVC\n🎧 TrueHD | 5.1\n💾 12 GB 📦 118 GB\n⚙️ FraMeSToR \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.TrueHD.5.1.AVC.REMUX-FraMeSToR.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.TrueHD.5.1.AVC.REMUX-FraMeSToR.mkv",
+        "videoSize": 12548429758
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42ef",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 BluRay REMUX 🎞️ H264\n🎧 TrueHD | 5.1\n💾 12 GB 📦 120 GB 〽️ 4.5 MB/s\n🎙️ 🇬🇧\n💬 🇬🇧 🇦🇱 🇸🇦 🇧🇦 🇧🇬 🇭🇷 🇨🇿 🇩🇰 🇳🇱 🇫🇮 🇭🇺 🇲🇰 🇳🇴 🇵🇱 🇵🇹 🇷🇴 🇷🇸 🇸🇰 🇸🇮 🇪🇸 🇸🇪\n⚙️ TRiToN \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.BluRay.REMUX.AVC.TrueHD.5.1-TRiToN.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.BluRay.REMUX.AVC.TrueHD.5.1-TRiToN.mkv",
+        "videoSize": 12662224319
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4319",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 REMUX 🎞️ H264\n🎧 TrueHD | 5.1\n📦 12 GB 〽️ 4.4 MB/s 👤 82\n🎙️ 🇬🇧\n💬 🇬🇧 🇦🇱 🇧🇦 🇧🇬 🇭🇷 🇨🇿 🇩🇰 🇳🇱 🇫🇮 🇫🇷 🇩🇪 🇭🇺 🇲🇰 🇳🇴 🇵🇱 🇧🇷 🇵🇹 🇷🇴 🇷🇸 🇸🇰 🇸🇮 🇪🇸 🇲🇽 🇸🇪\n⚙️ FraMeSToR 🔍 TorrentGalaxyClone\n📄 Dexter Resurrection S01E02 Camera Shy 1080p TrueHD 5 1 AVC REMUX-FraMeSToR.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 1080p TrueHD 5 1 AVC REMUX-FraMeSToR.mkv",
+        "videoSize": 12548429758
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f435b",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 BluRay REMUX 🎞️ H264\n🎧 TrueHD | 5.1\n💾 12 GB 📦 118 GB 〽️ 4.4 MB/s\n🎙️ 🇬🇧\n💬 🇬🇧 🇦🇱 🇧🇦 🇧🇬 🇭🇷 🇨🇿 🇩🇰 🇳🇱 🇫🇮 🇫🇷 🇩🇪 🇭🇺 🇲🇰 🇳🇴 🇵🇱 🇧🇷 🇵🇹 🇷🇴 🇷🇸 🇸🇰 🇸🇮 🇪🇸 🇲🇽 🇸🇪\n⚙️ FraMeSToR \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.TrueHD.5.1.AVC.REMUX-FraMeSToR.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.TrueHD.5.1.AVC.REMUX-FraMeSToR.mkv",
+        "videoSize": 12548429758
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4373",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 BluRay REMUX 🎞️ H264\n🎧 TrueHD | 5.1\n💾 12 GB 📦 118 GB 〽️ 4.4 MB/s 👤 14\n🎙️ 🇬🇧\n💬 🇬🇧 🇦🇱 🇧🇦 🇧🇬 🇭🇷 🇨🇿 🇩🇰 🇳🇱 🇫🇮 🇫🇷 🇩🇪 🇭🇺 🇲🇰 🇳🇴 🇵🇱 🇧🇷 🇵🇹 🇷🇴 🇷🇸 🇸🇰 🇸🇮 🇪🇸 🇲🇽 🇸🇪\n⚙️ FraMeSToR 🔍 Knaben\n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.TrueHD.5.1.AVC.REMUX-FraMeSToR.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.TrueHD.5.1.AVC.REMUX-FraMeSToR.mkv",
+        "videoSize": 12548429758
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4389",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 BluRay REMUX 🎞️ H264\n🎧 TrueHD | 5.1\n💾 12 GB 📦 118 GB 〽️ 4.4 MB/s\n🎙️ 🇬🇧\n💬 🇬🇧 🇦🇱 🇧🇦 🇧🇬 🇭🇷 🇨🇿 🇩🇰 🇳🇱 🇫🇮 🇭🇺 🇮🇹 🇲🇰 🇳🇴 🇵🇱 🇵🇹 🇷🇴 🇷🇸 🇸🇰 🇸🇮 🇪🇸 🇸🇪\n⚙️ dOwn \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.BluRay.REMUX.AVC.TrueHD.5.1-dOwn.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.BluRay.REMUX.AVC.TrueHD.5.1-dOwn.mkv",
+        "videoSize": 12549072662
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4366",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 BluRay 🎞️ HEVC\n🎧 DDP | 5.1\n💾 1.8 GB 📦 20 GB 〽️ 675 KB/s 👤 138\n🎙️ 🇬🇧\n💬 🇬🇧 🇦🇱 🇧🇦 🇧🇬 🇭🇷 🇨🇿 🇩🇰 🇳🇱 🇫🇮 🇫🇷 🇩🇪 🇭🇺 🇲🇰 🇳🇴 🇵🇱 🇧🇷 🇵🇹 🇷🇴 🇷🇸 🇸🇰 🇸🇮 🇪🇸 🇲🇽 🇸🇪\n🔍 The Pirate Bay\n📄 Dexter - Resurrection (2025) - S01E02 - Camera Shy (1080p BluRay x265 Silence).mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter - Resurrection (2025) - S01E02 - Camera Shy (1080p BluRay x265 Silence).mkv",
+        "videoSize": 1920228197
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42e1",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 BluRay 🎞️ AV1\n🎧 OPUS | 5.1\n💾 431 MB 📦 4.4 GB 〽️ 159 KB/s 👤 3\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ Edlyn \n📄 Dexter Resurrection (2025) S01E02 - Camera Shy (1080p BluRay AV1 Opus 5.1) - Edlyn.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter Resurrection (2025) S01E02 - Camera Shy (1080p BluRay AV1 Opus 5.1) - Edlyn.mkv",
+        "videoSize": 451692050
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f425e",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 DDP | 5.1, stereo\n💾 4.1 GB 📦 33 GB 〽️ 1.5 MB/s\n🎙️ 🇷🇺 🇺🇦 🇬🇧\n💬 🇷🇺 🇺🇦 🇬🇧\n⚙️ RGzsRutracker \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+        "videoSize": 4377461655
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42a2",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 DDP | 5.1, stereo\n💾 4.1 GB 📦 46 GB 〽️ 1.5 MB/s 👤 16\n🎙️ 🇷🇺 🇺🇦 🇬🇧\n💬 🇷🇺 🇺🇦 🇬🇧\n⚙️ RGzsRutracker \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+        "videoSize": 4377399686
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42cd",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 4.1 GB 📦 38 GB 👤 1\n⚙️ RGzsRutracker \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+        "videoSize": 4377461655
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42f0",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 4.1 GB 📦 46 GB 👤 1\n⚙️ RGzsRutracker \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+        "videoSize": 4377399693
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4306",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 DDP | 5.1, stereo\n💾 4.1 GB 📦 46 GB 〽️ 1.5 MB/s 👤 6\n🎙️ 🇷🇺 🇺🇦 🇬🇧\n💬 🇷🇺 🇺🇦 🇬🇧\n⚙️ RGzsRutracker 🔍 TorrentGalaxyClone\n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+        "videoSize": 4377461649
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4333",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 DDP | 5.1, stereo\n💾 4.1 GB 📦 19 GB 〽️ 1.5 MB/s 👤 1\n🎙️ 🇷🇺 🇺🇦 🇬🇧\n💬 🇷🇺 🇺🇦 🇬🇧\n⚙️ RGzsRutracker \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+        "videoSize": 4377461655
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f433a",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 4.1 GB 📦 41 GB\n⚙️ RGzsRutracker \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+        "videoSize": 4377461649
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43a5",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 DDP | 5.1, stereo\n💾 4.1 GB 📦 46 GB 〽️ 1.5 MB/s 👤 1\n🎙️ 🇷🇺 🇺🇦 🇬🇧\n💬 🇷🇺 🇺🇦 🇬🇧\n⚙️ RGzsRutracker 🔍 Knaben\n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+        "videoSize": 4377399686
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43ad",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 4.1 GB 📦 28 GB\n⚙️ RGzsRutracker \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-RGzsRutracker.mkv",
+        "videoSize": 4377461655
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4240",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 2.9 GB 📦 5.9 GB\n⚙️ RgN \n📄 Dexter.Resurrection.S01.E02.1080p.SKST.WEB-DL.DD+5.1.H.264-RgN.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01.E02.1080p.SKST.WEB-DL.DD+5.1.H.264-RgN.mkv",
+        "videoSize": 3060982938
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4293",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n💾 2.9 GB 📦 33 GB 👤 1\n🌐 🇬🇧\n🔍 Magnet Cat\n📄 Dexter.Resurrection.S01E02.WEBDL.1080p.2xUkr.Eng.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEBDL.1080p.2xUkr.Eng.mkv",
+        "videoSize": 3080396696
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42b8",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 5.1, stereo\n💾 2.9 GB 📦 33 GB 〽️ 1.1 MB/s\n🎙️ 🇺🇦 🇬🇧\n💬 🇺🇦 🇬🇧\n📄 Dexter.Resurrection.S01E02.WEBDL.1080p.2xUkr.Eng.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEBDL.1080p.2xUkr.Eng.mkv",
+        "videoSize": 3080396739
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42d1",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n💾 2.9 GB 📦 33 GB\n🌐 🇬🇧\n📄 Dexter.Resurrection.S01E02.WEBDL.1080p.2xUkr.Eng.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEBDL.1080p.2xUkr.Eng.mkv",
+        "videoSize": 3080396696
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42e4",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n💾 2.9 GB 📦 16 GB\n📄 Dexter. Resurrection (2025) S01E02 - Camera Shy.mkv",
+      "behaviorHints": {
+        "filename": "Dexter. Resurrection (2025) S01E02 - Camera Shy.mkv",
+        "videoSize": 3148462167
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4392",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n💾 2.9 GB 📦 27 GB 👤 1\n🌐 🇬🇧\n📄 Dexter.Resurrection.S01E02.WEBDL.1080p.2xUkr.Eng.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEBDL.1080p.2xUkr.Eng.mkv",
+        "videoSize": 3080396739
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4253",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 2.8 GB 📦 32 GB 👤 2\n🌐 🔊\n⚙️ Ralf 🔗 Ex-torrenty.org\n📄 Dexter.Resurrection.S01E02.Camera.Shy.MULTi.1080p.AMZN.WEB-DL.DDP5.1.H264-Ralf.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.MULTi.1080p.AMZN.WEB-DL.DDP5.1.H264-Ralf.mkv",
+        "videoSize": 2973465095
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f425a",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 2.8 GB 📦 5.9 GB\n🌐 🔊 🇵🇱\n🔗 DEVIL-TORRENTS.PL\n📄 Dexter.Resurrection.S01E02.MULTi.1080p.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.1080p.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+        "videoSize": 3053637486
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4268",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 DDP | 5.1\n📦 2.8 GB 〽️ 1.1 MB/s\n🎙️ 🇮🇹 🇬🇧\n💬 🇮🇹 🇬🇧\n🔍 TheRARBG\n📄 Dexter.Resurrection.S01E02.Assassino.in.incognito.ITA.ENG.1080p.AMZN.WEB-DL.DDP5.1.H.264-MeM.GP.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Assassino.in.incognito.ITA.ENG.1080p.AMZN.WEB-DL.DDP5.1.H.264-MeM.GP.mkv",
+        "videoSize": 3057197474
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4311",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 2.8 GB 📦 31 GB 👤 1\n🌐 🔊 🇵🇱\n📄 Dexter.Resurrection.S01E02.MULTi.1080p.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.1080p.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+        "videoSize": 3053637486
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4383",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 stereo, 5.1\n💾 2.8 GB 📦 6.0 GB 〽️ 1.0 MB/s\n🎙️ 🇺🇦 🇬🇧\n💬 🇺🇦 🇬🇧\n📄 Dexter. Resurrection (2025) S01E02 - Camera Shy.mkv",
+      "behaviorHints": {
+        "filename": "Dexter. Resurrection (2025) S01E02 - Camera Shy.mkv",
+        "videoSize": 2966565437
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f439c",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n💾 2.8 GB 📦 32 GB 〽️ 1.1 MB/s\n🎙️ 🇱🇹 🇬🇧\n💬 🇬🇧\n📄 Dexter.Resurrection.S01E02.1080p.AMZN.WEB-DL.LT.EN.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.AMZN.WEB-DL.LT.EN.mkv",
+        "videoSize": 3011659733
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43ae",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 2.8 GB 📦 5.9 GB 👤 4\n🌐 🔊\n🔗 BEST-TORRENTS.COM\n📄 Dexter.Resurrection.S01E02.MULTi.1080p.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.1080p.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+        "videoSize": 3053637486
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43b1",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n💾 2.8 GB 📦 6.2 GB\n🌐 🇷🇺\n📄 Dexter.Resurrection.2025.S01E02_1080p_RHS_[scarfilm].mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.2025.S01E02_1080p_RHS_[scarfilm].mkv",
+        "videoSize": 3057154883
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f427b",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 Atmos, DDP | 5.1\n📦 2.6 GB 〽️ 995 KB/s 👤 3\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ Kitsune 🔍 Torrents.csv\n📄 Dexter Resurrection S01E02 Camera Shy 1080p AMZN WEB-DL DDP5 1 Atmos H 264-Kitsune.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 1080p AMZN WEB-DL DDP5 1 Atmos H 264-Kitsune.mkv",
+        "videoSize": 2829590150
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4281",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 DDP | 5.1\n💾 2.6 GB 📦 31 GB 〽️ 995 KB/s\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ NTb \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTb.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTb.mkv",
+        "videoSize": 2829589650
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4295",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 Atmos, DDP | 5.1\n💾 2.6 GB 📦 31 GB\n⚙️ FLUX \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX.mkv",
+        "videoSize": 2829589453
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42ad",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 2.6 GB 📦 31 GB\n⚙️ NTb \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTb.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTb.mkv",
+        "videoSize": 2829589650
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42af",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 DDP | 5.1\n📦 2.6 GB 〽️ 995 KB/s 👤 20\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ NTb 🔍 Knaben\n📄 Dexter Resurrection S01E02 Camera Shy 1080p AMZN WEB-DL DDP5 1 H 264-NTb.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 1080p AMZN WEB-DL DDP5 1 H 264-NTb.mkv",
+        "videoSize": 2829589650
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42ea",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 Atmos, DDP | 5.1\n💾 2.6 GB 📦 31 GB 〽️ 995 KB/s\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ FLUX \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX.mkv",
+        "videoSize": 2829589453
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4301",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 2.6 GB 📦 29 GB\n⚙️ ETHEL \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-ETHEL.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-ETHEL.mkv",
+        "videoSize": 2784530595
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4309",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 Atmos, DDP | 5.1\n💾 2.6 GB 📦 31 GB\n⚙️ Kitsune \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-Kitsune.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-Kitsune.mkv",
+        "videoSize": 2829590150
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4348",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n📦 2.6 GB 👤 26\n⚙️ playWEB 🔍 TorrentGalaxyClone\n📄 Dexter Resurrection S01E02 Camera Shy 1080p AMZN WEB-DL DDP5 1 H 264-playWEB.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 1080p AMZN WEB-DL DDP5 1 H 264-playWEB.mkv",
+        "videoSize": 2784099899
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f435d",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 Atmos, DDP | 5.1\n💾 2.6 GB 📦 31 GB 〽️ 995 KB/s\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ FLUX \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX.mkv",
+        "videoSize": 2829589453
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f436a",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 Atmos, DDP | 5.1\n📦 2.6 GB 〽️ 995 KB/s 👤 26\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ FLUX 🔍 TorrentGalaxyClone\n📄 Dexter Resurrection S01E02 Camera Shy 1080p AMZN WEB-DL DDP5 1 Atmos H 264-FLUX.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 1080p AMZN WEB-DL DDP5 1 Atmos H 264-FLUX.mkv",
+        "videoSize": 2829589453
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4372",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n📦 2.6 GB\n⚙️ playWEB \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-playWEB.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-playWEB.mkv",
+        "videoSize": 2784099899
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42e6",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 5.1\n💾 2.5 GB 📦 5.6 GB 〽️ 970 KB/s 👤 2\n🌐 🇵🇱\n⚙️ DSiTE \n📄 Dexter.Resurrection.S01E02.PL.AI.1080p.WEB-DL.H264-DSiTE.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.PL.AI.1080p.WEB-DL.H264-DSiTE.mkv",
+        "videoSize": 2663804610
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4284",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 2.4 GB 📦 28 GB\n⚙️ LatTeam \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-LatTeam.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.H.264-LatTeam.mkv",
+        "videoSize": 2596226392
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42cf",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 5.1\n💾 2.4 GB 📦 5.2 GB 〽️ 893 KB/s 👤 61\n🎙️ 🇵🇹 🇬🇧\n💬 🇧🇷 🇬🇧\n📄 Dexter.Ressurreicao.S01E02.1080p.WEB-DL.DUAL.5.1.mkv",
+      "fileIdx": 3,
+      "behaviorHints": {
+        "filename": "Dexter.Ressurreicao.S01E02.1080p.WEB-DL.DUAL.5.1.mkv",
+        "videoSize": 2596229084
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f435c",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 DDP | 5.1\n💾 2.4 GB 📦 5.2 GB 〽️ 893 KB/s 👤 102\n🎙️ 🇮🇹 🇬🇧\n💬 🇮🇹 🇬🇧\n🔍 TheRARBG\n📄 Dexter.Resurrection.S01E02.Assassino.in.incognito.1080p.AMZN.WEB-DL.DDP5.1.H264-G66.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Assassino.in.incognito.1080p.AMZN.WEB-DL.DDP5.1.H264-G66.mkv",
+        "videoSize": 2596229449
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f438a",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 5.1\n💾 2.4 GB 📦 5.2 GB\n🌐 🔉\n📄 Dexter - Ressurreição S01E02 WEB-DL 1080p x264 DUAL 5.1.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter - Ressurreição S01E02 WEB-DL 1080p x264 DUAL 5.1.mkv",
+        "videoSize": 2596281683
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42db",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n💾 2.1 GB 📦 19 GB\n📄 Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+        "videoSize": 2263571749
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42fa",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n💾 2.1 GB 📦 6.7 GB\n📄 Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+        "videoSize": 2263571749
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4331",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n💾 2.1 GB 📦 14 GB\n📄 Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+        "videoSize": 2263571749
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4337",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n💾 2.1 GB 📦 21 GB\n📄 Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+        "videoSize": 2263571749
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f437a",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n💾 2.1 GB 📦 9.6 GB\n📄 Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+        "videoSize": 2263571749
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f438f",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n💾 2.1 GB 📦 17 GB 👤 1\n📄 Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+        "videoSize": 2263571749
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43b9",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n💾 2.1 GB 📦 4.4 GB\n📄 Dexter.Resurrection.S01E02.WEB-DL.1080p.Dub.Dragon.Money.Studio.mp4",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DL.1080p.Dub.Dragon.Money.Studio.mp4",
+        "videoSize": 2234022751
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43bc",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n💾 2.1 GB 📦 23 GB\n📄 Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DL.1080p.1WinStudio.PROPER.mkv",
+        "videoSize": 2263571749
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f424c",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 Atmos, DDP | 5.1\n📦 1.6 GB 〽️ 602 KB/s 👤 22\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ STC 🔍 TheRARBG\n📄 Dexter Resurrection S01E02 Camera Shy 1080p PMTP WEB-DL DDP5 1 Atmos H 264-STC.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 1080p PMTP WEB-DL DDP5 1 Atmos H 264-STC.mkv",
+        "videoSize": 1711224728
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42f5",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ HEVC\n🎧 DDP | 5.1\n💾 1.6 GB 📦 17 GB 👤 1\n📄 Dexter Resurrection (2025) - S01E02 - Camera Shy (1080p AMZN WEB-DL x265 Silence).mkv",
+      "fileIdx": 3,
+      "behaviorHints": {
+        "filename": "Dexter Resurrection (2025) - S01E02 - Camera Shy (1080p AMZN WEB-DL x265 Silence).mkv",
+        "videoSize": 1696559069
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f436b",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ HEVC\n💾 1.6 GB 📦 17 GB 👤 12\n📄 Dexter Resurrection (2025) - S01E02 - Camera Shy (1080p AMZN WEB-DL x265 Silence).mkv",
+      "fileIdx": 3,
+      "behaviorHints": {
+        "filename": "Dexter Resurrection (2025) - S01E02 - Camera Shy (1080p AMZN WEB-DL x265 Silence).mkv",
+        "videoSize": 1696559069
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f433f",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 5.1\n📦 1.5 GB 〽️ 573 KB/s\n🎙️ 🇪🇸 🇬🇧\n💬 🇪🇸 🇬🇧\n⚙️ Lat \n📄 Dexter.Resurreccion.S01E02.2025.WEB-DL.1080p-Dual-Lat.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurreccion.S01E02.2025.WEB-DL.1080p-Dual-Lat.mkv",
+        "videoSize": 1660677727
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f439b",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 5.1\n💾 1.5 GB 📦 3.2 GB\n🌐 🔉\n⚙️ SF \n📄 Dexter.Ressurreição.S01E02.1080p.x264.WEB-DL.DUAL.5.1-SF.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Ressurreição.S01E02.1080p.x264.WEB-DL.DUAL.5.1-SF.mkv",
+        "videoSize": 1660641990
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4264",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ HEVC\n🎧 DDP | 5.1\n📦 1.0 GB 〽️ 381 KB/s 👤 3\n🎙️ 🇬🇧\n💬 🇬🇧\n🔍 Torrents.csv\n📄 Dexter. Resurrection. S01E02. Camera Shy. 1080P. AMZN WEB-DL. DDP5.1. HEVC-X265. POOTLED.mkv",
+      "behaviorHints": {
+        "filename": "Dexter. Resurrection. S01E02. Camera Shy. 1080P. AMZN WEB-DL. DDP5.1. HEVC-X265. POOTLED.mkv",
+        "videoSize": 1084201383
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42c6",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ HEVC\n🎧 DD | 5.1\n📦 1.0 GB 〽️ 386 KB/s\n🎙️ 🇮🇹 🇬🇧\n💬 🇮🇹 🇬🇧\n📄 Dexter Resurrection 1x02 Camera Shy - Assassino in incognito 1080p WEB-DL H265 Ita Eng AC3 5.1 Sub Ita Eng - iDN_CreW.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection 1x02 Camera Shy - Assassino in incognito 1080p WEB-DL H265 Ita Eng AC3 5.1 Sub Ita Eng - iDN_CreW.mkv",
+        "videoSize": 1098561273
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4322",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL 🎞️ HEVC\n🎧 DDP | 5.1\n💾 998 MB 📦 2.0 GB 〽️ 360 KB/s 👤 8\n🎙️ 🇮🇹 🇬🇧\n💬 🇮🇹 🇬🇧\n🔍 TheRARBG\n📄 Dexter.Resurrection.S01E02.Assassino.in.incognito.1080p.AMZN.WEB-DL.DDP5.1.H265-G66.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Assassino.in.incognito.1080p.AMZN.WEB-DL.DDP5.1.H265-G66.mkv",
+        "videoSize": 1046091197
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f430d",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB-DL \n📦 593 MB 👤 1\n🔍 TheRARBG\n📄 Dexter.Resurrection.S01E02.1080p.WEB-DL-[Feranki1980].mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.WEB-DL-[Feranki1980].mkv",
+        "videoSize": 621535026
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42b9",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip \n💾 2.7 GB 📦 5.6 GB 👤 2\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.HD1080p.WEBRip.Rus.RuDub.tv.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.HD1080p.WEBRip.Rus.RuDub.tv.mkv",
+        "videoSize": 2884537861
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42e0",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip \n💾 2.7 GB 📦 21 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.HD1080p.WEBRip.Rus.RuDub.tv.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.HD1080p.WEBRip.Rus.RuDub.tv.mkv",
+        "videoSize": 2884537861
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4300",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip \n💾 2.7 GB 📦 15 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.HD1080p.WEBRip.Rus.RuDub.tv.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.HD1080p.WEBRip.Rus.RuDub.tv.mkv",
+        "videoSize": 2884537861
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4336",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip \n💾 2.7 GB 📦 12 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.HD1080p.WEBRip.Rus.RuDub.tv.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.HD1080p.WEBRip.Rus.RuDub.tv.mkv",
+        "videoSize": 2884537861
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4385",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip \n💾 2.7 GB 📦 18 GB 👤 1\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.HD1080p.WEBRip.Rus.RuDub.tv.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.HD1080p.WEBRip.Rus.RuDub.tv.mkv",
+        "videoSize": 2884537861
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4395",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip \n💾 2.7 GB 📦 29 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.HD1080p.WEBRip.Rus.RuDub.tv.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.HD1080p.WEBRip.Rus.RuDub.tv.mkv",
+        "videoSize": 2884537861
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4251",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.5 GB 📦 8.0 GB\n📄 Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+        "videoSize": 1658095859
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4260",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.5 GB 📦 14 GB 👤 16\n📄 Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+        "videoSize": 1658095859
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4267",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.5 GB 📦 8.2 GB\n📄 Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+        "videoSize": 1658095859
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4272",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ AVC\n🎧 AAC\n💾 1.5 GB 📦 6.7 GB\n⚙️ production \n📄 Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "videoSize": 1575977292
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4296",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.5 GB 📦 9.8 GB\n📄 Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+        "videoSize": 1658095859
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42a0",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.5 GB 📦 14 GB 👤 11\n📄 Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+        "videoSize": 1658095859
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42c4",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.5 GB 📦 12 GB\n📄 Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+        "videoSize": 1658095859
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42d9",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ AVC\n🎧 AAC\n💾 1.5 GB 📦 14 GB\n⚙️ production \n📄 Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "videoSize": 1575977292
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42da",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ AVC\n🎧 AAC\n💾 1.5 GB 📦 4.6 GB\n⚙️ production \n📄 Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.DUB.le-production.mp4",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.DUB.le-production.mp4",
+        "videoSize": 1571045666
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42dc",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ AVC\n🎧 AAC\n💾 1.5 GB 📦 8.2 GB\n⚙️ production \n📄 Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "videoSize": 1575977292
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42e9",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.5 GB 📦 13 GB\n📄 Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+        "videoSize": 1658095859
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42f4",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.5 GB 📦 6.4 GB\n📄 Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+        "videoSize": 1658095859
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4304",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ AVC\n🎧 AAC\n💾 1.5 GB 📦 9.9 GB\n⚙️ production \n📄 Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "videoSize": 1575977292
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4325",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.5 GB 📦 4.5 GB\n📄 Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+        "videoSize": 1658095859
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f432a",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.5 GB 📦 6.7 GB\n📄 Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+        "videoSize": 1658095859
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f433d",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ AVC\n🎧 AAC\n💾 1.5 GB 📦 12 GB\n⚙️ production \n📄 Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "videoSize": 1575977292
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4343",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.5 GB 📦 11 GB 👤 1\n📄 Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+        "videoSize": 1658095859
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4357",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ AVC\n🎧 AAC\n💾 1.5 GB 📦 3.0 GB\n⚙️ production \n📄 Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.DUB.le-production.mp4",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.DUB.le-production.mp4",
+        "videoSize": 1571045666
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f438b",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ AVC\n🎧 AAC\n💾 1.5 GB 📦 13 GB\n⚙️ production \n📄 Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "videoSize": 1575977292
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4390",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.5 GB 📦 4.7 GB\n📄 Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+        "videoSize": 1658095859
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43bb",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ AVC\n🎧 AAC\n💾 1.5 GB 📦 4.6 GB\n⚙️ production \n📄 Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "videoSize": 1575977292
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42a8",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.3 GB 📦 2.5 GB\n📄 Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.mkv",
+        "videoSize": 1373763015
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f427c",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n🎧 Atmos, DDP | 5.1\n💾 1.2 GB 📦 14 GB 👤 1\n🌐 🇬🇧\n📄 Dexter - Resurrection (2025) S01E02 Camera Shy (1080p AMZN Webrip x265 10bit EAC3 5.1 Atmos English - JBENT)[TAoE].mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter - Resurrection (2025) S01E02 Camera Shy (1080p AMZN Webrip x265 10bit EAC3 5.1 Atmos English - JBENT)[TAoE].mkv",
+        "videoSize": 1341940273
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42ba",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 1.1 GB 📦 12 GB 👤 20\n⚙️ KONTRAST 🔍 TorrentGalaxyClone\n📄 Dexter.Resurrection.S01E02.1080p.WEBRip.x265-KONTRAST.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.WEBRip.x265-KONTRAST.mkv",
+        "videoSize": 1146854325
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42eb",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 898 MB 📦 9.0 GB\n⚙️ DH \n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.WEBRip.x265-DH.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.WEBRip.x265-DH.mkv",
+        "videoSize": 941460771
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42b6",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n🎧 DD | 5.1\n💾 610 MB 📦 6.3 GB 👤 4\n🌐 🇷🇴\n⚙️ F1✰ \n📄 Dexter.Resurrection.S01E02.1080p.WEBRip.DD5.1.x265.RoSub-F1✰.mkv",
+      "fileIdx": 3,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.WEBRip.DD5.1.x265.RoSub-F1✰.mkv",
+        "videoSize": 639788805
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42f9",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n📦 609 MB 👤 2\n⚙️ PSA \n📄 Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.6CH.x265.HEVC-PSA.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.6CH.x265.HEVC-PSA.mkv",
+        "videoSize": 638888321
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4305",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n🎧 5.1\n💾 609 MB 📦 6.4 GB 〽️ 225 KB/s\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ PSA \n📄 Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.6CH.x265.HEVC-PSA.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.6CH.x265.HEVC-PSA.mkv",
+        "videoSize": 638888321
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4329",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n💾 609 MB 📦 6.4 GB\n⚙️ PSA \n📄 Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.6CH.x265.HEVC-PSA.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.6CH.x265.HEVC-PSA.mkv",
+        "videoSize": 638888321
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4330",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEBRip 🎞️ HEVC\n🎧 AAC | 5.1\n💾 530 MB 📦 5.6 GB 〽️ 191 KB/s 👤 3\n🎙️ 🇮🇹 🇬🇧\n💬 🇮🇹 🇬🇧\n⚙️ Pir8 🔍 Uindex\n📄 Dexter.Resurrection.1x02.Assassino.In.Incognito.ITA.ENG.1080p.AMZN.WEBRip.AAC.x265-Pir8.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.1x02.Assassino.In.Incognito.ITA.ENG.1080p.AMZN.WEBRip.AAC.x265-Pir8.mkv",
+        "videoSize": 556051059
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f426a",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ H264\n🎧 5.1\n📦 2.6 GB 〽️ 979 KB/s 👤 123\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ successfulcrab 🔍 The Pirate Bay\n📄 dexter.resurrection.s01e02.1080p.web.h264-successfulcrab[EZTVx.to].mkv",
+      "behaviorHints": {
+        "filename": "dexter.resurrection.s01e02.1080p.web.h264-successfulcrab[EZTVx.to].mkv",
+        "videoSize": 2784041586
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f427e",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ AVC\n📦 2.6 GB 👤 7\n⚙️ SuccessfulCrab 🔍 Knaben\n📄 dexter.resurrection.s01e02.1080p.web.h264-successfulcrab.mkv",
+      "behaviorHints": {
+        "filename": "dexter.resurrection.s01e02.1080p.web.h264-successfulcrab.mkv",
+        "videoSize": 2784041586
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f428a",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ H264\n🎧 5.1\n📦 2.6 GB 〽️ 979 KB/s 👤 19\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ successfulcrab 🔍 TheRARBG\n📄 dexter.resurrection.s01e02.1080p.web.h264-successfulcrab.mkv",
+      "behaviorHints": {
+        "filename": "dexter.resurrection.s01e02.1080p.web.h264-successfulcrab.mkv",
+        "videoSize": 2784041586
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4290",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ AVC\n💾 2.6 GB 📦 30 GB 👤 6\n🌐 🇵🇱\n📄 Dexter.Resurrection.S01E02.1080p.WEB.H264.[NapisyPL].V4LTO.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.WEB.H264.[NapisyPL].V4LTO.mkv",
+        "videoSize": 2784095426
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4297",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ AVC\n📦 2.6 GB 👤 4\n⚙️ successfulcrab \n📄 Dexter.Resurrection.S01E02.1080p.WEB.H264.[NapisyPL]-successfulcrab.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.WEB.H264.[NapisyPL]-successfulcrab.mkv",
+        "videoSize": 2784095426
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f429e",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ AVC\n💾 2.6 GB 📦 5.7 GB 👤 1\n⚙️ SuccessfulCrab \n📄 dexter.resurrection.s01e02.1080p.web.h264-successfulcrab.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "dexter.resurrection.s01e02.1080p.web.h264-successfulcrab.mkv",
+        "videoSize": 2784041586
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4328",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ AVC\n💾 2.6 GB 📦 30 GB 👤 2\n🌐 🇵🇱\n⚙️ XuploaD \n📄 Dexter.Resurrection.S01E02.PL.AI.1080p.WEB.H264-XuploaD.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.PL.AI.1080p.WEB.H264-XuploaD.mkv",
+        "videoSize": 2784484067
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4339",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ AVC\n📦 2.6 GB\n🌐 🇫🇷\n📄 Dexter.Resurrection.S01E02.VOSTFR.FANSUB.1080p.WEB.H264.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.VOSTFR.FANSUB.1080p.WEB.H264.mkv",
+        "videoSize": 2784103919
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43a9",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ AVC\n📦 2.6 GB\n⚙️ successfulcrab \n📄 dexter.resurrection.s01e02.1080p.web.h264-successfulcrab.mkv",
+      "behaviorHints": {
+        "filename": "dexter.resurrection.s01e02.1080p.web.h264-successfulcrab.mkv",
+        "videoSize": 2784041586
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4255",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ H264\n🎧 5.1\n💾 1.5 GB 📦 18 GB 〽️ 573 KB/s\n🎙️ 🇵🇹 🇬🇧\n💬 🇧🇷\n⚙️ PTBR \n📄 Dexter.Resurrection.S01E02.1080p-DUAL-PTBR.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p-DUAL-PTBR.mkv",
+        "videoSize": 1660641990
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f424a",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ AVC\n📺 SDR 🎧 DDP\n📦 1.4 GB\n🌐 🔊\n⚙️ THESYNDiCATE \n📄 Dexter.Resurrection.S01E02.Camera.Shy.MULTi.SDR.1080p.WEB.DDP.x264-THESYNDiCATE.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.MULTi.SDR.1080p.WEB.DDP.x264-THESYNDiCATE.mkv",
+        "videoSize": 1450107282
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f428e",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ H264\n🎧 5.1\n📦 1.3 GB 〽️ 532 KB/s 👤 10\n🎙️ 🇫🇷 🇬🇧\n💬 🇫🇷 🇬🇧\n⚙️ LUCKY 🔍 The Pirate Bay\n📄 Dexter Resurrection S01E02 MULTi 1080p WEB x264-LUCKY.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 MULTi 1080p WEB x264-LUCKY.mkv",
+        "videoSize": 1449508496
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4317",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ AVC\n📦 1.3 GB 👤 3\n🌐 🔊\n⚙️ LUCKY \n📄 Dexter.Resurrection.S01E02.MULTi.1080p.WEB.x264-LUCKY.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.1080p.WEB.x264-LUCKY.mkv",
+        "videoSize": 1449508496
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4387",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ AVC\n💾 1.3 GB 📦 15 GB\n🌐 🔊\n⚙️ TFA \n📄 Dexter.Resurrection.S01E02.MULTi.1080p.WEB.H264-TFA.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.1080p.WEB.H264-TFA.mkv",
+        "videoSize": 1449221173
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43c0",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ AVC\n💾 1.3 GB 📦 15 GB\n🌐 🔊\n⚙️ SUPPLY \n📄 Dexter.Resurrection.S01E02.MULTi.1080p.WEB.x264-SUPPLY.mkv",
+      "fileIdx": 3,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.1080p.WEB.x264-SUPPLY.mkv",
+        "videoSize": 1449508505
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4394",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ H264\n🎧 stereo\n💾 841 MB 📦 8.5 GB 〽️ 310 KB/s 👤 148\n🎙️ 🇬🇧\n💬 🇬🇧\n🔍 TorrentGalaxyClone\n📄 Dexter Resurrection - S01E02 - Camera Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter Resurrection - S01E02 - Camera Shy.mkv",
+        "videoSize": 882156914
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f434c",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💿 WEB 🎞️ AVC\n💾 67 MB 📦 2.7 GB\n⚙️ SuccessfulCrab \n📄 dexter.resurrection.s01e02.1080p.web.h264-successfulcrab-sample.mkv",
+      "behaviorHints": {
+        "filename": "dexter.resurrection.s01e02.1080p.web.h264-successfulcrab-sample.mkv",
+        "videoSize": 70606111
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4265",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ H264\n🎧 5.1\n💾 2.8 GB 📦 23 GB 〽️ 1.1 MB/s\n🎙️ 🇷🇺 🇬🇧\n💬 🇷🇺 🇬🇧\n📄 Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+        "videoSize": 2988904252
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42dd",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.8 GB 📦 20 GB\n📄 Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+        "videoSize": 2988904252
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42e5",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.8 GB 📦 29 GB 👤 5\n📄 Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+        "videoSize": 2988904252
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4308",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.8 GB 📦 16 GB\n📄 Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+        "videoSize": 2988904252
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4320",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.8 GB 📦 26 GB\n📄 Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+        "videoSize": 2988904252
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f432c",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.8 GB 📦 32 GB\n📄 Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+        "videoSize": 2988904252
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4351",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.8 GB 📦 9.1 GB\n📄 Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+        "videoSize": 2988904252
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4371",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ H264\n🎧 5.1\n💾 2.8 GB 📦 6.0 GB 〽️ 1.1 MB/s\n🎙️ 🇷🇺 🇬🇧\n💬 🇷🇺 🇬🇧\n📄 Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.2025.S01E02.Camera.Shy.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-FLUX_EniaHD.mkv",
+        "videoSize": 2988904252
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4247",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.7 GB 📦 24 GB\n🌐 🇷🇺\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+        "videoSize": 2851071838
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f424f",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "📦 2.7 GB\n🌐 🇷🇺\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+        "videoSize": 2851071838
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f426e",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.7 GB 📦 29 GB\n🌐 🇷🇺\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+        "videoSize": 2851071838
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42b2",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.7 GB 📦 10 GB 👤 1\n🌐 🇷🇺\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+        "videoSize": 2851071838
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42c2",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.7 GB 📦 26 GB\n🌐 🇷🇺\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+        "videoSize": 2851071838
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42c7",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "📦 2.7 GB\n🌐 🇷🇺\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+        "videoSize": 2851071838
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f430c",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.7 GB 📦 18 GB\n🌐 🇷🇺\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+        "videoSize": 2851071838
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4346",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.7 GB 📦 5.5 GB 👤 1\n🌐 🇷🇺\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+        "videoSize": 2851071838
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4353",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.7 GB 📦 12 GB\n🌐 🇷🇺\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+        "videoSize": 2851071838
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f438d",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.7 GB 📦 8.4 GB\n🌐 🇷🇺\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.rus.LostFilm.TV.mkv",
+        "videoSize": 2851071838
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4258",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ H264\n🎧 5.1\n📦 2.4 GB 〽️ 893 KB/s 👤 21\n🎙️ 🇮🇹 🇬🇧\n💬 🇮🇹 🇬🇧\n⚙️ TheBlackKing 🔍 TorrentGalaxyClone\n📄 Dexter.Resurrection.S01E02.1080p.ENG.ITA.H264-TheBlackKing.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.ENG.ITA.H264-TheBlackKing.mkv",
+        "videoSize": 2596230152
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43b7",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ H264\n🎧 5.1\n📦 2.4 GB 〽️ 893 KB/s 👤 2\n🎙️ 🇮🇹 🇬🇧\n💬 🇮🇹 🇬🇧\n⚙️ TheBlackKing 🔍 TheRARBG\n📄 Dexter.Resurrection.S01E02.1080p.REPACK.ENG.ITA.H264-TheBlackKing.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.REPACK.ENG.ITA.H264-TheBlackKing.mkv",
+        "videoSize": 2596230152
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42df",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ H264\n🎧 5.1\n💾 2.1 GB 📦 4.3 GB 〽️ 769 KB/s\n🎙️ 🇮🇹 🇬🇧\n💬 🇮🇹 🇬🇧\n📄 Dexter.Resurrection.S01E02.Assassino.in.Incognito.1080p.PMPRip.ITA-ENG.H264.kovalski.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Assassino.in.Incognito.1080p.PMPRip.ITA-ENG.H264.kovalski.mkv",
+        "videoSize": 2227976841
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4246",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 2.0 GB 📦 4.2 GB\n📄 Dexter.Resurrection.S01E02.1080p.ColdFilm.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.ColdFilm.mkv",
+        "videoSize": 2152387893
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f429d",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.8 GB 📦 3.7 GB\n📄 Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+        "videoSize": 1906899961
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42b0",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.8 GB 📦 5.6 GB 👤 7\n📄 Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+        "videoSize": 1906899961
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42ce",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.8 GB 📦 19 GB\n📄 Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+        "videoSize": 1906899961
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4302",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.8 GB 📦 18 GB\n📄 Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+        "videoSize": 1906899961
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4303",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.8 GB 📦 12 GB 👤 3\n📄 Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+        "videoSize": 1906899961
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f430b",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.8 GB 📦 8.1 GB 👤 2\n📄 Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+        "videoSize": 1906899961
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43a1",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.8 GB 📦 10 GB 👤 1\n📄 Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+        "videoSize": 1906899961
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43c1",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.8 GB 📦 16 GB\n📄 Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Kerob.mkv",
+        "videoSize": 1906899961
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42b1",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.6 GB 📦 9.2 GB\n📄 Dexter.Resurrection.S01E02.1080p.Ultradox.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Ultradox.mkv",
+        "videoSize": 1769102770
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42bc",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.6 GB 📦 11 GB 👤 1\n📄 Dexter.Resurrection.S01E02.1080p.Ultradox.mkv",
+      "fileIdx": 5,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Ultradox.mkv",
+        "videoSize": 1769102770
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42de",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.6 GB 📦 5.2 GB\n📄 Dexter.Resurrection.S01E02.1080p.Ultradox.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Ultradox.mkv",
+        "videoSize": 1769102770
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42ff",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.6 GB 📦 13 GB 👤 1\n📄 Dexter.Resurrection.S01E02.1080p.Ultradox.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Ultradox.mkv",
+        "videoSize": 1769102770
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4316",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.6 GB 📦 14 GB\n🔍 iDope\n📄 Dexter.Resurrection.S01E02.1080p.Ultradox.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Ultradox.mkv",
+        "videoSize": 1769102770
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f434f",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "💾 1.6 GB 📦 7.5 GB\n📄 Dexter.Resurrection.S01E02.1080p.Ultradox.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Ultradox.mkv",
+        "videoSize": 1769102770
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f435a",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n💾 870 MB 📦 1.7 GB\n📄 Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+        "videoSize": 912188147
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4287",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n💾 805 MB 📦 2.5 GB 👤 2\n📄 Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+        "videoSize": 843863309
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42a3",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n💾 805 MB 📦 8.5 GB\n📄 Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+        "videoSize": 843863309
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42fc",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n💾 805 MB 📦 7.7 GB\n📄 Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+        "videoSize": 843863309
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f430f",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n💾 805 MB 📦 6.9 GB\n📄 Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+        "videoSize": 843863309
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4313",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n💾 805 MB 📦 3.4 GB\n📄 Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+        "videoSize": 843863309
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f431e",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n💾 805 MB 📦 6.2 GB 👤 10\n📄 Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+        "videoSize": 843863309
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4360",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ H264\n🎧 stereo\n📦 804 MB 〽️ 291 KB/s 👤 4\n🎙️ 🇪🇸 🇬🇧\n💬 🇪🇸 🇬🇧\n⚙️ Lat \n📄 Dexter.Resurreccion.S01e02.2025.1080P-Dual-Lat.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurreccion.S01e02.2025.1080P-Dual-Lat.mkv",
+        "videoSize": 843324341
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4252",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n💾 674 MB 📦 1.5 GB\n📄 Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.10bit.WEBRip.HEVC.mkv",
+        "videoSize": 707213000
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f429c",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n🎧 5.1\n💾 610 MB 📦 634 MB 〽️ 225 KB/s 👤 835\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ ELiTE 🔍 TheRARBG\n📄 Dexter.Resurrection.S01E02.1080p.x265-ELiTE.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.x265-ELiTE.mkv",
+        "videoSize": 639788805
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42b5",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n📦 610 MB 👤 49\n⚙️ ELiTE 🔍 TorrentGalaxyClone\n📄 Dexter Resurrection S01E02 1080p x265-ELiTE.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 1080p x265-ELiTE.mkv",
+        "videoSize": 639789694
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4321",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n🎧 5.1\n💾 610 MB 📦 6.3 GB 〽️ 225 KB/s 👤 11\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ ELiTE 🔍 Knaben\n📄 Dexter.Resurrection.S01E02.1080p.x265-ELiTE.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.x265-ELiTE.mkv",
+        "videoSize": 639788805
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4376",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n🎧 5.1\n📦 610 MB 〽️ 225 KB/s 👤 12\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ ELiTE 🔍 Torrents.csv\n📄 Dexter Resurrection S01E02 1080p x265-ELiTE[EZTVx.to].mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 1080p x265-ELiTE[EZTVx.to].mkv",
+        "videoSize": 639789694
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42fe",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ H264\n🎧 stereo\n📦 504 MB 〽️ 186 KB/s 👤 4\n🌐 🇬🇧\n📄 Dexter.Resurrection.S01E02.1080p.Subtitulado.Esp.SC.mp4",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.Subtitulado.Esp.SC.mp4",
+        "videoSize": 528572166
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f428c",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n💾 438 MB 📦 454 MB 👤 42\n⚙️ MeGusta 🔍 TorrentGalaxyClone\n📄 Dexter.Resurrection.S01E02.1080p.HEVC.x265-MeGusta.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.HEVC.x265-MeGusta.mkv",
+        "videoSize": 459297186
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42d2",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n💾 438 MB 📦 454 MB 👤 31\n⚙️ MeGusta 🔍 TheRARBG\n📄 Dexter.Resurrection.S01E02.Camera.Shy.1080p.HEVC.x265-MeGusta.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.1080p.HEVC.x265-MeGusta.mkv",
+        "videoSize": 459288334
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f438e",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ HEVC\n🎧 5.1\n📦 438 MB 〽️ 162 KB/s 👤 58\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ MeGusta 🔍 TheRARBG\n📄 Dexter.Resurrection.S01E02.1080p.HEVC.x265-MeGusta[EZTVx.to].mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.HEVC.x265-MeGusta[EZTVx.to].mkv",
+        "videoSize": 459297186
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4332",
+      "name": "[P2P]\nTorz\n1080p",
+      "description": "🎞️ AV1\n🎧 5.1\n📦 402 MB 〽️ 148 KB/s 👤 7\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ MeGusta 🔍 Knaben\n📄 Dexter.Resurrection.S01E02.1080p.AV1.10bit-MeGusta.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.1080p.AV1.10bit-MeGusta.mkv",
+        "videoSize": 421521191
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4291",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 1.8 GB 📦 3.9 GB 👤 2\n🌐 🔊 🇵🇱\n🔗 DEVIL-TORRENTS.PL\n📄 Dexter.Resurrection.S01E02.MULTi.720p.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.720p.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+        "videoSize": 1985686381
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42a1",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEB-DL 🎞️ H264\n🎧 5.1, stereo\n💾 1.8 GB 📦 20 GB 〽️ 666 KB/s 👤 121\n🎙️ 🇷🇺 🇬🇧\n💬 🇷🇺 🇬🇧\n🔍 Knaben\n📄 Dexter.Resurrection.S01E02.720p.AMZN.WEB-DL.H264.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.AMZN.WEB-DL.H264.mkv",
+        "videoSize": 1893439604
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f431c",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 1.8 GB 📦 20 GB 👤 2\n🌐 🔊 🇵🇱\n📄 Dexter.Resurrection.S01E02.MULTi.720p.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.720p.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+        "videoSize": 1985686381
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4363",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 1.8 GB 📦 3.9 GB 👤 1\n🌐 🔊\n🔗 BEST-TORRENTS.COM\n📄 Dexter.Resurrection.S01E02.MULTi.720p.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.MULTi.720p.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+        "videoSize": 1985686381
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4358",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n📦 1.1 GB 👤 11\n⚙️ NTb 🔍 TorrentGalaxyClone\n📄 Dexter Resurrection S01E02 Camera Shy 720p AMZN WEB-DL DDP5 1 H 264-NTb.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 Camera Shy 720p AMZN WEB-DL DDP5 1 H 264-NTb.mkv",
+        "videoSize": 1164990450
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42d0",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEB-DL \n📦 348 MB 👤 1\n🔍 TheRARBG\n📄 Dexter.Resurrection.S01E02.720p.WEB-DL-[Feranki1980].mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.WEB-DL-[Feranki1980].mkv",
+        "videoSize": 364918927
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f425c",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEBRip \n💾 1.5 GB 📦 16 GB 👤 2\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.HD720p.WEBRip.Rus.RuDub.tv.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.HD720p.WEBRip.Rus.RuDub.tv.mkv",
+        "videoSize": 1629728559
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f425f",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEBRip 🎞️ H264\n🎧 stereo\n💾 1.5 GB 📦 3.2 GB 〽️ 564 KB/s\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.HD720p.WEBRip.Rus.RuDub.tv.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.HD720p.WEBRip.Rus.RuDub.tv.mkv",
+        "videoSize": 1629728559
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f430e",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEBRip \n💾 1.5 GB 📦 12 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.HD720p.WEBRip.Rus.RuDub.tv.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.HD720p.WEBRip.Rus.RuDub.tv.mkv",
+        "videoSize": 1629728559
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f432f",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEBRip \n💾 1.5 GB 📦 4.8 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.HD720p.WEBRip.Rus.RuDub.tv.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.HD720p.WEBRip.Rus.RuDub.tv.mkv",
+        "videoSize": 1629728559
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4380",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEBRip \n💾 1.5 GB 📦 13 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.HD720p.WEBRip.Rus.RuDub.tv.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.HD720p.WEBRip.Rus.RuDub.tv.mkv",
+        "videoSize": 1629728559
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43b3",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEBRip \n💾 1.5 GB 📦 8.5 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.HD720p.WEBRip.Rus.RuDub.tv.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.HD720p.WEBRip.Rus.RuDub.tv.mkv",
+        "videoSize": 1629728559
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42ac",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEBRip 🎞️ HEVC\n📦 245 MB\n⚙️ PSA \n📄 Dexter.Resurrection.S01E02.720p.10bit.WEBRip.2CH.x265.HEVC-PSA.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.10bit.WEBRip.2CH.x265.HEVC-PSA.mkv",
+        "videoSize": 257350615
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42ed",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEBRip 🎞️ HEVC\n📦 245 MB 👤 2\n⚙️ PSA 🔍 Torrents.csv\n📄 Dexter Resurrection S01E02 720p 10bit WEBRip 2CH x265 HEVC-PSA.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 720p 10bit WEBRip 2CH x265 HEVC-PSA.mkv",
+        "videoSize": 257350615
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43b4",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEB 🎞️ AVC\n📦 1.4 GB 👤 24\n⚙️ JFF 🔍 TorrentGalaxyClone\n📄 Dexter Resurrection S01E02 720p WEB H264-JFF.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 720p WEB H264-JFF.mkv",
+        "videoSize": 1535450808
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42b4",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEB 🎞️ AVC\n📦 1.0 GB 👤 1\n⚙️ sylix \n📄 dexter.resurrection.s01e02.720p.web.h264-sylix[EZTVx.to].mkv",
+      "behaviorHints": {
+        "filename": "dexter.resurrection.s01e02.720p.web.h264-sylix[EZTVx.to].mkv",
+        "videoSize": 1119501026
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f431b",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEB 🎞️ AVC\n📦 1.0 GB 👤 1\n⚙️ SYLiX 🔍 Knaben\n📄 dexter.resurrection.s01e02.720p.web.h264-sylix.mkv",
+      "behaviorHints": {
+        "filename": "dexter.resurrection.s01e02.720p.web.h264-sylix.mkv",
+        "videoSize": 1119501026
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4361",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEB 🎞️ H264\n🎧 5.1\n📦 1.0 GB 〽️ 394 KB/s 👤 29\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ sylix 🔍 Knaben\n📄 dexter.resurrection.s01e02.720p.web.h264-sylix[EZTVx.to].mkv",
+      "behaviorHints": {
+        "filename": "dexter.resurrection.s01e02.720p.web.h264-sylix[EZTVx.to].mkv",
+        "videoSize": 1119501026
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4352",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEB 🎞️ AVC\n💾 558 MB 📦 5.6 GB 👤 8\n🔍 TorrentGalaxyClone\n📄 Dexter Resurrection - S01E02 - Camera Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter Resurrection - S01E02 - Camera Shy.mkv",
+        "videoSize": 585067501
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f439e",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💿 WEB 🎞️ AVC\n📦 496 MB 👤 13\n🔍 Knaben\n📄 dexter.resurrection.s01e02.720p.web.h264.mp4",
+      "behaviorHints": {
+        "filename": "dexter.resurrection.s01e02.720p.web.h264.mp4",
+        "videoSize": 520458431
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f427d",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "📦 1.5 GB 👤 5\n🌐 🇷🇺\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.720p.rus.LostFilm.TV.mp4",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.rus.LostFilm.TV.mp4",
+        "videoSize": 1603858157
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f435e",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "📦 1.5 GB\n🌐 🇷🇺\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.720p.rus.LostFilm.TV.mp4",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.rus.LostFilm.TV.mp4",
+        "videoSize": 1603877838
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42c0",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💾 1.3 GB 📦 2.7 GB\n📄 Dexter.Resurrection.S01E02.720p.ColdFilm.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.ColdFilm.mkv",
+        "videoSize": 1373263045
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f428f",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "🎞️ H264\n🎧 stereo\n💾 1.0 GB 📦 11 GB 〽️ 388 KB/s\n📄 Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+        "videoSize": 1127081028
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42b7",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💾 1.0 GB 📦 7.1 GB\n📄 Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+      "fileIdx": 5,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+        "videoSize": 1127081028
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42f2",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💾 1.0 GB 📦 9.3 GB\n📄 Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+        "videoSize": 1127081028
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4342",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💾 1.0 GB 📦 5.9 GB\n📄 Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+        "videoSize": 1127081028
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f435f",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💾 1.0 GB 📦 4.8 GB\n📄 Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+        "videoSize": 1127081028
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4368",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💾 1.0 GB 📦 8.3 GB 👤 1\n📄 Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+        "videoSize": 1127081028
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4378",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💾 1.0 GB 📦 3.3 GB\n📄 Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+        "videoSize": 1127081028
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43bd",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "💾 1.0 GB 📦 2.2 GB\n📄 Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.Ultradox.mkv",
+        "videoSize": 1127081028
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42f6",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "🎞️ H264\n🎧 5.1\n💾 490 MB 📦 5.0 GB 〽️ 181 KB/s 👤 19\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ FENiX 🔍 Knaben\n📄 Dexter.Resurrection.S01E02.720p.x264-FENiX.mkv",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.x264-FENiX.mkv",
+        "videoSize": 514141436
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4355",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "🎞️ AVC\n📦 490 MB 👤 47\n⚙️ FENiX 🔍 TheRARBG\n📄 Dexter Resurrection S01E02 720p x264-FENiX[EZTVx.to].mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 720p x264-FENiX[EZTVx.to].mkv",
+        "videoSize": 514141436
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4364",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "🎞️ AVC\n💾 490 MB 📦 492 MB 👤 19\n⚙️ FENiX 🔍 TheRARBG\n📄 Dexter Resurrection S01E02 720p x264-FENiX.mkv",
+      "behaviorHints": {
+        "filename": "Dexter Resurrection S01E02 720p x264-FENiX.mkv",
+        "videoSize": 514141436
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f439d",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "🎞️ AVC\n💾 490 MB 📦 493 MB 👤 241\n⚙️ FENiX 🔍 TorrentGalaxyClone\n📄 Dexter.Resurrection.S01E02.720p.x264-FENiX.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.x264-FENiX.mkv",
+        "videoSize": 514141436
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4289",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "📦 451 MB\n📄 Dexter Zmartwychwstanie S01E02 Lektor 720p.mp4",
+      "behaviorHints": {
+        "filename": "Dexter Zmartwychwstanie S01E02 Lektor 720p.mp4",
+        "videoSize": 473127976
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42fd",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "🎞️ HEVC\n🎧 5.1\n📦 403 MB 〽️ 149 KB/s 👤 53\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ MeGusta 🔍 The Pirate Bay\n📄 Dexter.Resurrection.S01E02.720p.HEVC.x265-MeGusta[EZTVx.to].mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.HEVC.x265-MeGusta[EZTVx.to].mkv",
+        "videoSize": 422936856
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f433c",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "🎞️ HEVC\n💾 403 MB 📦 417 MB 👤 33\n⚙️ MeGusta 🔍 TorrentGalaxyClone\n📄 Dexter.Resurrection.S01E02.Camera.Shy.720p.HEVC.x265-MeGusta.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.720p.HEVC.x265-MeGusta.mkv",
+        "videoSize": 422930078
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43ba",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "🎞️ HEVC\n🎧 5.1\n💾 403 MB 📦 417 MB 〽️ 149 KB/s 👤 2\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ MeGusta 🔍 Knaben\n📄 Dexter.Resurrection.S01E02.720p.HEVC.x265-MeGusta.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.720p.HEVC.x265-MeGusta.mkv",
+        "videoSize": 422936856
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4250",
+      "name": "[P2P]\nTorz\n720p",
+      "description": "🎞️ HEVC\n💾 139 MB 📦 1.5 GB 👤 4\n📄 Dexter Resurrection (2025) S01E02 720p hevc x265 [WD-13].mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter Resurrection (2025) S01E02 720p hevc x265 [WD-13].mkv",
+        "videoSize": 145724899
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4278",
+      "name": "[P2P]\nTorz\n480p",
+      "description": "🎞️ H264\n🎧 5.1\n📦 330 MB 〽️ 122 KB/s 👤 22\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ mSD 🔍 Knaben\n📄 Dexter.Resurrection.S01E02.480p.x264-mSD[EZTVx.to].mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.480p.x264-mSD[EZTVx.to].mkv",
+        "videoSize": 345581900
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4245",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 665 MB 📦 5.7 GB\n📄 Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+        "videoSize": 697069568
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42a7",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 665 MB 📦 1.4 GB\n📄 Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+        "videoSize": 697069568
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42bd",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 665 MB 📦 5.1 GB\n📄 Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+        "videoSize": 697069568
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4314",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 665 MB 📦 3.0 GB\n📄 Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+        "videoSize": 697069568
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f433e",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 665 MB 📦 7.0 GB\n📄 Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+        "videoSize": 697069568
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4396",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 665 MB 📦 2.1 GB\n📄 Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+        "videoSize": 697069568
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43ac",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 665 MB 📦 3.6 GB\n📄 Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Ultradox.avi",
+        "videoSize": 697069568
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42a4",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 508 MB 📦 1.0 GB\n📄 Dexter.Resurrection.S01E02.400p.ColdFilm.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.ColdFilm.avi",
+        "videoSize": 533149718
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4280",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 441 MB 📦 917 MB\n📄 Dexter.Resurrection.S01E02.400p.Kerob.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Kerob.avi",
+        "videoSize": 462112960
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4283",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 441 MB 📦 1.3 GB\n📄 Dexter.Resurrection.S01E02.400p.Kerob.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Kerob.avi",
+        "videoSize": 462112960
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42ab",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 441 MB 📦 1.8 GB\n📄 Dexter.Resurrection.S01E02.400p.Kerob.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Kerob.avi",
+        "videoSize": 462112960
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42ca",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 441 MB 📦 3.6 GB 👤 3\n📄 Dexter.Resurrection.S01E02.400p.Kerob.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Kerob.avi",
+        "videoSize": 462112960
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42f1",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 441 MB 📦 3.2 GB 👤 4\n📄 Dexter.Resurrection.S01E02.400p.Kerob.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Kerob.avi",
+        "videoSize": 462112960
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4326",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 441 MB 📦 2.6 GB 👤 1\n📄 Dexter.Resurrection.S01E02.400p.Kerob.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Kerob.avi",
+        "videoSize": 462112960
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4365",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "🎞️ MPEG4\n🎧 stereo\n💾 441 MB 📦 4.5 GB 〽️ 161 KB/s\n📄 Dexter.Resurrection.S01E02.400p.Kerob.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Kerob.avi",
+        "videoSize": 462112960
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4370",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 441 MB 📦 4.1 GB\n📄 Dexter.Resurrection.S01E02.400p.Kerob.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Kerob.avi",
+        "videoSize": 462112960
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4374",
+      "name": "[P2P]\nTorz\n400p",
+      "description": "💾 441 MB 📦 2.1 GB 👤 2\n📄 Dexter.Resurrection.S01E02.400p.Kerob.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.400p.Kerob.avi",
+        "videoSize": 462112960
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4277",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DL 🎞️ AVC\n💾 2.4 GB 📦 5.2 GB 👤 1\n🌐 🔉\n🔍 Knaben\n📄 s01e02.Camera Shy.mkv",
+      "fileIdx": 4,
+      "behaviorHints": {
+        "filename": "s01e02.Camera Shy.mkv",
+        "videoSize": 2596226558
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42d5",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ AVC\n💾 1.8 GB 📦 21 GB\n📄 Dexter.Resurrection.S01E02.Camera.Shy.WEB-DLRip-AVC.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.WEB-DLRip-AVC.mkv",
+        "videoSize": 1956172187
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4262",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 916 MB 📦 9.7 GB\n📄 Dexter.Resurrection.2025.S01E02.Camera.Shy.WEB-DLRip.NewStudio.avi",
+      "fileIdx": 3,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.2025.S01E02.Camera.Shy.WEB-DLRip.NewStudio.avi",
+        "videoSize": 960151552
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f425d",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ Xvid\n🎧 DD\n💾 846 MB 📦 1.7 GB 👤 9\n⚙️ Hqh \n📄 Dexter.Resurrection.S01E02.Camera.Shy.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.avi",
+        "videoSize": 886653858
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4263",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ Xvid\n🎧 DD\n💾 846 MB 📦 5.6 GB 👤 3\n⚙️ Hqh \n📄 Dexter.Resurrection.S01E02.Camera.Shy.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.avi",
+        "videoSize": 886653858
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4269",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ Xvid\n🎧 DD\n💾 846 MB 📦 2.6 GB 👤 1\n⚙️ Hqh \n📄 Dexter.Resurrection.S01E02.Camera.Shy.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.avi",
+        "videoSize": 886653858
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f428d",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ Xvid\n🎧 DD\n💾 846 MB 📦 8.2 GB\n⚙️ Hqh \n📄 Dexter.Resurrection.S01E02.Camera.Shy.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.avi",
+        "videoSize": 886653858
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42d6",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ Xvid\n🎧 DD\n💾 846 MB 📦 9.0 GB 👤 1\n⚙️ Hqh \n📄 Dexter.Resurrection.S01E02.Camera.Shy.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.avi",
+        "videoSize": 886653858
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4388",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ Xvid\n🎧 DD\n💾 846 MB 📦 6.6 GB\n⚙️ Hqh \n📄 Dexter.Resurrection.S01E02.Camera.Shy.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.avi",
+        "videoSize": 886653858
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43aa",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ Xvid\n🎧 DD\n💾 846 MB 📦 3.8 GB\n⚙️ Hqh \n📄 Dexter.Resurrection.S01E02.Camera.Shy.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.avi",
+        "videoSize": 886653858
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43b2",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ Xvid\n🎧 DD\n💾 846 MB 📦 7.4 GB\n⚙️ Hqh \n📄 Dexter.Resurrection.S01E02.Camera.Shy.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.avi",
+        "videoSize": 886653858
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43c2",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ Xvid\n🎧 DD\n💾 846 MB 📦 4.7 GB\n⚙️ Hqh \n📄 Dexter.Resurrection.S01E02.Camera.Shy.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Camera.Shy.avi",
+        "videoSize": 886653858
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42bb",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 756 MB 📦 8.0 GB 👤 1\n🌐 🇵🇱\n📄 Dexter.Resurrection.S01E02.PL.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.PL.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+        "videoSize": 792565788
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f430a",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n📦 756 MB 👤 6\n🌐 🇵🇱\n📄 Dexter.Resurrection.S01E02.PL.SKY.WEB-DL.H264.DDP5.1.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.PL.SKY.WEB-DL.H264.DDP5.1.mkv",
+        "videoSize": 792565788
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4327",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 756 MB 📦 1.5 GB 👤 1\n🌐 🇵🇱\n🔗 BEST-TORRENTS.COM\n📄 Dexter.Resurrection.S01E02.PL.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.PL.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+        "videoSize": 792565788
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4345",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DL 🎞️ AVC\n🎧 DDP | 5.1\n💾 756 MB 📦 1.5 GB 👤 2\n🌐 🇵🇱\n🔗 DEVIL-TORRENTS.PL\n📄 Dexter.Resurrection.S01E02.PL.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.PL.SKY.WEB-DL.H264.DDP5.1-K83.mkv",
+        "videoSize": 792565788
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f436c",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 697 MB 📦 1.4 GB\n📄 Dexter.Resurrection.2025.S01E02_WEB-DLRip_RHS.avi",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.2025.S01E02_WEB-DLRip_RHS.avi",
+        "videoSize": 731021312
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f426d",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 677 MB 📦 3.7 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 12,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4288",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 677 MB 📦 5.2 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 16,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42d7",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 677 MB 📦 3.0 GB 👤 2\n🌐 🇷🇺\n📄 Dexter.Resurrection.S01.E02.Rus.Eng.by.Сибиряк.avi",
+      "fileIdx": 3,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01.E02.Rus.Eng.by.Сибиряк.avi",
+        "videoSize": 709519360
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42e8",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 677 MB 📦 3.0 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 10,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42ee",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 677 MB 📦 4.5 GB 👤 24\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 14,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42f8",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 677 MB 📦 1.4 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 6,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4310",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 677 MB 📦 5.2 GB\n🌐 🇷🇺\n📄 Dexter.Resurrection.S01.E02.Rus.Eng.by.Сибиряк.avi",
+      "fileIdx": 6,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01.E02.Rus.Eng.by.Сибиряк.avi",
+        "videoSize": 709519360
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4335",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 677 MB 📦 1.4 GB\n🌐 🇷🇺\n📄 Dexter.Resurrection.S01.E02.Rus.Eng.by.Сибиряк.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01.E02.Rus.Eng.by.Сибиряк.avi",
+        "videoSize": 709519360
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f433b",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ MPEG4\n🎧 stereo\n💾 677 MB 📦 7.2 GB 〽️ 250 KB/s 👤 5\n🔍 Knaben\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 22,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4367",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 677 MB 📦 4.5 GB\n🌐 🇷🇺\n📄 Dexter.Resurrection.S01.E02.Rus.Eng.by.Сибиряк.avi",
+      "fileIdx": 5,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01.E02.Rus.Eng.by.Сибиряк.avi",
+        "videoSize": 709519360
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4375",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 677 MB 📦 5.9 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 18,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4386",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ MPEG4\n🎧 stereo\n💾 677 MB 📦 7.2 GB 〽️ 250 KB/s 👤 2\n🔍 Knaben\n📄 Dexter.Resurrection.S01.E02.Rus.Eng.by.Сибиряк.avi",
+      "fileIdx": 6,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01.E02.Rus.Eng.by.Сибиряк.avi",
+        "videoSize": 709519360
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4391",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 677 MB 📦 6.5 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 20,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4399",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip \n💾 677 MB 📦 2.1 GB 👤 3\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 8,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f424b",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ AVC\n💾 674 MB 📦 5.2 GB 👤 1\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+        "videoSize": 706222421
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4256",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ AVC\n💾 674 MB 📦 3.7 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+        "videoSize": 706222421
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f427f",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ AVC\n💾 674 MB 📦 3.6 GB 👤 1\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+        "videoSize": 706222421
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42c3",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ AVC\n💾 674 MB 📦 3.0 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+        "videoSize": 706222421
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4356",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ AVC\n💾 674 MB 📦 6.5 GB 👤 2\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+        "videoSize": 706222421
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f436e",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ AVC\n💾 674 MB 📦 4.5 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+        "videoSize": 706222421
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f436f",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ AVC\n💾 674 MB 📦 2.9 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+        "videoSize": 706222421
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4384",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ AVC\n💾 674 MB 📦 5.8 GB 👤 1\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+        "videoSize": 706222421
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43ab",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEB-DLRip 🎞️ AVC\n💾 674 MB 📦 7.1 GB 👤 11\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.x264.seleZen.mkv",
+        "videoSize": 706222421
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f424d",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEBRip 🎞️ AVC\n💾 615 MB 📦 6.2 GB 👤 1\n🌐 🇬🇧 🇭🇺\n⚙️ FULCRUM 🔍 iDope\n📄 fulcrum-dexter.resurrection.s01e02.webrip.mkv",
+      "fileIdx": 7,
+      "behaviorHints": {
+        "filename": "fulcrum-dexter.resurrection.s01e02.webrip.mkv",
+        "videoSize": 644796784
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42f3",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEBRip 🎞️ MPEG4\n💾 599 MB 📦 5.9 GB 〽️ 216 KB/s\n⚙️ Pir8 🔍 Uindex\n📄 Dexter.Resurrection.1x02.Assassino.In.Incognito.ITA.ENG.AMZN.WEBRip.XviD-Pir8.avi",
+      "fileIdx": 4,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.1x02.Assassino.In.Incognito.ITA.ENG.AMZN.WEBRip.XviD-Pir8.avi",
+        "videoSize": 628093500
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4242",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEBRip 🎞️ Xvid\n💾 586 MB 📦 6.2 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+        "videoSize": 614320708
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4282",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEBRip 🎞️ Xvid\n💾 586 MB 📦 5.1 GB 👤 1\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+        "videoSize": 614320708
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42e2",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEBRip 🎞️ Xvid\n💾 586 MB 📦 2.6 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+        "videoSize": 614320708
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4315",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEBRip 🎞️ Xvid\n💾 586 MB 📦 1.2 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+        "videoSize": 614320708
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f432b",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEBRip 🎞️ Xvid\n💾 586 MB 📦 1.8 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+        "videoSize": 614320708
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f434b",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEBRip 🎞️ Xvid\n💾 586 MB 📦 3.9 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+        "videoSize": 614320708
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4359",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEBRip 🎞️ Xvid\n💾 586 MB 📦 2.6 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+        "videoSize": 614320708
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43a8",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEBRip 🎞️ Xvid\n💾 586 MB 📦 3.2 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+        "videoSize": 614320708
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43be",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEBRip 🎞️ Xvid\n💾 586 MB 📦 4.5 GB\n🌐 🇷🇺\n🔗 RuDub.tv\n📄 Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.s01e02.WEBRip.XviD.Rus.RuDub.tv.avi",
+        "videoSize": 614320708
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4347",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEBRip 🎞️ H264\n🎧 stereo\n📦 262 MB 〽️ 97 KB/s 👤 20\n📄 Dexter.Resurrection.S01E02.VOSTFR.FANSUB.WEBRip.x264.mp4",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.VOSTFR.FANSUB.WEBRip.x264.mp4",
+        "videoSize": 274922954
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43a4",
+      "name": "[P2P]\nTorz",
+      "description": "💿 WEBRip 🎞️ AVC\n📦 242 MB\n🌐 🇫🇷\n📄 Dexter.Resurrection.S01E02.FRENCH.WEBRip.x264.mp4",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.FRENCH.WEBRip.x264.mp4",
+        "videoSize": 253669999
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f426b",
+      "name": "[P2P]\nTorz",
+      "description": "💾 2.7 GB 📦 22 GB\n📄 Dexter.Resurrection.S01E02.Jetvis.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Jetvis.mkv",
+        "videoSize": 2852373259
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f426c",
+      "name": "[P2P]\nTorz",
+      "description": "💾 2.7 GB 📦 5.8 GB\n📄 Dexter.Resurrection.S01E02.Jetvis.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Jetvis.mkv",
+        "videoSize": 2852306828
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f432e",
+      "name": "[P2P]\nTorz",
+      "description": "💾 2.7 GB 📦 31 GB\n📄 Dexter.Resurrection.S01E02.Jetvis.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Jetvis.mkv",
+        "videoSize": 2852373259
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4350",
+      "name": "[P2P]\nTorz",
+      "description": "💾 2.7 GB 📦 28 GB 👤 2\n📄 Dexter.Resurrection.S01E02.Jetvis.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Jetvis.mkv",
+        "videoSize": 2852373259
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f437e",
+      "name": "[P2P]\nTorz",
+      "description": "🎞️ H264\n🎧 stereo, 5.1\n💾 2.7 GB 📦 8.7 GB 〽️ 1.0 MB/s\n🌐 🇷🇺 🇬🇧\n📄 Dexter.Resurrection.S01E02.Jetvis.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Jetvis.mkv",
+        "videoSize": 2852306828
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4381",
+      "name": "[P2P]\nTorz",
+      "description": "💾 2.7 GB 📦 25 GB 👤 6\n📄 Dexter.Resurrection.S01E02.Jetvis.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Jetvis.mkv",
+        "videoSize": 2852373259
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4382",
+      "name": "[P2P]\nTorz",
+      "description": "💾 2.7 GB 📦 15 GB 👤 4\n📄 Dexter.Resurrection.S01E02.Jetvis.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Jetvis.mkv",
+        "videoSize": 2852373259
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4393",
+      "name": "[P2P]\nTorz",
+      "description": "💾 2.7 GB 📦 19 GB\n📄 Dexter.Resurrection.S01E02.Jetvis.mkv",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.Jetvis.mkv",
+        "videoSize": 2852373259
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42a5",
+      "name": "[P2P]\nTorz",
+      "description": "💾 1.0 GB 📦 2.0 GB 👤 4\n🌐 🇨🇳\n📄 嗜血法医：杀魔复生.Dexter.Resurrection.S01E02.Camera.Shy.1080p.HD中英双字[最新电影www.5266ys.com].mp4",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "嗜血法医：杀魔复生.Dexter.Resurrection.S01E02.Camera.Shy.1080p.HD中英双字[最新电影www.5266ys.com].mp4",
+        "videoSize": 1081728076
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4294",
+      "name": "[P2P]\nTorz",
+      "description": "🎞️ MPEG4\n🎧 stereo\n📦 712 MB 〽️ 262 KB/s\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.rus.LostFilm.TV.avi",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.rus.LostFilm.TV.avi",
+        "videoSize": 746326016
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42e3",
+      "name": "[P2P]\nTorz",
+      "description": "📦 712 MB 👤 7\n🌐 🇷🇺\n🔗 LostFilm.TV\n📄 Dexter.Resurrection.S01E02.rus.LostFilm.TV.avi",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.rus.LostFilm.TV.avi",
+        "videoSize": 746295296
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4271",
+      "name": "[P2P]\nTorz",
+      "description": "💾 677 MB 📦 4.5 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4274",
+      "name": "[P2P]\nTorz",
+      "description": "💾 677 MB 📦 6.5 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4286",
+      "name": "[P2P]\nTorz",
+      "description": "💾 677 MB 📦 7.2 GB 👤 7\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42a9",
+      "name": "[P2P]\nTorz",
+      "description": "💾 677 MB 📦 3.0 GB 👤 1\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4334",
+      "name": "[P2P]\nTorz",
+      "description": "💾 677 MB 📦 3.7 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f437c",
+      "name": "[P2P]\nTorz",
+      "description": "💾 677 MB 📦 1.4 GB 👤 1\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f4398",
+      "name": "[P2P]\nTorz",
+      "description": "💾 677 MB 📦 5.2 GB 👤 1\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f439f",
+      "name": "[P2P]\nTorz",
+      "description": "💾 677 MB 📦 2.1 GB 👤 2\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f43c3",
+      "name": "[P2P]\nTorz",
+      "description": "💾 677 MB 📦 5.9 GB\n📄 Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+      "fileIdx": 2,
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.WEB-DLRip.RGzsRutracker.avi",
+        "videoSize": 710096896
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f42c9",
+      "name": "[P2P]\nTorz",
+      "description": "💾 432 MB 📦 4.4 GB 👤 5\n🔍 TorrentGalaxyClone\n📄 Dexter - Resurrection - S01E02 - Camera Shy.mkv",
+      "fileIdx": 1,
+      "behaviorHints": {
+        "filename": "Dexter - Resurrection - S01E02 - Camera Shy.mkv",
+        "videoSize": 452828249
+      }
+    },
+    {
+      "infoHash": "00000000000000000000000000000000000f437d",
+      "name": "[P2P]\nTorz",
+      "description": "💿 XviD 🎞️ Xvid\n📦 392 MB 👤 9\n⚙️ AFG 🔍 Knaben\n📄 Dexter.Resurrection.S01E02.XviD-AFG[EZTVx.to].avi",
+      "behaviorHints": {
+        "filename": "Dexter.Resurrection.S01E02.XviD-AFG[EZTVx.to].avi",
+        "videoSize": 410952602
+      }
+    }
+  ]
+}

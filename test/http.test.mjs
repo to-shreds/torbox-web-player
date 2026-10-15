@@ -56,6 +56,27 @@ test('playback refuses an actual AVI before creating a browser media ticket',asy
   const response=await call('/api/playback',{...auth,method:'POST',data:{viewer:'viewer-1',videoId:'torrents:1:0'}}),body=await response.json();
   assert.equal(response.status,415);assert.equal(body.error,'BROWSER_CONTAINER_UNSUPPORTED');assert.equal(mediaTickets.rows.size,0);
 });
+for (const mime of ['video/x-matroska', 'video/matroska', 'application/octet-stream']) test(`playback permits a conditional MKV with ${mime} and redirects without relaying media`, async t => {
+  let mediaFetchCalls = 0;
+  const upstreamUrl = 'https://store.tb-cdn.io/fixture.mkv?token=fixture-master-key';
+  const providerExtra = { resolveForRelay: async videoId => ({ upstreamUrl, file: { id: videoId, title: 'Fixture.H264.AAC.mkv', mime } }) };
+  const { call, login, mediaTickets } = await fixture(t, { providerExtra, mediaFetch: async () => { mediaFetchCalls++; throw new Error('unexpected relay'); } });
+  const auth = await login();
+  const response = await call('/api/playback', { ...auth, method: 'POST', data: { viewer: 'viewer-1', videoId: 'torrents:1:0' } });
+  assert.equal(response.status, 200);
+  const playback = await response.json();
+  assert.equal(playback.delivery, 'direct');
+  assert.equal(playback.conversion, false);
+  assert.equal(playback.file.mime, mime);
+  assert.match(playback.mediaUrl, /^\/media\/[A-Za-z0-9_-]{43}$/);
+  assert.ok(!JSON.stringify(playback).includes('fixture-master-key'));
+  assert.equal(mediaTickets.rows.size, 1);
+  const media = await call(playback.mediaUrl, { headers: { Range: 'bytes=0-0' }, redirect: 'manual' });
+  assert.equal(media.status, 307);
+  assert.equal(media.headers.get('location'), upstreamUrl);
+  assert.equal(media.headers.get('x-media-delivery'), 'direct');
+  assert.equal(mediaFetchCalls, 0);
+});
 test('media ticket redirects range-preserving to TorBox without relaying video bytes', async t => {
   let mediaFetchCalls=0;
   const {call,login}=await fixture(t,{mediaFetch:async()=>{mediaFetchCalls++;throw new Error('unexpected relay');}}),auth=await login();
