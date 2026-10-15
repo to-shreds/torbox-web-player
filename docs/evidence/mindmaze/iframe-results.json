@@ -1,0 +1,83 @@
+{
+  "checkedDate": "2026-10-15",
+  "scope": "Read-only verification of the third-party author page inside a local sandboxed iframe. Application integration has separate tests.",
+  "authorURL": "https://gorjan.rocks/projects/mindmaze/",
+  "author": "Gorjan Jovanovski",
+  "displayName": "MindMaze (Encarta browser recreation)",
+  "originalProduct": "Microsoft Encarta 98 MindMaze",
+  "hostedGameCopiedToRepository": false,
+  "sandbox": "allow-scripts",
+  "referrerPolicy": "no-referrer",
+  "observedAuthorHeaders": {
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "xFrameOptions": null,
+    "contentSecurityPolicy": null,
+    "accessControlAllowOrigin": "*",
+    "lastModified": "Thu, 01 Oct 2026 19:11:18 GMT"
+  },
+  "sourceInspection": {
+    "browserImplementation": "JavaScript/canvas recreation, not emulation of the original Windows executable",
+    "authorClaimsOriginalAssets": true,
+    "originalQuestionCount": 7723,
+    "questionGroups": 36,
+    "parentMessageBridge": false,
+    "parentPauseBridge": false,
+    "redistributionGrantFound": false
+  },
+  "limitations": [
+    "The opaque sandbox disables localStorage. Entered named players revert to Tourist; embedded mode has no saved progress. The full-page author link enables normal profiles.",
+    "The author game exposes no parent pause or mute protocol. Its own controls work; removing the iframe ends the session.",
+    "Touch tests use emulated browser touchscreens; physical phone and audio-device acceptance is not claimed.",
+    "Game assets remain on the author host. Screenshots are attributed QA evidence of that remote page."
+  ],
+  "cases": [
+    {
+      "name": "desktop",
+      "viewport": { "width": 1280, "height": 850 },
+      "input": "mouse",
+      "titleLoaded": true,
+      "actualPlayer": "Tourist",
+      "enteredCastle": true,
+      "enteredMaze": true,
+      "timedQuestionVisible": true,
+      "timerRuns": true,
+      "answerHandled": true,
+      "parentBlur": { "hasFocus": true, "activeElement": "IFRAME" },
+      "errors": []
+    },
+    {
+      "name": "portrait",
+      "viewport": { "width": 412, "height": 915 },
+      "input": "touchscreen tap",
+      "titleLoaded": true,
+      "actualPlayer": "Tourist",
+      "enteredCastle": true,
+      "enteredMaze": true,
+      "timedQuestionVisible": true,
+      "timerRuns": true,
+      "answerHandled": true,
+      "parentBlur": { "hasFocus": true, "activeElement": "IFRAME" },
+      "errors": []
+    },
+    {
+      "name": "landscape",
+      "viewport": { "width": 915, "height": 412 },
+      "input": "touchscreen tap",
+      "titleLoaded": true,
+      "actualPlayer": "Tourist",
+      "enteredCastle": true,
+      "enteredMaze": true,
+      "timedQuestionVisible": true,
+      "timerRuns": true,
+      "answerHandled": true,
+      "parentBlur": { "hasFocus": true, "activeElement": "IFRAME" },
+      "errors": []
+    }
+  ],
+  "allPassed": true,
+  "screenshots": {
+    "portrait-question.png": "Remote author page in a 412x915 emulated touchscreen iframe, question and large answer sheet",
+    "landscape-question.png": "Remote author page in a 915x412 emulated touchscreen iframe, question, navigation pad and large answer sheet"
+  }
+}

@@ -35,7 +35,11 @@ export async function startFixture(port=4175) {
     if(path==='/api/login')control.logins++;
     void handler(req,res);
   });
-  await new Promise(resolve=>app.server.listen(port,'127.0.0.1',resolve));
+  await new Promise((resolve,reject)=>{
+    const failed=error=>reject(error);
+    app.server.once('error',failed);
+    app.server.listen(port,'127.0.0.1',()=>{app.server.off('error',failed);resolve();});
+  });
   return{...app,origin,control,provider,session(){const row=app.sessions.create();row.row.provider=provider;return row.id;},close:()=>new Promise(resolve=>{app.server.closeAllConnections();app.server.close(resolve);})};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){const f=await startFixture(4174);console.log('Synthetic player fixture: '+f.origin);}

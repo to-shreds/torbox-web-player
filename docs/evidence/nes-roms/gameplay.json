@@ -1,0 +1,57 @@
+{
+  "checkedAt": "2026-10-13T23:17:43.872319+00:00",
+  "scope": "initial actual ROM gameplay and manual restore, not full playthrough",
+  "games": [
+    {
+      "id": "super-mario-bros-duck-hunt",
+      "game": "Super Mario Bros.",
+      "gameplay": "World 1-1",
+      "controls": [
+        "move",
+        "jump"
+      ],
+      "manualRestore": "CPU RAM, program counter and mapper state matched"
+    },
+    {
+      "id": "super-mario-bros-3",
+      "game": "Super Mario Bros. 3",
+      "gameplay": "World 1 level 1",
+      "controls": [
+        "move",
+        "jump"
+      ],
+      "manualRestore": "CPU RAM, program counter and mapper state matched"
+    },
+    {
+      "id": "tmnt-ii-arcade-game",
+      "game": "Teenage Mutant Ninja Turtles II",
+      "gameplay": "Scene 1 combat",
+      "controls": [
+        "move",
+        "attack",
+        "jump"
+      ],
+      "manualRestore": "CPU RAM, program counter and mapper state matched"
+    },
+    {
+      "id": "super-mario-bros-duck-hunt",
+      "game": "Duck Hunt",
+      "controls": [
+        "mouse aim",
+        "mouse trigger"
+      ],
+      "verifiedHit": true,
+      "score": 1000,
+      "aimMethod": "read-only sprite coordinates mapped to rendered canvas; actual browser mouse input",
+      "gameStateModifiedToCreateHit": false
+    }
+  ],
+  "fatalErrors": [],
+  "privateTorBoxRequests": 0,
+  "screenshots": [
+    "smb-gameplay.png",
+    "smb3-gameplay.png",
+    "tmnt2-gameplay.png",
+    "duckhunt-hit.png"
+  ]
+}

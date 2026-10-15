@@ -1,0 +1,29 @@
+
+Interrupted while running:
+
+⚠ test/browser/buffstreams.mjs (test/browser/buffstreams.mjs:1:1)
+⚠ test/browser/games-cheats.mjs (test/browser/games-cheats.mjs:1:1)
+✖ test/browser/buffstreams.mjs (34932.03696ms)
+✔ a six-letter Game Genie code patches the actual ROM read, with master and individual toggles (1564.485444ms)
+✔ eight-letter compare codes apply only to matching ROM bytes, and editing and removing use the new code (1081.424124ms)
+✔ bulk addition and portable JSON import/export preserve the list and reject bad input atomically (885.929516ms)
+✔ cheats remain current across manual restore, Start fresh and reopening, and isolate viewers and ROMs (2710.607693ms)
+✔ the paused cheat panel accepts text keys without sending them to NES controllers (604.985046ms)
+✔ an unexpected native callback failure rolls back the engine, stored model and checkboxes (1195.664344ms)
+✔ a fatal opcode cheat stays editable and recovers through Start fresh and manual Load while editing (1473.128695ms)
+✔ a delayed JSON import from an old game cannot change the next game (1049.755668ms)
+✔ mobile portrait and landscape keep cheat editing inside the viewport (832.65301ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 1
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 34938.792825
+
+✖ failing tests:
+
+test at test/browser/buffstreams.mjs:1:1
+✖ test/browser/buffstreams.mjs (34932.03696ms)
+  'Promise resolution is still pending but the event loop has already resolved'

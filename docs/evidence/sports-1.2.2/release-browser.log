@@ -1,0 +1,74 @@
+2026-10-11T13:46:36.0885480Z ##[group]Run npm run test:browser
+2026-10-11T13:46:36.0885661Z [36;1mnpm run test:browser[0m
+2026-10-11T13:46:36.0935456Z shell: /usr/bin/bash -e {0}
+2026-10-11T13:46:36.0935594Z ##[endgroup]
+2026-10-11T13:46:36.1562324Z 
+2026-10-11T13:46:36.1562684Z > torbox-web-player@1.2.2 test:browser
+2026-10-11T13:46:36.1563172Z > node --test test/browser/reliability.mjs test/browser/sports.mjs test/browser/sports-routing.mjs
+2026-10-11T13:46:36.1563377Z 
+2026-10-11T13:46:37.3048090Z ✔ browser loads artwork at the actual redirect destination under the production image CSP (803.736642ms)
+2026-10-11T13:46:37.6125497Z ✔ browser blocks an untrusted redirect and recovers with the title-specific medium poster (310.221528ms)
+2026-10-11T13:46:38.2099537Z {"event":"media_redirect_issued","ranged":true}
+2026-10-11T13:46:38.2961563Z ✔ full UI login, browse, playback and seeking verify the CDN redirect with synthetic media (684.227663ms)
+2026-10-11T13:46:38.5729712Z ✔ catalog renders while a slow TorBox health check is still pending (277.000268ms)
+2026-10-11T13:46:42.5122660Z {"event":"media_redirect_issued","ranged":true}
+2026-10-11T13:46:42.5449877Z ✔ resume keeps the local rewind position and a visible overlay until real playback (3972.792138ms)
+2026-10-11T13:46:43.7655946Z ✔ canceling Resume during slow source lookup cannot reopen the player (1220.339981ms)
+2026-10-11T13:46:44.9561318Z ✔ closing a title during a slow Play request prevents late playback (1190.523591ms)
+2026-10-11T13:46:46.1999881Z {"event":"media_redirect_issued","ranged":true}
+2026-10-11T13:46:46.2211034Z ✔ details prepare the exact ready episode before Play and reuse the result without another lookup (1263.994907ms)
+2026-10-11T13:46:46.2212015Z ℹ Warmed Play to first synthetic video frame: 42ms; source lookup fixture delay: 1000ms.
+2026-10-11T13:46:46.7260937Z {"event":"media_redirect_issued","ranged":true}
+2026-10-11T13:46:46.7553253Z ✔ an uncached fast batch waits for later cached exact results before offering preparation (535.148208ms)
+2026-10-11T13:46:47.2377903Z {"event":"media_redirect_issued","ranged":true}
+2026-10-11T13:46:47.2578238Z ✔ a mismatched fast batch waits for later cached exact results before offering preparation (502.370502ms)
+2026-10-11T13:46:47.5950501Z ✔ uncached details prefetch never starts a TorBox download or opens the player (337.18942ms)
+2026-10-11T13:46:48.7707754Z ✔ closing details cancels warm work without late preparation or playback (1175.39747ms)
+2026-10-11T13:46:48.9996668Z {"event":"media_redirect_issued","ranged":true}
+2026-10-11T13:46:49.6087943Z ✔ next episode warms before the credits window and is reused during auto-next (837.894304ms)
+2026-10-11T13:46:49.8830586Z {"event":"media_redirect_issued","ranged":true}
+2026-10-11T13:46:49.9826779Z {"event":"media_redirect_issued","ranged":true}
+2026-10-11T13:46:50.0031282Z ✔ slow progress saves do not block auto-next and the actual video element survives (394.634893ms)
+2026-10-11T13:46:50.2832980Z {"event":"media_redirect_issued","ranged":true}
+2026-10-11T13:46:50.7171390Z ✔ an expired background progress session does not stop a playing video (713.749393ms)
+2026-10-11T13:46:50.9865248Z {"event":"media_redirect_issued","ranged":true}
+2026-10-11T13:46:51.2554756Z ✔ hung initial media reaches a bounded failure and clears the resume overlay (536.807797ms)
+2026-10-11T13:46:51.6580034Z {"event":"media_redirect_issued","ranged":true}
+2026-10-11T13:46:51.6707540Z ✔ Resume offers in-app preparation, with no uncached write until explicitly selected (416.736128ms)
+2026-10-11T13:47:15.0827158Z ✔ service startup can exceed the old 22-second cutoff without forcing a reload (23411.967436ms)
+2026-10-11T13:47:15.7281237Z {"event":"media_redirect_issued","ranged":true}
+2026-10-11T13:47:15.7536436Z ✔ rapid episode choices play only the last selected episode (670.630089ms)
+2026-10-11T13:47:15.9673330Z ✔ a remembered encrypted key reconnects after a backend session restart (213.760836ms)
+2026-10-11T13:47:19.3910198Z ✔ startup errors show a working Try again button (3423.564278ms)
+2026-10-11T13:47:42.8998095Z ✔ anonymous Sports plays directly without any private service request or provider credentials (1087.780029ms)
+2026-10-11T13:47:42.8999058Z ✔ legitimate approved CDN beacon redirect still plays without private service requests or provider cookies (363.535036ms)
+2026-10-11T13:47:42.9000847Z ✔ anonymous full replay resolves metadata and media directly without result text (496.41747ms)
+2026-10-11T13:47:42.9001835Z ✔ Sports denies manifest-redirect before forbidden media transfer (271.610006ms)
+2026-10-11T13:47:42.9002611Z ✔ Sports denies variant-redirect before forbidden media transfer (3484.156137ms)
+2026-10-11T13:47:42.9003342Z ✔ Sports denies segment-redirect before forbidden media transfer (25520.807207ms)
+2026-10-11T13:47:42.9004020Z ✔ Sports denies key-redirect before forbidden media transfer (9764.050729ms)
+2026-10-11T13:47:42.9004715Z ✔ Sports denies variant-direct before forbidden media transfer (25470.157611ms)
+2026-10-11T13:47:43.1173101Z ✔ Sports denies segment-direct before forbidden media transfer (217.736101ms)
+2026-10-11T13:47:43.3440143Z ✔ Sports denies key-direct before forbidden media transfer (226.591253ms)
+2026-10-11T13:48:08.8093514Z ✔ Sports denies redirect-chain before forbidden media transfer (25465.292534ms)
+2026-10-11T13:48:34.2997687Z ✔ Sports denies credentials-redirect before forbidden media transfer (25489.53067ms)
+2026-10-11T13:48:59.7771558Z ✔ Sports denies http-redirect before forbidden media transfer (25477.052547ms)
+2026-10-11T13:49:25.2674504Z ✔ Sports denies port-redirect before forbidden media transfer (25491.217001ms)
+2026-10-11T13:49:25.5134548Z ✔ replay metadata redirects cannot reach Render (245.897219ms)
+2026-10-11T13:49:25.7477785Z ✔ native browser HLS fallback is isolated and cannot redirect media to Render (233.656886ms)
+2026-10-11T13:49:25.7854988Z ✔ sports opens and plays HLS tennis while private startup is hung, with no TorBox login or media relay (882.516687ms)
+2026-10-11T13:49:25.7855565Z ✔ padel full replay resolves anonymously, resumes and starts over without showing result text (545.962059ms)
+2026-10-11T13:49:25.7856017Z ✔ closing a resolving sports replay prevents late media and leaves the catalog usable (1200.379199ms)
+2026-10-11T13:49:25.7856813Z ✔ failed sports HLS reports retry and remains bounded (249.74623ms)
+2026-10-11T13:49:25.7857368Z ✔ Sports requires an adult viewer so it cannot bypass Kid Mode allowances (214.285547ms)
+2026-10-11T13:49:25.7857898Z ✔ expanded Sports filters expose football/hockey replays without a TorBox key or availability notice (182.992568ms)
+2026-10-11T13:49:25.7858645Z ✔ a canceled old Play rejection cannot overwrite the next Sports playback (485.419404ms)
+2026-10-11T13:49:25.7858881Z ℹ tests 44
+2026-10-11T13:49:25.7858992Z ℹ suites 0
+2026-10-11T13:49:25.7859102Z ℹ pass 44
+2026-10-11T13:49:25.7860989Z ℹ fail 0
+2026-10-11T13:49:25.7861109Z ℹ cancelled 0
+2026-10-11T13:49:25.7861229Z ℹ skipped 0
+2026-10-11T13:49:25.7861340Z ℹ todo 0
+2026-10-11T13:49:25.7861469Z ℹ duration_ms 169608.351765
+2026-10-11T13:49:25.8025964Z

@@ -1,4 +1,4 @@
-import {sportsMediaUrl} from './sports-core.js?v=release-1.2.2-sports.1';
+import {sportsMediaUrl} from './sports-core.js?v=release-1.2.3-party.1';
 
 // This document's exact media/connect CSP checks all redirect destinations.
 // It excludes Render even when this document is served by Render itself.

@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "mindmaze-encarta",
+      "title": "MindMaze (Encarta browser recreation)",
+      "platform": "web",
+      "hosted": "https://gorjan.rocks/projects/mindmaze/",
+      "controls": "An author-hosted recreation of Encarta 98's MindMaze. Use the game's mouse or touch controls to explore rooms and answer questions. Embedded play uses Tourist mode without saved names or progress. Open full page for the creator's player profiles. Closing or leaving ends this session.",
+      "keys": [],
+      "license": "Hosted by its creator; Encarta assets are not copied into this project",
+      "source": "https://gorjan.rocks/projects/mindmaze/"
+    },
+    {
+      "id": "dosdefender",
+      "title": "DOS Defender",
+      "platform": "dos",
+      "bundle": "games-data/dosdefender.jsdos",
+      "controls": "Move the mouse to steer. Hold the left mouse button to fire. Right-click after game over to restart.",
+      "keys": [],
+      "license": "Unlicense",
+      "source": "https://github.com/skeeto/dosdefender-ld31/tree/40e98d22f8dd0f537a79e4f2730bc347f5b03ba4"
+    },
+    {
+      "id": "master-mind",
+      "title": "Master Mind (1999)",
+      "platform": "dos",
+      "bundle": "games-data/master-mind.jsdos",
+      "controls": "Use the mouse to choose a menu option and build guesses from colored pins. White and black dots give feedback on your guess.",
+      "keys": [],
+      "license": "CC0",
+      "source": "https://moreaux.nl/projects/master-mind/"
+    },
+    {
+      "id": "zmiy",
+      "title": "Zmiy Snake",
+      "platform": "dos",
+      "bundle": "games-data/zmiy.jsdos",
+      "controls": "Use the arrow keys to steer the snake. Enter or P pauses the game. Escape quits to DOS.",
+      "keys": [
+        {
+          "label": "↑",
+          "code": 265
+        },
+        {
+          "label": "←",
+          "code": 263
+        },
+        {
+          "label": "↓",
+          "code": 264
+        },
+        {
+          "label": "→",
+          "code": 262
+        },
+        {
+          "label": "Pause",
+          "code": 257
+        },
+        {
+          "label": "Esc",
+          "code": 256
+        }
+      ],
+      "license": "BSD-2-Clause",
+      "source": "https://zmiy.sourceforge.net/"
+    },
+    {
+      "id": "skifree-browser",
+      "title": "SkiFree (browser remake)",
+      "platform": "web",
+      "page": "games-web/skifree/index.html",
+      "controls": "Press Resume or Start to ski. Use Left and Right arrows or the mouse to steer, Down to tuck, Space to jump, and F for fast mode. Dodge trees and rocks, pass gates, and escape the chasing monster. Touch controls work on phones.",
+      "keys": [
+        {
+          "label": "←",
+          "code": 37
+        },
+        {
+          "label": "→",
+          "code": 39
+        },
+        {
+          "label": "Tuck",
+          "code": 40
+        },
+        {
+          "label": "Jump",
+          "code": 32
+        },
+        {
+          "label": "Fast",
+          "code": 70
+        }
+      ],
+      "license": "MIT",
+      "source": "https://github.com/warboy176/skifree-warboy/tree/718df286fb643b26df667b9b764afb724f9a63e6"
+    }
+  ]
+}

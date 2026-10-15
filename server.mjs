@@ -12,6 +12,7 @@ import { Catalog } from './lib/catalog.mjs';
 import { DriveTransferTests } from './lib/drive-share.mjs';
 import { TorBoxStatusChecker } from './lib/torbox-status.mjs';
 import { SetupTransfers } from './lib/setup-transfer.mjs';
+import { WatchParties, prepareExactPartyFile } from './lib/watch-party.mjs';
 import { browserContainerHints } from './public/source-client.js';
 const root = dirname(fileURLToPath(import.meta.url));
 const publicFiles = new Map([
@@ -22,7 +23,53 @@ const publicFiles = new Map([
   ['/recover/', ['recover/index.html', 'text/html; charset=utf-8']],
   ['/recover/index.html', ['recover/index.html', 'text/html; charset=utf-8']],
   ['/boot.js', ['boot.js', 'text/javascript; charset=utf-8']],
+  ['/watch-party.js', ['watch-party.js', 'text/javascript; charset=utf-8']],
+  ['/watch-party-core.js', ['watch-party-core.js', 'text/javascript; charset=utf-8']],
+  ['/watch-party.css', ['watch-party.css', 'text/css; charset=utf-8']],
+  ['/games-nav.js', ['games-nav.js', 'text/javascript; charset=utf-8']],
+  ['/games.js', ['games.js', 'text/javascript; charset=utf-8']],
+  ['/games-core.js', ['games-core.js', 'text/javascript; charset=utf-8']],
+  ['/games-pointer.js', ['games-pointer.js', 'text/javascript; charset=utf-8']],
+  ['/games-cheats.js', ['games-cheats.js', 'text/javascript; charset=utf-8']],
+  ['/extra-games.js', ['extra-games.js', 'text/javascript; charset=utf-8']],
+  ['/extra-games-core.js', ['extra-games-core.js', 'text/javascript; charset=utf-8']],
+  ['/extra-games-catalog.json', ['extra-games-catalog.json', 'application/json; charset=utf-8']],
+  ['/dos-player.html', ['dos-player.html', 'text/html; charset=utf-8']],
+  ['/dos-player.js', ['dos-player.js', 'text/javascript; charset=utf-8']],
+  ['/dos-player.css', ['dos-player.css', 'text/css; charset=utf-8']],
+  ['/vendor/dos/emulators.js', ['vendor/dos/emulators.js', 'text/javascript; charset=utf-8']],
+  ['/vendor/dos/wdosbox.js', ['vendor/dos/wdosbox.js', 'text/javascript; charset=utf-8']],
+  ['/vendor/dos/wdosbox.wasm', ['vendor/dos/wdosbox.wasm', 'application/wasm']],
+  ['/vendor/dos/wlibzip.js', ['vendor/dos/wlibzip.js', 'text/javascript; charset=utf-8']],
+  ['/vendor/dos/wlibzip.wasm', ['vendor/dos/wlibzip.wasm', 'application/wasm']],
+  ['/vendor/dos/LICENSE', ['vendor/dos/LICENSE', 'text/plain; charset=utf-8']],
+  ['/vendor/dos/SOURCES.md', ['vendor/dos/SOURCES.md', 'text/markdown; charset=utf-8']],
+  ['/vendor/dos/THIRD-PARTY-NOTICES.txt', ['vendor/dos/THIRD-PARTY-NOTICES.txt', 'text/plain; charset=utf-8']],
+  ['/vendor/dos/SOURCE-PROVENANCE.json', ['vendor/dos/SOURCE-PROVENANCE.json', 'application/json; charset=utf-8']],
+  ['/vendor/dos/emulators-8.5.2-source.tar.gz', ['vendor/dos/emulators-8.5.2-source.tar.gz', 'application/gzip']],
+  ['/games-data/dosdefender.jsdos', ['games-data/dosdefender.jsdos', 'application/octet-stream']],
+  ['/games-data/master-mind.jsdos', ['games-data/master-mind.jsdos', 'application/octet-stream']],
+  ['/games-data/zmiy.jsdos', ['games-data/zmiy.jsdos', 'application/octet-stream']],
+  ['/games-data/licenses/dosdefender-UNLICENSE.txt', ['games-data/licenses/dosdefender-UNLICENSE.txt', 'text/plain; charset=utf-8']],
+  ['/games-data/licenses/master-mind-CC0-readme.txt', ['games-data/licenses/master-mind-CC0-readme.txt', 'text/plain; charset=utf-8']],
+  ['/games-data/licenses/zmiy-BSD-2-Clause-readme.txt', ['games-data/licenses/zmiy-BSD-2-Clause-readme.txt', 'text/plain; charset=utf-8']],
+  ['/games-data/sources/dosdefender-source-40e98d2.zip', ['games-data/sources/dosdefender-source-40e98d2.zip', 'application/zip']],
+  ['/games-data/sources/zmiy-freedos-source-and-binary-0.85.2a.zip', ['games-data/sources/zmiy-freedos-source-and-binary-0.85.2a.zip', 'application/zip']],
+  ['/games-web/skifree/index.html', ['games-web/skifree/index.html', 'text/html; charset=utf-8']],
+  ['/games-web/skifree/game.js', ['games-web/skifree/game.js', 'text/javascript; charset=utf-8']],
+  ['/games-web/skifree/style.css', ['games-web/skifree/style.css', 'text/css; charset=utf-8']],
+  ['/games-web/skifree/LICENSE', ['games-web/skifree/LICENSE', 'text/plain; charset=utf-8']],
+  ['/games-web/skifree/UPSTREAM.md', ['games-web/skifree/UPSTREAM.md', 'text/markdown; charset=utf-8']],
+  ['/games.css', ['games.css', 'text/css; charset=utf-8']],
+  ['/games-catalog.json', ['games-catalog.json', 'application/json; charset=utf-8']],
+  ['/vendor/jsnes-2.1.0.min.js', ['vendor/jsnes-2.1.0.min.js', 'text/javascript; charset=utf-8']],
+  ['/vendor/nes-audio-worklet.js', ['vendor/nes-audio-worklet.js', 'text/javascript; charset=utf-8']],
+  ['/vendor/jsnes-2.1.0.LICENSE.txt', ['vendor/jsnes-2.1.0.LICENSE.txt', 'text/plain; charset=utf-8']],
   ['/sports.js', ['sports.js', 'text/javascript; charset=utf-8']],
+  ['/buffstreams.js', ['buffstreams.js', 'text/javascript; charset=utf-8']],
+  ['/buffstreams-ui.js', ['buffstreams-ui.js', 'text/javascript; charset=utf-8']],
+  ['/buffstreams-opening.html', ['buffstreams-opening.html', 'text/html; charset=utf-8']],
+  ['/buffstreams-opening.css', ['buffstreams-opening.css', 'text/css; charset=utf-8']],
   ['/sports-core.js', ['sports-core.js', 'text/javascript; charset=utf-8']],
   ['/sports.css', ['sports.css', 'text/css; charset=utf-8']],
   ['/sports-player.html', ['sports-player.html', 'text/html; charset=utf-8']],
@@ -181,7 +228,8 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
     response.setHeader('Access-Control-Expose-Headers', 'Content-Type, Content-Length, Content-Range, Accept-Ranges, ETag, Last-Modified, Retry-After, X-TorBox-Bridge');
     return true;
   };
-  const sessions = new Sessions(now), progress = new ProgressStore(), mediaTickets = new MediaTickets(now), guestInvites = new GuestInvites(now), driveTransfers = driveTransferService || new DriveTransferTests({ now }), torboxStatus = new TorBoxStatusChecker({ fetchFn: discoveryFetch, now }), setupTransfers = new SetupTransfers({ now });
+  const sessions = new Sessions(now), progress = new ProgressStore(), mediaTickets = new MediaTickets(now), guestInvites = new GuestInvites(now), driveTransfers = driveTransferService || new DriveTransferTests({ now }), torboxStatus = new TorBoxStatusChecker({ fetchFn: discoveryFetch, now }), setupTransfers = new SetupTransfers({ now }), watchParties = new WatchParties(now);
+  const partyCreateRate = new Limiter(6, 60000, now), partyJoinRate = new Limiter(15, 60000, now), partySyncRate = new Limiter(240, 60000, now), partyPrepareRate = new Limiter(8, 60000, now);
   const loginRate = new Limiter(15, 15 * 60000, now), operationRate = new Limiter(30, 60000, now), progressRate = new Limiter(120, 60000, now), transferCreateRate = new Limiter(6, 60000, now), transferRedeemRate = new Limiter(30, 60000, now);
   let activeLogins = 0;
   const mediaHosts = (env.MEDIA_HOST_SUFFIXES || TORBOX_MEDIA_HOSTS.join(',')).split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
@@ -214,7 +262,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.2.2', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.2.3', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/relay/health') {
         if(!corsAllowed)throw new AppError('BAD_ORIGIN','This frontend is not allowed to use the TorBox bridge.',403);
         response.setHeader('X-TorBox-Bridge','render');
@@ -226,10 +274,15 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         return sendRelay(response,relayed);
       }
       if (method === 'GET' && path === '/robots.txt') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end('User-agent: *\nDisallow: /\n'); }
+      // Public ROMs are flat, explicitly named files. Never resolve caller paths.
+      if (method === 'GET' && /^\/roms\/[A-Za-z0-9][A-Za-z0-9._-]{0,199}\.nes$/i.test(path)) {
+        try { const data=await readFile(join(root,'public','roms',path.slice('/roms/'.length)));response.setHeader('Content-Type','application/octet-stream');return response.end(data); }
+        catch(error) { if(error.code==='ENOENT')throw new AppError('NOT_FOUND','That game file was not found.',404);throw error; }
+      }
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
         if(filename==='index.html'){const html=await readFile(join(root,'public',filename),'utf8');const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];if(csp)response.setHeader('Content-Security-Policy',csp+"; frame-ancestors 'none'");response.setHeader('Content-Type',type);return response.end(html);}
-        if(filename==='sports-player.html'){
+        if(filename==='sports-player.html'||filename==='dos-player.html'||filename==='games-web/skifree/index.html'){
           const html=await readFile(join(root,'public',filename),'utf8');
           const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];
           if(csp)response.setHeader('Content-Security-Policy',csp+"; frame-ancestors 'self'");
@@ -295,7 +348,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         const created = sessions.create();
         if (!created) throw new AppError('SESSION_LIMIT', 'The session limit was reached. Restart the service to revoke old sessions.', 429);
         if (apiKeyMode) { created.row.provider = sessionProvider; created.row.discovery = sessionDiscovery; }
-        if (session) { (session.discovery || discovery).revoke(session.id); mediaTickets.revokeSession(session.id); sessions.revoke(session.id); }
+        if (session) { (session.discovery || discovery).revoke(session.id); mediaTickets.revokeSession(session.id); watchParties.revokeSession(session.id); sessions.revoke(session.id); }
         setCookie(response, created.id); return json(response, 200, { ok: true, csrf: created.row.csrf, sessionToken: created.id, authMode: apiKeyMode ? 'api-key' : 'household' });
       }
       if (path === '/api/guest/accept' && method === 'POST') {
@@ -328,6 +381,33 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (result.state === 'choose_file' && Array.isArray(result.files)) for (const file of result.files) if (file?.id) session.allowedVideos.add(file.id);
       };
       if (!['GET', 'HEAD'].includes(method) && !bearerSession && request.headers['x-csrf-token'] !== session.csrf) throw new AppError('BAD_CSRF', 'Reload the page and try again.', 403);
+      if (path.startsWith('/api/watch-party/') && method === 'POST') {
+        if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'Watch parties require each viewer’s own TorBox connection.', 403);
+        const data = await body(request, 8192);
+        // Prune parties when a participant's authenticated session has expired or been revoked.
+        sessions.prune();
+        for (const room of watchParties.rooms.values()) for (const member of [room.host, room.guest]) if (member && !sessions.rows.has(member.sessionId)) watchParties.revokeSession(member.sessionId);
+        if (path === '/api/watch-party/create') {
+          if (!partyCreateRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Please wait before creating another watch party.', 429);
+          return json(response, 200, watchParties.create(session.id, data));
+        }
+        if (path === '/api/watch-party/join') {
+          if (!partyJoinRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Please wait before trying another party link.', 429);
+          return json(response, 200, watchParties.join(session.id, data.token));
+        }
+        if (path === '/api/watch-party/prepare') {
+          if (!partyPrepareRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Please wait before checking the party video again.', 429);
+          const result = await watchParties.prepare(session.id, data.roomId, (identity, state) => prepareExactPartyFile(identity, activeDiscovery.gateway, state));
+          if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
+          return json(response, 200, result);
+        }
+        if (path === '/api/watch-party/sync') {
+          if (!partySyncRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Watch party updates are arriving too quickly.', 429);
+          return json(response, 200, watchParties.sync(session.id, data));
+        }
+        if (path === '/api/watch-party/leave') return json(response, 200, watchParties.leave(session.id, data.roomId));
+        throw new AppError('NOT_FOUND', 'This watch party action is unavailable.', 404);
+      }
       if (path === '/api/setup-transfer' && method === 'POST') {
         if(session.guest)throw new AppError('GUEST_FORBIDDEN','Temporary guests cannot transfer a setup.',403);
         if(!transferCreateRate.allow(session.id))throw new AppError('SLOW_DOWN','Please wait before creating another setup transfer.',429);
@@ -336,10 +416,11 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         return json(response,200,{ok:true,expiresAt:new Date(row.expires).toISOString()});
       }
       if (path === '/api/logout' && method === 'POST') {
+        watchParties.revokeSession(session.id);
         activeDiscovery.revoke(session.id);
         if (!session.guest) {
           guestInvites.revokeOwner(session.id);
-          for (const [id, row] of sessions.rows) if (row.guest && row.ownerId === session.id) { row.discovery?.revokeAll(); mediaTickets.revokeSession(id); sessions.rows.delete(id); }
+          for (const [id, row] of sessions.rows) if (row.guest && row.ownerId === session.id) { row.discovery?.revokeAll(); mediaTickets.revokeSession(id); watchParties.revokeSession(id); sessions.rows.delete(id); }
           if (session.provider) session.provider.key = '';
         }
         mediaTickets.revokeSession(session.id); sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true });
@@ -401,7 +482,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
       }
       if (path.startsWith('/api/owner/')) {
         if (session.ownerUntil <= now()) throw new AppError('OWNER_REAUTH_REQUIRED', 'Re-enter your TorBox API key to open owner tools.', 403);
-        if (path === '/api/owner/revoke' && method === 'POST') { discovery.revokeAll(); mediaTickets.revokeAll(); guestInvites.rows.clear(); for (const row of sessions.rows.values()) { row.discovery?.revokeAll(); if (row.provider && !row.guest) row.provider.key = ''; } sessions.revokeAll(); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
+        if (path === '/api/owner/revoke' && method === 'POST') { discovery.revokeAll(); mediaTickets.revokeAll(); guestInvites.rows.clear(); watchParties.clear(); for (const row of sessions.rows.values()) { row.discovery?.revokeAll(); if (row.provider && !row.guest) row.provider.key = ''; } sessions.revokeAll(); setCookie(response, '', 0); return json(response, 200, { ok: true }); }
         if (path === '/api/owner/diagnostics' && method === 'POST') {
           if (!operationRate.allow('provider')) throw new AppError('SLOW_DOWN', 'Please wait a minute before checking again.', 429);
           const account = await activeProvider.account();
@@ -478,7 +559,8 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
         const lease = progress.start(progressViewer, data.videoId, { reset: data.startOver === true, sessionId: session.id });
         const mediaToken = mediaTickets.create(session.id, data.videoId, stream.upstreamUrl, stream.file);
-        return json(response, 200, { file: stream.file, mediaUrl: `/media/${mediaToken}`, delivery: 'direct', conversion: false, exposesTorBoxToken: session.guest ? false : true, guestSafeLink: session.guest === true, ...lease });
+        const playbackProof = session.guest ? null : watchParties.issuePlayback(session.id, stream.file, stream.mediaIdentity);
+        return json(response, 200, { file: stream.file, mediaUrl: `/media/${mediaToken}`, mediaIdentity: stream.mediaIdentity || null, playbackProof, delivery: 'direct', conversion: false, exposesTorBoxToken: session.guest ? false : true, guestSafeLink: session.guest === true, ...lease });
       }
       if (path === '/api/progress' && method === 'PUT') {
         if (!progressRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Progress is being saved too frequently.', 429);
@@ -497,10 +579,10 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
     }
   });
   server.requestTimeout = 25000; server.headersTimeout = 15000; server.keepAliveTimeout = 5000;
-  return { server, sessions, progress, mediaTickets, discovery, sourceLookup, guestInvites, driveTransfers, torboxStatus };
+  return { server, sessions, progress, mediaTickets, discovery, sourceLookup, guestInvites, driveTransfers, torboxStatus, watchParties };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.2.2' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.2.3' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }

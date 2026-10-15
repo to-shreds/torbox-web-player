@@ -1,0 +1,19 @@
+{
+  "checkpoint": "c73541887129f26eb2aac1d28436debac7442f5c",
+  "failedRun": 38487268677,
+  "conclusion": "cancelled at the 10-minute job limit",
+  "cause": "Buffstreams and Games cheats both bound fixture port 4187; fixture startup did not reject listen errors, leaving a test hook pending.",
+  "reproduction": "Bounded two-suite parallel reproduction reproduced the unresolved startup promise.",
+  "corrections": [
+    "Games cheats now uses unique fixture port 4198.",
+    "Fixture startup rejects server listen errors; an occupied-port regression verifies prompt EADDRINUSE rejection.",
+    "The full browser runner uses --test-concurrency=1 to bound active emulators."
+  ],
+  "exactCheckpointSerialVerification": {
+    "tests": 79,
+    "passed": 79,
+    "failed": 0,
+    "seconds": 248.986
+  },
+  "publication": "Game Genie will publish together with the expanded Games release after the complete gate passes."
+}

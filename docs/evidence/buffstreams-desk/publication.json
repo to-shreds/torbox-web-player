@@ -1,0 +1,259 @@
+{
+  "checkedAt": "2026-10-11T19:43:39.474499+00:00",
+  "build": "release-1.2.2-buffstreams-desk.1",
+  "runtimeCommit": "6f20820e96ec3b589a122ef27c2a119371c20c95",
+  "assets": [
+    {
+      "path": "app.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "9601e6c5f3c9ff66848a449dbf85b2e952e0b404d3757aef15c3a9df4e6ff7c2",
+      "expectedSha256": "9601e6c5f3c9ff66848a449dbf85b2e952e0b404d3757aef15c3a9df4e6ff7c2"
+    },
+    {
+      "path": "boot.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "c4568ee0d7b6a7a8849100b8b3705745461dfc8ba3bbee03def25a0e1c3d9f72",
+      "expectedSha256": "c4568ee0d7b6a7a8849100b8b3705745461dfc8ba3bbee03def25a0e1c3d9f72"
+    },
+    {
+      "path": "buffstreams-opening.css",
+      "status": 200,
+      "matches": true,
+      "sha256": "21e51e7195d334501f380c259c7fefbda2b6852c1d5fea973dd0e9bcb33ad665",
+      "expectedSha256": "21e51e7195d334501f380c259c7fefbda2b6852c1d5fea973dd0e9bcb33ad665"
+    },
+    {
+      "path": "buffstreams-opening.html",
+      "status": 200,
+      "matches": true,
+      "sha256": "8c9a3a8c23fcb92d8302331c71c97390a56698f0674fbf02e074cdb1a3325c14",
+      "expectedSha256": "8c9a3a8c23fcb92d8302331c71c97390a56698f0674fbf02e074cdb1a3325c14"
+    },
+    {
+      "path": "buffstreams-ui.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "f1d998a2e74f4b8f870c17c3f5f25634fd62d667ec3543008f42ca94a55c15b5",
+      "expectedSha256": "f1d998a2e74f4b8f870c17c3f5f25634fd62d667ec3543008f42ca94a55c15b5"
+    },
+    {
+      "path": "buffstreams.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "fcce84e21cee3709ecf387001c46944f68b1330921c25a5ef119259ce2df5c38",
+      "expectedSha256": "fcce84e21cee3709ecf387001c46944f68b1330921c25a5ef119259ce2df5c38"
+    },
+    {
+      "path": "discover.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "45eed39f374c6a9fb3ce2a8d86f2461040d0acc4a9e0e477e8dd78d8beb1e984",
+      "expectedSha256": "45eed39f374c6a9fb3ce2a8d86f2461040d0acc4a9e0e477e8dd78d8beb1e984"
+    },
+    {
+      "path": "history.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "a9eec46e0ad760e195bcf99e8a3e550c54e998c8e85a9ef8f3db4440620fa72d",
+      "expectedSha256": "a9eec46e0ad760e195bcf99e8a3e550c54e998c8e85a9ef8f3db4440620fa72d"
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "matches": true,
+      "sha256": "f70f7ac51012c44cd12e323288d1e354da912fd40de82b70883d755fdd223a78",
+      "expectedSha256": "f70f7ac51012c44cd12e323288d1e354da912fd40de82b70883d755fdd223a78"
+    },
+    {
+      "path": "playback-errors.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "2b79bfa30f3454cc6dbe27918ec5d22e26cdca2fc6db90e38b72a9158b7c8139",
+      "expectedSha256": "2b79bfa30f3454cc6dbe27918ec5d22e26cdca2fc6db90e38b72a9158b7c8139"
+    },
+    {
+      "path": "source-client.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "ee4cc6a1910812881ddd55b43ee58a099918f4e5e131fbf88566bf3b8d264f67",
+      "expectedSha256": "ee4cc6a1910812881ddd55b43ee58a099918f4e5e131fbf88566bf3b8d264f67"
+    },
+    {
+      "path": "sports-player.html",
+      "status": 200,
+      "matches": true,
+      "sha256": "1905288dedb7ea2331791ba6c0cfb5f4cf27d0322437d957f4b75eda9e868765",
+      "expectedSha256": "1905288dedb7ea2331791ba6c0cfb5f4cf27d0322437d957f4b75eda9e868765"
+    },
+    {
+      "path": "sports-player.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "44e4a3e37214a5f4e824b06bc2978ff36f6ddf7987a226127b40caf7b9c74028",
+      "expectedSha256": "44e4a3e37214a5f4e824b06bc2978ff36f6ddf7987a226127b40caf7b9c74028"
+    },
+    {
+      "path": "sports.css",
+      "status": 200,
+      "matches": true,
+      "sha256": "41999a1685ec7264a7c2c7ec3d18416c310dd348d0444ec2b54e95515b28ad30",
+      "expectedSha256": "41999a1685ec7264a7c2c7ec3d18416c310dd348d0444ec2b54e95515b28ad30"
+    },
+    {
+      "path": "sports.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "a6964e817f238a85a6f8818fe8ff560427dca5373434d16feb684689a8f99c17",
+      "expectedSha256": "a6964e817f238a85a6f8818fe8ff560427dca5373434d16feb684689a8f99c17"
+    },
+    {
+      "path": "sw.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "d9eb4a5a04aeed5514a8458f826734670ef2b0011d70618a630d6c6d2a92ad2f",
+      "expectedSha256": "d9eb4a5a04aeed5514a8458f826734670ef2b0011d70618a630d6c6d2a92ad2f"
+    },
+    {
+      "path": "sports-core.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "bbb9ac3ee55efc3425c15c0fe0abddf7d611a17939a5d01df03a47cee63e060a",
+      "expectedSha256": "bbb9ac3ee55efc3425c15c0fe0abddf7d611a17939a5d01df03a47cee63e060a"
+    },
+    {
+      "path": "sports-catalog.json",
+      "status": 200,
+      "matches": true,
+      "sha256": "62138495be241725e3e39d3f34a92bde30f95c8d6d5eef02c3c832fed392ecc7",
+      "expectedSha256": "62138495be241725e3e39d3f34a92bde30f95c8d6d5eef02c3c832fed392ecc7"
+    },
+    {
+      "path": "key/app.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "9601e6c5f3c9ff66848a449dbf85b2e952e0b404d3757aef15c3a9df4e6ff7c2",
+      "expectedSha256": "9601e6c5f3c9ff66848a449dbf85b2e952e0b404d3757aef15c3a9df4e6ff7c2"
+    },
+    {
+      "path": "key/boot.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "c4568ee0d7b6a7a8849100b8b3705745461dfc8ba3bbee03def25a0e1c3d9f72",
+      "expectedSha256": "c4568ee0d7b6a7a8849100b8b3705745461dfc8ba3bbee03def25a0e1c3d9f72"
+    },
+    {
+      "path": "key/buffstreams-opening.css",
+      "status": 200,
+      "matches": true,
+      "sha256": "21e51e7195d334501f380c259c7fefbda2b6852c1d5fea973dd0e9bcb33ad665",
+      "expectedSha256": "21e51e7195d334501f380c259c7fefbda2b6852c1d5fea973dd0e9bcb33ad665"
+    },
+    {
+      "path": "key/buffstreams-opening.html",
+      "status": 200,
+      "matches": true,
+      "sha256": "8c9a3a8c23fcb92d8302331c71c97390a56698f0674fbf02e074cdb1a3325c14",
+      "expectedSha256": "8c9a3a8c23fcb92d8302331c71c97390a56698f0674fbf02e074cdb1a3325c14"
+    },
+    {
+      "path": "key/buffstreams-ui.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "f1d998a2e74f4b8f870c17c3f5f25634fd62d667ec3543008f42ca94a55c15b5",
+      "expectedSha256": "f1d998a2e74f4b8f870c17c3f5f25634fd62d667ec3543008f42ca94a55c15b5"
+    },
+    {
+      "path": "key/buffstreams.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "fcce84e21cee3709ecf387001c46944f68b1330921c25a5ef119259ce2df5c38",
+      "expectedSha256": "fcce84e21cee3709ecf387001c46944f68b1330921c25a5ef119259ce2df5c38"
+    },
+    {
+      "path": "key/discover.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "45eed39f374c6a9fb3ce2a8d86f2461040d0acc4a9e0e477e8dd78d8beb1e984",
+      "expectedSha256": "45eed39f374c6a9fb3ce2a8d86f2461040d0acc4a9e0e477e8dd78d8beb1e984"
+    },
+    {
+      "path": "key/history.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "a9eec46e0ad760e195bcf99e8a3e550c54e998c8e85a9ef8f3db4440620fa72d",
+      "expectedSha256": "a9eec46e0ad760e195bcf99e8a3e550c54e998c8e85a9ef8f3db4440620fa72d"
+    },
+    {
+      "path": "key/index.html",
+      "status": 200,
+      "matches": true,
+      "sha256": "f70f7ac51012c44cd12e323288d1e354da912fd40de82b70883d755fdd223a78",
+      "expectedSha256": "f70f7ac51012c44cd12e323288d1e354da912fd40de82b70883d755fdd223a78"
+    },
+    {
+      "path": "key/playback-errors.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "2b79bfa30f3454cc6dbe27918ec5d22e26cdca2fc6db90e38b72a9158b7c8139",
+      "expectedSha256": "2b79bfa30f3454cc6dbe27918ec5d22e26cdca2fc6db90e38b72a9158b7c8139"
+    },
+    {
+      "path": "key/source-client.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "ee4cc6a1910812881ddd55b43ee58a099918f4e5e131fbf88566bf3b8d264f67",
+      "expectedSha256": "ee4cc6a1910812881ddd55b43ee58a099918f4e5e131fbf88566bf3b8d264f67"
+    },
+    {
+      "path": "key/sports-player.html",
+      "status": 200,
+      "matches": true,
+      "sha256": "1905288dedb7ea2331791ba6c0cfb5f4cf27d0322437d957f4b75eda9e868765",
+      "expectedSha256": "1905288dedb7ea2331791ba6c0cfb5f4cf27d0322437d957f4b75eda9e868765"
+    },
+    {
+      "path": "key/sports-player.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "44e4a3e37214a5f4e824b06bc2978ff36f6ddf7987a226127b40caf7b9c74028",
+      "expectedSha256": "44e4a3e37214a5f4e824b06bc2978ff36f6ddf7987a226127b40caf7b9c74028"
+    },
+    {
+      "path": "key/sports.css",
+      "status": 200,
+      "matches": true,
+      "sha256": "41999a1685ec7264a7c2c7ec3d18416c310dd348d0444ec2b54e95515b28ad30",
+      "expectedSha256": "41999a1685ec7264a7c2c7ec3d18416c310dd348d0444ec2b54e95515b28ad30"
+    },
+    {
+      "path": "key/sports.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "a6964e817f238a85a6f8818fe8ff560427dca5373434d16feb684689a8f99c17",
+      "expectedSha256": "a6964e817f238a85a6f8818fe8ff560427dca5373434d16feb684689a8f99c17"
+    },
+    {
+      "path": "key/sw.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "d9eb4a5a04aeed5514a8458f826734670ef2b0011d70618a630d6c6d2a92ad2f",
+      "expectedSha256": "d9eb4a5a04aeed5514a8458f826734670ef2b0011d70618a630d6c6d2a92ad2f"
+    },
+    {
+      "path": "key/sports-core.js",
+      "status": 200,
+      "matches": true,
+      "sha256": "bbb9ac3ee55efc3425c15c0fe0abddf7d611a17939a5d01df03a47cee63e060a",
+      "expectedSha256": "bbb9ac3ee55efc3425c15c0fe0abddf7d611a17939a5d01df03a47cee63e060a"
+    },
+    {
+      "path": "key/sports-catalog.json",
+      "status": 200,
+      "matches": true,
+      "sha256": "62138495be241725e3e39d3f34a92bde30f95c8d6d5eef02c3c832fed392ecc7",
+      "expectedSha256": "62138495be241725e3e39d3f34a92bde30f95c8d6d5eef02c3c832fed392ecc7"
+    }
+  ]
+}

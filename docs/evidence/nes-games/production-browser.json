@@ -1,0 +1,24 @@
+{
+  "url": "https://to-shreds.github.io/torbox-web-player/#games",
+  "checkedAt": "2026-10-13T22:56:09.466Z",
+  "environmentProxyCertificateException": true,
+  "errors": [],
+  "privateRequests": [],
+  "emptyCatalogVisible": true,
+  "before": [
+    188,
+    25,
+    0,
+    255
+  ],
+  "after": [
+    255,
+    255,
+    255,
+    255
+  ],
+  "inputChangedPixels": true,
+  "manualSave": true,
+  "sportsHash": "#sports",
+  "success": true
+}

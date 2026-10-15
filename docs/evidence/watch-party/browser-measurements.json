@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-10-15T01:58:05.257Z",
+  "scope": "Local production UI/server with two synthetic TorBox accounts and original fixture.mp4; no real accounts or media.",
+  "measurements": {
+    "start": {
+      "driftSeconds": 0.119075,
+      "host": {
+        "time": 0.214202,
+        "paused": false,
+        "duration": 120,
+        "readyState": 4,
+        "rate": 1
+      },
+      "guest": {
+        "time": 0.095127,
+        "paused": false,
+        "duration": 120,
+        "readyState": 4,
+        "rate": 1
+      },
+      "separateProviderFilesAndTickets": true
+    },
+    "nativePause": {
+      "startPauseDelayMs": 50.10000000055879,
+      "correctionRate": 1.0450016,
+      "rateCorrectionPauseDelayMs": 11,
+      "remainedPaused": true
+    },
+    "ready": {
+      "simulatedBrowserAutoplayRefusals": 1,
+      "actualReadyGestureRecoveredRealPlayback": true
+    }
+  },
+  "sourceSha256": {
+    "public/watch-party.js": "16ec766c2892abdb1bf822b0d2ff1dfae8b0f728ca9eb223aa5c555caf85aedf",
+    "public/watch-party-core.js": "74e98fa0e18b9593e6c223fa7f8a8af9ca6076c748d3d65e4fc318d404d5f6a3",
+    "public/app.js": "7721e6ab09e3de2d87a426fce7c0cebb4343752a03355046cf140502351cc0ed",
+    "lib/watch-party.mjs": "e42fcac12f87599db9b18e07d7d57cbc8769e4f594fdb056671f321e51456011",
+    "server.mjs": "71d026527912a4ed488651e226b9a4865e081e58091d7e23e9f08539344efe08"
+  }
+}

@@ -1,0 +1,17 @@
+✔ a six-letter Game Genie code patches the actual ROM read, with master and individual toggles (2150.861044ms)
+✔ eight-letter compare codes apply only to matching ROM bytes, and editing and removing use the new code (1333.462431ms)
+✔ bulk addition and portable JSON import/export preserve the list and reject bad input atomically (982.429532ms)
+✔ cheats remain current across manual restore, Start fresh and reopening, and isolate viewers and ROMs (2783.988319ms)
+✔ the paused cheat panel accepts text keys without sending them to NES controllers (609.9164ms)
+✔ an unexpected native callback failure rolls back the engine, stored model and checkboxes (1220.910773ms)
+✔ a fatal opcode cheat stays editable and recovers through Start fresh and manual Load while editing (1617.110491ms)
+✔ a delayed JSON import from an old game cannot change the next game (1058.277479ms)
+✔ mobile portrait and landscape keep cheat editing inside the viewport (829.476883ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13088.969871

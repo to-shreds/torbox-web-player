@@ -1,4 +1,4 @@
-const BUILD='release-1.2.2-sports.1';
+const BUILD='release-1.2.3-party.1';
 const startedAt=Date.now();
 let startupTimer=null;
 const stageNode=()=>document.querySelector('#startup-stage');
@@ -42,8 +42,9 @@ function showStartupFailure(){
   button.addEventListener('click',()=>location.reload());panel.append(button);
 }
 
-// Sports initializes independently, before any private service request.
+// Public tabs initialize independently, before any private service request.
 try{await import(`./sports.js?v=${BUILD}`);}catch{const message=document.querySelector('#sports-nav-message');if(message)message.textContent='Sports could not start. Reload to retry.';}
+try{await import(`./games-nav.js?v=${BUILD}`);}catch{const message=document.querySelector('#sports-nav-message');if(message)message.textContent='Games could not start. Reload to retry.';}
 
 let cinemaStarted=false;
 async function startCinema(){
@@ -54,5 +55,5 @@ async function startCinema(){
   catch(error){console.error('player_boot_failed',error);cinemaStarted=false;showStartupFailure();}
 }
 document.querySelector('#open-cinema')?.addEventListener('click',()=>void startCinema());
-if(location.hash==='#sports')stopStartupTimer();else void startCinema();
+if(location.hash==='#sports'||location.hash==='#games')stopStartupTimer();else void startCinema();
 void refreshServiceWorker();

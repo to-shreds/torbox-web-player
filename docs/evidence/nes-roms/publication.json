@@ -1,0 +1,359 @@
+{
+  "checkedAt": "2026-10-13T23:26:31.781672+00:00",
+  "runtimeCommit": "d39bdda13890b7939a637580b8b1c2043aee8b6f",
+  "deployment": "https://github.com/to-shreds/torbox-web-player/actions/runs/38483565915",
+  "results": [
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/app.js?v=release-1.2.2-games.2",
+      "asset": "app.js",
+      "status": 200,
+      "bytes": 78889,
+      "sha256": "ef1ff3064b8ae97b4740c750c1b1e05d70a6d5976c4faace22e03090688f7ab6",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/boot.js?v=release-1.2.2-games.2",
+      "asset": "boot.js",
+      "status": 200,
+      "bytes": 3210,
+      "sha256": "cacf85e8d86ebc2cefefb3789f7d1f5826e9ca1456170ec8b5b87e265c560086",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/buffstreams-opening.html?v=release-1.2.2-games.2",
+      "asset": "buffstreams-opening.html",
+      "status": 200,
+      "bytes": 598,
+      "sha256": "3fc3ecba322f21dbf1fd8597ca1dcbdb248795122e25e974eae1f00e4e80aaef",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/buffstreams-ui.js?v=release-1.2.2-games.2",
+      "asset": "buffstreams-ui.js",
+      "status": 200,
+      "bytes": 9042,
+      "sha256": "c11ed4013f33d948d7282b60bd8cc8c1a8a155f8ebe21676afb48ef406513deb",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/discover.js?v=release-1.2.2-games.2",
+      "asset": "discover.js",
+      "status": 200,
+      "bytes": 62991,
+      "sha256": "adc7f860925832722e3999559690bda91af73e0285f4553b3562ef1403e51d4a",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/games-catalog.json?v=release-1.2.2-games.2",
+      "asset": "games-catalog.json",
+      "status": 200,
+      "bytes": 477,
+      "sha256": "e3ee6a1c2edebdb94e83f23a20b2b0b508cfacbae714e4e9812d57c84c589f96",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/games-nav.js?v=release-1.2.2-games.2",
+      "asset": "games-nav.js",
+      "status": 200,
+      "bytes": 2464,
+      "sha256": "5eacf58254c5c1d7ac7943f7a184979ca829bf6642e90dac3be98f2c33d95c3f",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/games-pointer.js?v=release-1.2.2-games.2",
+      "asset": "games-pointer.js",
+      "status": 200,
+      "bytes": 799,
+      "sha256": "5f68c115b12d5107ed1470d6fb9713fd601beafa28437630c758367bb825f394",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/games.css?v=release-1.2.2-games.2",
+      "asset": "games.css",
+      "status": 200,
+      "bytes": 5911,
+      "sha256": "956a417555a27fb9336218b8be1f26cd74d616a8aa93db06c633b6947a5a9351",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/games.js?v=release-1.2.2-games.2",
+      "asset": "games.js",
+      "status": 200,
+      "bytes": 23888,
+      "sha256": "07eb2f67432ad0c11bdf7baa79cd45ce817dee6453a884466838bc9296e4e46c",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/history.js?v=release-1.2.2-games.2",
+      "asset": "history.js",
+      "status": 200,
+      "bytes": 5109,
+      "sha256": "a261bbebb6c7e6897c81aabe7684e0f788515cae9c1f0ca228045c6bb0d0fed3",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/?v=release-1.2.2-games.2",
+      "asset": "index.html",
+      "status": 200,
+      "bytes": 34539,
+      "sha256": "07b2f82419390936ce5725c6f02ce8f5a05dd7a28ccfaa3936dc851fc8328722",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/playback-errors.js?v=release-1.2.2-games.2",
+      "asset": "playback-errors.js",
+      "status": 200,
+      "bytes": 1254,
+      "sha256": "f725fc17a4e251e3cfce559bdb1a1b8d07493dc8aa48114aab1e931978a830d1",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/roms/README.md?v=release-1.2.2-games.2",
+      "asset": "roms/README.md",
+      "status": 200,
+      "bytes": 2866,
+      "sha256": "c5a672b805c66174fb4510339be1afc75d018c8f44d075debb533957247d3b4d",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/roms/super-mario-bros-3.nes?v=release-1.2.2-games.2",
+      "asset": "roms/super-mario-bros-3.nes",
+      "status": 200,
+      "bytes": 393232,
+      "sha256": "4377a7f5e6eb50bdd2ac6f249bf1a7085500aca8eb41f38545c3a2731c51a579",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/roms/super-mario-bros-duck-hunt.nes?v=release-1.2.2-games.2",
+      "asset": "roms/super-mario-bros-duck-hunt.nes",
+      "status": 200,
+      "bytes": 81936,
+      "sha256": "23ec3f6bb68f8774070ce936869e7f62ac3490449f58e62d6ed33a0fb385d456",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/roms/tmnt-ii-arcade-game.nes?v=release-1.2.2-games.2",
+      "asset": "roms/tmnt-ii-arcade-game.nes",
+      "status": 200,
+      "bytes": 524304,
+      "sha256": "637fa9d773cb39fcd4e55faf46bc53f82ac9d7706f8473adeb06e2b9e95c2414",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/source-client.js?v=release-1.2.2-games.2",
+      "asset": "source-client.js",
+      "status": 200,
+      "bytes": 10222,
+      "sha256": "c42a6866e57f00f7903b6f308b96f10363ae8954c2100e015ea770a9c5ee81bb",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/sports-player.html?v=release-1.2.2-games.2",
+      "asset": "sports-player.html",
+      "status": 200,
+      "bytes": 4657,
+      "sha256": "0c415dbb2301f4459ca4668f88bb9c8b0f9775787fdbee05109d20fcf5763930",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/sports-player.js?v=release-1.2.2-games.2",
+      "asset": "sports-player.js",
+      "status": 200,
+      "bytes": 970,
+      "sha256": "d39c5c9ce22e7b612f5b29c1f31a5976458523cdcbd1dd8b1ed5b71f00ca3404",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/sports.js?v=release-1.2.2-games.2",
+      "asset": "sports.js",
+      "status": 200,
+      "bytes": 12939,
+      "sha256": "99c545e9c8d20c9b8392eaa64b0a36cbd6b085260f822ab5e9f0accc6c4c729e",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/sw.js?v=release-1.2.2-games.2",
+      "asset": "sw.js",
+      "status": 200,
+      "bytes": 3022,
+      "sha256": "a59954640079332d64ac1372811320cfa0fbecc616ce44e0dda66c8a3b89846b",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/app.js?v=release-1.2.2-games.2",
+      "asset": "app.js",
+      "status": 200,
+      "bytes": 78889,
+      "sha256": "ef1ff3064b8ae97b4740c750c1b1e05d70a6d5976c4faace22e03090688f7ab6",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/boot.js?v=release-1.2.2-games.2",
+      "asset": "boot.js",
+      "status": 200,
+      "bytes": 3210,
+      "sha256": "cacf85e8d86ebc2cefefb3789f7d1f5826e9ca1456170ec8b5b87e265c560086",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/buffstreams-opening.html?v=release-1.2.2-games.2",
+      "asset": "buffstreams-opening.html",
+      "status": 200,
+      "bytes": 598,
+      "sha256": "3fc3ecba322f21dbf1fd8597ca1dcbdb248795122e25e974eae1f00e4e80aaef",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/buffstreams-ui.js?v=release-1.2.2-games.2",
+      "asset": "buffstreams-ui.js",
+      "status": 200,
+      "bytes": 9042,
+      "sha256": "c11ed4013f33d948d7282b60bd8cc8c1a8a155f8ebe21676afb48ef406513deb",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/discover.js?v=release-1.2.2-games.2",
+      "asset": "discover.js",
+      "status": 200,
+      "bytes": 62991,
+      "sha256": "adc7f860925832722e3999559690bda91af73e0285f4553b3562ef1403e51d4a",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/games-catalog.json?v=release-1.2.2-games.2",
+      "asset": "games-catalog.json",
+      "status": 200,
+      "bytes": 477,
+      "sha256": "e3ee6a1c2edebdb94e83f23a20b2b0b508cfacbae714e4e9812d57c84c589f96",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/games-nav.js?v=release-1.2.2-games.2",
+      "asset": "games-nav.js",
+      "status": 200,
+      "bytes": 2464,
+      "sha256": "5eacf58254c5c1d7ac7943f7a184979ca829bf6642e90dac3be98f2c33d95c3f",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/games-pointer.js?v=release-1.2.2-games.2",
+      "asset": "games-pointer.js",
+      "status": 200,
+      "bytes": 799,
+      "sha256": "5f68c115b12d5107ed1470d6fb9713fd601beafa28437630c758367bb825f394",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/games.css?v=release-1.2.2-games.2",
+      "asset": "games.css",
+      "status": 200,
+      "bytes": 5911,
+      "sha256": "956a417555a27fb9336218b8be1f26cd74d616a8aa93db06c633b6947a5a9351",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/games.js?v=release-1.2.2-games.2",
+      "asset": "games.js",
+      "status": 200,
+      "bytes": 23888,
+      "sha256": "07eb2f67432ad0c11bdf7baa79cd45ce817dee6453a884466838bc9296e4e46c",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/history.js?v=release-1.2.2-games.2",
+      "asset": "history.js",
+      "status": 200,
+      "bytes": 5109,
+      "sha256": "a261bbebb6c7e6897c81aabe7684e0f788515cae9c1f0ca228045c6bb0d0fed3",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/?v=release-1.2.2-games.2",
+      "asset": "index.html",
+      "status": 200,
+      "bytes": 34539,
+      "sha256": "07b2f82419390936ce5725c6f02ce8f5a05dd7a28ccfaa3936dc851fc8328722",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/playback-errors.js?v=release-1.2.2-games.2",
+      "asset": "playback-errors.js",
+      "status": 200,
+      "bytes": 1254,
+      "sha256": "f725fc17a4e251e3cfce559bdb1a1b8d07493dc8aa48114aab1e931978a830d1",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/roms/README.md?v=release-1.2.2-games.2",
+      "asset": "roms/README.md",
+      "status": 200,
+      "bytes": 2866,
+      "sha256": "c5a672b805c66174fb4510339be1afc75d018c8f44d075debb533957247d3b4d",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/roms/super-mario-bros-3.nes?v=release-1.2.2-games.2",
+      "asset": "roms/super-mario-bros-3.nes",
+      "status": 200,
+      "bytes": 393232,
+      "sha256": "4377a7f5e6eb50bdd2ac6f249bf1a7085500aca8eb41f38545c3a2731c51a579",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/roms/super-mario-bros-duck-hunt.nes?v=release-1.2.2-games.2",
+      "asset": "roms/super-mario-bros-duck-hunt.nes",
+      "status": 200,
+      "bytes": 81936,
+      "sha256": "23ec3f6bb68f8774070ce936869e7f62ac3490449f58e62d6ed33a0fb385d456",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/roms/tmnt-ii-arcade-game.nes?v=release-1.2.2-games.2",
+      "asset": "roms/tmnt-ii-arcade-game.nes",
+      "status": 200,
+      "bytes": 524304,
+      "sha256": "637fa9d773cb39fcd4e55faf46bc53f82ac9d7706f8473adeb06e2b9e95c2414",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/source-client.js?v=release-1.2.2-games.2",
+      "asset": "source-client.js",
+      "status": 200,
+      "bytes": 10222,
+      "sha256": "c42a6866e57f00f7903b6f308b96f10363ae8954c2100e015ea770a9c5ee81bb",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/sports-player.html?v=release-1.2.2-games.2",
+      "asset": "sports-player.html",
+      "status": 200,
+      "bytes": 4657,
+      "sha256": "0c415dbb2301f4459ca4668f88bb9c8b0f9775787fdbee05109d20fcf5763930",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/sports-player.js?v=release-1.2.2-games.2",
+      "asset": "sports-player.js",
+      "status": 200,
+      "bytes": 970,
+      "sha256": "d39c5c9ce22e7b612f5b29c1f31a5976458523cdcbd1dd8b1ed5b71f00ca3404",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/sports.js?v=release-1.2.2-games.2",
+      "asset": "sports.js",
+      "status": 200,
+      "bytes": 12939,
+      "sha256": "99c545e9c8d20c9b8392eaa64b0a36cbd6b085260f822ab5e9f0accc6c4c729e",
+      "matches": true
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/sw.js?v=release-1.2.2-games.2",
+      "asset": "sw.js",
+      "status": 200,
+      "bytes": 3022,
+      "sha256": "a59954640079332d64ac1372811320cfa0fbecc616ce44e0dda66c8a3b89846b",
+      "matches": true
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "games": [
+    {
+      "id": "dosdefender",
+      "version": "40e98d22f8dd0f537a79e4f2730bc347f5b03ba4",
+      "author": "skeeto / Christopher Wellons",
+      "license": "Unlicense",
+      "licenseFile": "public/games-data/licenses/dosdefender-UNLICENSE.txt",
+      "source": "https://github.com/skeeto/dosdefender-ld31/tree/40e98d22f8dd0f537a79e4f2730bc347f5b03ba4",
+      "sourceArchive": "public/games-data/sources/dosdefender-source-40e98d2.zip",
+      "sourceArchiveSha256": "af886edef8add588aedad4a3f8a4b3010dad04d1c4c2ed8f17210356e496a6ef",
+      "executable": "DOSDEF.COM",
+      "executableSha256": "5f6b325720e8960b6ab17773f71f9f11555dc4db6082f4fe67161f53c2696286",
+      "bundleSha256": "dc9efd956cc71e81d232d758b93f1ad2e3e5c2d4a4f955ad59a8023b553c8f59",
+      "sourceModified": false,
+      "buildCompiler": "GCC 13.3.0",
+      "buildCommand": "make dosdef.com CFLAGS='-std=gnu99 -Wall -Os -nostdlib -m32 -march=i386 -Wno-unused-function -ffreestanding -fomit-frame-pointer -fwrapv -fno-strict-aliasing -fno-leading-underscore -fno-pic -fno-pie -fno-stack-protector -no-pie -Wl,--nmagic,-static,--build-id=none,-Tcom.ld'",
+      "notes": "Pinned upstream mouse-capable revision includes exact Unlicense grant. Joystick emulation disabled so the built-in mouse path is selected. Actual browser gameplay checked: mouse movement, held left-button firing, pause/resume and restart passed.",
+      "browserVerification": {
+        "status": "checked",
+        "date": "2026-10-14",
+        "report": "docs/evidence/extra-games/standalone-dos-gameplay.json"
+      }
+    },
+    {
+      "id": "master-mind",
+      "version": "1999, creator mouse fix 2009-05-17",
+      "author": "Marcel Moreaux",
+      "license": "CC0-1.0",
+      "licenseFile": "public/games-data/licenses/master-mind-CC0-readme.txt",
+      "source": "https://moreaux.nl/projects/master-mind/",
+      "download": "https://moreaux.nl/projects/master-mind/master-mind.zip",
+      "downloadSha256": "ac89378a54fc2e8f7128d43c688c3a24293d8c57eec834a6016ded51d765fc26",
+      "executable": "MASTER.EXE",
+      "executableSha256": "7316997fddb70770c070f46805c1be3a44872e3eb0a8af8e904499b8576d6cf9",
+      "dataSha256": "776d7408dcee1abded344d8964fa5e4b8aa75b4af655549bf6966962fc929b9a",
+      "bundleSha256": "089f342066b1c97d2081b3fb2e9d52cb5866e5f620a4961a9f7324a943ac023d",
+      "sourceModified": false,
+      "notes": "Creator grants CC0 for the built program, superseding old exit-screen notice. Source was lost. Only patched MASTER.EXE and required MASTER.DAT included; BUGGY.EXE excluded. Actual browser gameplay checked: fresh first ordinary 120 ms click/touch, four-pin guess, feedback, pause/resume and restart passed with the title-specific mouse ordering adapter. Executable and data unchanged, cycles=12000.",
+      "browserVerification": {
+        "status": "checked",
+        "date": "2026-10-14",
+        "report": "docs/evidence/extra-games/standalone-dos-gameplay.json"
+      }
+    },
+    {
+      "id": "zmiy",
+      "version": "0.85.2 (FreeDOS packaging 0.85.2a)",
+      "author": "Mateusz Viste",
+      "license": "BSD-2-Clause",
+      "licenseFile": "public/games-data/licenses/zmiy-BSD-2-Clause-readme.txt",
+      "source": "https://zmiy.sourceforge.net/",
+      "download": "https://ibiblio.org/pub/micro/pc-stuff/freedos/files/repositories/latest/games/zmiy.zip",
+      "packageMetadata": "https://ibiblio.org/pub/micro/pc-stuff/freedos/files/repositories/latest/html/en/games/zmiy/20250410.1/index.html",
+      "downloadSha1": "2e15f04fb0904c05ddd7b847658e042ad2e59b68",
+      "downloadSha256": "8a78ea618c4c1b27a0176e80d662d73c5dedb7e765c0c845518efab3ba57be14",
+      "sourceArchive": "public/games-data/sources/zmiy-freedos-source-and-binary-0.85.2a.zip",
+      "executable": "ZMIY.EXE",
+      "executableSha256": "376c2d9cfed3da97e6c5e3ef7044d645b95a4210f4f41fbd7dd68d2a7b549019",
+      "bundleSha256": "e486d30c296db25563a1e27f5ef71217cc05ee7af7036434e184eca1fada1cde",
+      "sourceModified": false,
+      "notes": "Official FreeDOS package SHA1 matches published 2e15f04fb0904c05ddd7b847658e042ad2e59b68. Copyright, two BSD clauses and disclaimer retained verbatim in bundle readme. Actual browser gameplay checked: level 1 boot, ArrowDown/ArrowRight steering, pause/resume and restart passed.",
+      "browserVerification": {
+        "status": "checked",
+        "date": "2026-10-14",
+        "report": "docs/evidence/extra-games/standalone-dos-gameplay.json"
+      }
+    }
+  ]
+}

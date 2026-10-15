@@ -1,4 +1,4 @@
-import { isTrustedMediaUrl, isTrustedRelayMediaUrl } from './runtime.js?v=release-1.2.2-sports.1';
+import { isTrustedMediaUrl, isTrustedRelayMediaUrl } from './runtime.js?v=release-1.2.3-party.1';
 export function matchesFormat(file, format = 'all') {
   return format !== 'mp4' || /\.mp4$/i.test(file.title || '');
 }

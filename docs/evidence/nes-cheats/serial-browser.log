@@ -1,0 +1,101 @@
+✔ Buffstreams lists games and filters them locally while the private service is hung (440.523933ms)
+✔ Watch opens its own waiting page and navigates only that tab to the resolved direct player (325.972621ms)
+✔ a blocked popup still resolves the player and offers a protected direct-player link (392.098911ms)
+✔ a failed player lookup closes its waiting tab and does not fall back to the provider website (304.0531ms)
+✔ a replacement address is checked before saving and failed refreshes preserve the working catalog (750.52319ms)
+✔ canceling an address check discards a late result and leaves the saved games untouched (477.324289ms)
+✔ leaving Buffstreams cancels a pending player and keeps existing Sports counts unchanged (518.839458ms)
+✔ a delayed bundled Sports response cannot restart Buffstreams after switching to Movies (389.154227ms)
+✔ cached games and local filters survive reload without presenting stale entries as live (431.458454ms)
+✔ Kid Mode guards visible Watch buttons, refresh, address changes and a resolved fallback link (569.294559ms)
+✔ a six-letter Game Genie code patches the actual ROM read, with master and individual toggles (1405.879764ms)
+✔ eight-letter compare codes apply only to matching ROM bytes, and editing and removing use the new code (1102.706944ms)
+✔ bulk addition and portable JSON import/export preserve the list and reject bad input atomically (912.503532ms)
+✔ cheats remain current across manual restore, Start fresh and reopening, and isolate viewers and ROMs (2723.67691ms)
+✔ the paused cheat panel accepts text keys without sending them to NES controllers (540.255389ms)
+✔ an unexpected native callback failure rolls back the engine, stored model and checkboxes (1298.574219ms)
+✔ a fatal opcode cheat stays editable and recovers through Start fresh and manual Load while editing (1437.234941ms)
+✔ a delayed JSON import from an old game cannot change the next game (1006.684149ms)
+✔ mobile portrait and landscape keep cheat editing inside the viewport (763.239552ms)
+✔ light gun mouse click reaches the native NES trigger and releases across pause (1226.31921ms)
+✔ light gun touch tap reaches the native NES trigger and releases across pause (1181.369682ms)
+✔ anonymous Games executes the original ROM with real PPU output and keyboard input without TorBox calls (831.674152ms)
+✔ manual save and restore recover emulated CPU and PPU state, and reopening offers the saved state (1167.58744ms)
+✔ toolbar focus preserves game keys while Enter activates its focused Pause control (574.079904ms)
+✔ a delayed manual Load cannot overwrite a newer Start fresh action (1213.05057ms)
+✔ standard controller A reaches the emulator and disconnecting releases the held button (614.673332ms)
+✔ automatic saves stay separate for the two viewers (750.515501ms)
+✔ local ROM import renders a game and malformed files report a useful error (698.881098ms)
+✔ a canceled slow ROM cannot replace a newer game or reopen its closed player (862.435182ms)
+✔ closing Games releases keyboard interception and switching to Sports stops its emulator (857.296664ms)
+✔ mobile portrait and landscape keep the emulator and touch controls inside the viewport (823.74715ms)
+✔ unsafe catalog entries never request private APIs or external ROM hosts (306.845797ms)
+✔ direct Games links respect Kid Mode and finish the normal movie startup after denial (202.279984ms)
+✔ an existing movie fragment still boots Cinema and is preserved when returning from Games (276.59792ms)
+✔ pending movie auto-next cannot reopen Cinema over Games while presentation exit is delayed (1052.888328ms)
+✔ browser loads artwork at the actual redirect destination under the production image CSP (295.596658ms)
+✔ browser blocks an untrusted redirect and recovers with the title-specific medium poster (212.846104ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ full UI login, browse, playback and seeking verify the CDN redirect with synthetic media (555.460711ms)
+✔ catalog renders while a slow TorBox health check is still pending (221.025962ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ resume keeps the local rewind position and a visible overlay until real playback (4009.507154ms)
+✔ canceling Resume during slow source lookup cannot reopen the player (1343.515349ms)
+✔ closing a title during a slow Play request prevents late playback (1248.806202ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ details prepare the exact ready episode before Play and reuse the result without another lookup (1343.368438ms)
+ℹ Warmed Play to first synthetic video frame: 72ms; source lookup fixture delay: 1000ms.
+{"event":"media_redirect_issued","ranged":true}
+✔ an uncached fast batch waits for later cached exact results before offering preparation (584.74576ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ a mismatched fast batch waits for later cached exact results before offering preparation (595.493304ms)
+✔ uncached details prefetch never starts a TorBox download or opens the player (383.344366ms)
+✔ closing details cancels warm work without late preparation or playback (1222.195126ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ next episode warms before the credits window and is reused during auto-next (985.692931ms)
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ slow progress saves do not block auto-next and the actual video element survives (540.303942ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ an expired background progress session does not stop a playing video (873.568953ms)
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ hung initial media reaches a bounded failure and clears the resume overlay (842.693757ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ Resume offers in-app preparation, with no uncached write until explicitly selected (568.941035ms)
+✔ service startup can exceed the old 22-second cutoff without forcing a reload (23529.778996ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ rapid episode choices play only the last selected episode (885.062949ms)
+✔ a remembered encrypted key reconnects after a backend session restart (308.25167ms)
+✔ startup errors show a working Try again button (3500.412487ms)
+✔ anonymous Sports plays directly without any private service request or provider credentials (359.380886ms)
+✔ legitimate approved CDN beacon redirect still plays without private service requests or provider cookies (306.222911ms)
+✔ anonymous full replay resolves metadata and media directly without result text (372.646834ms)
+✔ Sports denies manifest-redirect before forbidden media transfer (309.11786ms)
+✔ Sports denies variant-redirect before forbidden media transfer (3479.753814ms)
+✔ Sports denies segment-redirect before forbidden media transfer (25598.971372ms)
+✔ Sports denies key-redirect before forbidden media transfer (9601.926948ms)
+✔ Sports denies variant-direct before forbidden media transfer (25736.624474ms)
+✔ Sports denies segment-direct before forbidden media transfer (300.128042ms)
+✔ Sports denies key-direct before forbidden media transfer (282.610314ms)
+✔ Sports denies redirect-chain before forbidden media transfer (25690.04995ms)
+✔ Sports denies credentials-redirect before forbidden media transfer (25661.716424ms)
+✔ Sports denies http-redirect before forbidden media transfer (25635.836784ms)
+✔ Sports denies port-redirect before forbidden media transfer (25684.818938ms)
+✔ replay metadata redirects cannot reach Render (311.444035ms)
+✔ native browser HLS fallback is isolated and cannot redirect media to Render (311.552904ms)
+✔ sports opens and plays HLS tennis while private startup is hung, with no TorBox login or media relay (440.005296ms)
+✔ padel full replay resolves anonymously, resumes and starts over without showing result text (419.638273ms)
+✔ closing a resolving sports replay prevents late media and leaves the catalog usable (1012.318132ms)
+✔ failed sports HLS reports retry and remains bounded (286.764195ms)
+✔ Sports requires an adult viewer so it cannot bypass Kid Mode allowances (222.807665ms)
+✔ expanded Sports filters expose football/hockey replays without a TorBox key or availability notice (202.755502ms)
+✔ a canceled old Play rejection cannot overwrite the next Sports playback (517.989085ms)
+ℹ tests 79
+ℹ suites 0
+ℹ pass 79
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 248985.532649

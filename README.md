@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.2**, frontend Sports build **release-1.2.2-sports.1**
+Current version: **1.2.3**, frontend build **release-1.2.3-party.1**
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
@@ -10,15 +10,39 @@ Frontend: `https://to-shreds.github.io/torbox-web-player/` (legacy mirror: `/key
 
 Backend: `https://torbox-web-player-key.onrender.com`
 
+## Watch party
+
+While playing a movie or episode, choose **Watch party → Create party for this video**, then copy the invitation. The other person connects TorBox on their own device and joins with the link or code. Joining loads the exact same cached file. Both viewers can play, pause and seek; buffering holds playback until both are ready. Tap **Ready to watch** if the browser asks. Video streams directly to each device, with only small control messages using the existing free Render service. No extra account or paid service is required. Parties last up to six hours and end when the host leaves or the service restarts. Source switching and auto-next are held during a party. This feature applies to the movie/episode player. [Details and limits](docs/watch-party.md).
+
 ## Playback startup patch
 
 Title details now prepare cached movie/episode files before Play, reuse the completed work briefly and prepare auto-next earlier. The new backend also returns a useful first provider batch promptly and retains slower results for safe fallback and Options. Exact identity/episode checks and cached-only automatic playback remain. See [the startup report](docs/STARTUP-1.2.1.md) for timing fixtures, test results and the separate backend publication gate.
+
+## Games
+
+Open **GAMES** in the top navigation, or use `#games` in the app URL. NES games run directly in your browser without a TorBox login, backend request, or extra service. The catalog is alphabetical and searchable. Open a local uncompressed `.nes` file, or choose a game added to the repository's `public/roms/` folder and `public/games-catalog.json`. The menu currently includes the user-supplied Super Mario Bros. / Duck Hunt cartridge, Super Mario Bros. 3, and Teenage Mutant Ninja Turtles II: The Arcade Game. Catalog entries and safe file naming are described in [the ROM folder README](public/roms/README.md).
+
+The menu also includes **MindMaze (Encarta browser recreation)** through its creator-hosted page. Embedded play uses Tourist without saved profiles; **Open full page** supports the creator's profiles. This is not a bundled Windows executable, and the repository does not redistribute Encarta artwork, audio or questions. [MindMaze details](docs/mindmaze.md).
+
+The same menu also includes **DOS Defender** (Unlicense/public-domain release), **Master Mind (1999)** (the creator's complete-game CC0 release), **Zmiy Snake** (BSD-2-Clause), and **SkiFree (browser remake)** (MIT). Use the All games / NES / DOS / Browser filter to browse platforms. DOS games run in a self-hosted, pinned DOSBox worker and support their own keyboard/mouse controls, including touch pointer input. The ski game uses a separately licensed canvas remake with freshly drawn graphics; the original Windows SkiFree executable is not included. Each extra player exposes Controls & credits, pause/resume, restart and fullscreen. Closing/restarting a DOS game begins a new session; DOS games do not have the NES save-state system. The ski remake keeps local high scores per viewer and has no audio.
+
+Exact game licenses and provenance are in `public/games-data/licenses/`, `docs/evidence/extra-games/licenses.json`, and `public/games-web/skifree/UPSTREAM.md`. The five unmodified GPL-2.0 DOS runtime files have matching source, original build scripts and dependency notices available under [the DOS source notice](public/vendor/dos/SOURCES.md), including the same-location source archive. The WASM/Blob-worker permissions are confined to the DOS child page; the main app's script policy stays unchanged. Game bundles, WASM and source archives are excluded from the app-shell cache. These games require an adult viewer like the existing Games tab.
+
+The player supports touch controls including diagonals and simultaneous buttons, keyboard input, and up to two standard gamepads. Automatic saves resume each viewer's game on the same browser. Save and Load save use a separate manual slot. Game saves use their own IndexedDB store and do not alter movie history or credential storage. Full screen retains the controls; rotating the device gives a landscape layout. Leaving Games or hiding the app pauses emulation and sound. For Duck Hunt, choose it inside the combined cartridge, turn on **Light gun**, then click or tap the game screen to aim and shoot.
+
+Open **Cheats** in any NES game to manage Game Genie codes. Six-letter and eight-letter codes are supported, including the eight-letter original-byte comparison. You can paste several codes, name them, edit/remove them, switch each code or the whole list on/off, and import/export JSON lists. Lists are saved separately for each viewer and exact ROM on this browser, including local ROM files. The game pauses while the manager is open; **Done & Resume** returns to play. Raw ROM patches accept `AAAA:VV` or `AAAA:VV?CC` with CPU addresses `$8000` through `$FFFF`. Codes apply to ROM reads immediately; codes affecting startup may require **Start fresh**, and effects already written to game RAM can remain until restart. Use codes for the exact game revision. This NES player uses Game Genie formats; codes for GameShark on other consoles are not compatible. If enabled codes overlap, the first matching code in the list wins. Up to 128 codes can be stored per game; ROM files and the save-state format remain unchanged.
+
+Games initially follows Sports' adult-viewer restriction, so it cannot bypass Kid Mode's existing viewing allowances. This release does not add gaming to those allowance rules. Actual ROM compatibility and physical controller/touch/audio behavior still depend on the game and device. The pinned JSNES 2.1.0 engine and Apache 2.0 license are self-hosted under `public/vendor/`. ROM payloads are not added to the application-shell cache.
 
 ## Sports
 
 Open **Sports** in the top navigation, or use `#sports` in the app URL. Sports opens without a TorBox login or a running private backend. It bundles 36 live channels with 48 stream choices and 157 dated full event/session replays across 25 sports. Channels include tennis, NFL/NBA classics, MLB, motorsport, golf, rugby, cricket, combat and more. Replays include American football and hockey as well as padel and other sports. No additional subscription, login or VPN is needed by the app. Regional rights still apply, and free channels do not cover every paid event. The replay collection is a release snapshot.
 
 Sports has live/replay, sport and channel filters, text search, 720p by default with quality choices, Go Live, replay resume/Start Over, and clear Retry/channel alternatives. Catalogs omit scores, descriptions and result images. Sports is available to adult viewers. Direct public HLS uses the bundled Apache-licensed hls.js 1.6.15; the native browser HLS fallback selects quality itself. No sports video is relayed through Render. See [the sports expansion report](docs/SPORTS-2026-10-11.md).
+
+The **Buffstreams games** tab within Sports loads the game list inside TorBox. Search teams or games, filter by sport or **Live now**, then press **Watch** to open only the selected direct player in a new tab. No provider directory or event page is opened. The existing [Sports Desk](https://to-shreds.github.io/Misc/SportsDesk/) metadata helper supplies the list and resolves the selected player; it never relays video. Scores, results, descriptions and images are omitted.
+
+**Change Buffstreams address → Check & save** verifies a new HTTPS source before replacing the saved list. Failed, empty, malformed, cancelled or obsolete responses preserve the previous source and games. Saved lists older than five minutes are clearly labelled and do not appear as currently live. A blocked popup exposes a direct-player link. TorBox credentials and referrer data are excluded from external requests. Metadata requests also omit cookies. Existing channels and replays still use the in-app player.
 
 ## Artwork patch
 

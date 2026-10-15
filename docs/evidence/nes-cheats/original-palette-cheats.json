@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "enabled": true,
+  "codes": [
+    {
+      "code": "ZPUAZAYO",
+      "name": "Original test codes",
+      "enabled": true
+    },
+    {
+      "code": "ALLAZA",
+      "name": "Original test codes",
+      "enabled": true
+    }
+  ]
+}
