@@ -41,5 +41,8 @@
     "The18 English-attested H264MKV candidates in capturedE2 metadata have unknown audio codecs.",
     "No authenticated TorBox episode, actual release media, or physical Android device was tested.",
     "Existing legacy source bans remain because manual and automatic reasons were not previously distinguishable."
-  ]
+  ],
+  "runtimeCommit": "1454116b5781651cd988ab5bf427e4b2e949e079",
+  "backendCommit": "852553cfad5d3d5eb40fbbb6f353ac0fd2a4708c",
+  "tree": "f493304363f0be5094623a802a9c3747e0158d92"
 }

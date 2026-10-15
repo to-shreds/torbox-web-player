@@ -1,0 +1,28 @@
+{
+  "service": "srv-damu91142hec73chb7qg",
+  "workspace": "tea-dakujgmk1f9s73d2v8ng",
+  "plan": "existing free service",
+  "branch": "browser-key-clone",
+  "deployment": {
+    "commit": {
+      "createdAt": "2026-10-15T20:49:02Z",
+      "id": "852553cfad5d3d5eb40fbbb6f353ac0fd2a4708c",
+      "message": "Deploy verified 1.2.6 playback source correction runtime"
+    },
+    "createdAt": "2026-10-15T20:50:48.21872Z",
+    "finishedAt": "2026-10-15T20:51:37.734607Z",
+    "id": "dep-db8jpa6q1p3s738vl0gg",
+    "startedAt": "2026-10-15T20:50:48.191074Z",
+    "status": "live",
+    "trigger": "api",
+    "updatedAt": "2026-10-15T20:51:37.734923Z"
+  },
+  "postDeploymentErrorLogs": {
+    "hasMore": false,
+    "logs": [],
+    "nextEndTime": "2026-10-15T20:52:08.117000737Z",
+    "nextStartTime": "2026-10-15T20:51:37Z"
+  },
+  "deployNote": "Configured auto-deploy did not start after two post-branch checks. One explicit deployment was triggered for the exact tested backend mirror commit, with no service/plan/environment change.",
+  "scope": "Backend deployment identity and error logs only. No authenticated TorBox account or actual episode playback was tested."
+}

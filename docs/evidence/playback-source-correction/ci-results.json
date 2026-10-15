@@ -1,0 +1,41 @@
+{
+  "runtimeCommit": "1454116b5781651cd988ab5bf427e4b2e949e079",
+  "backendCommit": "852553cfad5d3d5eb40fbbb6f353ac0fd2a4708c",
+  "tree": "f493304363f0be5094623a802a9c3747e0158d92",
+  "workflowRun": 38804997173,
+  "workflowUrl": "https://github.com/to-shreds/torbox-web-player/actions/runs/38804997173",
+  "verificationJob": 116663432203,
+  "verificationConclusion": "success",
+  "deploymentJob": 116666571370,
+  "deploymentConclusion": "success",
+  "node": {
+    "registered": 559,
+    "passed": 553,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 6,
+    "durationMs": 5154.299554
+  },
+  "browser": {
+    "registered": 144,
+    "passed": 144,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "durationMs": 373611.397088
+  },
+  "sourceLogSummary": [
+    "2026-10-15T20:49:19.1036302Z ℹ tests 559",
+    "2026-10-15T20:49:19.1036571Z ℹ pass 553",
+    "2026-10-15T20:49:19.1036691Z ℹ fail 0",
+    "2026-10-15T20:49:19.1036919Z ℹ cancelled 0",
+    "2026-10-15T20:49:19.1037046Z ℹ skipped 6",
+    "2026-10-15T20:49:19.1037303Z ℹ duration_ms 5154.299554",
+    "2026-10-15T20:55:53.2071337Z ℹ tests 144",
+    "2026-10-15T20:55:53.2072040Z ℹ pass 144",
+    "2026-10-15T20:55:53.2072160Z ℹ fail 0",
+    "2026-10-15T20:55:53.2072283Z ℹ cancelled 0",
+    "2026-10-15T20:55:53.2072425Z ℹ skipped 0",
+    "2026-10-15T20:55:53.2072697Z ℹ duration_ms 373611.397088"
+  ]
+}
