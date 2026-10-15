@@ -1,0 +1,3143 @@
+{
+  "timestamp": "2026-10-15T20:26:47.305Z",
+  "titleId": "tt33043892",
+  "season": 1,
+  "scope": "Live public metadata snapshot of the FIXED working tree. Root updated source-lookup.mjs before this process loaded it, so both current and configured-path-only StremThru groups used the corrected configured path. This is not pre-fix evidence. Cache counts are explicitly simulated; no TorBox account calls or media downloads occurred. The checked-in probe now defaults to three episodes; this retained snapshot covered ten before that limit was requested.",
+  "sourceHashes": {
+    "lib/source-lookup.mjs": "faf19a52ad607ce0cfa87c283c3a4322b5b96e069325e89deff4482206bb1c49",
+    "lib/discovery.mjs": "3cb32dc77108487f43036c69f35366384f69e46a7640150d63a3b0a093afa9f3",
+    "public/source-client.js": "16252c51fa62f19f2c46bbe934ff4514ee3551e3aee1a74946a2c32d6e53a39a",
+    "public/discover.js": "b4a105622ac5cb4297d030a8ab7c457c8391c96bd923aa62975f3874eb6bb688"
+  },
+  "timeoutMs": 10000,
+  "episodes": [
+    {
+      "episode": 1,
+      "current": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 21,
+            "unknown": 18,
+            "v4lto": 1
+          },
+          "browserContainer": 21,
+          "browserFriendly": 9,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 21,
+            "unknown": 18,
+            "v4lto": 1
+          },
+          "browserContainer": 21,
+          "browserFriendly": 9,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 21
+      },
+      "configuredPathOnly": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 21,
+            "unknown": 18,
+            "v4lto": 1
+          },
+          "browserContainer": 21,
+          "browserFriendly": 9,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 21,
+            "unknown": 18,
+            "v4lto": 1
+          },
+          "browserContainer": 21,
+          "browserFriendly": 9,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 21
+      },
+      "providers": [
+        {
+          "mode": "current",
+          "name": "Zilean",
+          "elapsedMs": 4084,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "unknown": 40
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 12,
+              "videoRisk": 9
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "unknown": 40
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 12,
+              "videoRisk": 9
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 0
+          }
+        },
+        {
+          "mode": "current",
+          "name": "Torrentio",
+          "elapsedMs": 2584,
+          "error": "SOURCE_ACCESS_DENIED"
+        },
+        {
+          "mode": "current",
+          "name": "MediaFusion Torznab",
+          "elapsedMs": 3969,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "unknown": 32,
+                "v4lto": 1,
+                "tv": 6,
+                "en": 1
+              },
+              "browserContainer": 0,
+              "browserFriendly": 1,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 1
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "unknown": 32,
+                "v4lto": 1,
+                "tv": 6,
+                "en": 1
+              },
+              "browserContainer": 0,
+              "browserFriendly": 1,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 1
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 1
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 4162,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 21,
+                "mkv": 19
+              },
+              "browserContainer": 21,
+              "browserFriendly": 9,
+              "browserUnsupported": 19,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 21,
+                "mkv": 19
+              },
+              "browserContainer": 21,
+              "browserFriendly": 9,
+              "browserUnsupported": 19,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 21,
+            "assumedUncachedPreparationOptions": 21
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 4191,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 21,
+                "mkv": 19
+              },
+              "browserContainer": 21,
+              "browserFriendly": 9,
+              "browserUnsupported": 19,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 21,
+                "mkv": 19
+              },
+              "browserContainer": 21,
+              "browserFriendly": 9,
+              "browserUnsupported": 19,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 21,
+            "assumedUncachedPreparationOptions": 21
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 6833,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 21,
+                "mkv": 19
+              },
+              "browserContainer": 21,
+              "browserFriendly": 9,
+              "browserUnsupported": 19,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 21,
+                "mkv": 19
+              },
+              "browserContainer": 21,
+              "browserFriendly": 9,
+              "browserUnsupported": 19,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 21,
+            "assumedUncachedPreparationOptions": 21
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 7393,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 21,
+                "mkv": 19
+              },
+              "browserContainer": 21,
+              "browserFriendly": 9,
+              "browserUnsupported": 19,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 21,
+                "mkv": 19
+              },
+              "browserContainer": 21,
+              "browserFriendly": 9,
+              "browserUnsupported": 19,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 21,
+            "assumedUncachedPreparationOptions": 21
+          }
+        }
+      ]
+    },
+    {
+      "episode": 2,
+      "current": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 20,
+            "unknown": 20
+          },
+          "browserContainer": 20,
+          "browserFriendly": 9,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 20,
+            "unknown": 20
+          },
+          "browserContainer": 20,
+          "browserFriendly": 9,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 20
+      },
+      "configuredPathOnly": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 20,
+            "unknown": 20
+          },
+          "browserContainer": 20,
+          "browserFriendly": 9,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 20,
+            "unknown": 20
+          },
+          "browserContainer": 20,
+          "browserFriendly": 9,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 20
+      },
+      "providers": [
+        {
+          "mode": "current",
+          "name": "Zilean",
+          "elapsedMs": 4290,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "unknown": 40
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 13,
+              "videoRisk": 12
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "unknown": 40
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 13,
+              "videoRisk": 12
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 0
+          }
+        },
+        {
+          "mode": "current",
+          "name": "Torrentio",
+          "elapsedMs": 2598,
+          "error": "SOURCE_ACCESS_DENIED"
+        },
+        {
+          "mode": "current",
+          "name": "MediaFusion Torznab",
+          "elapsedMs": 3674,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "unknown": 34,
+                "eng": 4,
+                "tv": 2
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "unknown": 34,
+                "eng": 4,
+                "tv": 2
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 0
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 4652,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 20,
+                "mkv": 20
+              },
+              "browserContainer": 20,
+              "browserFriendly": 9,
+              "browserUnsupported": 20,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 20,
+                "mkv": 20
+              },
+              "browserContainer": 20,
+              "browserFriendly": 9,
+              "browserUnsupported": 20,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 20,
+            "assumedUncachedPreparationOptions": 20
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 4308,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 20,
+                "mkv": 20
+              },
+              "browserContainer": 20,
+              "browserFriendly": 9,
+              "browserUnsupported": 20,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 20,
+                "mkv": 20
+              },
+              "browserContainer": 20,
+              "browserFriendly": 9,
+              "browserUnsupported": 20,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 20,
+            "assumedUncachedPreparationOptions": 20
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 6476,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 20,
+                "mkv": 20
+              },
+              "browserContainer": 20,
+              "browserFriendly": 9,
+              "browserUnsupported": 20,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 20,
+                "mkv": 20
+              },
+              "browserContainer": 20,
+              "browserFriendly": 9,
+              "browserUnsupported": 20,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 20,
+            "assumedUncachedPreparationOptions": 20
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 10002,
+          "error": "SOURCE_TIMEOUT"
+        }
+      ]
+    },
+    {
+      "episode": 3,
+      "current": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 18,
+            "unknown": 21,
+            "scr": 1
+          },
+          "browserContainer": 18,
+          "browserFriendly": 8,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 18,
+            "unknown": 21,
+            "scr": 1
+          },
+          "browserContainer": 18,
+          "browserFriendly": 8,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 18
+      },
+      "configuredPathOnly": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 18,
+            "unknown": 21,
+            "scr": 1
+          },
+          "browserContainer": 18,
+          "browserFriendly": 8,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 18,
+            "unknown": 21,
+            "scr": 1
+          },
+          "browserContainer": 18,
+          "browserFriendly": 8,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 18
+      },
+      "providers": [
+        {
+          "mode": "current",
+          "name": "Zilean",
+          "elapsedMs": 3580,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "unknown": 39,
+                "mp4": 1
+              },
+              "browserContainer": 1,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 13,
+              "videoRisk": 16
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "unknown": 39,
+                "mp4": 1
+              },
+              "browserContainer": 1,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 13,
+              "videoRisk": 16
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 0
+          }
+        },
+        {
+          "mode": "current",
+          "name": "Torrentio",
+          "elapsedMs": 6,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        },
+        {
+          "mode": "current",
+          "name": "MediaFusion Torznab",
+          "elapsedMs": 3908,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 1,
+                "unknown": 35,
+                "scr": 1,
+                "tv": 2,
+                "eng": 1
+              },
+              "browserContainer": 1,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 1
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 1,
+                "unknown": 35,
+                "scr": 1,
+                "tv": 2,
+                "eng": 1
+              },
+              "browserContainer": 1,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 1
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 1
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 4406,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 18,
+                "mkv": 22
+              },
+              "browserContainer": 18,
+              "browserFriendly": 8,
+              "browserUnsupported": 22,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 18,
+                "mkv": 22
+              },
+              "browserContainer": 18,
+              "browserFriendly": 8,
+              "browserUnsupported": 22,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 18,
+            "assumedUncachedPreparationOptions": 18
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 4524,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 18,
+                "mkv": 22
+              },
+              "browserContainer": 18,
+              "browserFriendly": 8,
+              "browserUnsupported": 22,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 18,
+                "mkv": 22
+              },
+              "browserContainer": 18,
+              "browserFriendly": 8,
+              "browserUnsupported": 22,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 18,
+            "assumedUncachedPreparationOptions": 18
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 1893,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 18,
+                "mkv": 22
+              },
+              "browserContainer": 18,
+              "browserFriendly": 8,
+              "browserUnsupported": 22,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 18,
+                "mkv": 22
+              },
+              "browserContainer": 18,
+              "browserFriendly": 8,
+              "browserUnsupported": 22,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 18,
+            "assumedUncachedPreparationOptions": 18
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 4,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        }
+      ]
+    },
+    {
+      "episode": 4,
+      "current": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 17,
+            "unknown": 21,
+            "v4lto": 1,
+            "tv": 1
+          },
+          "browserContainer": 17,
+          "browserFriendly": 6,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 17,
+            "unknown": 21,
+            "v4lto": 1,
+            "tv": 1
+          },
+          "browserContainer": 17,
+          "browserFriendly": 6,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 17
+      },
+      "configuredPathOnly": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 17,
+            "unknown": 21,
+            "v4lto": 1,
+            "tv": 1
+          },
+          "browserContainer": 17,
+          "browserFriendly": 6,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 17,
+            "unknown": 21,
+            "v4lto": 1,
+            "tv": 1
+          },
+          "browserContainer": 17,
+          "browserFriendly": 6,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 17
+      },
+      "providers": [
+        {
+          "mode": "current",
+          "name": "Zilean",
+          "elapsedMs": 3619,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 2,
+                "unknown": 38
+              },
+              "browserContainer": 2,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 12,
+              "videoRisk": 14
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 2,
+                "unknown": 38
+              },
+              "browserContainer": 2,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 12,
+              "videoRisk": 14
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 1
+          }
+        },
+        {
+          "mode": "current",
+          "name": "Torrentio",
+          "elapsedMs": 3,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        },
+        {
+          "mode": "current",
+          "name": "MediaFusion Torznab",
+          "elapsedMs": 3880,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 2,
+                "unknown": 34,
+                "v4lto": 1,
+                "tv": 2,
+                "eng": 1
+              },
+              "browserContainer": 2,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 1
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 2,
+                "unknown": 34,
+                "v4lto": 1,
+                "tv": 2,
+                "eng": 1
+              },
+              "browserContainer": 2,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 1
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 2
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 4440,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 17,
+                "mkv": 23
+              },
+              "browserContainer": 17,
+              "browserFriendly": 6,
+              "browserUnsupported": 23,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 17,
+                "mkv": 23
+              },
+              "browserContainer": 17,
+              "browserFriendly": 6,
+              "browserUnsupported": 23,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 17,
+            "assumedUncachedPreparationOptions": 17
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 4551,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 17,
+                "mkv": 23
+              },
+              "browserContainer": 17,
+              "browserFriendly": 6,
+              "browserUnsupported": 23,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 17,
+                "mkv": 23
+              },
+              "browserContainer": 17,
+              "browserFriendly": 6,
+              "browserUnsupported": 23,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 17,
+            "assumedUncachedPreparationOptions": 17
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 1682,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 17,
+                "mkv": 23
+              },
+              "browserContainer": 17,
+              "browserFriendly": 6,
+              "browserUnsupported": 23,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 17,
+                "mkv": 23
+              },
+              "browserContainer": 17,
+              "browserFriendly": 6,
+              "browserUnsupported": 23,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 17,
+            "assumedUncachedPreparationOptions": 17
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 0,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        }
+      ]
+    },
+    {
+      "episode": 5,
+      "current": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 16,
+            "unknown": 24
+          },
+          "browserContainer": 16,
+          "browserFriendly": 5,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 16,
+            "unknown": 24
+          },
+          "browserContainer": 16,
+          "browserFriendly": 5,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 16
+      },
+      "configuredPathOnly": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 16,
+            "unknown": 24
+          },
+          "browserContainer": 16,
+          "browserFriendly": 5,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 16,
+            "unknown": 24
+          },
+          "browserContainer": 16,
+          "browserFriendly": 5,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 16
+      },
+      "providers": [
+        {
+          "mode": "current",
+          "name": "Zilean",
+          "elapsedMs": 549,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "unknown": 40
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 10,
+              "videoRisk": 13
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "unknown": 40
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 10,
+              "videoRisk": 13
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 0
+          }
+        },
+        {
+          "mode": "current",
+          "name": "Torrentio",
+          "elapsedMs": 1,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        },
+        {
+          "mode": "current",
+          "name": "MediaFusion Torznab",
+          "elapsedMs": 472,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 3,
+                "unknown": 35,
+                "tv": 1,
+                "eng": 1
+              },
+              "browserContainer": 3,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 2
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 3,
+                "unknown": 35,
+                "tv": 1,
+                "eng": 1
+              },
+              "browserContainer": 3,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 2
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 3
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 444,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 16,
+                "mkv": 24
+              },
+              "browserContainer": 16,
+              "browserFriendly": 5,
+              "browserUnsupported": 24,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 16,
+                "mkv": 24
+              },
+              "browserContainer": 16,
+              "browserFriendly": 5,
+              "browserUnsupported": 24,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 16,
+            "assumedUncachedPreparationOptions": 16
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 720,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 16,
+                "mkv": 24
+              },
+              "browserContainer": 16,
+              "browserFriendly": 5,
+              "browserUnsupported": 24,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 16,
+                "mkv": 24
+              },
+              "browserContainer": 16,
+              "browserFriendly": 5,
+              "browserUnsupported": 24,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 16,
+            "assumedUncachedPreparationOptions": 16
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 1720,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 16,
+                "mkv": 24
+              },
+              "browserContainer": 16,
+              "browserFriendly": 5,
+              "browserUnsupported": 24,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 16,
+                "mkv": 24
+              },
+              "browserContainer": 16,
+              "browserFriendly": 5,
+              "browserUnsupported": 24,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 16,
+            "assumedUncachedPreparationOptions": 16
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 1,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        }
+      ]
+    },
+    {
+      "episode": 6,
+      "current": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 14,
+            "unknown": 23,
+            "v4lto": 1,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 14,
+          "browserFriendly": 4,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 14,
+            "unknown": 23,
+            "v4lto": 1,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 14,
+          "browserFriendly": 4,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 14
+      },
+      "configuredPathOnly": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 14,
+            "unknown": 23,
+            "v4lto": 1,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 14,
+          "browserFriendly": 4,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 14,
+            "unknown": 23,
+            "v4lto": 1,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 14,
+          "browserFriendly": 4,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 14
+      },
+      "providers": [
+        {
+          "mode": "current",
+          "name": "Zilean",
+          "elapsedMs": 673,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "unknown": 40
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 10,
+              "videoRisk": 13
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "unknown": 40
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 10,
+              "videoRisk": 13
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 0
+          }
+        },
+        {
+          "mode": "current",
+          "name": "Torrentio",
+          "elapsedMs": 1,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        },
+        {
+          "mode": "current",
+          "name": "MediaFusion Torznab",
+          "elapsedMs": 662,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 2,
+                "unknown": 34,
+                "v4lto": 1,
+                "tv": 2,
+                "eng": 1
+              },
+              "browserContainer": 2,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 2
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 2,
+                "unknown": 34,
+                "v4lto": 1,
+                "tv": 2,
+                "eng": 1
+              },
+              "browserContainer": 2,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 2
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 2
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 873,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 13,
+                "mkv": 27
+              },
+              "browserContainer": 13,
+              "browserFriendly": 4,
+              "browserUnsupported": 27,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 13,
+                "mkv": 27
+              },
+              "browserContainer": 13,
+              "browserFriendly": 4,
+              "browserUnsupported": 27,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 13,
+            "assumedUncachedPreparationOptions": 13
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 493,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 13,
+                "mkv": 27
+              },
+              "browserContainer": 13,
+              "browserFriendly": 4,
+              "browserUnsupported": 27,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 13,
+                "mkv": 27
+              },
+              "browserContainer": 13,
+              "browserFriendly": 4,
+              "browserUnsupported": 27,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 13,
+            "assumedUncachedPreparationOptions": 13
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 2519,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 13,
+                "mkv": 27
+              },
+              "browserContainer": 13,
+              "browserFriendly": 4,
+              "browserUnsupported": 27,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 13,
+                "mkv": 27
+              },
+              "browserContainer": 13,
+              "browserFriendly": 4,
+              "browserUnsupported": 27,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 13,
+            "assumedUncachedPreparationOptions": 13
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 0,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        }
+      ]
+    },
+    {
+      "episode": 7,
+      "current": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 14,
+            "unknown": 25,
+            "v4lto": 1
+          },
+          "browserContainer": 14,
+          "browserFriendly": 3,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 14,
+            "unknown": 25,
+            "v4lto": 1
+          },
+          "browserContainer": 14,
+          "browserFriendly": 3,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 14
+      },
+      "configuredPathOnly": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 14,
+            "unknown": 25,
+            "v4lto": 1
+          },
+          "browserContainer": 14,
+          "browserFriendly": 3,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 14,
+            "unknown": 25,
+            "v4lto": 1
+          },
+          "browserContainer": 14,
+          "browserFriendly": 3,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 14
+      },
+      "providers": [
+        {
+          "mode": "current",
+          "name": "Zilean",
+          "elapsedMs": 690,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 1,
+                "unknown": 39
+              },
+              "browserContainer": 1,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 11,
+              "videoRisk": 11
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 1,
+                "unknown": 39
+              },
+              "browserContainer": 1,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 11,
+              "videoRisk": 11
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 1
+          }
+        },
+        {
+          "mode": "current",
+          "name": "Torrentio",
+          "elapsedMs": 2,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        },
+        {
+          "mode": "current",
+          "name": "MediaFusion Torznab",
+          "elapsedMs": 469,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 2,
+                "unknown": 35,
+                "v4lto": 1,
+                "tv": 1,
+                "eng": 1
+              },
+              "browserContainer": 2,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 2
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 2,
+                "unknown": 35,
+                "v4lto": 1,
+                "tv": 1,
+                "eng": 1
+              },
+              "browserContainer": 2,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 2
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 2
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 873,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 14,
+                "mkv": 26
+              },
+              "browserContainer": 14,
+              "browserFriendly": 3,
+              "browserUnsupported": 26,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 14,
+                "mkv": 26
+              },
+              "browserContainer": 14,
+              "browserFriendly": 3,
+              "browserUnsupported": 26,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 14,
+            "assumedUncachedPreparationOptions": 14
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 2473,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 14,
+                "mkv": 26
+              },
+              "browserContainer": 14,
+              "browserFriendly": 3,
+              "browserUnsupported": 26,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 14,
+                "mkv": 26
+              },
+              "browserContainer": 14,
+              "browserFriendly": 3,
+              "browserUnsupported": 26,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 14,
+            "assumedUncachedPreparationOptions": 14
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 1188,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 14,
+                "mkv": 26
+              },
+              "browserContainer": 14,
+              "browserFriendly": 3,
+              "browserUnsupported": 26,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 14,
+                "mkv": 26
+              },
+              "browserContainer": 14,
+              "browserFriendly": 3,
+              "browserUnsupported": 26,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 14,
+            "assumedUncachedPreparationOptions": 14
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 1,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        }
+      ]
+    },
+    {
+      "episode": 8,
+      "current": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 12,
+            "unknown": 26,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 12,
+          "browserFriendly": 2,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 1
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 12,
+            "unknown": 26,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 12,
+          "browserFriendly": 2,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 1
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 12
+      },
+      "configuredPathOnly": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 12,
+            "unknown": 26,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 12,
+          "browserFriendly": 2,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 1
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 12,
+            "unknown": 26,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 12,
+          "browserFriendly": 2,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 1
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 12
+      },
+      "providers": [
+        {
+          "mode": "current",
+          "name": "Zilean",
+          "elapsedMs": 704,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "unknown": 39,
+                "mp4": 1
+              },
+              "browserContainer": 1,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 11,
+              "videoRisk": 14
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "unknown": 39,
+                "mp4": 1
+              },
+              "browserContainer": 1,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 11,
+              "videoRisk": 14
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 0
+          }
+        },
+        {
+          "mode": "current",
+          "name": "Torrentio",
+          "elapsedMs": 1,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        },
+        {
+          "mode": "current",
+          "name": "MediaFusion Torznab",
+          "elapsedMs": 501,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 1,
+                "unknown": 36,
+                "v4lto": 1,
+                "tv": 1,
+                "eng": 1
+              },
+              "browserContainer": 1,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 5
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 1,
+                "unknown": 36,
+                "v4lto": 1,
+                "tv": 1,
+                "eng": 1
+              },
+              "browserContainer": 1,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 5
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 1
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 1108,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 12,
+                "mkv": 28
+              },
+              "browserContainer": 12,
+              "browserFriendly": 2,
+              "browserUnsupported": 28,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 12,
+                "mkv": 28
+              },
+              "browserContainer": 12,
+              "browserFriendly": 2,
+              "browserUnsupported": 28,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 12,
+            "assumedUncachedPreparationOptions": 12
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 3118,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 12,
+                "mkv": 28
+              },
+              "browserContainer": 12,
+              "browserFriendly": 2,
+              "browserUnsupported": 28,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 12,
+                "mkv": 28
+              },
+              "browserContainer": 12,
+              "browserFriendly": 2,
+              "browserUnsupported": 28,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 12,
+            "assumedUncachedPreparationOptions": 12
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 1346,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 12,
+                "mkv": 28
+              },
+              "browserContainer": 12,
+              "browserFriendly": 2,
+              "browserUnsupported": 28,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 12,
+                "mkv": 28
+              },
+              "browserContainer": 12,
+              "browserFriendly": 2,
+              "browserUnsupported": 28,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 12,
+            "assumedUncachedPreparationOptions": 12
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 0,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        }
+      ]
+    },
+    {
+      "episode": 9,
+      "current": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 13,
+            "unknown": 25,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 13,
+          "browserFriendly": 1,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 13,
+            "unknown": 25,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 13,
+          "browserFriendly": 1,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 13
+      },
+      "configuredPathOnly": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 13,
+            "unknown": 27
+          },
+          "browserContainer": 13,
+          "browserFriendly": 1,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 13,
+            "unknown": 27
+          },
+          "browserContainer": 13,
+          "browserFriendly": 1,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 0
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 13
+      },
+      "providers": [
+        {
+          "mode": "current",
+          "name": "Zilean",
+          "elapsedMs": 710,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "unknown": 40
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 11,
+              "videoRisk": 14
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "unknown": 40
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 11,
+              "videoRisk": 14
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 0
+          }
+        },
+        {
+          "mode": "current",
+          "name": "Torrentio",
+          "elapsedMs": 3,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        },
+        {
+          "mode": "current",
+          "name": "MediaFusion Torznab",
+          "elapsedMs": 382,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 1,
+                "unknown": 37,
+                "tv": 1,
+                "eng": 1
+              },
+              "browserContainer": 1,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 2
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 1,
+                "unknown": 37,
+                "tv": 1,
+                "eng": 1
+              },
+              "browserContainer": 1,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 2
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 1
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 2110,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 13,
+                "mkv": 27
+              },
+              "browserContainer": 13,
+              "browserFriendly": 1,
+              "browserUnsupported": 27,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 13,
+                "mkv": 27
+              },
+              "browserContainer": 13,
+              "browserFriendly": 1,
+              "browserUnsupported": 27,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 13,
+            "assumedUncachedPreparationOptions": 13
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 815,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 13,
+                "mkv": 27
+              },
+              "browserContainer": 13,
+              "browserFriendly": 1,
+              "browserUnsupported": 27,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 13,
+                "mkv": 27
+              },
+              "browserContainer": 13,
+              "browserFriendly": 1,
+              "browserUnsupported": 27,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 13,
+            "assumedUncachedPreparationOptions": 13
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 1428,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 13,
+                "mkv": 27
+              },
+              "browserContainer": 13,
+              "browserFriendly": 1,
+              "browserUnsupported": 27,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 13,
+                "mkv": 27
+              },
+              "browserContainer": 13,
+              "browserFriendly": 1,
+              "browserUnsupported": 27,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 13,
+            "assumedUncachedPreparationOptions": 13
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 2,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        }
+      ]
+    },
+    {
+      "episode": 10,
+      "current": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 10,
+            "unknown": 27,
+            "exe": 1,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 10,
+          "browserFriendly": 0,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 1
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 10,
+            "unknown": 27,
+            "exe": 1,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 10,
+          "browserFriendly": 0,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 1
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 10
+      },
+      "configuredPathOnly": {
+        "normalized": {
+          "total": 40,
+          "containers": {
+            "mp4": 10,
+            "unknown": 27,
+            "exe": 1,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 10,
+          "browserFriendly": 0,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 1
+        },
+        "rejectedYear": 0,
+        "rejectedEpisodeTitle": 0,
+        "accepted": {
+          "total": 40,
+          "containers": {
+            "mp4": 10,
+            "unknown": 27,
+            "exe": 1,
+            "tv": 1,
+            "eng": 1
+          },
+          "browserContainer": 10,
+          "browserFriendly": 0,
+          "browserUnsupported": 0,
+          "audioRisk": 0,
+          "videoRisk": 1
+        },
+        "assumedCachedAutomaticCandidates": 40,
+        "assumedUncachedPreparationOptions": 10
+      },
+      "providers": [
+        {
+          "mode": "current",
+          "name": "Zilean",
+          "elapsedMs": 715,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "unknown": 40
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 10,
+              "videoRisk": 14
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "unknown": 40
+              },
+              "browserContainer": 0,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 10,
+              "videoRisk": 14
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 0
+          }
+        },
+        {
+          "mode": "current",
+          "name": "Torrentio",
+          "elapsedMs": 2,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        },
+        {
+          "mode": "current",
+          "name": "MediaFusion Torznab",
+          "elapsedMs": 387,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 3,
+                "unknown": 34,
+                "exe": 1,
+                "tv": 1,
+                "eng": 1
+              },
+              "browserContainer": 3,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 2
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 3,
+                "unknown": 34,
+                "exe": 1,
+                "tv": 1,
+                "eng": 1
+              },
+              "browserContainer": 3,
+              "browserFriendly": 0,
+              "browserUnsupported": 0,
+              "audioRisk": 0,
+              "videoRisk": 2
+            },
+            "assumedCachedAutomaticCandidates": 40,
+            "assumedUncachedPreparationOptions": 3
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 792,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 10,
+                "mkv": 30
+              },
+              "browserContainer": 10,
+              "browserFriendly": 0,
+              "browserUnsupported": 30,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 10,
+                "mkv": 30
+              },
+              "browserContainer": 10,
+              "browserFriendly": 0,
+              "browserUnsupported": 30,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 10,
+            "assumedUncachedPreparationOptions": 10
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz Main",
+          "elapsedMs": 2400,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 10,
+                "mkv": 30
+              },
+              "browserContainer": 10,
+              "browserFriendly": 0,
+              "browserUnsupported": 30,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 10,
+                "mkv": 30
+              },
+              "browserContainer": 10,
+              "browserFriendly": 0,
+              "browserUnsupported": 30,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 10,
+            "assumedUncachedPreparationOptions": 10
+          }
+        },
+        {
+          "mode": "current",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 1472,
+          "classification": {
+            "normalized": {
+              "total": 40,
+              "containers": {
+                "mp4": 10,
+                "mkv": 30
+              },
+              "browserContainer": 10,
+              "browserFriendly": 0,
+              "browserUnsupported": 30,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "rejectedYear": 0,
+            "rejectedEpisodeTitle": 0,
+            "accepted": {
+              "total": 40,
+              "containers": {
+                "mp4": 10,
+                "mkv": 30
+              },
+              "browserContainer": 10,
+              "browserFriendly": 0,
+              "browserUnsupported": 30,
+              "audioRisk": 0,
+              "videoRisk": 0
+            },
+            "assumedCachedAutomaticCandidates": 10,
+            "assumedUncachedPreparationOptions": 10
+          }
+        },
+        {
+          "mode": "configured-path-only",
+          "name": "StremThru Torz ElfHosted",
+          "elapsedMs": 0,
+          "error": "SOURCE_PROVIDER_COOLDOWN"
+        }
+      ]
+    }
+  ],
+  "http": [
+    {
+      "provider": "Torrentio",
+      "path": "/sort=qualityseed/stream/series/tt33043892:1:1.json",
+      "query": "",
+      "status": 403,
+      "elapsedMs": 2582,
+      "rawCount": 0
+    },
+    {
+      "provider": "Torrentio",
+      "path": "/sort=qualityseed/stream/series/tt33043892:1:2.json",
+      "query": "",
+      "status": 403,
+      "elapsedMs": 2598,
+      "rawCount": 0
+    },
+    {
+      "provider": "MediaFusion Torznab",
+      "path": "/torznab",
+      "query": "?t=tvsearch&imdbid=tt33043892&limit=100&season=1&ep=2",
+      "status": 200,
+      "elapsedMs": 3662,
+      "rawCount": 100
+    },
+    {
+      "provider": "MediaFusion Torznab",
+      "path": "/torznab",
+      "query": "?t=tvsearch&imdbid=tt33043892&limit=100&season=1&ep=1",
+      "status": 200,
+      "elapsedMs": 3965,
+      "rawCount": 100
+    },
+    {
+      "provider": "Zilean",
+      "path": "/dmm/filtered",
+      "query": "?ImdbId=tt33043892&Season=1&Episode=1",
+      "status": 200,
+      "elapsedMs": 4079,
+      "rawCount": 101
+    },
+    {
+      "provider": "StremThru Torz Main current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:1.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 4152,
+      "rawCount": 403
+    },
+    {
+      "provider": "StremThru Torz Main configured path",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:1.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 4185,
+      "rawCount": 403
+    },
+    {
+      "provider": "Zilean",
+      "path": "/dmm/filtered",
+      "query": "?ImdbId=tt33043892&Season=1&Episode=2",
+      "status": 200,
+      "elapsedMs": 4286,
+      "rawCount": 96
+    },
+    {
+      "provider": "StremThru Torz Main configured path",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:2.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 4301,
+      "rawCount": 389
+    },
+    {
+      "provider": "StremThru Torz Main current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:2.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 4643,
+      "rawCount": 389
+    },
+    {
+      "provider": "StremThru Torz ElfHosted current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:2.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 6470,
+      "rawCount": 395
+    },
+    {
+      "provider": "StremThru Torz ElfHosted current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:1.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 6819,
+      "rawCount": 409
+    },
+    {
+      "provider": "StremThru Torz ElfHosted configured path",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:1.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 7382,
+      "rawCount": 409
+    },
+    {
+      "provider": "StremThru Torz ElfHosted configured path",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:2.json",
+      "query": "",
+      "elapsedMs": 10002,
+      "error": "TimeoutError"
+    },
+    {
+      "provider": "StremThru Torz ElfHosted current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:4.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 1675,
+      "rawCount": 345
+    },
+    {
+      "provider": "StremThru Torz ElfHosted current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:3.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 1888,
+      "rawCount": 364
+    },
+    {
+      "provider": "Zilean",
+      "path": "/dmm/filtered",
+      "query": "?ImdbId=tt33043892&Season=1&Episode=3",
+      "status": 200,
+      "elapsedMs": 3579,
+      "rawCount": 90
+    },
+    {
+      "provider": "Zilean",
+      "path": "/dmm/filtered",
+      "query": "?ImdbId=tt33043892&Season=1&Episode=4",
+      "status": 200,
+      "elapsedMs": 3616,
+      "rawCount": 96
+    },
+    {
+      "provider": "MediaFusion Torznab",
+      "path": "/torznab",
+      "query": "?t=tvsearch&imdbid=tt33043892&limit=100&season=1&ep=4",
+      "status": 200,
+      "elapsedMs": 3874,
+      "rawCount": 100
+    },
+    {
+      "provider": "MediaFusion Torznab",
+      "path": "/torznab",
+      "query": "?t=tvsearch&imdbid=tt33043892&limit=100&season=1&ep=3",
+      "status": 200,
+      "elapsedMs": 3904,
+      "rawCount": 100
+    },
+    {
+      "provider": "StremThru Torz Main current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:3.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 4399,
+      "rawCount": 357
+    },
+    {
+      "provider": "StremThru Torz Main current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:4.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 4435,
+      "rawCount": 337
+    },
+    {
+      "provider": "StremThru Torz Main configured path",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:3.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 4516,
+      "rawCount": 357
+    },
+    {
+      "provider": "StremThru Torz Main configured path",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:4.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 4547,
+      "rawCount": 337
+    },
+    {
+      "provider": "StremThru Torz Main current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:5.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 344,
+      "rawCount": 307
+    },
+    {
+      "provider": "MediaFusion Torznab",
+      "path": "/torznab",
+      "query": "?t=tvsearch&imdbid=tt33043892&limit=100&season=1&ep=5",
+      "status": 200,
+      "elapsedMs": 462,
+      "rawCount": 100
+    },
+    {
+      "provider": "StremThru Torz Main configured path",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:6.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 488,
+      "rawCount": 256
+    },
+    {
+      "provider": "Zilean",
+      "path": "/dmm/filtered",
+      "query": "?ImdbId=tt33043892&Season=1&Episode=5",
+      "status": 200,
+      "elapsedMs": 538,
+      "rawCount": 89
+    },
+    {
+      "provider": "MediaFusion Torznab",
+      "path": "/torznab",
+      "query": "?t=tvsearch&imdbid=tt33043892&limit=100&season=1&ep=6",
+      "status": 200,
+      "elapsedMs": 654,
+      "rawCount": 100
+    },
+    {
+      "provider": "Zilean",
+      "path": "/dmm/filtered",
+      "query": "?ImdbId=tt33043892&Season=1&Episode=6",
+      "status": 200,
+      "elapsedMs": 671,
+      "rawCount": 95
+    },
+    {
+      "provider": "StremThru Torz Main configured path",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:5.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 716,
+      "rawCount": 307
+    },
+    {
+      "provider": "StremThru Torz Main current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:6.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 869,
+      "rawCount": 256
+    },
+    {
+      "provider": "StremThru Torz ElfHosted current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:5.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 1715,
+      "rawCount": 314
+    },
+    {
+      "provider": "StremThru Torz ElfHosted current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:6.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 2515,
+      "rawCount": 263
+    },
+    {
+      "provider": "MediaFusion Torznab",
+      "path": "/torznab",
+      "query": "?t=tvsearch&imdbid=tt33043892&limit=100&season=1&ep=7",
+      "status": 200,
+      "elapsedMs": 465,
+      "rawCount": 100
+    },
+    {
+      "provider": "MediaFusion Torznab",
+      "path": "/torznab",
+      "query": "?t=tvsearch&imdbid=tt33043892&limit=100&season=1&ep=8",
+      "status": 200,
+      "elapsedMs": 498,
+      "rawCount": 100
+    },
+    {
+      "provider": "Zilean",
+      "path": "/dmm/filtered",
+      "query": "?ImdbId=tt33043892&Season=1&Episode=7",
+      "status": 200,
+      "elapsedMs": 688,
+      "rawCount": 91
+    },
+    {
+      "provider": "Zilean",
+      "path": "/dmm/filtered",
+      "query": "?ImdbId=tt33043892&Season=1&Episode=8",
+      "status": 200,
+      "elapsedMs": 702,
+      "rawCount": 84
+    },
+    {
+      "provider": "StremThru Torz Main current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:7.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 870,
+      "rawCount": 262
+    },
+    {
+      "provider": "StremThru Torz Main current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:8.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 1104,
+      "rawCount": 228
+    },
+    {
+      "provider": "StremThru Torz ElfHosted current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:7.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 1181,
+      "rawCount": 268
+    },
+    {
+      "provider": "StremThru Torz ElfHosted current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:8.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 1339,
+      "rawCount": 236
+    },
+    {
+      "provider": "StremThru Torz Main configured path",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:7.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 2467,
+      "rawCount": 262
+    },
+    {
+      "provider": "StremThru Torz Main configured path",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:8.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 3113,
+      "rawCount": 228
+    },
+    {
+      "provider": "MediaFusion Torznab",
+      "path": "/torznab",
+      "query": "?t=tvsearch&imdbid=tt33043892&limit=100&season=1&ep=9",
+      "status": 200,
+      "elapsedMs": 378,
+      "rawCount": 100
+    },
+    {
+      "provider": "MediaFusion Torznab",
+      "path": "/torznab",
+      "query": "?t=tvsearch&imdbid=tt33043892&limit=100&season=1&ep=10",
+      "status": 200,
+      "elapsedMs": 384,
+      "rawCount": 100
+    },
+    {
+      "provider": "Zilean",
+      "path": "/dmm/filtered",
+      "query": "?ImdbId=tt33043892&Season=1&Episode=9",
+      "status": 200,
+      "elapsedMs": 708,
+      "rawCount": 90
+    },
+    {
+      "provider": "Zilean",
+      "path": "/dmm/filtered",
+      "query": "?ImdbId=tt33043892&Season=1&Episode=10",
+      "status": 200,
+      "elapsedMs": 714,
+      "rawCount": 81
+    },
+    {
+      "provider": "StremThru Torz Main current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:10.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 789,
+      "rawCount": 194
+    },
+    {
+      "provider": "StremThru Torz Main configured path",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:9.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 812,
+      "rawCount": 228
+    },
+    {
+      "provider": "StremThru Torz ElfHosted current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:9.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 1425,
+      "rawCount": 236
+    },
+    {
+      "provider": "StremThru Torz ElfHosted current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:10.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 1469,
+      "rawCount": 200
+    },
+    {
+      "provider": "StremThru Torz Main current",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:9.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 2107,
+      "rawCount": 228
+    },
+    {
+      "provider": "StremThru Torz Main configured path",
+      "path": "/stremio/torz/<public-p2p-config>/stream/series/tt33043892:1:10.json",
+      "query": "",
+      "status": 200,
+      "elapsedMs": 2395,
+      "rawCount": 194
+    }
+  ],
+  "diagnostics": [
+    {
+      "mode": "current",
+      "name": "Zilean",
+      "outcome": "ok",
+      "status": 200,
+      "cooldownMs": 0
+    },
+    {
+      "mode": "current",
+      "name": "Torrentio",
+      "outcome": "SOURCE_ACCESS_DENIED",
+      "status": 403,
+      "cooldownMs": 1779945
+    },
+    {
+      "mode": "current",
+      "name": "MediaFusion Torznab",
+      "outcome": "ok",
+      "status": 200,
+      "cooldownMs": 0
+    },
+    {
+      "mode": "current",
+      "name": "StremThru Torz Main",
+      "outcome": "ok",
+      "status": 200,
+      "cooldownMs": 0
+    },
+    {
+      "mode": "configured-path-only",
+      "name": "StremThru Torz Main",
+      "outcome": "ok",
+      "status": 200,
+      "cooldownMs": 0
+    },
+    {
+      "mode": "current",
+      "name": "StremThru Torz ElfHosted",
+      "outcome": "ok",
+      "status": 200,
+      "cooldownMs": 0
+    },
+    {
+      "mode": "configured-path-only",
+      "name": "StremThru Torz ElfHosted",
+      "outcome": "SOURCE_TIMEOUT",
+      "status": 200,
+      "cooldownMs": 287352
+    }
+  ],
+  "classificationNote": "current means fixed-worktree in this retained snapshot; configuredPathOnly repeats the same path. Use earlier separately observed host-root 404 comparison for the diagnosed pre-fix defect."
+}

@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.5**, frontend build **release-1.2.5-search.1**
+Current version: **1.2.6**, frontend build **release-1.2.6-playback.1**
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
@@ -93,6 +93,8 @@ Cinemeta supplies catalog metadata. Browse supports Popular, Featured, New, genr
 Text search uses Cinemeta's query-aware endpoint and falls back to catalog-validated IMDb suggestions when necessary. The secondary popular feed is used for browsing because it ignores search text. Typing immediately retires the previous query's cards and pagination; canceled or late responses cannot replace the current results. Distinct same-name titles remain visible when a poster or year is missing.
 
 Source discovery aggregates Zilean, Torrentio, and MediaFusion Torznab, with StremThru fallbacks when needed. Results are deduplicated before TorBox cache checks.
+
+Configured add-on paths are preserved for StremThru requests. Explicit audio-language and codec information survives normalization and exact-file merges. English-only choices rank ahead of mixed-language and unconfirmed-language choices; known foreign-only sources are offered explicitly rather than selected automatically. Subtitle flags and release groups do not establish an audio language. Matroska/MKV is attempted conditionally through native playback, with MP4/WebM preferred when otherwise equivalent. Browser and codec support still vary; no conversion or media relay is added. Playback recovery can copy a small diagnostic report containing public title/episode identity, error codes and counts, without credentials, file URLs or torrent hashes.
 
 Automatic source selection continues to prioritize browser-friendly cached sources and penalize known risky audio/video formats. In Simple mode, Play never opens the technical torrent/source picker. Cached multi-file packages are resolved to a browser-compatible matching episode file automatically when that can be done safely; otherwise Play reports that no cached browser-compatible source could be opened. The source picker remains an explicit Full-mode Options tool only.
 

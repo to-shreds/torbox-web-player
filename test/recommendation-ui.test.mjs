@@ -22,11 +22,11 @@ test('browser-friendly uncached source beats cached known-silent audio when nece
 });
 test('known MP4 source beats cached AVI and unsupported containers never enter automatic order',()=>{
   const avi=src('avi',{cached:true,browserFriendly:false,browserUnsupported:true,browserContainer:false,containerStatus:'unsupported'});
-  const mkv=src('mkv',{cached:true,browserFriendly:false,browserUnsupported:true,browserContainer:false,containerStatus:'unsupported'});
+  const wmv=src('wmv',{cached:true,browserFriendly:false,browserUnsupported:true,browserContainer:false,containerStatus:'unsupported'});
   const mp4=src('mp4',{cached:false,browserFriendly:false,browserUnsupported:false,browserContainer:true,containerStatus:'supported'});
-  assert.equal(recommendSource([avi,mkv,mp4],'series','auto').id,'mp4');
-  assert.deepEqual(automaticSourceOrder([avi,mkv,mp4],'series','auto').map(source=>source.id),['mp4']);
-  assert.equal(recommendSource([avi,mkv],'series','auto'),null);
+  assert.equal(recommendSource([avi,wmv,mp4],'series','auto').id,'mp4');
+  assert.deepEqual(automaticSourceOrder([avi,wmv,mp4],'series','auto').map(source=>source.id),['mp4']);
+  assert.equal(recommendSource([avi,wmv],'series','auto'),null);
 });
 test('cached plausible source is tried before an uncached MP4',()=>{
   const cached=src('cached-unknown',{browserFriendly:false,browserContainer:false,browserUnsupported:false,containerStatus:'unknown'});
@@ -46,13 +46,13 @@ test('automatic playback skips a cached source whose cached file list proves it 
   assert.deepEqual(automaticCachedSourceOrder([blocked,verified],'series','auto').map(source=>source.id),['verified']);
 });
 test('explicit browser preparation fallback chooses uncached browser files and avoids alternate cuts when possible',()=>{
-  const cachedMkv=src('cached-mkv',{cached:true,browserFriendly:false,browserContainer:false,browserUnsupported:true,containerStatus:'unsupported',filename:'Show.S01E01.mkv'});
+  const cachedAvi=src('cached-avi',{cached:true,browserFriendly:false,browserContainer:false,browserUnsupported:true,containerStatus:'unsupported',filename:'Show.S01E01.avi'});
   const extended=src('extended',{cached:false,browserFriendly:false,browserContainer:true,browserUnsupported:false,containerStatus:'supported',filename:'Show.S01E01.EXTENDED.mp4',resolution:'720p',size:.4*G,hash:'e'.repeat(40)});
   const regular=src('regular',{cached:false,browserFriendly:false,browserContainer:true,browserUnsupported:false,containerStatus:'supported',filename:'Show.S01E01.mp4',resolution:'720p',size:.8*G,hash:'a'.repeat(40)});
   const regular2=src('regular-2',{cached:false,browserFriendly:false,browserContainer:true,browserUnsupported:false,containerStatus:'supported',filename:'Show.S01E01.alt.mp4',resolution:'1080p',size:1.1*G,hash:'b'.repeat(40)});
-  assert.equal(browserPreparationCandidate([cachedMkv,extended,regular],'series','720p').id,'regular');
-  assert.equal(browserPreparationCandidate([cachedMkv,extended],'series','720p').id,'extended');
-  assert.deepEqual(browserPreparationOptions([cachedMkv,extended,regular,regular2],'series','auto','balanced',3).map(row=>row.id),['regular','regular-2']);
+  assert.equal(browserPreparationCandidate([cachedAvi,extended,regular],'series','720p').id,'regular');
+  assert.equal(browserPreparationCandidate([cachedAvi,extended],'series','720p').id,'extended');
+  assert.deepEqual(browserPreparationOptions([cachedAvi,extended,regular,regular2],'series','auto','balanced',3).map(row=>row.id),['regular','regular-2']);
 });
 test('no-cache Play failure renders in-app Prepare-and-Play choices instead of requiring TorBox or a browser confirm',async()=>{
   const [source,html]=await Promise.all([
@@ -116,10 +116,11 @@ test('automatic playback stays bounded and never opens the technical source pick
   assert.equal(AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS,18000);
   assert.equal(AUTOMATIC_SOURCE_CANDIDATES,8);
 });
-test('automatic package selection prefers a browser-playable episode file and rejects all-unsupported choices',()=>{
+test('automatic package selection prefers native containers, allows conditional MKV, and rejects unsupported choices',()=>{
   const files=[{id:'mkv',title:'Elena.of.Avalor.S02E03.mkv'},{id:'mp4',title:'Elena.of.Avalor.S02E03.mp4'},{id:'avi',title:'Elena.of.Avalor.S02E03.avi'}];
   assert.equal(selectAutomaticVideoFile(files)?.id,'mp4');
-  assert.equal(selectAutomaticVideoFile(files.filter(file=>file.id!=='mp4')),null);
+  assert.equal(selectAutomaticVideoFile(files.filter(file=>file.id!=='mp4'))?.id,'mkv');
+  assert.equal(selectAutomaticVideoFile(files.filter(file=>file.id==='avi')),null);
 });
 test('resolution filter supports exact 720/1080 and 4K alias',()=>{
   const list=[src('a',{resolution:'720p'}),src('b',{resolution:'1080p'}),src('c',{resolution:'4K'})];

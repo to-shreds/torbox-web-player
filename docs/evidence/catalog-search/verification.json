@@ -31,5 +31,14 @@
     "Browser interactions used local synthetic catalog responses and an authenticated synthetic session.",
     "Live public search used the real server Catalog class without a TorBox account.",
     "No real episode or physical Android device was tested."
+  ],
+  "runtimeCommit": "b6fda18ace3103ea480099502f6ed96186e20801",
+  "backendCommit": "5e9171a64951528e48a79585ea5a1064d1945f68",
+  "tree": "b13e0632c9fe09062b7d287ae622972f1a218362",
+  "verifiedFrozenFiles": [
+    "lib/catalog.mjs",
+    "public/discover.js",
+    "test/catalog-search-recovery.test.mjs",
+    "test/browser/catalog-search.mjs"
   ]
 }

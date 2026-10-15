@@ -21,7 +21,7 @@ const adapters = [
 ];
 
 for (const [name, create, response] of adapters) test(`${name} explicit refresh replaces cached empty and incompatible sources before normal expiry`, async () => {
-  for (const initial of ['', 'mkv']) {
+  for (const initial of ['', 'avi']) {
     let extension = initial, calls = 0;
     const provider = create({ now: () => 1000, fetchFn: async () => { calls++; return response(extension); } });
     const stale = await provider.lookup(target);
@@ -37,7 +37,7 @@ for (const [name, create, response] of adapters) test(`${name} explicit refresh 
 });
 
 test('multi-provider explicit refresh bypasses both combined and adapter caches', async () => {
-  let extension = 'mkv', indexCalls = 0, streamCalls = 0;
+  let extension = 'avi', indexCalls = 0, streamCalls = 0;
   const index = new SourceLookup({ fetchFn: async () => { indexCalls++; return json([{ imdb_id: target.id, info_hash: HASH, raw_title: source(extension).title }]); } });
   const stream = new TorrentioSourceLookup({ fetchFn: async () => { streamCalls++; return json(streams(extension)); } });
   const lookup = new MultiSourceLookup({ providers: [index, stream] });
@@ -52,7 +52,7 @@ test('multi-provider explicit refresh bypasses both combined and adapter caches'
 
 test('refresh clicks and ordinary lookups coalesce, then refresh is throttled per target', async () => {
   let now = 1000, calls = 0, held = null;
-  const provider = new TorrentioSourceLookup({ now: () => now, fetchFn: async () => { calls++; if (held) await held.promise; return json(streams(calls === 1 ? 'mkv' : 'mp4')); } });
+  const provider = new TorrentioSourceLookup({ now: () => now, fetchFn: async () => { calls++; if (held) await held.promise; return json(streams(calls === 1 ? 'avi' : 'mp4')); } });
   const lookup = new MultiSourceLookup({ providers: [provider], now: () => now });
   await lookup.lookup(target); await turn();
   held = deferred();
@@ -123,7 +123,7 @@ test('browser source lookup sends refresh only when explicitly requested', async
 });
 
 test('authenticated HTTP refresh reaches real lookup caches while anonymous refresh is rejected', async t => {
-  let extension = 'mkv', calls = 0;
+  let extension = 'avi', calls = 0;
   const provider = new TorrentioSourceLookup({ fetchFn: async () => { calls++; return json(streams(extension)); } });
   const lookup = new MultiSourceLookup({ providers: [provider] });
   const app = createApp({ env: { HOUSEHOLD_PASSWORD_HASH: await hashPassword('source-refresh-fixture'), PUBLIC_ORIGIN: 'https://fixture.test' }, sourceLookupService: lookup });

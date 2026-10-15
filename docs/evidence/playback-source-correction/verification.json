@@ -1,0 +1,45 @@
+{
+  "release": "1.2.6",
+  "frontend": "release-1.2.6-playback.1",
+  "localNode": {
+    "registered": 559,
+    "passed": 553,
+    "failed": 0,
+    "skipped": 6,
+    "durationMs": 6011.622526
+  },
+  "localTargetedBrowser": {
+    "tests": 16,
+    "passed": 16,
+    "failed": 0,
+    "durationMs": 18162.098327
+  },
+  "nativeFormatExperiment": {
+    "cases": 5,
+    "passed": 5,
+    "features": [
+      "decoded video frames",
+      "decoded audio signal",
+      "advancing media time",
+      "seeking"
+    ]
+  },
+  "sourceSha256": {
+    "lib/source-lookup.mjs": "049ddcec4d0f49b26acd1605c63579ab4afd65b90ead98aebe2059fc139a033a",
+    "lib/discovery.mjs": "3bb3e78670d74875a7d5a50e6f2aa2971e1693f5c18752ee832e15f6434ede74",
+    "public/source-client.js": "7e1b69b2b925166e9bb22ead94b1db29bd85a2f173e2aa699dee1e3f08436099",
+    "public/discover.js": "7468451aa567da9f4871c4cc52d539dd1c63a5b2802b7b138d38b65ae30b3666",
+    "server.mjs": "7020f20213a0cc8c728546be75c930a1c95547041b79cd0d9d2659766221928d",
+    "test/playback-source-correction.test.mjs": "6842848e1ec1691a1ddd72c0eabb2c5a4324bfacfccbf3dca9e2023f6411ea9e",
+    "test/browser/matroska-playback.mjs": "5f189ed576de1300512289bfd398c595dff04b02ceaa60f05483e5878016667c",
+    "test/browser/playback-source-metadata.mjs": "8431726e0736ce980817abb1470d5e4745bd7d6dd5a8bd06ae28635f9c632e99",
+    "test/fixtures/h264-aac.mkv": "00a704e9b1ae955f26a7ab4b3dea7b66c3ea69af671d8ac94b6c3dfee0f25ee9"
+  },
+  "limits": [
+    "Real public source metadata was replayed with deterministic synthetic torrent hashes.",
+    "Native decoding used original synthetic H264/AAC and H264/Opus media in desktop Chromium141.",
+    "The18 English-attested H264MKV candidates in capturedE2 metadata have unknown audio codecs.",
+    "No authenticated TorBox episode, actual release media, or physical Android device was tested.",
+    "Existing legacy source bans remain because manual and automatic reasons were not previously distinguishable."
+  ]
+}

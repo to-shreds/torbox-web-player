@@ -1,0 +1,28 @@
+{
+  "service": "srv-damu91142hec73chb7qg",
+  "workspace": "tea-dakujgmk1f9s73d2v8ng",
+  "plan": "existing free service",
+  "branch": "browser-key-clone",
+  "deployment": {
+    "commit": {
+      "createdAt": "2026-10-15T17:53:54Z",
+      "id": "5e9171a64951528e48a79585ea5a1064d1945f68",
+      "message": "Deploy verified 1.2.5 catalog search runtime"
+    },
+    "createdAt": "2026-10-15T17:55:36.13895Z",
+    "finishedAt": "2026-10-15T17:56:22.338676Z",
+    "id": "dep-db8h764s728c738ng050",
+    "startedAt": "2026-10-15T17:55:36.111837Z",
+    "status": "live",
+    "trigger": "api",
+    "updatedAt": "2026-10-15T17:56:51.315416Z"
+  },
+  "postDeploymentErrorLogs": {
+    "hasMore": false,
+    "logs": [],
+    "nextEndTime": "2026-10-15T17:57:33.02953403Z",
+    "nextStartTime": "2026-10-15T17:56:22Z"
+  },
+  "deployNote": "Configured commit auto-deploy did not start after two post-branch checks, the second 90 seconds after publication. One explicit deployment was triggered for the exact tested backend mirror commit. No service, plan or environment configuration changed.",
+  "scope": "Published backend identity, health, and application error log observation; no authenticated TorBox session."
+}

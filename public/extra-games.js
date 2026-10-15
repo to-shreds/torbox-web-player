@@ -1,5 +1,5 @@
-import {extraPlayerUrl, extraKeyCommand, readExtraStatus} from './extra-games-core.js?v=release-1.2.5-search.1';
-import {getKidProfile} from './parental-controls.js?v=release-1.2.5-search.1';
+import {extraPlayerUrl, extraKeyCommand, readExtraStatus} from './extra-games-core.js?v=release-1.2.6-playback.1';
+import {getKidProfile} from './parental-controls.js?v=release-1.2.6-playback.1';
 
 const $ = id => document.getElementById(id);
 const dialog = $('extra-game-player');

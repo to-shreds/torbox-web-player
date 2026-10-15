@@ -1,0 +1,295 @@
+{
+  "recordedAt": "2026-10-15T20:44:20.748Z",
+  "networkRequests": 0,
+  "codeHashes": {
+    "lib/source-lookup.mjs": "049ddcec4d0f49b26acd1605c63579ab4afd65b90ead98aebe2059fc139a033a",
+    "lib/discovery.mjs": "3bb3e78670d74875a7d5a50e6f2aa2971e1693f5c18752ee832e15f6434ede74",
+    "public/source-client.js": "7e1b69b2b925166e9bb22ead94b1db29bd85a2f173e2aa699dee1e3f08436099",
+    "public/discover.js": "7468451aa567da9f4871c4cc52d539dd1c63a5b2802b7b138d38b65ae30b3666"
+  },
+  "rawFixture": "test/fixtures/dexter-resurrection-s01e02-streams.json",
+  "rawFixtureSha256": "a1e8a17e69d6cb8d9f0cf845343be3fe876fba0190c318bd83fb0847d0ca6e4c",
+  "capture": {
+    "capturedAt": "2026-10-15T20:37:18.825Z",
+    "provider": "StremThru Torz Main",
+    "elapsedMs": 5888,
+    "status": 200,
+    "rawCount": 389
+  },
+  "target": {
+    "type": "series",
+    "id": "tt33043892",
+    "season": 1,
+    "episode": 2
+  },
+  "beforeProviderCap": {
+    "count": 389,
+    "englishAttested": 90,
+    "englishOnlyAttested": 48,
+    "multilingualEnglishAttested": 42,
+    "audioLanguageUnknown": 299,
+    "knownNonEnglish": 0,
+    "containers": {
+      "avi": 64,
+      "mkv": 305,
+      "mp4": 20
+    },
+    "englishBrowserFriendly": 0,
+    "englishPreparationEligible": 18,
+    "englishPreparationEligibleMp4": 0,
+    "englishPreparationEligibleMkv": 18,
+    "englishPreparationEligibleUnknownAudioCodec": 18,
+    "allPreparationEligible": 153,
+    "automaticCandidatesWithMockCacheUnknown": 325
+  },
+  "afterProviderCap": {
+    "count": 40,
+    "englishAttested": 31,
+    "englishOnlyAttested": 18,
+    "multilingualEnglishAttested": 13,
+    "audioLanguageUnknown": 9,
+    "knownNonEnglish": 0,
+    "containers": {
+      "mkv": 31,
+      "mp4": 9
+    },
+    "englishBrowserFriendly": 0,
+    "englishPreparationEligible": 18,
+    "englishPreparationEligibleMp4": 0,
+    "englishPreparationEligibleMkv": 18,
+    "englishPreparationEligibleUnknownAudioCodec": 18,
+    "allPreparationEligible": 27,
+    "automaticCandidatesWithMockCacheUnknown": 40
+  },
+  "afterIdentityChecks": {
+    "count": 40,
+    "englishAttested": 31,
+    "englishOnlyAttested": 18,
+    "multilingualEnglishAttested": 13,
+    "audioLanguageUnknown": 9,
+    "knownNonEnglish": 0,
+    "containers": {
+      "mkv": 31,
+      "mp4": 9
+    },
+    "englishBrowserFriendly": 0,
+    "englishPreparationEligible": 18,
+    "englishPreparationEligibleMp4": 0,
+    "englishPreparationEligibleMkv": 18,
+    "englishPreparationEligibleUnknownAudioCodec": 18,
+    "allPreparationEligible": 27,
+    "automaticCandidatesWithMockCacheUnknown": 40
+  },
+  "firstPreparationChoices": [
+    {
+      "syntheticHash": "00000000000000000000000000000000000f42f6",
+      "filename": "Dexter.Resurrection.S01E02.720p.x264-FENiX.mkv",
+      "container": "mkv",
+      "languages": [
+        "en"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "videoCodec": "H264",
+      "audioCodecs": [],
+      "browserFriendly": false,
+      "audioRisk": false,
+      "videoRisk": false,
+      "containerStatus": "conditional"
+    },
+    {
+      "syntheticHash": "00000000000000000000000000000000000f4394",
+      "filename": "Dexter Resurrection - S01E02 - Camera Shy.mkv",
+      "container": "mkv",
+      "languages": [
+        "en"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "videoCodec": "H264",
+      "audioCodecs": [],
+      "browserFriendly": false,
+      "audioRisk": false,
+      "videoRisk": false,
+      "containerStatus": "conditional"
+    },
+    {
+      "syntheticHash": "00000000000000000000000000000000000f4361",
+      "filename": "dexter.resurrection.s01e02.720p.web.h264-sylix[EZTVx.to].mkv",
+      "container": "mkv",
+      "languages": [
+        "en"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "videoCodec": "H264",
+      "audioCodecs": [],
+      "browserFriendly": false,
+      "audioRisk": false,
+      "videoRisk": false,
+      "containerStatus": "conditional"
+    },
+    {
+      "syntheticHash": "00000000000000000000000000000000000f4278",
+      "filename": "Dexter.Resurrection.S01E02.480p.x264-mSD[EZTVx.to].mkv",
+      "container": "mkv",
+      "languages": [
+        "en"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "videoCodec": "H264",
+      "audioCodecs": [],
+      "browserFriendly": false,
+      "audioRisk": false,
+      "videoRisk": false,
+      "containerStatus": "conditional"
+    },
+    {
+      "syntheticHash": "00000000000000000000000000000000000f426a",
+      "filename": "dexter.resurrection.s01e02.1080p.web.h264-successfulcrab[EZTVx.to].mkv",
+      "container": "mkv",
+      "languages": [
+        "en"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "videoCodec": "H264",
+      "audioCodecs": [],
+      "browserFriendly": false,
+      "audioRisk": false,
+      "videoRisk": false,
+      "containerStatus": "conditional"
+    },
+    {
+      "syntheticHash": "00000000000000000000000000000000000f428a",
+      "filename": "dexter.resurrection.s01e02.1080p.web.h264-successfulcrab.mkv",
+      "container": "mkv",
+      "languages": [
+        "en"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "videoCodec": "H264",
+      "audioCodecs": [],
+      "browserFriendly": false,
+      "audioRisk": false,
+      "videoRisk": false,
+      "containerStatus": "conditional"
+    },
+    {
+      "syntheticHash": "00000000000000000000000000000000000f4360",
+      "filename": "Dexter.Resurreccion.S01e02.2025.1080P-Dual-Lat.mkv",
+      "container": "mkv",
+      "languages": [
+        "en",
+        "es"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "videoCodec": "H264",
+      "audioCodecs": [],
+      "browserFriendly": false,
+      "audioRisk": false,
+      "videoRisk": false,
+      "containerStatus": "conditional"
+    },
+    {
+      "syntheticHash": "00000000000000000000000000000000000f42a1",
+      "filename": "Dexter.Resurrection.S01E02.720p.AMZN.WEB-DL.H264.mkv",
+      "container": "mkv",
+      "languages": [
+        "en",
+        "ru"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "videoCodec": "H264",
+      "audioCodecs": [],
+      "browserFriendly": false,
+      "audioRisk": false,
+      "videoRisk": false,
+      "containerStatus": "conditional"
+    }
+  ],
+  "correctlyRiskFlaggedEnglishMp4": [
+    {
+      "syntheticHash": "00000000000000000000000000000000000f434e",
+      "filename": "Dexter.Resurrection.S01E02.2160p.WEB-DL.DV.P5[Ben The Men].mp4",
+      "container": "mp4",
+      "languages": [
+        "en"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "videoCodec": "HEVC",
+      "audioCodecs": [
+        "EAC3",
+        "Dolby Atmos"
+      ],
+      "browserFriendly": false,
+      "audioRisk": true,
+      "videoRisk": true,
+      "containerStatus": "supported"
+    },
+    {
+      "syntheticHash": "00000000000000000000000000000000000f4397",
+      "filename": "Dexter.Resurrection.S01E02.2160p.WEB-DL.DV.P5[Ben The Men].mp4",
+      "container": "mp4",
+      "languages": [
+        "en"
+      ],
+      "languageEvidence": [
+        "description:audio"
+      ],
+      "videoCodec": "HEVC",
+      "audioCodecs": [
+        "EAC3",
+        "Dolby Atmos"
+      ],
+      "browserFriendly": false,
+      "audioRisk": true,
+      "videoRisk": true,
+      "containerStatus": "supported"
+    }
+  ],
+  "historicalEpisodes": [
+    {
+      "episode": 1,
+      "boundedHistoricalProviderRows": 160,
+      "finalMergedCount": 40,
+      "mp4": 20,
+      "mkv": 20,
+      "englishSafeCount": null,
+      "limitation": "Earlier snapshot discarded raw audio-language and codec descriptions before its provider cap. English-safe counts cannot be reconstructed or treated as zero. These counts only describe current re-ranking of the retained historical rows."
+    },
+    {
+      "episode": 2,
+      "boundedHistoricalProviderRows": 160,
+      "finalMergedCount": 40,
+      "mp4": 19,
+      "mkv": 20,
+      "englishSafeCount": null,
+      "limitation": "Earlier snapshot discarded raw audio-language and codec descriptions before its provider cap. English-safe counts cannot be reconstructed or treated as zero. These counts only describe current re-ranking of the retained historical rows."
+    },
+    {
+      "episode": 3,
+      "boundedHistoricalProviderRows": 160,
+      "finalMergedCount": 40,
+      "mp4": 17,
+      "mkv": 22,
+      "englishSafeCount": null,
+      "limitation": "Earlier snapshot discarded raw audio-language and codec descriptions before its provider cap. English-safe counts cannot be reconstructed or treated as zero. These counts only describe current re-ranking of the retained historical rows."
+    }
+  ],
+  "scope": "Public metadata replay only. Cache states are deliberately mocked. No TorBox account, cache availability, actual source file, audio track selection, or playback was tested. English-attested H.264 MKV with unknown audio codecs is a conditional native trial, not a guaranteed safe playback claim. An absent provider audio-language attestation remains unknown."
+}

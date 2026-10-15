@@ -1,0 +1,40 @@
+{
+  "test": "cached H264/AAC Matroska automatically plays native video and audio, seeks, and never relays video through the app",
+  "result": "pass",
+  "duration_ms": 2709.7666320000003,
+  "browser": "141.0.7390.0",
+  "fixture": {
+    "file": "test/fixtures/h264-aac.mkv",
+    "size": 150578,
+    "sha256": "00a704e9b1ae955f26a7ab4b3dea7b66c3ea69af671d8ac94b6c3dfee0f25ee9"
+  },
+  "decoded": {
+    "currentTime": 0.842667,
+    "duration": 17.021,
+    "decodedVideoFrames": 4,
+    "decodedAudioBytes": 12773,
+    "audioPeak": 0.0912800133228302,
+    "error": null
+  },
+  "afterSeek": {
+    "currentTime": 6.42846,
+    "decodedVideoFrames": 14,
+    "decodedAudioBytes": 93000,
+    "paused": false,
+    "seeking": false
+  },
+  "redirects": [
+    {
+      "status": 307,
+      "bodyBytes": 0,
+      "hostname": "store.tb-cdn.io",
+      "pathname": "/fixture.mkv",
+      "range": "bytes=0-"
+    }
+  ],
+  "prepareRequests": 1,
+  "onlyCached": true,
+  "newTorrents": 0,
+  "serverMediaFetches": 0,
+  "limitations": "Synthetic H264/AAC Matroska through real app UI/backend, with Playwright standing in for CDN media delivery. Desktop Chromium with a mobile viewport; not a physical Android decoder or live TorBox account test."
+}

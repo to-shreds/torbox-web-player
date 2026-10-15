@@ -171,10 +171,11 @@ test('source hints identify likely browser-friendly audio without promising univ
   const friendly = sourceHints({ filename: 'Test.H264.AAC.mp4' });
   const risky = sourceHints({ filename: 'Test.HEVC.DTS.mkv' });
   assert.equal(friendly.browserFriendly, true); assert.ok(/browser/i.test(friendly.hint));
-  assert.equal(risky.browserFriendly, false); assert.equal(risky.audioRisk, true); assert.equal(risky.browserUnsupported,true);assert.ok(/Android Chrome/i.test(risky.hint));
+  assert.equal(risky.browserFriendly, false); assert.equal(risky.audioRisk, true); assert.equal(risky.videoRisk, true);
+  assert.equal(risky.browserUnsupported, false); assert.equal(risky.containerStatus, 'conditional'); assert.match(risky.hint, /Dolby\/DTS/);
 });
-test('container hints reject AVI and MKV even when codec names look friendly', () => {
-  for (const source of [{ filename: 'Show.H264.AAC.avi' }, { container: 'mkv', title: 'Show H264 AAC' }, { mime: 'video/x-msvideo' }]) {
+test('container hints reject AVI and WMV even when codec names look friendly', () => {
+  for (const source of [{ filename: 'Show.H264.AAC.avi' }, { container: 'wmv', title: 'Show H264 AAC' }, { mime: 'video/x-msvideo' }]) {
     const hints=sourceHints(source);assert.equal(hints.browserUnsupported,true);assert.equal(hints.browserFriendly,false);
   }
   assert.equal(browserContainerHints({ title:'Show.mp4' }).containerStatus,'supported');
@@ -267,7 +268,8 @@ test('actual AVI file is rejected before browser playback even when source metad
 test('cached file preflight identifies an exact browser-playable episode without adding the torrent', () => {
   const t={type:'series',season:1,episode:2};
   assert.equal(cachedBrowserFit({cached:true,files:[{name:'Show.S01E02.mp4',mimetype:'video/mp4'}]},t,{}),true);
-  assert.equal(cachedBrowserFit({cached:true,files:[{name:'Show.S01E02.mkv',mimetype:'video/x-matroska'}]},t,{}),false);
+  assert.equal(cachedBrowserFit({cached:true,files:[{name:'Show.S01E02.mkv',mimetype:'video/x-matroska'}]},t,{}),true);
+  assert.equal(cachedBrowserFit({cached:true,files:[{name:'Show.S01E02.avi',mimetype:'video/x-msvideo'}]},t,{}),false);
   assert.equal(cachedBrowserFit({cached:true,files:[{name:'Show.S01E03.mp4',mimetype:'video/mp4'}]},t,{}),null);
 });
 test('registration exposes file-aware cached browser compatibility for automatic ranking', async () => {

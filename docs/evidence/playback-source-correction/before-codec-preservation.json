@@ -1,0 +1,84 @@
+{
+  "recordedAt": "2026-10-15T20:38:55.400Z",
+  "networkRequests": 0,
+  "codeHashes": {
+    "lib/source-lookup.mjs": "18ce6448848a1ea3619e672151a37c36cd2da12fecb89053f936594f9ef7ca09",
+    "public/source-client.js": "a8fabb99dfd2b98acf3cdf68476a397ed7429d4788c8313497aa10071250fb60",
+    "public/discover.js": "6bea08af7e307dc153f2640cf5f39a182d71f150c5d4e56ded2b7f87d0939d92"
+  },
+  "rawCount": 389,
+  "normalizedCount": 40,
+  "firstChoices": [
+    {
+      "hash": "00000000000000000000000000000000000f434e",
+      "filename": "Dexter.Resurrection.S01E02.2160p.WEB-DL.DV.P5[Ben The Men].mp4",
+      "container": "mp4",
+      "languages": [
+        "en"
+      ],
+      "videoCodec": "",
+      "audioCodecs": [],
+      "browserFriendly": false,
+      "audioRisk": false,
+      "videoRisk": false,
+      "rawDescription": "💿 WEB-DL 🎞️ HEVC\n📺 DV 🎧 Atmos, DDP | 5.1\n💾 3.0 GB 📦 34 GB 〽️ 1.1 MB/s 👤 9\n🎙️ 🇬🇧\n💬 🇬🇧\n📄 Dexter.Resurrection.S01E02.2160p.WEB-DL.DV.P5[Ben The Men].mp4"
+    },
+    {
+      "hash": "00000000000000000000000000000000000f4397",
+      "filename": "Dexter.Resurrection.S01E02.2160p.WEB-DL.DV.P5[Ben The Men].mp4",
+      "container": "mp4",
+      "languages": [
+        "en"
+      ],
+      "videoCodec": "",
+      "audioCodecs": [],
+      "browserFriendly": false,
+      "audioRisk": false,
+      "videoRisk": false,
+      "rawDescription": "💿 WEB-DL 🎞️ HEVC\n📺 DV 🎧 Atmos, DDP | 5.1\n💾 3.0 GB 📦 34 GB 〽️ 1.1 MB/s 👤 5\n🎙️ 🇬🇧\n💬 🇬🇧\n🔍 Knaben\n📄 Dexter.Resurrection.S01E02.2160p.WEB-DL.DV.P5[Ben The Men].mp4"
+    },
+    {
+      "hash": "00000000000000000000000000000000000f42f6",
+      "filename": "Dexter.Resurrection.S01E02.720p.x264-FENiX.mkv",
+      "container": "mkv",
+      "languages": [
+        "en"
+      ],
+      "videoCodec": "",
+      "audioCodecs": [],
+      "browserFriendly": false,
+      "audioRisk": false,
+      "videoRisk": false,
+      "rawDescription": "🎞️ H264\n🎧 5.1\n💾 490 MB 📦 5.0 GB 〽️ 181 KB/s 👤 19\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ FENiX 🔍 Knaben\n📄 Dexter.Resurrection.S01E02.720p.x264-FENiX.mkv"
+    },
+    {
+      "hash": "00000000000000000000000000000000000f4394",
+      "filename": "Dexter Resurrection - S01E02 - Camera Shy.mkv",
+      "container": "mkv",
+      "languages": [
+        "en"
+      ],
+      "videoCodec": "",
+      "audioCodecs": [],
+      "browserFriendly": false,
+      "audioRisk": false,
+      "videoRisk": false,
+      "rawDescription": "💿 WEB 🎞️ H264\n🎧 stereo\n💾 841 MB 📦 8.5 GB 〽️ 310 KB/s 👤 148\n🎙️ 🇬🇧\n💬 🇬🇧\n🔍 TorrentGalaxyClone\n📄 Dexter Resurrection - S01E02 - Camera Shy.mkv"
+    },
+    {
+      "hash": "00000000000000000000000000000000000f4361",
+      "filename": "dexter.resurrection.s01e02.720p.web.h264-sylix[EZTVx.to].mkv",
+      "container": "mkv",
+      "languages": [
+        "en"
+      ],
+      "videoCodec": "",
+      "audioCodecs": [],
+      "browserFriendly": false,
+      "audioRisk": false,
+      "videoRisk": false,
+      "rawDescription": "💿 WEB 🎞️ H264\n🎧 5.1\n📦 1.0 GB 〽️ 394 KB/s 👤 29\n🎙️ 🇬🇧\n💬 🇬🇧\n⚙️ sylix 🔍 Knaben\n📄 dexter.resurrection.s01e02.720p.web.h264-sylix[EZTVx.to].mkv"
+    }
+  ],
+  "finding": "Explicit StremThru codec descriptions are dropped by the adapter; English BenTheMen MP4 with explicit HEVC and DDP/Atmos markers is incorrectly treated as low risk and first preparation choice. No account or playback claim."
+}
