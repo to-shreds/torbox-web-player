@@ -6,6 +6,18 @@ Read this first. The code repository controls implementation; `to-shreds/Project
 
 The user explicitly confirmed **My Workspace** (`tea-dakujgmk1f9s73d2v8ng`) on 2026-10-10 and requested blanket confirmation because this is the account's only workspace. Reuse that workspace for authorized Render work without asking again unless the user changes the choice. Pass its ID explicitly on Render calls.
 
+## Catalog search correction · 2026-10-15
+
+Backend/package **1.2.5**, frontend **release-1.2.5-search.1**, corrects the inconsistent Dexte/Dexter results. Live public probes confirmed that the secondary `/top/catalog/.../search=...` endpoint returns the same popular list for search, nonsense text and browse. A coincidental Resurrection match fulfilled the old `Promise.any` before the primary returned the original series, New Blood and other actual matches, poisoning the five-minute query cache with a sparse subset.
+
+Text search now uses only the query-aware primary endpoint, with the existing catalog-validated IMDb suggestion fallback on empty or failed results. Secondary/trusted redirects remain available for Browse. Redirect hops share one original request deadline. Cross-type pagination advances to the earliest remaining full page so a longer movie page cannot skip show results. Exact-title ghost pruning applies only when both poster and year are absent, preserving distinct same-name titles with partial metadata while retaining the prior empty Family Guy ghost correction.
+
+The browser immediately clears previous cards, pagination and retry state during typing's debounce interval. Enter still cancels the timer and searches once, and request generations continue to reject delayed or canceled responses. Clearing the query restores browse. Existing playback/source recovery, games, watch parties, history/settings/keys and direct media delivery are preserved; no service, plan, video relay or APK change is introduced.
+
+Twelve new backend/search regressions reproduce **nine failures and three passes** against runtime `61b5f29`, then all pass against this correction. Four new actual-browser cases cover Dexte to Dexter with a same-name movie, immediate debounce clearing and Enter, late responses, query clearing and opening the exact original series identity. Local final syntax/diff checks pass; **519 Node checks registered, 513 passed, zero failed, six optional live/account skips**, and the four browser cases passed in 5.324 seconds. Live corrected searches returned 15 and 16 cards in 3.367 and 3.317 seconds; both contained original Dexter (`tt0773262`), New Blood (`tt14164730`), Resurrection (`tt33043892`) and Original Sin (`tt32252772`), with zero secondary text-search requests. Counts/timings are observations, not fixed guarantees. Evidence and a reproducible public-only probe are in `docs/evidence/catalog-search/`. No real account, episode playback or physical Android device was used by these search checks.
+
+Prior frontend is preserved at `archive/web-before-search-fix-2026-10-15` (`2cf363274ab2589cf7b314eb691ad62ddca021d9`) and backend at `archive/backend-before-search-fix-2026-10-15` (`cd3fcdb4c26a5d3fd56cfb1096da606f8a4b2dc5`). Restore as new commits. Full release/publication verification follows when complete.
+
 ## Source recovery correction · 2026-10-15
 
 Backend/package **1.2.4**, frontend **release-1.2.4-recovery.1**, repairs the recurring playback dead end shown in the Dexter: Resurrection screenshot. This section supersedes older automatic-selection wording below: confirmed uncached sources remain excluded from automatic playback; unknown cache status may be checked only with `onlyCached:true`, so TorBox itself enforces the cached-only boundary.

@@ -207,7 +207,7 @@ for (const startOver of [false, true]) test(`${startOver ? 'Start over' : 'Resum
   await context.route('**/api/discover/lookup?**', route => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ complete: true, sources: recovered ? [source()] : [] }) }));
   await page.goto(fixture.origin); await page.waitForSelector('#workspace:not([hidden])');
   await page.evaluate(async () => {
-    const { recordRecent } = await import('./history.js?v=release-1.2.4-recovery.1');
+    const { recordRecent } = await import('./history.js?v=release-1.2.5-search.1');
     recordRecent({ current: { type: 'series', id: 'tt1234567', season: 1, episode: 1 }, title: 'Fixture Show', episodeName: 'One' }, 40, 120);
   });
   await page.reload(); await page.waitForSelector('#workspace:not([hidden])');

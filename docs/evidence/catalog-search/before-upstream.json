@@ -1,0 +1,1726 @@
+{
+  "timestamp": "2026-10-15T17:46:26.874Z",
+  "rows": [
+    {
+      "name": "primary-dexter-series",
+      "url": "https://v3-cinemeta.strem.io/catalog/series/top/search=Dexter.json",
+      "status": 200,
+      "ms": 4957,
+      "count": 12,
+      "relevant": [
+        {
+          "id": "tt0773262",
+          "name": "Dexter",
+          "type": "series",
+          "year": "2006-2013"
+        },
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025-"
+        },
+        {
+          "id": "tt14164730",
+          "name": "Dexter: New Blood",
+          "type": "series",
+          "year": "2021-2022"
+        },
+        {
+          "id": "tt32252772",
+          "name": "Dexter: Original Sin",
+          "type": "series",
+          "year": "2024-2025"
+        },
+        {
+          "id": "tt1595870",
+          "name": "Dexter: Early Cuts",
+          "type": "series",
+          "year": "2009-2012"
+        },
+        {
+          "id": "tt1470992",
+          "name": "Dexter: Blood Spatter 101",
+          "type": "series",
+          "year": "2006-2007"
+        },
+        {
+          "id": "tt37974449",
+          "name": "Dexter Procter: The 10-Year-Old Doctor",
+          "type": "series",
+          "year": "2025-"
+        },
+        {
+          "id": "tt0115157",
+          "name": "Dexter's Laboratory",
+          "type": "series",
+          "year": "1996-2003"
+        },
+        {
+          "id": "tt1842178",
+          "name": "Stupid for Dexter",
+          "type": "series",
+          "year": "2010-2011"
+        },
+        {
+          "id": "tt35429558",
+          "name": "Dexter: Final Cut",
+          "type": "series",
+          "year": "2024-"
+        },
+        {
+          "id": "tt5466094",
+          "name": "Amby & Dexter",
+          "type": "series",
+          "year": "1997-2003"
+        },
+        {
+          "id": "tt0168313",
+          "name": "Cliff Dexter",
+          "type": "series",
+          "year": "1966-1968"
+        }
+      ],
+      "metas": [
+        {
+          "id": "tt0773262",
+          "name": "Dexter",
+          "type": "series",
+          "year": "2006-2013"
+        },
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025-"
+        },
+        {
+          "id": "tt14164730",
+          "name": "Dexter: New Blood",
+          "type": "series",
+          "year": "2021-2022"
+        },
+        {
+          "id": "tt32252772",
+          "name": "Dexter: Original Sin",
+          "type": "series",
+          "year": "2024-2025"
+        },
+        {
+          "id": "tt1595870",
+          "name": "Dexter: Early Cuts",
+          "type": "series",
+          "year": "2009-2012"
+        },
+        {
+          "id": "tt1470992",
+          "name": "Dexter: Blood Spatter 101",
+          "type": "series",
+          "year": "2006-2007"
+        },
+        {
+          "id": "tt37974449",
+          "name": "Dexter Procter: The 10-Year-Old Doctor",
+          "type": "series",
+          "year": "2025-"
+        },
+        {
+          "id": "tt0115157",
+          "name": "Dexter's Laboratory",
+          "type": "series",
+          "year": "1996-2003"
+        },
+        {
+          "id": "tt1842178",
+          "name": "Stupid for Dexter",
+          "type": "series",
+          "year": "2010-2011"
+        },
+        {
+          "id": "tt35429558",
+          "name": "Dexter: Final Cut",
+          "type": "series",
+          "year": "2024-"
+        },
+        {
+          "id": "tt5466094",
+          "name": "Amby & Dexter",
+          "type": "series",
+          "year": "1997-2003"
+        },
+        {
+          "id": "tt0168313",
+          "name": "Cliff Dexter",
+          "type": "series",
+          "year": "1966-1968"
+        }
+      ]
+    },
+    {
+      "name": "secondary-dexte-series",
+      "url": "https://cinemeta-catalogs.strem.io/top/catalog/series/top/search=Dexte.json",
+      "status": 200,
+      "ms": 4396,
+      "count": 50,
+      "relevant": [
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025–"
+        }
+      ],
+      "metas": [
+        {
+          "id": "tt11540908",
+          "name": "Carrie",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt35934755",
+          "name": "Below",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt21097264",
+          "name": "East of Eden",
+          "type": "series",
+          "year": "2026"
+        },
+        {
+          "id": "tt26545992",
+          "name": "Lanterns",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt10986410",
+          "name": "Ted Lasso",
+          "type": "series",
+          "year": "2020–"
+        },
+        {
+          "id": "tt31510819",
+          "name": "MobLand",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt5875444",
+          "name": "Slow Horses",
+          "type": "series",
+          "year": "2022–"
+        },
+        {
+          "id": "tt37972251",
+          "name": "War",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt1844624",
+          "name": "American Horror Story",
+          "type": "series",
+          "year": "2011–"
+        },
+        {
+          "id": "tt13210838",
+          "name": "The Gentlemen",
+          "type": "series",
+          "year": "2024–"
+        },
+        {
+          "id": "tt35854736",
+          "name": "Avatar: Seven Havens",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt33539520",
+          "name": "Neagley",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt1196946",
+          "name": "The Mentalist",
+          "type": "series",
+          "year": "2008–2015"
+        },
+        {
+          "id": "tt0944947",
+          "name": "Game of Thrones",
+          "type": "series",
+          "year": "2011–2019"
+        },
+        {
+          "id": "tt9288030",
+          "name": "Reacher",
+          "type": "series",
+          "year": "2022–"
+        },
+        {
+          "id": "tt33332385",
+          "name": "Widow's Bay",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt13111078",
+          "name": "Lioness",
+          "type": "series",
+          "year": "2023–"
+        },
+        {
+          "id": "tt14688458",
+          "name": "Silo",
+          "type": "series",
+          "year": "2023–"
+        },
+        {
+          "id": "tt36064406",
+          "name": "Coven Academy",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt0903747",
+          "name": "Breaking Bad",
+          "type": "series",
+          "year": "2008–2013"
+        },
+        {
+          "id": "tt19231492",
+          "name": "Dark Matter",
+          "type": "series",
+          "year": "2024–"
+        },
+        {
+          "id": "tt7441658",
+          "name": "Black Clover",
+          "type": "series",
+          "year": "2017–2026"
+        },
+        {
+          "id": "tt6037988",
+          "name": "Last Seen",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt11712058",
+          "name": "Mayor of Kingstown",
+          "type": "series",
+          "year": "2021–"
+        },
+        {
+          "id": "tt33270224",
+          "name": "Cupertino",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt7587890",
+          "name": "The Rookie",
+          "type": "series",
+          "year": "2018–"
+        },
+        {
+          "id": "tt6773088",
+          "name": "Brothers",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt35726020",
+          "name": "Kill Jackie",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt12408718",
+          "name": "Murder in a Small Town",
+          "type": "series",
+          "year": "2024–"
+        },
+        {
+          "id": "tt0364845",
+          "name": "NCIS",
+          "type": "series",
+          "year": "2003–"
+        },
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt0141842",
+          "name": "The Sopranos",
+          "type": "series",
+          "year": "1999–2007"
+        },
+        {
+          "id": "tt32499579",
+          "name": "Haunted Hotel",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt0203259",
+          "name": "Law & Order: Special Victims Unit",
+          "type": "series",
+          "year": "1999–"
+        },
+        {
+          "id": "tt2560140",
+          "name": "Attack on Titan",
+          "type": "series",
+          "year": "2013–2023"
+        },
+        {
+          "id": "tt31938062",
+          "name": "The Pitt",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt36849871",
+          "name": "Marshals",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt0460681",
+          "name": "Supernatural",
+          "type": "series",
+          "year": "2005–2020"
+        },
+        {
+          "id": "tt33081352",
+          "name": "A Different World",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt1520211",
+          "name": "The Walking Dead",
+          "type": "series",
+          "year": "2010–2022"
+        },
+        {
+          "id": "tt0121955",
+          "name": "South Park",
+          "type": "series",
+          "year": "1997–"
+        },
+        {
+          "id": "tt11198330",
+          "name": "House of the Dragon",
+          "type": "series",
+          "year": "2022–"
+        },
+        {
+          "id": "tt36303968",
+          "name": "Furious",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt36885662",
+          "name": "Best Medicine",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt4574334",
+          "name": "Stranger Things",
+          "type": "series",
+          "year": "2016–2025"
+        },
+        {
+          "id": "tt2356777",
+          "name": "True Detective",
+          "type": "series",
+          "year": "2014–"
+        },
+        {
+          "id": "tt39365612",
+          "name": "Line of Fire",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt0306414",
+          "name": "The Wire",
+          "type": "series",
+          "year": "2002–2008"
+        },
+        {
+          "id": "tt14466018",
+          "name": "Blue Lights",
+          "type": "series",
+          "year": "2023–"
+        },
+        {
+          "id": "tt3032476",
+          "name": "Better Call Saul",
+          "type": "series",
+          "year": "2015–2022"
+        }
+      ]
+    },
+    {
+      "name": "secondary-dexter-series",
+      "url": "https://cinemeta-catalogs.strem.io/top/catalog/series/top/search=Dexter.json",
+      "status": 200,
+      "ms": 4339,
+      "count": 50,
+      "relevant": [
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025–"
+        }
+      ],
+      "metas": [
+        {
+          "id": "tt11540908",
+          "name": "Carrie",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt35934755",
+          "name": "Below",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt21097264",
+          "name": "East of Eden",
+          "type": "series",
+          "year": "2026"
+        },
+        {
+          "id": "tt26545992",
+          "name": "Lanterns",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt10986410",
+          "name": "Ted Lasso",
+          "type": "series",
+          "year": "2020–"
+        },
+        {
+          "id": "tt31510819",
+          "name": "MobLand",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt5875444",
+          "name": "Slow Horses",
+          "type": "series",
+          "year": "2022–"
+        },
+        {
+          "id": "tt37972251",
+          "name": "War",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt1844624",
+          "name": "American Horror Story",
+          "type": "series",
+          "year": "2011–"
+        },
+        {
+          "id": "tt13210838",
+          "name": "The Gentlemen",
+          "type": "series",
+          "year": "2024–"
+        },
+        {
+          "id": "tt35854736",
+          "name": "Avatar: Seven Havens",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt33539520",
+          "name": "Neagley",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt1196946",
+          "name": "The Mentalist",
+          "type": "series",
+          "year": "2008–2015"
+        },
+        {
+          "id": "tt0944947",
+          "name": "Game of Thrones",
+          "type": "series",
+          "year": "2011–2019"
+        },
+        {
+          "id": "tt9288030",
+          "name": "Reacher",
+          "type": "series",
+          "year": "2022–"
+        },
+        {
+          "id": "tt33332385",
+          "name": "Widow's Bay",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt13111078",
+          "name": "Lioness",
+          "type": "series",
+          "year": "2023–"
+        },
+        {
+          "id": "tt14688458",
+          "name": "Silo",
+          "type": "series",
+          "year": "2023–"
+        },
+        {
+          "id": "tt36064406",
+          "name": "Coven Academy",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt0903747",
+          "name": "Breaking Bad",
+          "type": "series",
+          "year": "2008–2013"
+        },
+        {
+          "id": "tt19231492",
+          "name": "Dark Matter",
+          "type": "series",
+          "year": "2024–"
+        },
+        {
+          "id": "tt7441658",
+          "name": "Black Clover",
+          "type": "series",
+          "year": "2017–2026"
+        },
+        {
+          "id": "tt6037988",
+          "name": "Last Seen",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt11712058",
+          "name": "Mayor of Kingstown",
+          "type": "series",
+          "year": "2021–"
+        },
+        {
+          "id": "tt33270224",
+          "name": "Cupertino",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt7587890",
+          "name": "The Rookie",
+          "type": "series",
+          "year": "2018–"
+        },
+        {
+          "id": "tt6773088",
+          "name": "Brothers",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt35726020",
+          "name": "Kill Jackie",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt12408718",
+          "name": "Murder in a Small Town",
+          "type": "series",
+          "year": "2024–"
+        },
+        {
+          "id": "tt0364845",
+          "name": "NCIS",
+          "type": "series",
+          "year": "2003–"
+        },
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt0141842",
+          "name": "The Sopranos",
+          "type": "series",
+          "year": "1999–2007"
+        },
+        {
+          "id": "tt32499579",
+          "name": "Haunted Hotel",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt0203259",
+          "name": "Law & Order: Special Victims Unit",
+          "type": "series",
+          "year": "1999–"
+        },
+        {
+          "id": "tt2560140",
+          "name": "Attack on Titan",
+          "type": "series",
+          "year": "2013–2023"
+        },
+        {
+          "id": "tt31938062",
+          "name": "The Pitt",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt36849871",
+          "name": "Marshals",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt0460681",
+          "name": "Supernatural",
+          "type": "series",
+          "year": "2005–2020"
+        },
+        {
+          "id": "tt33081352",
+          "name": "A Different World",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt1520211",
+          "name": "The Walking Dead",
+          "type": "series",
+          "year": "2010–2022"
+        },
+        {
+          "id": "tt0121955",
+          "name": "South Park",
+          "type": "series",
+          "year": "1997–"
+        },
+        {
+          "id": "tt11198330",
+          "name": "House of the Dragon",
+          "type": "series",
+          "year": "2022–"
+        },
+        {
+          "id": "tt36303968",
+          "name": "Furious",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt36885662",
+          "name": "Best Medicine",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt4574334",
+          "name": "Stranger Things",
+          "type": "series",
+          "year": "2016–2025"
+        },
+        {
+          "id": "tt2356777",
+          "name": "True Detective",
+          "type": "series",
+          "year": "2014–"
+        },
+        {
+          "id": "tt39365612",
+          "name": "Line of Fire",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt0306414",
+          "name": "The Wire",
+          "type": "series",
+          "year": "2002–2008"
+        },
+        {
+          "id": "tt14466018",
+          "name": "Blue Lights",
+          "type": "series",
+          "year": "2023–"
+        },
+        {
+          "id": "tt3032476",
+          "name": "Better Call Saul",
+          "type": "series",
+          "year": "2015–2022"
+        }
+      ]
+    },
+    {
+      "name": "secondary-unrelated-series",
+      "url": "https://cinemeta-catalogs.strem.io/top/catalog/series/top/search=zzzzzznomatchabcdef.json",
+      "status": 200,
+      "ms": 5674,
+      "count": 50,
+      "relevant": [
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025–"
+        }
+      ],
+      "metas": [
+        {
+          "id": "tt11540908",
+          "name": "Carrie",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt35934755",
+          "name": "Below",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt21097264",
+          "name": "East of Eden",
+          "type": "series",
+          "year": "2026"
+        },
+        {
+          "id": "tt26545992",
+          "name": "Lanterns",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt10986410",
+          "name": "Ted Lasso",
+          "type": "series",
+          "year": "2020–"
+        },
+        {
+          "id": "tt31510819",
+          "name": "MobLand",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt5875444",
+          "name": "Slow Horses",
+          "type": "series",
+          "year": "2022–"
+        },
+        {
+          "id": "tt37972251",
+          "name": "War",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt1844624",
+          "name": "American Horror Story",
+          "type": "series",
+          "year": "2011–"
+        },
+        {
+          "id": "tt13210838",
+          "name": "The Gentlemen",
+          "type": "series",
+          "year": "2024–"
+        },
+        {
+          "id": "tt35854736",
+          "name": "Avatar: Seven Havens",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt33539520",
+          "name": "Neagley",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt1196946",
+          "name": "The Mentalist",
+          "type": "series",
+          "year": "2008–2015"
+        },
+        {
+          "id": "tt0944947",
+          "name": "Game of Thrones",
+          "type": "series",
+          "year": "2011–2019"
+        },
+        {
+          "id": "tt9288030",
+          "name": "Reacher",
+          "type": "series",
+          "year": "2022–"
+        },
+        {
+          "id": "tt33332385",
+          "name": "Widow's Bay",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt13111078",
+          "name": "Lioness",
+          "type": "series",
+          "year": "2023–"
+        },
+        {
+          "id": "tt14688458",
+          "name": "Silo",
+          "type": "series",
+          "year": "2023–"
+        },
+        {
+          "id": "tt36064406",
+          "name": "Coven Academy",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt0903747",
+          "name": "Breaking Bad",
+          "type": "series",
+          "year": "2008–2013"
+        },
+        {
+          "id": "tt19231492",
+          "name": "Dark Matter",
+          "type": "series",
+          "year": "2024–"
+        },
+        {
+          "id": "tt7441658",
+          "name": "Black Clover",
+          "type": "series",
+          "year": "2017–2026"
+        },
+        {
+          "id": "tt6037988",
+          "name": "Last Seen",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt11712058",
+          "name": "Mayor of Kingstown",
+          "type": "series",
+          "year": "2021–"
+        },
+        {
+          "id": "tt33270224",
+          "name": "Cupertino",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt7587890",
+          "name": "The Rookie",
+          "type": "series",
+          "year": "2018–"
+        },
+        {
+          "id": "tt6773088",
+          "name": "Brothers",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt35726020",
+          "name": "Kill Jackie",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt12408718",
+          "name": "Murder in a Small Town",
+          "type": "series",
+          "year": "2024–"
+        },
+        {
+          "id": "tt0364845",
+          "name": "NCIS",
+          "type": "series",
+          "year": "2003–"
+        },
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt0141842",
+          "name": "The Sopranos",
+          "type": "series",
+          "year": "1999–2007"
+        },
+        {
+          "id": "tt32499579",
+          "name": "Haunted Hotel",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt0203259",
+          "name": "Law & Order: Special Victims Unit",
+          "type": "series",
+          "year": "1999–"
+        },
+        {
+          "id": "tt2560140",
+          "name": "Attack on Titan",
+          "type": "series",
+          "year": "2013–2023"
+        },
+        {
+          "id": "tt31938062",
+          "name": "The Pitt",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt36849871",
+          "name": "Marshals",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt0460681",
+          "name": "Supernatural",
+          "type": "series",
+          "year": "2005–2020"
+        },
+        {
+          "id": "tt33081352",
+          "name": "A Different World",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt1520211",
+          "name": "The Walking Dead",
+          "type": "series",
+          "year": "2010–2022"
+        },
+        {
+          "id": "tt0121955",
+          "name": "South Park",
+          "type": "series",
+          "year": "1997–"
+        },
+        {
+          "id": "tt11198330",
+          "name": "House of the Dragon",
+          "type": "series",
+          "year": "2022–"
+        },
+        {
+          "id": "tt36303968",
+          "name": "Furious",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt36885662",
+          "name": "Best Medicine",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt4574334",
+          "name": "Stranger Things",
+          "type": "series",
+          "year": "2016–2025"
+        },
+        {
+          "id": "tt2356777",
+          "name": "True Detective",
+          "type": "series",
+          "year": "2014–"
+        },
+        {
+          "id": "tt39365612",
+          "name": "Line of Fire",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt0306414",
+          "name": "The Wire",
+          "type": "series",
+          "year": "2002–2008"
+        },
+        {
+          "id": "tt14466018",
+          "name": "Blue Lights",
+          "type": "series",
+          "year": "2023–"
+        },
+        {
+          "id": "tt3032476",
+          "name": "Better Call Saul",
+          "type": "series",
+          "year": "2015–2022"
+        }
+      ]
+    },
+    {
+      "name": "secondary-browse-series",
+      "url": "https://cinemeta-catalogs.strem.io/top/catalog/series/top.json",
+      "status": 200,
+      "ms": 4347,
+      "count": 50,
+      "relevant": [
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025–"
+        }
+      ],
+      "metas": [
+        {
+          "id": "tt11540908",
+          "name": "Carrie",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt35934755",
+          "name": "Below",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt21097264",
+          "name": "East of Eden",
+          "type": "series",
+          "year": "2026"
+        },
+        {
+          "id": "tt26545992",
+          "name": "Lanterns",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt10986410",
+          "name": "Ted Lasso",
+          "type": "series",
+          "year": "2020–"
+        },
+        {
+          "id": "tt31510819",
+          "name": "MobLand",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt5875444",
+          "name": "Slow Horses",
+          "type": "series",
+          "year": "2022–"
+        },
+        {
+          "id": "tt37972251",
+          "name": "War",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt1844624",
+          "name": "American Horror Story",
+          "type": "series",
+          "year": "2011–"
+        },
+        {
+          "id": "tt13210838",
+          "name": "The Gentlemen",
+          "type": "series",
+          "year": "2024–"
+        },
+        {
+          "id": "tt35854736",
+          "name": "Avatar: Seven Havens",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt33539520",
+          "name": "Neagley",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt1196946",
+          "name": "The Mentalist",
+          "type": "series",
+          "year": "2008–2015"
+        },
+        {
+          "id": "tt0944947",
+          "name": "Game of Thrones",
+          "type": "series",
+          "year": "2011–2019"
+        },
+        {
+          "id": "tt9288030",
+          "name": "Reacher",
+          "type": "series",
+          "year": "2022–"
+        },
+        {
+          "id": "tt33332385",
+          "name": "Widow's Bay",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt13111078",
+          "name": "Lioness",
+          "type": "series",
+          "year": "2023–"
+        },
+        {
+          "id": "tt14688458",
+          "name": "Silo",
+          "type": "series",
+          "year": "2023–"
+        },
+        {
+          "id": "tt36064406",
+          "name": "Coven Academy",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt0903747",
+          "name": "Breaking Bad",
+          "type": "series",
+          "year": "2008–2013"
+        },
+        {
+          "id": "tt19231492",
+          "name": "Dark Matter",
+          "type": "series",
+          "year": "2024–"
+        },
+        {
+          "id": "tt7441658",
+          "name": "Black Clover",
+          "type": "series",
+          "year": "2017–2026"
+        },
+        {
+          "id": "tt6037988",
+          "name": "Last Seen",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt11712058",
+          "name": "Mayor of Kingstown",
+          "type": "series",
+          "year": "2021–"
+        },
+        {
+          "id": "tt33270224",
+          "name": "Cupertino",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt7587890",
+          "name": "The Rookie",
+          "type": "series",
+          "year": "2018–"
+        },
+        {
+          "id": "tt6773088",
+          "name": "Brothers",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt35726020",
+          "name": "Kill Jackie",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt12408718",
+          "name": "Murder in a Small Town",
+          "type": "series",
+          "year": "2024–"
+        },
+        {
+          "id": "tt0364845",
+          "name": "NCIS",
+          "type": "series",
+          "year": "2003–"
+        },
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt0141842",
+          "name": "The Sopranos",
+          "type": "series",
+          "year": "1999–2007"
+        },
+        {
+          "id": "tt32499579",
+          "name": "Haunted Hotel",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt0203259",
+          "name": "Law & Order: Special Victims Unit",
+          "type": "series",
+          "year": "1999–"
+        },
+        {
+          "id": "tt2560140",
+          "name": "Attack on Titan",
+          "type": "series",
+          "year": "2013–2023"
+        },
+        {
+          "id": "tt31938062",
+          "name": "The Pitt",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt36849871",
+          "name": "Marshals",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt0460681",
+          "name": "Supernatural",
+          "type": "series",
+          "year": "2005–2020"
+        },
+        {
+          "id": "tt33081352",
+          "name": "A Different World",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt1520211",
+          "name": "The Walking Dead",
+          "type": "series",
+          "year": "2010–2022"
+        },
+        {
+          "id": "tt0121955",
+          "name": "South Park",
+          "type": "series",
+          "year": "1997–"
+        },
+        {
+          "id": "tt11198330",
+          "name": "House of the Dragon",
+          "type": "series",
+          "year": "2022–"
+        },
+        {
+          "id": "tt36303968",
+          "name": "Furious",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt36885662",
+          "name": "Best Medicine",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt4574334",
+          "name": "Stranger Things",
+          "type": "series",
+          "year": "2016–2025"
+        },
+        {
+          "id": "tt2356777",
+          "name": "True Detective",
+          "type": "series",
+          "year": "2014–"
+        },
+        {
+          "id": "tt39365612",
+          "name": "Line of Fire",
+          "type": "series",
+          "year": "2026–"
+        },
+        {
+          "id": "tt0306414",
+          "name": "The Wire",
+          "type": "series",
+          "year": "2002–2008"
+        },
+        {
+          "id": "tt14466018",
+          "name": "Blue Lights",
+          "type": "series",
+          "year": "2023–"
+        },
+        {
+          "id": "tt3032476",
+          "name": "Better Call Saul",
+          "type": "series",
+          "year": "2015–2022"
+        }
+      ]
+    },
+    {
+      "name": "secondary-dexter-movie",
+      "url": "https://cinemeta-catalogs.strem.io/top/catalog/movie/top/search=Dexter.json",
+      "status": 200,
+      "ms": 4397,
+      "count": 48,
+      "relevant": [],
+      "metas": [
+        {
+          "id": "tt22084616",
+          "name": "Spider-Man: Brand New Day",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt6933238",
+          "name": "Unabomber",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt15047880",
+          "name": "Disclosure Day",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt37287335",
+          "name": "Obsession",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt26657236",
+          "name": "Backrooms",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt36983905",
+          "name": "The Uprising",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt22526100",
+          "name": "The Love Hypothesis",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt36064406",
+          "name": "Phantom Power",
+          "type": "movie",
+          "year": "2014"
+        },
+        {
+          "id": "tt27543632",
+          "name": "The Housemaid",
+          "type": "movie",
+          "year": "2025"
+        },
+        {
+          "id": "tt0074285",
+          "name": "Carrie",
+          "type": "movie",
+          "year": "1976"
+        },
+        {
+          "id": "tt27165187",
+          "name": "The End of Oak Street",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt36429458",
+          "name": "Doing Life",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt12042730",
+          "name": "Project Hail Mary",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt31349844",
+          "name": "Runner",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt14173636",
+          "name": "The Invite",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt27369017",
+          "name": "Hope",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt37969426",
+          "name": "The Muppet Show",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt11561116",
+          "name": "The Whisper Man",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt28014327",
+          "name": "Mayday",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt1756855",
+          "name": "Coyote vs. Acme",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt35298123",
+          "name": "Teenage Sex and Death at Camp Miasma",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt31170389",
+          "name": "Evil Dead Burn",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt0111161",
+          "name": "The Shawshank Redemption",
+          "type": "movie",
+          "year": "1994"
+        },
+        {
+          "id": "tt29355505",
+          "name": "Toy Story 5",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt35672862",
+          "name": "Hokum",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt26581740",
+          "name": "Weapons",
+          "type": "movie",
+          "year": "2025"
+        },
+        {
+          "id": "tt0107120",
+          "name": "Hocus Pocus",
+          "type": "movie",
+          "year": "1993"
+        },
+        {
+          "id": "tt27681354",
+          "name": "In the Grey",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt33296751",
+          "name": "Tuner",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt32547691",
+          "name": "Pressure",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt0120791",
+          "name": "Practical Magic",
+          "type": "movie",
+          "year": "1998"
+        },
+        {
+          "id": "tt32588798",
+          "name": "Practical Magic 2",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt31193180",
+          "name": "Sinners",
+          "type": "movie",
+          "year": "2025"
+        },
+        {
+          "id": "tt0048028",
+          "name": "East of Eden",
+          "type": "movie",
+          "year": "1955"
+        },
+        {
+          "id": "tt32565993",
+          "name": "The Sheep Detectives",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt4154796",
+          "name": "Avengers: Endgame",
+          "type": "movie",
+          "year": "2019"
+        },
+        {
+          "id": "tt1341338",
+          "name": "Good Luck, Have Fun, Don't Die",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt8367814",
+          "name": "The Gentlemen",
+          "type": "movie",
+          "year": "2020"
+        },
+        {
+          "id": "tt34385135",
+          "name": "Colony",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt0407887",
+          "name": "The Departed",
+          "type": "movie",
+          "year": "2006"
+        },
+        {
+          "id": "tt37853455",
+          "name": "One Night Only",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt0482571",
+          "name": "The Prestige",
+          "type": "movie",
+          "year": "2006"
+        },
+        {
+          "id": "tt5177120",
+          "name": "The Ministry of Ungentlemanly Warfare",
+          "type": "movie",
+          "year": "2024"
+        },
+        {
+          "id": "tt0327597",
+          "name": "Coraline",
+          "type": "movie",
+          "year": "2009"
+        },
+        {
+          "id": "tt36981462",
+          "name": "Union County",
+          "type": "movie",
+          "year": "2026"
+        },
+        {
+          "id": "tt14230458",
+          "name": "Poor Things",
+          "type": "movie",
+          "year": "2023"
+        },
+        {
+          "id": "tt9620292",
+          "name": "Promising Young Woman",
+          "type": "movie",
+          "year": "2020"
+        },
+        {
+          "id": "tt37281055",
+          "name": "Buddy",
+          "type": "movie",
+          "year": "2026"
+        }
+      ]
+    }
+  ]
+}

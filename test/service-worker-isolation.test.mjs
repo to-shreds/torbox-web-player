@@ -21,7 +21,7 @@ for (const entry of ['sports-player.html', 'buffstreams-opening.html','dos-playe
     const scope = 'https://to-shreds.github.io/torbox-web-player/';
     const handlers = {}, matches = [];
     const self = { registration: { scope }, location: { origin: new URL(scope).origin }, addEventListener: (name, handler) => { handlers[name] = handler; } };
-    const request = { url: scope + entry + '?v=release-1.2.4-recovery.1', method: 'GET', mode: 'navigate' };
+    const request = { url: scope + entry + '?v=release-1.2.5-search.1', method: 'GET', mode: 'navigate' };
     vm.runInNewContext(source, { self, URL, Response, Request: class { constructor(input) { Object.assign(this, input); } }, fetch: async () => { throw new Error('offline'); }, caches: { open: async () => ({ match: async input => { matches.push(input); return cached ? new Response('isolated sports shell') : undefined; } }) } });
     let response;
     handlers.fetch({ request, respondWith: promise => { response = promise; } });
@@ -36,7 +36,7 @@ test('service worker activation preserves other GitHub Pages apps and the legacy
   const source = await readFile(new URL('../public/sw.js', import.meta.url), 'utf8');
   const scope = 'https://to-shreds.github.io/torbox-web-player/';
   const own = 'torbox-player:' + scope + ':';
-  const names = [own + 'old', own + 'release-1.2.4-recovery.1', 'arcade-v1', 'facebatch-assets', 'torbox-player:' + scope + 'key/:old'];
+  const names = [own + 'old', own + 'release-1.2.5-search.1', 'arcade-v1', 'facebatch-assets', 'torbox-player:' + scope + 'key/:old'];
   const deleted = [], handlers = {};
   const self = { registration: { scope }, clients: { claim: async () => {} }, addEventListener: (name, handler) => { handlers[name] = handler; } };
   vm.runInNewContext(source, { self, URL, Request, caches: { keys: async () => names, delete: async name => { deleted.push(name); } } });

@@ -55,19 +55,20 @@ test('metadata follows the exact Cinemeta live redirect but still rejects other 
   await assert.rejects(blocked.meta('movie',ID),error=>error.code==='CATALOG_UNAVAILABLE'&&error.message==='The catalog target was not trusted.');
 });
 
-test('server search rejects query-ignoring results and uses the prefixed Cinemeta route',async()=>{
+test('server search rejects query-ignoring results and uses catalog-backed suggestions',async()=>{
   const junk=[{imdb_id:'tt13210838',type:'series',name:'The Gentlemen'},{imdb_id:'tt14688458',type:'series',name:'Silo'}];
   const seen=[];
   const c=new Catalog({fetchFn:async url=>{
     const value=String(url);seen.push(value);
     if(value==='https://v3-cinemeta.strem.io/catalog/series/top/search=Elena%20of%20Avalor.json')return ok({metas:junk});
-    if(value==='https://cinemeta-catalogs.strem.io/top/catalog/series/top/search=Elena%20of%20Avalor.json')return ok({metas:[{imdb_id:'tt4549142',type:'series',name:'Elena of Avalor'}]});
-    if(value.includes('v3.sg.media-imdb.com/suggestion/'))return ok({d:[]});
+    if(value.includes('v3.sg.media-imdb.com/suggestion/'))return ok({d:[{id:'tt4549142',l:'Elena of Avalor',qid:'tvSeries',y:2016}]});
+    if(value==='https://v3-cinemeta.strem.io/meta/series/tt4549142.json')return ok({meta:{id:'tt4549142',type:'series',name:'Elena of Avalor'}});
     throw new Error('unexpected '+value);
   }});
   const result=await c.search({type:'series',q:'Elena of Avalor'});
   assert.deepEqual(result.metas.map(row=>row.name),['Elena of Avalor']);
-  assert.ok(seen.some(value=>value.includes('cinemeta-catalogs.strem.io')));
+  assert.ok(!seen.some(value=>value.includes('cinemeta-catalogs.strem.io')));
+  assert.ok(seen.some(value=>value.includes('v3.sg.media-imdb.com/suggestion/')));
 });
 
 test('server cross-type search returns movies and shows from one request',async()=>{

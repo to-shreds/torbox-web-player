@@ -1,4 +1,4 @@
-import {normalizePartySnapshot,createPartyClock,partyDriftCorrection,partyUpdateIsNewer} from './watch-party-core.js?v=release-1.2.4-recovery.1';
+import {normalizePartySnapshot,createPartyClock,partyDriftCorrection,partyUpdateIsNewer} from './watch-party-core.js?v=release-1.2.5-search.1';
 
 const $=id=>document.getElementById(id);
 const TOKEN=/^[A-Za-z0-9_-]{43}$/;

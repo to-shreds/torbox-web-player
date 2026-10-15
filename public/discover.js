@@ -1,10 +1,10 @@
-import { LatestPlaybackAction, PlaybackPreparationCache } from './playback-lifecycle.js?v=release-1.2.4-recovery.1';
-import { loadPublicSources, browserContainerHints } from './source-client.js?v=release-1.2.4-recovery.1';
-import { getSettings, updateSettings } from './settings.js?v=release-1.2.4-recovery.1';
-import { listRecent, formatResumeTime } from './history.js?v=release-1.2.4-recovery.1';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=release-1.2.4-recovery.1';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=release-1.2.4-recovery.1';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=release-1.2.4-recovery.1';
+import { LatestPlaybackAction, PlaybackPreparationCache } from './playback-lifecycle.js?v=release-1.2.5-search.1';
+import { loadPublicSources, browserContainerHints } from './source-client.js?v=release-1.2.5-search.1';
+import { getSettings, updateSettings } from './settings.js?v=release-1.2.5-search.1';
+import { listRecent, formatResumeTime } from './history.js?v=release-1.2.5-search.1';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=release-1.2.5-search.1';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=release-1.2.5-search.1';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=release-1.2.5-search.1';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
@@ -749,7 +749,11 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   $('catalog-more').addEventListener('click',()=>browse(true));$('catalog-retry').addEventListener('click',()=>browse());
   $('search').addEventListener('input',()=>{
     clearTimeout(searchTimer);applySearchMode();renderSearchHistory();if(guestMode)return;++catalogGeneration;catalogAbort?.abort();
+    // The caption already reflects the new query. Retire the previous cards
+    // and pagination immediately, including during the debounce interval.
+    metas=[];nextSkip=null;$('catalog-grid').replaceChildren();$('catalog-more').hidden=true;$('catalog-more').disabled=true;$('catalog-retry').hidden=true;
     if(!$('search').value.trim()){browse();return;}
+    message('catalog-message','Searching…');
     searchTimer=setTimeout(()=>browse(),350);
   });
   $('search').addEventListener('keydown',event=>{
