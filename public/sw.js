@@ -1,6 +1,6 @@
 const CACHE_PREFIX='torbox-player:'+self.registration.scope+':';
-const CACHE=CACHE_PREFIX+'release-1.2.2-games.4';
-const BUILD='release-1.2.2-games.4';
+const CACHE=CACHE_PREFIX+'release-1.2.3-party.1';
+const BUILD='release-1.2.3-party.1';
 const SHELL=[
   './','./index.html',
   `./style.css?v=${BUILD}`,`./discover.css?v=${BUILD}`,`./boot.js?v=${BUILD}`,`./app.js?v=${BUILD}`,
@@ -12,6 +12,7 @@ const SHELL=[
   `./games-nav.js?v=${BUILD}`,`./games.js?v=${BUILD}`,`./games-core.js?v=${BUILD}`,`./games.css?v=${BUILD}`,`./games-catalog.json?v=${BUILD}`,
   `./games-pointer.js?v=${BUILD}`,
   `./games-cheats.js?v=${BUILD}`,
+  `./watch-party.js?v=${BUILD}`,`./watch-party-core.js?v=${BUILD}`,`./watch-party.css?v=${BUILD}`,
   `./extra-games.js?v=${BUILD}`,`./extra-games-core.js?v=${BUILD}`,`./extra-games-catalog.json?v=${BUILD}`,
   `./dos-player.html?v=${BUILD}`,`./dos-player.js?v=${BUILD}`,`./dos-player.css?v=${BUILD}`,
   `./games-web/skifree/index.html?v=${BUILD}`,`./games-web/skifree/game.js?v=${BUILD}`,`./games-web/skifree/style.css?v=${BUILD}`,

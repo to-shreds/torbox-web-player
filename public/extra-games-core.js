@@ -1,7 +1,8 @@
-export const EXTRA_GAMES_BUILD = 'release-1.2.2-games.4';
+export const EXTRA_GAMES_BUILD = 'release-1.2.3-party.1';
 const ID = /^[a-z][a-z0-9_-]{0,79}$/;
 const BUNDLE = /^games-data\/[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}\.jsdos$/;
 const PAGE = /^games-web\/[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}\/index\.html$/;
+export const MINDMAZE_URL = 'https://gorjan.rocks/projects/mindmaze/';
 
 function text(value, maximum) { return typeof value === 'string' && value.trim() && value.length <= maximum ? value.trim() : null; }
 function sourceLink(value) {
@@ -16,8 +17,9 @@ export function cleanExtraGamesCatalog(raw) {
     if (!row || !ID.test(row.id || '') || seen.has(row.id) || !['dos','web'].includes(row.platform)) continue;
     const title = text(row.title,160), controls = text(row.controls,700), license = text(row.license,200), source = sourceLink(row.source);
     if (!title || !controls || !license || !source || !Array.isArray(row.keys) || row.keys.length > 16) continue;
+    const hosted = row.id === 'mindmaze-encarta' && row.platform === 'web' && row.hosted === MINDMAZE_URL && row.page === undefined && row.bundle === undefined && row.keys.length === 0 && source === MINDMAZE_URL;
     const path = row.platform === 'dos' ? row.bundle : row.page;
-    if (typeof path !== 'string' || !(row.platform === 'dos' ? BUNDLE : PAGE).test(path)) continue;
+    if (!hosted && (row.hosted !== undefined || typeof path !== 'string' || !(row.platform === 'dos' ? BUNDLE : PAGE).test(path))) continue;
     const codes = new Set(), keys = []; let invalidKey = false;
     for (const key of row.keys) {
       const label = text(key?.label,32);
@@ -26,7 +28,7 @@ export function cleanExtraGamesCatalog(raw) {
     }
     if (invalidKey) continue;
     seen.add(row.id);
-    items.push({id:row.id,title,platform:row.platform,...(row.platform === 'dos' ? {bundle:path} : {page:path}),controls,keys,license,source});
+    items.push({id:row.id,title,platform:row.platform,...(hosted ? {hosted:MINDMAZE_URL} : row.platform === 'dos' ? {bundle:path} : {page:path}),controls,keys,license,source});
   }
   return {version:1,items:items.sort((a,b) => a.title.localeCompare(b.title,undefined,{sensitivity:'base'}) || a.id.localeCompare(b.id))};
 }
@@ -34,6 +36,7 @@ export function cleanExtraGamesCatalog(raw) {
 export function extraPlayerUrl(item, build = EXTRA_GAMES_BUILD) {
   const valid = cleanExtraGamesCatalog({version:1,items:[item]}).items[0];
   if (!valid || typeof build !== 'string' || !/^[a-zA-Z0-9._-]{1,100}$/.test(build)) throw new Error('This extra game cannot open.');
+  if (valid.hosted) return MINDMAZE_URL;
   return valid.platform === 'dos' ? `./dos-player.html?game=${encodeURIComponent(valid.id)}&v=${build}` : `./${valid.page}?v=${build}`;
 }
 export function extraKeyCommand(key, pressed) {

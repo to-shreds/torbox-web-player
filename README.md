@@ -2,13 +2,17 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.2**, frontend build **release-1.2.2-games.4**
+Current version: **1.2.3**, frontend build **release-1.2.3-party.1**
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/` (legacy mirror: `/key/`)
 
 Backend: `https://torbox-web-player-key.onrender.com`
+
+## Watch party
+
+While playing a movie or episode, choose **Watch party → Create party for this video**, then copy the invitation. The other person connects TorBox on their own device and joins with the link or code. Joining loads the exact same cached file. Both viewers can play, pause and seek; buffering holds playback until both are ready. Tap **Ready to watch** if the browser asks. Video streams directly to each device, with only small control messages using the existing free Render service. No extra account or paid service is required. Parties last up to six hours and end when the host leaves or the service restarts. Source switching and auto-next are held during a party. This feature applies to the movie/episode player. [Details and limits](docs/watch-party.md).
 
 ## Playback startup patch
 
@@ -17,6 +21,8 @@ Title details now prepare cached movie/episode files before Play, reuse the comp
 ## Games
 
 Open **GAMES** in the top navigation, or use `#games` in the app URL. NES games run directly in your browser without a TorBox login, backend request, or extra service. The catalog is alphabetical and searchable. Open a local uncompressed `.nes` file, or choose a game added to the repository's `public/roms/` folder and `public/games-catalog.json`. The menu currently includes the user-supplied Super Mario Bros. / Duck Hunt cartridge, Super Mario Bros. 3, and Teenage Mutant Ninja Turtles II: The Arcade Game. Catalog entries and safe file naming are described in [the ROM folder README](public/roms/README.md).
+
+The menu also includes **MindMaze (Encarta browser recreation)** through its creator-hosted page. Embedded play uses Tourist without saved profiles; **Open full page** supports the creator's profiles. This is not a bundled Windows executable, and the repository does not redistribute Encarta artwork, audio or questions. [MindMaze details](docs/mindmaze.md).
 
 The same menu also includes **DOS Defender** (Unlicense/public-domain release), **Master Mind (1999)** (the creator's complete-game CC0 release), **Zmiy Snake** (BSD-2-Clause), and **SkiFree (browser remake)** (MIT). Use the All games / NES / DOS / Browser filter to browse platforms. DOS games run in a self-hosted, pinned DOSBox worker and support their own keyboard/mouse controls, including touch pointer input. The ski game uses a separately licensed canvas remake with freshly drawn graphics; the original Windows SkiFree executable is not included. Each extra player exposes Controls & credits, pause/resume, restart and fullscreen. Closing/restarting a DOS game begins a new session; DOS games do not have the NES save-state system. The ski remake keeps local high scores per viewer and has no audio.
 

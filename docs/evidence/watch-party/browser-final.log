@@ -1,0 +1,45 @@
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ watch party joins the exact file through each account and keeps credentials out of party JSON (3518.17674ms)
+ℹ Real-video drift on coordinated start: 0.119s; independent account-local IDs and direct CDN tickets confirmed.
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ either participant pauses, seeks and resumes both independent video elements at the same time (11692.295736ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ a different full file path cannot silently join as the same cut (913.144632ms)
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ closing playback leaves the party and cannot reopen a stopped player (5872.564787ms)
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ a delayed real media load holds the ready viewer until both videos can start (4485.51771ms)
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ a player buffering report pauses the party and recovery starts both videos together (6058.942191ms)
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ a lost control connection pauses locally and at the peer, then reconnects to the shared timeline (18110.289469ms)
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ changing the viewer detaches its party before a stale heartbeat can affect another viewer (4982.782808ms)
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ Kid Mode enabled in another tab leaves the adult party and keeps further controls unavailable (4300.117248ms)
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ the host leaving ends the invitation and cleanly detaches the other player (3980.574593ms)
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ immediate native pause survives coordinated start and a drift-correction rate change (9472.30948ms)
+ℹ Native pause after coordinated start: 50ms; after 1.045x correction: 11ms. Both remained paused.
+{"event":"media_redirect_issued","ranged":true}
+{"event":"media_redirect_issued","ranged":true}
+✔ Ready to watch unlocks a real video after an autoplay refusal and preserves coordinated startup (5232.13452ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 79093.319412

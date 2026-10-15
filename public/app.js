@@ -1,16 +1,17 @@
-import { createDiscoveryUI, bindArtworkImage } from './discover.js?v=release-1.2.2-games.4';
-import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.2-games.4';
-import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.2-games.4';
-import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.2-games.4';
-import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.2-games.4';
-import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.2-games.4';
-import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.2-games.4';
-import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=release-1.2.2-games.4';
-import { clearSearchHistory } from './search-history.js?v=release-1.2.2-games.4';
-import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.2-games.4';
+import {createWatchParty} from './watch-party.js?v=release-1.2.3-party.1';
+import { createDiscoveryUI, bindArtworkImage } from './discover.js?v=release-1.2.3-party.1';
+import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.3-party.1';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.3-party.1';
+import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.3-party.1';
+import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.3-party.1';
+import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.3-party.1';
+import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.3-party.1';
+import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory } from './source-memory.js?v=release-1.2.3-party.1';
+import { clearSearchHistory } from './search-history.js?v=release-1.2.3-party.1';
+import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.3-party.1';
 const $ = id => document.getElementById(id);
 let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null, fullscreenExitControlTimer = null;
-let discoveryUI;
+let discoveryUI, watchParty=null;
 let activeSetupTransferLink='';
 let sessionRecovery=null, statusCheckPromise=null, playbackRequestAbort=null;
 const INITIAL_MEDIA_TIMEOUT_MS=25000;
@@ -498,7 +499,7 @@ function effectiveCreditsLead(duration,configured){
   if(!Number.isFinite(d)||d<=0||!Number.isFinite(lead)||lead<=0)return 0;
   return Math.min(lead,Math.max(5,d*.08));
 }
-function queuedNext(context){return context?.playbackContext?.queue?.[0]||null;}
+function queuedNext(context){if(watchParty?.isActive())return null;return context?.playbackContext?.queue?.[0]||null;}
 function markPlaybackCompleted(context,durationOverride=null){
   if(!context||context.completedRecorded||!context.playbackContext)return;
   const duration=Number.isFinite(durationOverride)&&durationOverride>0?durationOverride:Number.isFinite(context.video?.duration)&&context.video.duration>0?context.video.duration:Number(context.video?.currentTime)||0;
@@ -548,7 +549,7 @@ async function openNextEpisode(context,{fromEnded=false}={}){
   let moved=false;
   try{
     const prepared=context.nextPrepared||await ensureNextPrepared(context);
-    if(active!==context||generation!==playGeneration)return false;
+    if(active!==context||generation!==playGeneration||watchParty?.isActive())return false;
     moved=prepared?await discoveryUI.playPreparedNext(prepared):await discoveryUI.playNext(context.playbackContext);
   }catch{}
   if(moved){markPlaybackCompleted(context,completionDuration);return true;}
@@ -684,9 +685,10 @@ async function detachPlayback({preserveVideo=false}={}) {
   if(!preserveVideo){old.video.removeAttribute('src');old.video.load();old.video.remove();}
   return preserveVideo?(old.video||$('video-slot').querySelector('video')):null;
 }
-async function stopPlayback() { const generation=++playGeneration,context=active; playbackRequestAbort?.abort(); abortNextPreparation(context); context?.eventAbort?.abort(); context?.video?.pause(); discoveryUI?.cancelPlayback(); hideResumeOverlay(); clearStillWatchingTimer(); hideStillWatchingPrompt(); await exitPlayerPresentationModes(); if(generation!==playGeneration||active!==context)return; await detachPlayback(); }
+async function stopPlayback() { if(watchParty)void watchParty.leave({quiet:true}); const generation=++playGeneration,context=active; playbackRequestAbort?.abort(); abortNextPreparation(context); context?.eventAbort?.abort(); context?.video?.pause(); discoveryUI?.cancelPlayback(); hideResumeOverlay(); clearStillWatchingTimer(); hideStillWatchingPrompt(); await exitPlayerPresentationModes(); if(generation!==playGeneration||active!==context)return; await detachPlayback(); }
 async function startPlayback(file, playbackContext = null) {
   if(document.body.classList.contains('games-active'))return false;
+  watchParty?.beforePlayback(playbackContext);
   window.dispatchEvent(new CustomEvent('cinema-playback-start'));
   if(document.fullscreenElement===playerMediaShell()||document.fullscreenElement===active?.video){fullscreenIntent=true;fullscreenRestoreDeadline=Date.now()+6000;}
   if(!guestMode){
@@ -707,13 +709,14 @@ async function startPlayback(file, playbackContext = null) {
     const video = reusableVideo || document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.playbackRate=getSettings().playbackRate;
     try{video.controlsList.remove('nofullscreen');}catch{}
     try{video.disablePictureInPicture=false;}catch{}
-    const context = { file, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, startupTimer:null, sourceLearned:false, lastTime:0, nextPromptActive:false, nextCountdownStart:null, nextWatchCredits:false, nextTransitionStarted:false, nextEnded:false, nextWarmAttempted:false, nextPrepareAbort:null, nextPreparePromise:null, nextPrepared:null, nextPrepareError:'', completedRecorded:false, eventAbort:new AbortController() };
-    active = context;if(video.parentElement!==$('video-slot'))$('video-slot').replaceChildren(video);setHealthSource(context);updatePlayerModeActions();
+    const context = { file, mediaIdentity:result.mediaIdentity, playbackProof:result.playbackProof, viewer:selectedViewer, leaseId:result.leaseId, seq:0, video, mediaUrl:mediaUrl(result.mediaUrl), playbackContext, diagnosing:false, recovering:false, ready:false, started:false, timer:null, kidTimer:null, kidLastAt:0, kidLastPosition:0, bufferTimer:null, sleepTimer:null, healthyTimer:null, startupTimer:null, sourceLearned:false, lastTime:0, nextPromptActive:false, nextCountdownStart:null, nextWatchCredits:false, nextTransitionStarted:false, nextEnded:false, nextWarmAttempted:false, nextPrepareAbort:null, nextPreparePromise:null, nextPrepared:null, nextPrepareError:'', completedRecorded:false, eventAbort:new AbortController() };
+    active = context;watchParty?.onPlayback(context);if(video.parentElement!==$('video-slot'))$('video-slot').replaceChildren(video);setHealthSource(context);updatePlayerModeActions();
     const listen=(name,handler)=>video.addEventListener(name,handler,{signal:context.eventAbort.signal});
     const clearBuffer = () => { clearTimeout(context.bufferTimer); context.bufferTimer = null; };
     const recover = async (reason, diagnosis = null) => {
       if (active !== context || context.recovering || video.ended || (reason === 'buffer' && (!context.started || video.paused))) return;
       if (!getSettings().autoRecovery) { hideResumeOverlay(); setPlaybackHealth(reason==='buffer'?'Buffering':'Playback problem','Automatic recovery is off.'); text('player-message', reason === 'buffer' ? 'Playback is buffering. Automatic recovery is off in Settings.' : (diagnosis?.message||'Playback failed. Automatic recovery is off in Settings.'), true); return; }
+      if(watchParty?.isActive()){video.pause();clearBuffer();hideResumeOverlay();text('player-message','Watch party paused. Leave the party before choosing a different source.',true);return;}
       context.recovering = true; clearBuffer();clearTimeout(context.startupTimer);clearTimeout(context.healthyTimer); hidePauseCard(); void saveProgress(context); video.pause();
       setPlaybackHealth('Recovering',reason==='buffer'?'Switching to a lower-resolution source…':'Finding another source…');
       text('player-message', reason === 'buffer' ? 'Buffering · trying another source (maximum 3 total)…' : 'Stream failed · trying another source (maximum 3 total)…');
@@ -739,6 +742,7 @@ async function startPlayback(file, playbackContext = null) {
       text('player-message', position > 0 ? `Resuming ${formatResumeTime(position)}` : '');
       if(playbackContext?.resumeIntent)updateResumeOverlay('Resuming at '+formatResumeTime(position)+'…','Your saved position is loaded. Starting playback now.');
       else if(playbackContext?.startOverIntent)updateResumeOverlay('Starting from the beginning…','The video is ready. Starting playback now.');
+      if(watchParty?.mediaReady(context))return;
       video.play().catch(error => { if (active === context && error.name === 'NotAllowedError') {clearTimeout(context.startupTimer);hideResumeOverlay();text('player-message', 'Tap play');} });
     });
     listen('playing', () => { if (active === context) {
@@ -780,6 +784,7 @@ $('watch-credits').addEventListener('click',()=>{
   text('player-message','Watching credits · the next episode will start when this one ends.');
 });
 async function rejectCurrentSource(kind){
+  if(watchParty?.isActive()){text('player-message','Leave the watch party before changing sources.',true);return;}
   const context=active,playback=context?.playbackContext,source=playback?.sourceInfo;if(!context||!playback?.current||!source)return;
   const generation=playGeneration;
   if(kind==='audio')setAudioFeedback(playback.current,source,'bad');else setSourceBad(playback.current,source,true);
@@ -1057,6 +1062,8 @@ $('settings-clear-searches').addEventListener('click',()=>{if(confirm('Clear sea
 $('settings-install-app').addEventListener('click',async()=>{if(!deferredInstallPrompt){text('settings-message',window.matchMedia?.('(display-mode: standalone)').matches?'The app is already installed.':'Use Chrome’s Add to Home screen / Install app command if the install prompt is not available.');return;}const prompt=deferredInstallPrompt;deferredInstallPrompt=null;await prompt.prompt();await prompt.userChoice.catch(()=>{});updateInstallButton();});
 $('settings-check-status').addEventListener('click',async()=>{text('settings-message','Checking TorBox…');const ok=await checkTorBoxStatus(true);text('settings-message',ok?(torboxStatusCache?.official==='issue'?'TorBox API is reachable, but its status page reports an issue.':'TorBox API is reachable.'):(torboxStatusCache?.message||'TorBox is unavailable.'),!ok);});
 $('retry-torbox-status').addEventListener('click',()=>checkTorBoxStatus(true));
+watchParty=createWatchParty({api,getPlayback:()=>active,playFile:startPlayback,isAllowed:()=>!guestMode&&!kidEnabled(),isSignedIn:()=>!!sessionToken&&!$('workspace').hidden,getViewer:()=>viewer});
+window.addEventListener('watch-party-start',()=>{resetNextEpisodeState(active,{abortPreparation:true});});
 discoveryUI = createDiscoveryUI({ api, play: startPlayback, guard: ensureTorBoxReady, resumeActivity:{ show:showResumeOverlay, update:updateResumeOverlay, hide:hideResumeOverlay } });
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 window.addEventListener('sports-playback-start',()=>{void stopPlayback();if($('player').open)$('player').close();});

@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {cleanExtraGamesCatalog, extraPlayerUrl, extraKeyCommand, readExtraStatus} from '../public/extra-games-core.js';
+import {cleanExtraGamesCatalog, extraPlayerUrl, extraKeyCommand, readExtraStatus, MINDMAZE_URL} from '../public/extra-games-core.js';
 
 const dos = {id:'original-dos',title:'Original DOS Game',platform:'dos',bundle:'games-data/original-dos.jsdos',controls:'Use arrow keys.',keys:[{label:'Up',code:265}],license:'MIT',source:'https://example.org/source'};
 const web = {id:'original-web',title:'Alpha browser game',platform:'web',page:'games-web/original-web/index.html',controls:'Use arrow keys.',keys:[{label:'Left',code:37}],license:'MIT',source:'https://example.org/source'};
+const hosted = {id:'mindmaze-encarta',title:'MindMaze (Encarta browser recreation)',platform:'web',hosted:MINDMAZE_URL,controls:'Use the game controls.',keys:[],license:'Author-hosted recreation',source:MINDMAZE_URL};
 
 test('extra game catalog supports DOS and browser data while preserving trusted fields and order',() => {
   const clean = cleanExtraGamesCatalog({version:1,items:[{...dos,extra:'ignored'},web,dos]});
@@ -23,10 +24,23 @@ test('extra metadata and touch keys are bounded and invalid rows do not break ot
   for (const row of invalid) assert.deepEqual(cleanExtraGamesCatalog({version:1,items:[row,web]}).items,[web]);
 });
 test('launch URLs stay relative and identify only the selected self-hosted game',() => {
-  assert.equal(extraPlayerUrl(dos),'./dos-player.html?game=original-dos&v=release-1.2.2-games.4');
-  assert.equal(extraPlayerUrl(web),'./games-web/original-web/index.html?v=release-1.2.2-games.4');
+  assert.equal(extraPlayerUrl(dos),'./dos-player.html?game=original-dos&v=release-1.2.3-party.1');
+  assert.equal(extraPlayerUrl(web),'./games-web/original-web/index.html?v=release-1.2.3-party.1');
   assert.throws(() => extraPlayerUrl({...web,page:'api/session'}));
   assert.throws(() => extraPlayerUrl(dos,'../../../secret'));
+});
+test('only the pinned author-hosted MindMaze entry permits an external launch',() => {
+  assert.deepEqual(cleanExtraGamesCatalog({version:1,items:[hosted]}).items,[hosted]);
+  assert.equal(extraPlayerUrl(hosted),MINDMAZE_URL);
+  const invalid = [
+    {...hosted,id:'other-external-game'}, {...hosted,platform:'dos'}, {...hosted,source:'https://example.org/'},
+    {...hosted,page:'games-web/mindmaze/index.html'}, {...hosted,bundle:'games-data/mindmaze.jsdos'}, {...hosted,keys:[{label:'Left',code:37}]}
+  ];
+  for (const url of ['http://gorjan.rocks/projects/mindmaze/','https://gorjan.rocks.evil.example/projects/mindmaze/','https://gorjan.rocks/projects/mindmaze/?x=1','https://gorjan.rocks/projects/mindmaze/#x','https://gorjan.rocks/projects/mindmaze','https://user:pass@gorjan.rocks/projects/mindmaze/','https://gorjan.rocks:443/projects/mindmaze/','//gorjan.rocks/projects/mindmaze/']) invalid.push({...hosted,hosted:url});
+  for (const row of invalid) {
+    assert.equal(cleanExtraGamesCatalog({version:1,items:[row]}).items.length,0);
+    assert.throws(()=>extraPlayerUrl(row));
+  }
 });
 test('numeric key commands preserve native DOM or DOS GLFW values and release explicitly',() => {
   assert.deepEqual(extraKeyCommand(265,true),{type:'torbox-extra-command',command:'key',key:265,pressed:true});
@@ -45,7 +59,7 @@ test('child statuses require the active WindowProxy and exact origin with bounde
 test('catalog runtime paths are valid and extra games do not depend on TorBox APIs',async () => {
   const raw = JSON.parse(await readFile(new URL('../public/extra-games-catalog.json',import.meta.url),'utf8'));
   const clean = cleanExtraGamesCatalog(raw); assert.equal(clean.items.length,raw.items.length);
-  for (const item of clean.items) { assert.ok(extraPlayerUrl(item).startsWith('./')); assert.ok(item.license && item.source); }
+  for (const item of clean.items) { assert.ok(extraPlayerUrl(item).startsWith('./') || (item.id === hosted.id && extraPlayerUrl(item) === MINDMAZE_URL)); assert.ok(item.license && item.source); }
   const source = await readFile(new URL('../public/extra-games.js',import.meta.url),'utf8');
   assert.ok(!source.includes('/api/')); assert.ok(!source.includes('onrender.com'));
   assert.ok(source.includes('games-playback-start')); assert.ok(source.includes('document.hasFocus()'));

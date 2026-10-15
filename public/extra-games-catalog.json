@@ -2,6 +2,16 @@
   "version": 1,
   "items": [
     {
+      "id": "mindmaze-encarta",
+      "title": "MindMaze (Encarta browser recreation)",
+      "platform": "web",
+      "hosted": "https://gorjan.rocks/projects/mindmaze/",
+      "controls": "An author-hosted recreation of Encarta 98's MindMaze. Use the game's mouse or touch controls to explore rooms and answer questions. Embedded play uses Tourist mode without saved names or progress. Open full page for the creator's player profiles. Closing or leaving ends this session.",
+      "keys": [],
+      "license": "Hosted by its creator; Encarta assets are not copied into this project",
+      "source": "https://gorjan.rocks/projects/mindmaze/"
+    },
+    {
       "id": "dosdefender",
       "title": "DOS Defender",
       "platform": "dos",

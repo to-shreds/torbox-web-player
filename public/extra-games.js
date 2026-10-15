@@ -1,8 +1,11 @@
-import {extraPlayerUrl, extraKeyCommand, readExtraStatus} from './extra-games-core.js?v=release-1.2.2-games.4';
-import {getKidProfile} from './parental-controls.js?v=release-1.2.2-games.4';
+import {extraPlayerUrl, extraKeyCommand, readExtraStatus} from './extra-games-core.js?v=release-1.2.3-party.1';
+import {getKidProfile} from './parental-controls.js?v=release-1.2.3-party.1';
 
 const $ = id => document.getElementById(id);
 const dialog = $('extra-game-player');
+const hostedLink = document.createElement('a');
+hostedLink.id = 'extra-game-hosted-link'; hostedLink.textContent = 'Open full page'; hostedLink.target = '_blank'; hostedLink.rel = 'noopener noreferrer'; hostedLink.referrerPolicy = 'no-referrer'; hostedLink.hidden = true;
+$('extra-game-fullscreen').after(hostedLink);
 let frame = $('extra-game-frame');
 let selection = null, tabOpen = false, generation = 0, deadline = null, viewerTimer = null, muted = false, muteSent = null;
 let pauseIntent = false, pauseSent = false;
@@ -14,6 +17,7 @@ function viewer() {
 }
 function adult() { return !getKidProfile(viewer()).enabled; }
 function permitted() { return tabOpen && adult() && selection?.viewer === viewer(); }
+function hostedGame() { return !!selection?.item.hosted; }
 function state(value, message) {
   dialog.dataset.state = value;
   if (message !== undefined) $('extra-game-message').textContent = message;
@@ -23,7 +27,7 @@ function state(value, message) {
   $('extra-game-mute').disabled = !['playing','paused'].includes(value);
 }
 function post(command, fields = {}) {
-  if (selection && frame.contentWindow) frame.contentWindow.postMessage({type:'torbox-extra-command',command,...fields},location.origin);
+  if (selection && !hostedGame() && frame.contentWindow) frame.contentWindow.postMessage({type:'torbox-extra-command',command,...fields},location.origin);
 }
 function muteChild() {
   if (!selection || !frame.contentWindow || (muteSent?.target === frame.contentWindow && muteSent.muted === muted)) return;
@@ -53,6 +57,10 @@ function checkViewer() {
 }
 export function pauseExtraGame() {
   if (!selection) return;
+  if (hostedGame()) {
+    closeExtraGame(); $('games-message').textContent = 'MindMaze closed when you left the game. Reopen it to play again; progress may restart.';
+    return;
+  }
   pauseIntent = true; pauseSent = dialog.dataset.state !== 'loading';
   releaseKeys(); post('pause');
   if (dialog.dataset.state !== 'error' && dialog.dataset.state !== 'loading') state('paused','Paused. Press Resume to continue.');
@@ -60,6 +68,7 @@ export function pauseExtraGame() {
 export function closeExtraGame() {
   releaseKeys(); post('close'); generation++; clearTimeout(deadline); clearInterval(viewerTimer); deadline = null; viewerTimer = null;
   selection = null; frame.removeAttribute('src');
+  hostedLink.removeAttribute('href'); hostedLink.hidden = true;
   if (dialog.open) dialog.close();
   const ownedFullscreen = extraFullscreenOwned;
   extraFullscreenOwned = false; document.body.classList.remove('extra-game-fullscreen');
@@ -87,10 +96,17 @@ function mount(item) {
   pauseSent = false;
   muteSent = null;
   const nextFrame = document.createElement('iframe'); nextFrame.id = 'extra-game-frame'; nextFrame.title = item.title; nextFrame.allow = 'autoplay; fullscreen'; nextFrame.allowFullscreen = true;
+  if (item.hosted) { nextFrame.setAttribute('sandbox','allow-scripts'); nextFrame.referrerPolicy = 'no-referrer'; }
   frame.replaceWith(nextFrame); frame = nextFrame;
-  frame.addEventListener('error',() => { if (current === generation) fail('The game could not open. Choose Restart to try again.'); });
+  frame.addEventListener('error',() => { if (current === generation) fail(item.hosted ? 'The hosted game could not open. Try Open full page.' : 'The game could not open. Choose Restart to try again.'); });
+  if (item.hosted) frame.addEventListener('load',() => {
+    if (current !== generation || !selection || !dialog.open) return;
+    if (!permitted() || document.hidden) { closeExtraGame(); return; }
+    clearTimeout(deadline); deadline = null;
+    state('hosted','Author-hosted Encarta recreation. Guest play does not save names or progress here. Choose Tourist to play, or Open full page for player profiles. Closing or leaving ends this session.');
+  });
   frame.src = extraPlayerUrl(item);
-  clearTimeout(deadline); deadline = setTimeout(() => { if (current === generation && dialog.dataset.state === 'loading') fail('The game did not open in time. Choose Restart to try again.'); },25000);
+  clearTimeout(deadline); deadline = setTimeout(() => { if (current === generation && dialog.dataset.state === 'loading') fail(item.hosted ? 'The hosted game is taking too long to open. Try Open full page.' : 'The game did not open in time. Choose Restart to try again.'); },25000);
 }
 function fail(message) {
   clearTimeout(deadline); deadline = null; releaseKeys(); post('pause'); state('error',message);
@@ -103,6 +119,10 @@ export function playExtraGame(item) {
   $('extra-game-title').textContent = item.title; $('extra-game-platform').textContent = item.platform === 'dos' ? 'DOS' : 'BROWSER';
   $('extra-game-controls').textContent = item.controls; $('extra-game-license').textContent = item.license;
   $('extra-game-source').href = item.source;
+  $('extra-game-source').textContent = item.hosted ? 'Recreation by Gorjan' : 'Source & license';
+  for (const id of ['extra-game-pause','extra-game-restart','extra-game-mute']) $(id).hidden = !!item.hosted;
+  hostedLink.hidden = !item.hosted;
+  if (item.hosted) hostedLink.href = url;
   $('extra-game-mute').textContent = muted ? 'Unmute' : 'Mute'; $('extra-game-mute').setAttribute('aria-pressed',String(muted));
   renderKeys(item); state('loading','Opening game…'); dialog.dataset.frames = '0';
   if (!dialog.open) dialog.showModal();
@@ -110,7 +130,7 @@ export function playExtraGame(item) {
   mount(item); viewerTimer = setInterval(checkViewer,1000);
 }
 window.addEventListener('message',event => {
-  if (!selection || !dialog.open) return;
+  if (!selection || hostedGame() || !dialog.open) return;
   const message = readExtraStatus(event,frame.contentWindow,location.origin);
   if (!message || !checkViewer()) return;
   if (dialog.dataset.state === 'error' && message.state !== 'error') return;
@@ -126,22 +146,23 @@ window.addEventListener('message',event => {
   if (message.state === 'playing' || message.state === 'paused') muteChild();
 });
 function resumeExtraGame() {
-  if (!checkViewer()) return;
+  if (!checkViewer() || hostedGame()) return;
   pauseIntent = false; pauseSent = false;
   frame.focus(); post('resume');
 }
 function restartExtraGame() {
-  if (!checkViewer()) return;
+  if (!checkViewer() || hostedGame()) return;
   const item = selection.item;
   releaseKeys(); post('close'); generation++;
   state('loading','Restarting game…'); dialog.dataset.frames = '0'; mount(item);
 }
+hostedLink.addEventListener('click',event => { if (!checkViewer() || !hostedGame()) event.preventDefault(); });
 $('close-extra-game-player').addEventListener('click',closeExtraGame);
 dialog.addEventListener('cancel',event => { event.preventDefault(); closeExtraGame(); });
 $('extra-game-pause').addEventListener('click',() => { if (!checkViewer()) return; if (dialog.dataset.state === 'playing') pauseExtraGame(); else resumeExtraGame(); });
 $('extra-game-restart').addEventListener('click',restartExtraGame);
 $('extra-game-mute').addEventListener('click',() => {
-  if (!checkViewer()) return;
+  if (!checkViewer() || hostedGame()) return;
   muted = !muted; $('extra-game-mute').textContent = muted ? 'Unmute' : 'Mute'; $('extra-game-mute').setAttribute('aria-pressed',String(muted)); muteChild();
 });
 $('extra-game-fullscreen').addEventListener('click',() => {

@@ -1,0 +1,2 @@
+✔ immediate native pause survives coordinated start and a drift-correction rate change (9472.30948ms)
+ℹ Native pause after coordinated start: 50ms; after 1.045x correction: 11ms. Both remained paused.
