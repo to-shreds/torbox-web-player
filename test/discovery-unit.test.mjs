@@ -34,7 +34,7 @@ test('catalog broad search is encoded and independent of TorBox files', async ()
   const c = new Catalog({ fetchFn: async url => { seen.push(String(url)); return response({ metas: [{ id: ID, type: 'movie', name: 'A & B/?' }] }); } });
   const result = await c.search({ q: 'A & B/?', genre: 'Science Fiction' });
   assert.ok(seen.some(path => path.startsWith('https://v3-cinemeta.strem.io/catalog/movie/top/')));
-  assert.ok(seen.some(path => path.startsWith('https://cinemeta-catalogs.strem.io/top/catalog/movie/top/')));
+  assert.ok(!seen.some(path => path.startsWith('https://cinemeta-catalogs.strem.io/top/catalog/movie/top/')));
   const cinemeta = seen.filter(path => path.includes('cinemeta'));
   assert.ok(cinemeta.every(path => path.includes('search=A%20%26%20B%2F%3F')));
   assert.ok(cinemeta.every(path => path.includes('genre=Science%20Fiction')));

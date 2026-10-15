@@ -1,4 +1,4 @@
-const BUILD='release-1.2.4-recovery.1';
+const BUILD='release-1.2.5-search.1';
 const startedAt=Date.now();
 let startupTimer=null;
 const stageNode=()=>document.querySelector('#startup-stage');

@@ -1,0 +1,255 @@
+{
+  "timestamp": "2026-10-15T17:50:30.569Z",
+  "command": "node docs/evidence/catalog-search/live-check.mjs",
+  "catalogSourceSha256": "99067b0b2f6922af6d73c3ef1552943a69897d83131a812cd315e57e95942e5b",
+  "scope": "Live public catalog search through the actual Catalog class; no authenticated account, media playback or physical-device check.",
+  "required": {
+    "original": "tt0773262",
+    "newBlood": "tt14164730",
+    "resurrection": "tt33043892",
+    "originalSin": "tt32252772"
+  },
+  "queries": [
+    {
+      "query": "Dexte",
+      "elapsedMs": 3367,
+      "count": 15,
+      "retained": {
+        "original": true,
+        "newBlood": true,
+        "resurrection": true,
+        "originalSin": true
+      },
+      "secondarySearchRequests": 0,
+      "requests": [
+        {
+          "url": "https://v3-cinemeta.strem.io/catalog/series/top/search=Dexte.json",
+          "status": 200,
+          "elapsedMs": 3283
+        },
+        {
+          "url": "https://v3-cinemeta.strem.io/catalog/movie/top/search=Dexte.json",
+          "status": 200,
+          "elapsedMs": 3318
+        }
+      ],
+      "results": [
+        {
+          "id": "tt0168313",
+          "name": "Cliff Dexter",
+          "type": "series",
+          "year": "1966–1968"
+        },
+        {
+          "id": "tt0115157",
+          "name": "Dexter's Laboratory",
+          "type": "series",
+          "year": "1996-2003"
+        },
+        {
+          "id": "tt0228214",
+          "name": "Dexter Dickie",
+          "type": "movie",
+          "year": "2000"
+        },
+        {
+          "id": "tt0293092",
+          "name": "Dexter's Laboratory: Ego Trip",
+          "type": "movie",
+          "year": "1999"
+        },
+        {
+          "id": "tt0773262",
+          "name": "Dexter",
+          "type": "series",
+          "year": "2006-2013"
+        },
+        {
+          "id": "tt14164730",
+          "name": "Dexter: New Blood",
+          "type": "series",
+          "year": "2021-2022"
+        },
+        {
+          "id": "tt1470992",
+          "name": "Dexter: Blood Spatter 101",
+          "type": "series",
+          "year": "2006-2007"
+        },
+        {
+          "id": "tt1595870",
+          "name": "Dexter: Early Cuts",
+          "type": "series",
+          "year": "2009-2012"
+        },
+        {
+          "id": "tt32252772",
+          "name": "Dexter: Original Sin",
+          "type": "series",
+          "year": "2024-2025"
+        },
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025-"
+        },
+        {
+          "id": "tt35429558",
+          "name": "Dexter: Final Cut",
+          "type": "series",
+          "year": "2024-"
+        },
+        {
+          "id": "tt35513085",
+          "name": "Dexter's Kill Room",
+          "type": "series",
+          "year": "2024-"
+        },
+        {
+          "id": "tt35518994",
+          "name": "Dexter",
+          "type": "movie",
+          "year": "2025"
+        },
+        {
+          "id": "tt37974449",
+          "name": "Dexter Procter: The 10-Year-Old Doctor",
+          "type": "series",
+          "year": "2025-"
+        },
+        {
+          "id": "tt1842178",
+          "name": "Stupid for Dexter",
+          "type": "series",
+          "year": "2010-2011"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "query": "Dexter",
+      "elapsedMs": 3317,
+      "count": 16,
+      "retained": {
+        "original": true,
+        "newBlood": true,
+        "resurrection": true,
+        "originalSin": true
+      },
+      "secondarySearchRequests": 0,
+      "requests": [
+        {
+          "url": "https://v3-cinemeta.strem.io/catalog/movie/top/search=Dexter.json",
+          "status": 200,
+          "elapsedMs": 3269
+        },
+        {
+          "url": "https://v3-cinemeta.strem.io/catalog/series/top/search=Dexter.json",
+          "status": 200,
+          "elapsedMs": 3300
+        }
+      ],
+      "results": [
+        {
+          "id": "tt0773262",
+          "name": "Dexter",
+          "type": "series",
+          "year": "2006-2013"
+        },
+        {
+          "id": "tt35518994",
+          "name": "Dexter",
+          "type": "movie",
+          "year": "2025"
+        },
+        {
+          "id": "tt0115157",
+          "name": "Dexter's Laboratory",
+          "type": "series",
+          "year": "1996-2003"
+        },
+        {
+          "id": "tt0228214",
+          "name": "Dexter Dickie",
+          "type": "movie",
+          "year": "2000"
+        },
+        {
+          "id": "tt0293092",
+          "name": "Dexter's Laboratory: Ego Trip",
+          "type": "movie",
+          "year": "1999"
+        },
+        {
+          "id": "tt14164730",
+          "name": "Dexter: New Blood",
+          "type": "series",
+          "year": "2021-2022"
+        },
+        {
+          "id": "tt1470992",
+          "name": "Dexter: Blood Spatter 101",
+          "type": "series",
+          "year": "2006-2007"
+        },
+        {
+          "id": "tt1595870",
+          "name": "Dexter: Early Cuts",
+          "type": "series",
+          "year": "2009-2012"
+        },
+        {
+          "id": "tt32252772",
+          "name": "Dexter: Original Sin",
+          "type": "series",
+          "year": "2024-2025"
+        },
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025-"
+        },
+        {
+          "id": "tt35429558",
+          "name": "Dexter: Final Cut",
+          "type": "series",
+          "year": "2024-"
+        },
+        {
+          "id": "tt37974449",
+          "name": "Dexter Procter: The 10-Year-Old Doctor",
+          "type": "series",
+          "year": "2025-"
+        },
+        {
+          "id": "tt0168313",
+          "name": "Cliff Dexter",
+          "type": "series",
+          "year": "1966-1968"
+        },
+        {
+          "id": "tt1842178",
+          "name": "Stupid for Dexter",
+          "type": "series",
+          "year": "2010-2011"
+        },
+        {
+          "id": "tt3338098",
+          "name": "Respect: A Felix Dexter Special",
+          "type": "movie",
+          "year": "2013"
+        },
+        {
+          "id": "tt5466094",
+          "name": "Amby & Dexter",
+          "type": "series",
+          "year": "1997-2003"
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true
+}

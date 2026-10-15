@@ -1,0 +1,35 @@
+{
+  "release": "1.2.5",
+  "frontend": "release-1.2.5-search.1",
+  "baseline": {
+    "runtime": "61b5f292e1a37d2b6ca07a165f2b979aae557806",
+    "tests": 12,
+    "failed": 9,
+    "passed": 3
+  },
+  "localNode": {
+    "registered": 519,
+    "passed": 513,
+    "failed": 0,
+    "skipped": 6,
+    "durationMs": 6807.610661
+  },
+  "localNewBrowser": {
+    "tests": 4,
+    "passed": 4,
+    "failed": 0,
+    "durationMs": 5323.584617
+  },
+  "syntaxAndDiff": "passed",
+  "sourceSha256": {
+    "lib/catalog.mjs": "99067b0b2f6922af6d73c3ef1552943a69897d83131a812cd315e57e95942e5b",
+    "public/discover.js": "b4a105622ac5cb4297d030a8ab7c457c8391c96bd923aa62975f3874eb6bb688",
+    "test/catalog-search-recovery.test.mjs": "e89cb4616ff67a9b39bc4a173ade65967c42019a22f79beaccc870627a6a59b1",
+    "test/browser/catalog-search.mjs": "3950843d16f0abb773760e71d94838623fde063d1b2358525e920ff9e2e924d7"
+  },
+  "limits": [
+    "Browser interactions used local synthetic catalog responses and an authenticated synthetic session.",
+    "Live public search used the real server Catalog class without a TorBox account.",
+    "No real episode or physical Android device was tested."
+  ]
+}

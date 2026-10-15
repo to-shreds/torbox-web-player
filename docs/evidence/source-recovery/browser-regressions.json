@@ -1,0 +1,108 @@
+{
+  "source_commit": "61b5f292e1a37d2b6ca07a165f2b979aae557806",
+  "release_token": "release-1.2.4-recovery.1",
+  "command": "CHROME_EXECUTABLE=/tmp/chromium SOURCE_RECOVERY_EVIDENCE_DIR=/tmp/torbox-source-recovery-evidence node --test --test-concurrency=1 test/browser/source-recovery.mjs",
+  "result": {
+    "tests": 12,
+    "passed": 12,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "duration_ms": 11431.679325,
+    "exit_code": 0
+  },
+  "tests": [
+    {
+      "name": "an unknown cache check still resolves an existing exact source without allowing an uncached addition",
+      "result": "pass",
+      "duration_ms": 638.049518
+    },
+    {
+      "name": "a cached source that fails automatic preparation remains recoverable through Retry & Play",
+      "result": "pass",
+      "duration_ms": 626.004332
+    },
+    {
+      "name": "briefly preparing cached media is polled and starts automatically when ready",
+      "result": "pass",
+      "duration_ms": 833.07533
+    },
+    {
+      "name": "an empty incomplete fast batch waits for the complete lookup before failing",
+      "result": "pass",
+      "duration_ms": 711.148498
+    },
+    {
+      "name": "incompatible source results expose a working Retry search in Simple mode",
+      "result": "pass",
+      "duration_ms": 739.226065
+    },
+    {
+      "name": "empty source results expose a working Retry search in Simple mode",
+      "result": "pass",
+      "duration_ms": 645.972849
+    },
+    {
+      "name": "closing the title while cached preparation is pending prevents late playback",
+      "result": "pass",
+      "duration_ms": 1677.283656
+    },
+    {
+      "name": "a quick-actions playback failure opens a visible recovery panel even when details were closed",
+      "result": "pass",
+      "duration_ms": 604.957497
+    },
+    {
+      "name": "a rate-limited cache check does not trigger preparation and exposes Check again",
+      "result": "pass",
+      "duration_ms": 566.239638
+    },
+    {
+      "name": "failure of the full lookup retains a usable initial source for explicit Prepare & Play",
+      "result": "pass",
+      "duration_ms": 800.752751
+    },
+    {
+      "name": "Resume preserves playback position after Check again recovery",
+      "result": "pass",
+      "duration_ms": 1295.350297
+    },
+    {
+      "name": "Start over preserves playback position after Check again recovery",
+      "result": "pass",
+      "duration_ms": 1411.761047
+    }
+  ],
+  "stdout_log": "docs/evidence/source-recovery/browser-final-captured.log",
+  "capture_note": "The original command returned stdout in two consecutive tool-output chunks. This log reassembles those captured chunks; the command did not originally redirect stdout to disk.",
+  "screenshot": "docs/evidence/source-recovery/fallback-phone.png",
+  "verification": [
+    "Actual browser UI against the local application backend and synthetic TorBox fixture.",
+    "Existing cached and automatic source resolution remains cache-only.",
+    "Only explicit Prepare & Play starts an uncached torrent in the fixture.",
+    "Automatic and warm lookups omit refresh; explicit Check again requests refresh=1.",
+    "Resume plays at 30-35 seconds after the saved 40-second position and 10-second rewind; Start over plays below 5 seconds.",
+    "Media handoff is an empty 307 response to the synthetic CDN; the app media fetch counter stays zero in every case."
+  ],
+  "limitations": "Synthetic local account, source-index responses, cache state, and generated MP4 only. No real TorBox credentials, live account inventory, external index availability, real Android device, or production playback was exercised by this browser suite.",
+  "source_identity_note": "Listed final tested runtime, test, and media fixture files were byte-matched against frozen commit 61b5f29 before hashing. This is the relevant-file manifest, not an exhaustive application dependency manifest.",
+  "sha256": {
+    "entry.mjs": "a8db526ff457d7dc3be12fb0f0cbb20c665a6a5c20f9302084e39be0894d914c",
+    "server.mjs": "0aef89fa0b87b6743b6c48cf4287a7177a2b5e0d96a3de47eefee5a56c5bef83",
+    "lib/discovery.mjs": "3cb32dc77108487f43036c69f35366384f69e46a7640150d63a3b0a093afa9f3",
+    "lib/source-lookup.mjs": "745ce721eb8d9e5669d9730cd43dbe3f82b7e6339e72b43262f952ded97300e4",
+    "public/index.html": "40ee18fae71d93be7e4f51e9628f7d69e3bb45e207e0fa28240c82dd5e27f835",
+    "public/app.js": "4e7b06e18ddb3e581a5153f07d2318e3810db790d0b21a8b4aab77427c583b76",
+    "public/discover.js": "296e08d41e39385da9a449fd2eca60d4ae143647242fe55170842cb661b1cf72",
+    "public/source-client.js": "47a460b00e534aa1424881747b0cddb18401178ff8e97c817387cc610a97e11c",
+    "public/playback-lifecycle.js": "5c05c804601cdc2f63dcc7a478ad7812b38e867f0d1fe6249a2834171ff632a1",
+    "public/runtime.js": "2fba2b908c9266dbe6093bffda6b1120b0e58c96b5a849c089a4fc37693c209b",
+    "public/history.js": "f57bdc0d3887b612f59ce18accc57ed5397208e8253322aec4a21b270e060ade",
+    "public/settings.js": "6d83cbe96e1523bf3ab7aeeb4504129381cf7e045be503896d305c42c39b2df1",
+    "public/boot.js": "8eaa43daa08957f4733d625fa329e983a918c424819dad3ad2b4a823504d6791",
+    "public/sw.js": "38c684d6b662ed7b6d929df07ac824b5492e3aef908f4b9e7bbeef7d2d0b5740",
+    "test/browser/source-recovery.mjs": "358a6756907c5f8e1d44093225470fdcb9159f52e32e752ddcf89b6009943f35",
+    "test/browser/fixture.mjs": "5b9d29c90395939fc028aeb70661c00ffc9d76fe77b921e69dfc9a4956e00e11",
+    "test/fixtures/fixture.mp4": "1e3e7048e67ba8c0343f94288ca031453b257011ccdaae91c8b810ce488084bc"
+  }
+}

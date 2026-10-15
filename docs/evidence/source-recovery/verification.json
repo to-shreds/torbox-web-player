@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-10-15T16:20:48.776321+00:00",
+  "runtimeCommit": "61b5f292e1a37d2b6ca07a165f2b979aae557806",
+  "runtimeTree": "6cf06ac0c5af6594e8496d38e0899d4dfe8cd1c5",
+  "backendMirror": "cd3fcdb4c26a5d3fd56cfb1096da606f8a4b2dc5",
+  "version": "1.2.4",
+  "build": "release-1.2.4-recovery.1",
+  "syntaxAndDiff": "passed",
+  "node": {
+    "registered": 507,
+    "passed": 501,
+    "failed": 0,
+    "optionalSkipped": 6,
+    "durationMs": 4859.196771
+  },
+  "existingPlaybackAndWatchPartyBrowser": {
+    "registered": 33,
+    "passed": 33,
+    "failed": 0,
+    "durationMs": 134509.340138
+  },
+  "newRecoveryBrowser": {
+    "registered": 12,
+    "passed": 12,
+    "failed": 0,
+    "durationMs": 11431.679325
+  },
+  "baselineReproduction": {
+    "initialBackendRegressions": 11,
+    "failedBeforeFix": 9,
+    "safetyCasesPassedBeforeFix": 2
+  },
+  "sourceHashes": {
+    "lib/discovery.mjs": "3cb32dc77108487f43036c69f35366384f69e46a7640150d63a3b0a093afa9f3",
+    "lib/source-lookup.mjs": "745ce721eb8d9e5669d9730cd43dbe3f82b7e6339e72b43262f952ded97300e4",
+    "public/discover.js": "296e08d41e39385da9a449fd2eca60d4ae143647242fe55170842cb661b1cf72",
+    "public/source-client.js": "47a460b00e534aa1424881747b0cddb18401178ff8e97c817387cc610a97e11c",
+    "server.mjs": "0aef89fa0b87b6743b6c48cf4287a7177a2b5e0d96a3de47eefee5a56c5bef83",
+    "test/discovery-recovery.test.mjs": "378fccc2ea4a0503d5c0a4f1941c540e31db89c2eed026941ff378b4513dda13",
+    "test/source-refresh.test.mjs": "f83baf244ab881d48dc1bded20cdaf752fcd1566378c83aa57749579c9865169",
+    "test/source-recovery-ui.test.mjs": "1155cf625bac9964b8d418e0451182567c8a383cb94184f6837fa6e527d322e4",
+    "test/browser/source-recovery.mjs": "358a6756907c5f8e1d44093225470fdcb9159f52e32e752ddcf89b6009943f35"
+  },
+  "limits": [
+    "Browser playback used synthetic TorBox responses and an original generated MP4.",
+    "No live authenticated Dexter episode or physical Android device was tested.",
+    "External source availability and browser codec support remain dependencies."
+  ],
+  "delivery": "Video bytes still stream directly from TorBox; synthetic browser tests observed zero backend media-body fetches.",
+  "renderDeployment": "dep-db8fqrgn74is73ftscp0"
+}

@@ -1,0 +1,117 @@
+{
+  "timestamp": "2026-10-15T17:47:06.064Z",
+  "results": [
+    {
+      "query": "Dexte",
+      "ms": 3874,
+      "requests": [
+        {
+          "url": "https://cinemeta-catalogs.strem.io/top/catalog/movie/top/search=Dexte.json",
+          "status": 200,
+          "ms": 3157
+        },
+        {
+          "url": "https://cinemeta-catalogs.strem.io/top/catalog/series/top/search=Dexte.json",
+          "status": 200,
+          "ms": 3165
+        },
+        {
+          "url": "https://v3-cinemeta.strem.io/catalog/movie/top/search=Dexte.json",
+          "status": 200,
+          "ms": 3817
+        },
+        {
+          "url": "https://v3-cinemeta.strem.io/catalog/series/top/search=Dexte.json",
+          "status": 200,
+          "ms": 3827
+        }
+      ],
+      "count": 4,
+      "metas": [
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt0228214",
+          "name": "Dexter Dickie",
+          "type": "movie",
+          "year": "2000"
+        },
+        {
+          "id": "tt0293092",
+          "name": "Dexter's Laboratory: Ego Trip",
+          "type": "movie",
+          "year": "1999"
+        },
+        {
+          "id": "tt35518994",
+          "name": "Dexter",
+          "type": "movie",
+          "year": "2025"
+        }
+      ]
+    },
+    {
+      "query": "Dexter",
+      "ms": 3853,
+      "requests": [
+        {
+          "url": "https://cinemeta-catalogs.strem.io/top/catalog/movie/top/search=Dexter.json",
+          "status": 200,
+          "ms": 3158
+        },
+        {
+          "url": "https://cinemeta-catalogs.strem.io/top/catalog/series/top/search=Dexter.json",
+          "status": 200,
+          "ms": 3180
+        },
+        {
+          "url": "https://v3-cinemeta.strem.io/catalog/movie/top/search=Dexter.json",
+          "status": 200,
+          "ms": 3806
+        },
+        {
+          "url": "https://v3-cinemeta.strem.io/catalog/series/top/search=Dexter.json",
+          "status": 200,
+          "ms": 3835
+        }
+      ],
+      "count": 5,
+      "metas": [
+        {
+          "id": "tt35518994",
+          "name": "Dexter",
+          "type": "movie",
+          "year": "2025"
+        },
+        {
+          "id": "tt33043892",
+          "name": "Dexter: Resurrection",
+          "type": "series",
+          "year": "2025–"
+        },
+        {
+          "id": "tt0228214",
+          "name": "Dexter Dickie",
+          "type": "movie",
+          "year": "2000"
+        },
+        {
+          "id": "tt0293092",
+          "name": "Dexter's Laboratory: Ego Trip",
+          "type": "movie",
+          "year": "1999"
+        },
+        {
+          "id": "tt3338098",
+          "name": "Respect: A Felix Dexter Special",
+          "type": "movie",
+          "year": "2013"
+        }
+      ]
+    }
+  ]
+}

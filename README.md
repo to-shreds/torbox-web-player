@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.4**, frontend build **release-1.2.4-recovery.1**
+Current version: **1.2.5**, frontend build **release-1.2.5-search.1**
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
@@ -89,6 +89,8 @@ Render handles control/API operations such as catalog and source lookup, cache c
 ## Discovery and source selection
 
 Cinemeta supplies catalog metadata. Browse supports Popular, Featured, New, genre filters, movies, shows, and search. The browse adapter accepts Cinemeta's current `imdb_id` rows and follows only the bounded HTTPS redirect between the known Cinemeta hosts used by no-query catalog feeds.
+
+Text search uses Cinemeta's query-aware endpoint and falls back to catalog-validated IMDb suggestions when necessary. The secondary popular feed is used for browsing because it ignores search text. Typing immediately retires the previous query's cards and pagination; canceled or late responses cannot replace the current results. Distinct same-name titles remain visible when a poster or year is missing.
 
 Source discovery aggregates Zilean, Torrentio, and MediaFusion Torznab, with StremThru fallbacks when needed. Results are deduplicated before TorBox cache checks.
 
