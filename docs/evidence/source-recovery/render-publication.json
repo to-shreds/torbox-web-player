@@ -1,0 +1,28 @@
+{
+  "service": "srv-damu91142hec73chb7qg",
+  "workspace": "tea-dakujgmk1f9s73d2v8ng",
+  "plan": "existing free service",
+  "branch": "browser-key-clone",
+  "deployment": {
+    "commit": {
+      "createdAt": "2026-10-15T16:18:37Z",
+      "id": "cd3fcdb4c26a5d3fd56cfb1096da606f8a4b2dc5",
+      "message": "Deploy verified 1.2.4 source recovery runtime"
+    },
+    "createdAt": "2026-10-15T16:21:02.443659Z",
+    "finishedAt": "2026-10-15T16:21:51.279942Z",
+    "id": "dep-db8fqrgn74is73ftscp0",
+    "startedAt": "2026-10-15T16:21:02.411241Z",
+    "status": "live",
+    "trigger": "api",
+    "updatedAt": "2026-10-15T16:22:21.573629Z"
+  },
+  "postDeploymentErrorLogs": {
+    "hasMore": false,
+    "logs": [],
+    "nextEndTime": "2026-10-15T16:27:07.213739723Z",
+    "nextStartTime": "2026-10-15T16:21:51Z"
+  },
+  "deployNote": "The configured commit auto-deploy did not start after repeated checks. One explicit deployment was triggered for the exact tested backend mirror commit. No service, plan or environment configuration was changed.",
+  "limits": "Unauthenticated production checks only; authenticated real-media playback was not tested."
+}

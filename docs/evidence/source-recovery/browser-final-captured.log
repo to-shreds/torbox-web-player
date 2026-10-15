@@ -1,0 +1,31 @@
+{"event":"media_redirect_issued","ranged":true}
+✔ an unknown cache check still resolves an existing exact source without allowing an uncached addition (638.049518ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ a cached source that fails automatic preparation remains recoverable through Retry & Play (626.004332ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ briefly preparing cached media is polled and starts automatically when ready (833.07533ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ an empty incomplete fast batch waits for the complete lookup before failing (711.148498ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ incompatible source results expose a working Retry search in Simple mode (739.226065ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ empty source results expose a working Retry search in Simple mode (645.972849ms)
+✔ closing the title while cached preparation is pending prevents late playback (1677.283656ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ a quick-actions playback failure opens a visible recovery panel even when details were closed (604.957497ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ a rate-limited cache check does not trigger preparation and exposes Check again (566.239638ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ failure of the full lookup retains a usable initial source for explicit Prepare & Play (800.752751ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ Resume preserves playback position after Check again recovery (1295.350297ms)
+{"event":"media_redirect_issued","ranged":true}
+✔ Start over preserves playback position after Check again recovery (1411.761047ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11431.679325
