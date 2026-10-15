@@ -1,4 +1,4 @@
-export const EXTRA_GAMES_BUILD = 'release-1.2.3-party.1';
+export const EXTRA_GAMES_BUILD = 'release-1.2.3-games.1';
 const ID = /^[a-z][a-z0-9_-]{0,79}$/;
 const BUNDLE = /^games-data\/[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}\.jsdos$/;
 const PAGE = /^games-web\/[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}\/index\.html$/;

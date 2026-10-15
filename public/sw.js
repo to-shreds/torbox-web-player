@@ -1,6 +1,6 @@
 const CACHE_PREFIX='torbox-player:'+self.registration.scope+':';
-const CACHE=CACHE_PREFIX+'release-1.2.3-party.1';
-const BUILD='release-1.2.3-party.1';
+const CACHE=CACHE_PREFIX+'release-1.2.3-games.1';
+const BUILD='release-1.2.3-games.1';
 const SHELL=[
   './','./index.html',
   `./style.css?v=${BUILD}`,`./discover.css?v=${BUILD}`,`./boot.js?v=${BUILD}`,`./app.js?v=${BUILD}`,
@@ -16,7 +16,7 @@ const SHELL=[
   `./extra-games.js?v=${BUILD}`,`./extra-games-core.js?v=${BUILD}`,`./extra-games-catalog.json?v=${BUILD}`,
   `./dos-player.html?v=${BUILD}`,`./dos-player.js?v=${BUILD}`,`./dos-player.css?v=${BUILD}`,
   `./games-web/skifree/index.html?v=${BUILD}`,`./games-web/skifree/game.js?v=${BUILD}`,`./games-web/skifree/style.css?v=${BUILD}`,
-  './vendor/jsnes-2.1.0.min.js?v=2.1.0',`./vendor/nes-audio-worklet.js?v=${BUILD}`,
+  './vendor/jsnes-2.1.0-torbox.1.min.js?v=2.1.0-torbox.1',`./vendor/nes-audio-worklet.js?v=${BUILD}`,
   `./manifest.webmanifest?v=${BUILD}`,'./icon.svg'
 ];
 const shellUrls=new Set(SHELL.map(path=>new URL(path,self.registration.scope).href));

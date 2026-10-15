@@ -1,4 +1,6 @@
+// Save-state schema remains compatible with the upstream 2.1.0 engine.
 export const ENGINE_VERSION = '2.1.0';
+export const ENGINE_ASSET_VERSION = '2.1.0-torbox.1';
 export const MAX_ROM_BYTES = 16 * 1024 * 1024;
 export const MAX_CATALOG_BYTES = 512 * 1024;
 export const SUPPORTED_MAPPERS = Object.freeze([0, 1, 2, 3, 4, 5, 7, 9, 11, 34, 38, 66, 71, 79, 94, 118, 119, 140, 180, 240, 241]);

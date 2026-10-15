@@ -1,0 +1,18 @@
+JSNES 2.1.0, Apache-2.0. TorBox modification dated 2026-10-15.
+Upstream source: https://registry.npmjs.org/jsnes/-/jsnes-2.1.0.tgz
+Reproduce bundled change: node maintenance/patch-jsnes.mjs
+Verify bundled change: node maintenance/patch-jsnes.mjs --check
+
+In 8x16 mode, bit 0 selects the pattern table; bits 1-7 select an even
+top tile. Clearing bit 0 already selects that even tile. Subtracting one
+again selects the preceding tile and breaks every odd-bank sprite.
+No CPU, mapper, audio, save-state, timing, or game data changes.
+
+--- a/src/ppu/index.js
++++ b/src/ppu/index.js
+@@ -1730,4 +1730,4 @@
+           // top tile is (index & $FE), bottom tile is (index & $FE) + 1.
+           let sprBaseAddr = (sprTile & 1) !== 0 ? 0x1000 : 0x0000;
+           let topTileNum = sprTile & 0xfe;
+-          let top = (sprTile & 1) !== 0 ? topTileNum - 1 + 256 : topTileNum;
++          let top = (sprTile & 1) !== 0 ? topTileNum + 256 : topTileNum;

@@ -1,0 +1,70 @@
+{
+  "checkedAt": "2026-10-15T06:07:29.259077+00:00",
+  "environment": {
+    "browser": "Chromium via Playwright",
+    "viewport": {
+      "width": 412,
+      "height": 915
+    },
+    "mobileTouchEmulation": true,
+    "origin": "local app fixture, port 4215",
+    "frameControl": "Native NES.frame called deterministically while requestAnimationFrame emulator advancement is held; real app buttons own saves and lifecycle."
+  },
+  "diagnosis": {
+    "reproduced": true,
+    "blackBackdrop": "The initial black title backdrop is part of the SMB3 opening animation. The title reveals a tan backdrop around native frame420.",
+    "actualDefect": "The JSNES2.1.0 renderer picked the preceding tile when an 8x16 sprite selected pattern table $1000. Its even-masked top tile had a second subtraction, fragmenting characters.",
+    "fix": "For odd tile IDs, select (spriteTile & 0xFE) + 256 for the top tile, followed by its next tile.",
+    "saveCorruptionObserved": false
+  },
+  "engine": {
+    "oldAsset": "vendor/jsnes-2.1.0.min.js",
+    "oldSha256": "84946f0dae4bcf3b2dfebe84ad3bfeb1dbcb413bd9b1a69e1f45910a95fd7b41",
+    "fixedAsset": "vendor/jsnes-2.1.0-torbox.1.min.js",
+    "fixedSha256": "66454c99dd9115283859dcc61b15315083c3e6e4742aa437b7044381a5b36531",
+    "stateEngineVersion": "2.1.0"
+  },
+  "oracles": {
+    "algorithm": "FNV-1a over native canvas RGB bytes, 256x240, starting from a cold native reload with a fixed48000Hz sample rate",
+    "romSha256": "4377a7f5e6eb50bdd2ac6f249bf1a7085500aca8eb41f38545c3a2731c51a579",
+    "fixedFrameHashes": {
+      "390": 972485408,
+      "450": 2054907761,
+      "600": 2785151150,
+      "660": 2054084051
+    },
+    "oldFrame600Hash": 3052838854,
+    "visualReview": "Before and after native frame600 inspected on a412x915 phone viewport; corrected Mario, Luigi and enemies use complete connected sprite halves. Frame390 keeps the intentional black backdrop."
+  },
+  "verification": {
+    "browserTests": 4,
+    "passed": 4,
+    "failed": 0,
+    "manualRestorePixelsExact": true,
+    "automaticRestorePixelsExact": true,
+    "oldVersionCpuProgressExact": true,
+    "oldVersionManualAndAutoCorrected": true,
+    "threeCartridges": [
+      {
+        "id": "super-mario-bros-duck-hunt",
+        "nativeColors": 7,
+        "restoredPixelsExact": true
+      },
+      {
+        "id": "super-mario-bros-3",
+        "nativeColors": 11,
+        "restoredPixelsExact": true
+      },
+      {
+        "id": "tmnt-ii-arcade-game",
+        "nativeColors": 12,
+        "restoredPixelsExact": true
+      }
+    ]
+  },
+  "limitations": [
+    "Desktop Chromium emulating phone viewport and touch, not physical Android hardware.",
+    "Acceptance covers title graphics and save restoration, not a full game playthrough."
+  ],
+  "success": true
+}

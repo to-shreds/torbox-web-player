@@ -1,0 +1,12 @@
+✔ bundled SMB3 renders complete 8x16 sprites during the black intro and tan title stage (2982.936206ms)
+✔ SMB3 manual and automatic app saves retain complete native graphics on a new emulator (2161.932525ms)
+✔ all three supplied cartridges render real native frames and survive manual save restoration (5447.652803ms)
+✔ saves written by the unmodified 2.1.0 engine resume with corrected sprites and unchanged progress (2498.501771ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13467.735752

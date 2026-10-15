@@ -25,7 +25,7 @@ function paletteROM(color=0x16){
   return {operand,bytes:Buffer.concat([Buffer.from([0x4e,0x45,0x53,0x1a,1,1,0,0,0,0,0,0,0,0,0,0]),prg,Buffer.alloc(8192)])};
 }
 const red=paletteROM(),green=paletteROM(0x1a);
-const engineScope={};vm.runInNewContext(await readFile(new URL('../../public/vendor/jsnes-2.1.0.min.js',import.meta.url),'utf8'),engineScope);
+const engineScope={};vm.runInNewContext(await readFile(new URL('../../public/vendor/jsnes-2.1.0-torbox.1.min.js',import.meta.url),'utf8'),engineScope);
 const genie=new engineScope.jsnes.GameGenie();
 const sixWhite=genie.encode(red.operand&0x7fff,0x30);
 const eightGreen=genie.encode(red.operand&0x7fff,0x1a,0x16);
