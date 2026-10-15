@@ -1,10 +1,10 @@
-import { LatestPlaybackAction, PlaybackPreparationCache } from './playback-lifecycle.js?v=release-1.2.3-games.1';
-import { loadPublicSources, browserContainerHints } from './source-client.js?v=release-1.2.3-games.1';
-import { getSettings, updateSettings } from './settings.js?v=release-1.2.3-games.1';
-import { listRecent, formatResumeTime } from './history.js?v=release-1.2.3-games.1';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=release-1.2.3-games.1';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=release-1.2.3-games.1';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=release-1.2.3-games.1';
+import { LatestPlaybackAction, PlaybackPreparationCache } from './playback-lifecycle.js?v=release-1.2.4-recovery.1';
+import { loadPublicSources, browserContainerHints } from './source-client.js?v=release-1.2.4-recovery.1';
+import { getSettings, updateSettings } from './settings.js?v=release-1.2.4-recovery.1';
+import { listRecent, formatResumeTime } from './history.js?v=release-1.2.4-recovery.1';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=release-1.2.4-recovery.1';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=release-1.2.4-recovery.1';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=release-1.2.4-recovery.1';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
@@ -86,11 +86,14 @@ export function isAutomaticCandidateFailure(error) {
   return error?.code === 'TORBOX_OPERATION_FAILED' && /\bcach(?:e|ed)\b/i.test(error?.message || '');
 }
 export function automaticCachedSourceOrder(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
-  return automaticSourceOrder((Array.isArray(list)?list:[]).filter(source=>source.cached===true),type,resolution,sizeProfile);
+  // An unavailable cache lookup is not proof that a source is uncached. The
+  // preparation request independently enforces cached-only behavior.
+  return automaticSourceOrder((Array.isArray(list)?list:[]).filter(source=>source.cached!==false),type,resolution,sizeProfile);
 }
 export function browserPreparationOptions(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced', limit = 3) {
   const eligible=(Array.isArray(list)?list:[]).filter(source=>
-    source.cached!==true&&source.browserContainer===true&&source.browserUnsupported!==true&&
+    (source.browserContainer===true||source.browserFriendly===true||source.cachedBrowserPlayable===true)&&
+    source.cachedBrowserPlayable!==false&&source.browserUnsupported!==true&&
     source.audioRisk!==true&&source.videoRisk!==true&&source.memoryBad!==true&&source.memoryAudio!=='bad'
   );
   const regular=eligible.filter(source=>!/\b(?:superfan|extended(?:[ ._-]+cut)?)\b/i.test([source.filename,source.title].filter(Boolean).join(' ')));
@@ -115,6 +118,14 @@ export function selectAutomaticVideoFile(files = []) {
   return rows.find(file=>!browserContainerHints(file).browserUnsupported)||null;
 }
 function automaticBudgetError(){const error=new Error('Cached source checks took too long.');error.code='CACHED_SOURCE_NOT_READY';return error;}
+export function isRecoverableSourceFailure(error) {
+  return error?.name==='TimeoutError'||['NO_CACHED_BROWSER_SOURCE','CACHED_SOURCE_NOT_READY','PREPARED_ITEM_MISSING','SOURCE_EXPIRED','SOURCE_TIMEOUT','SOURCE_ALL_UNAVAILABLE','TORBOX_UNAVAILABLE','TORBOX_TIMEOUT','TORBOX_CONNECTION_ERROR','TORBOX_HTTP_ERROR','TORBOX_RATE_LIMITED','TORBOX_PLAN_RESTRICTED','TORBOX_ACCESS_DENIED','TORBOX_NOT_CONFIGURED','CACHE_SCHEMA','INVALID_PROVIDER_RESPONSE','PROVIDER_RESPONSE_TOO_LARGE'].includes(error?.code)||isAutomaticCandidateFailure(error);
+}
+const blockedCacheChecks=new Set(['TORBOX_RATE_LIMITED','TORBOX_PLAN_RESTRICTED','TORBOX_ACCESS_DENIED','TORBOX_NOT_CONFIGURED','CACHE_SCHEMA','INVALID_PROVIDER_RESPONSE','PROVIDER_RESPONSE_TOO_LARGE']);
+function abortableDelay(ms,signal){
+  if(signal?.aborted)return Promise.reject(signal.reason||new DOMException('Playback cancelled.','AbortError'));
+  return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{signal?.removeEventListener('abort',stop);resolve();},ms);const stop=()=>{clearTimeout(timer);reject(signal.reason||new DOMException('Playback cancelled.','AbortError'));};signal?.addEventListener('abort',stop,{once:true});});
+}
 async function withinAutomaticBudget(action,signal){
   if(!signal)return action();if(signal.aborted)throw automaticBudgetError();
   return new Promise((resolve,reject)=>{let settled=false;const stop=()=>{if(settled)return;settled=true;reject(automaticBudgetError());};signal.addEventListener('abort',stop,{once:true});
@@ -268,7 +279,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     if(!cards.length){section.hidden=true;list.replaceChildren();return;}section.hidden=false;list.replaceChildren(...cards);
   }
   async function resolveQuickTarget(meta){
-    const data=meta?.episodes?{meta}:await api(`/api/discover/meta?type=${meta.type}&id=${meta.id}`,{signal:AbortSignal.timeout(15000)}),full=data.meta;
+    const data=(meta?.type==='movie'||meta?.episodes?.length)?{meta}:await api(`/api/discover/meta?type=${meta.type}&id=${meta.id}`,{signal:AbortSignal.timeout(15000)}),full=data.meta;
     if(full.type==='movie')return{meta:full,target:{type:'movie',id:full.id},episodeName:''};
     const history=listRecent().filter(item=>item.type==='series'&&item.id===full.id),latest=history[0];
     if(latest&&!latest.completed)return{meta:full,target:{type:'series',id:full.id,season:latest.season,episode:latest.episode},episodeName:full.episodes.find(e=>e.season===latest.season&&e.episode===latest.episode)?.name||latest.episodeName||''};
@@ -345,17 +356,21 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   const closeTitleForPlayback = () => { if (!guestMode && $('title-dialog').open) {closingTitleForPlayback=true;$('title-dialog').close();} };
 
   async function ensureService(){ if(typeof guard==='function') await guard(); }
-  async function registeredSources(target, signal, {fast=false,complete=false}={}){
-    const lookup=await loadPublicSources(target,{signal,api,fast,complete,withMetadata:true}),sources=lookup.sources;if(!sources.length)throw new Error('No source found.');
+  async function registeredSources(target, signal, {fast=false,complete=false,refresh=false}={}){
+    const lookup=await loadPublicSources(target,{signal,api,fast,complete,refresh,withMetadata:true}),sources=lookup.sources;
+    if(!sources.length){const error=new Error('No playable source was found for this title or episode.');error.code='NO_CACHED_BROWSER_SOURCE';error.complete=lookup.complete;error.registered={sources:[],complete:lookup.complete};throw error;}
     const result=await api('/api/discover/sources',{method:'POST',data:{target,sources},signal:signal?AbortSignal.any([signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000)});
     if(!result.sources?.length){const error=new Error('No supported source found.');error.code='NO_CACHED_BROWSER_SOURCE';error.complete=lookup.complete;throw error;}return {...result,complete:lookup.complete,sources:applySourceMemory(target,result.sources)};
   }
 
-  async function readyFile(source, { signal, unattended=false, allowBrowserUnsupported=false, waitForPreparation=true, initialTimeoutMs=waitForPreparation?60000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } = {}){
-    const request=async(path,options,timeoutMs)=>{const timeout=AbortSignal.timeout(timeoutMs);try{return await api(path,{...options,signal:signal?AbortSignal.any([signal,timeout]):timeout});}catch(error){if(!waitForPreparation&&timeout.aborted&&!signal?.aborted){const unavailable=new Error('This cached source did not become ready quickly enough.');unavailable.code='CACHED_SOURCE_NOT_READY';throw unavailable;}throw error;}};
-    let result=await request('/api/discover/prepare',{method:'POST',data:{source:source.id,onlyCached:source.cached===true}},initialTimeoutMs);
-    const deadline=Date.now()+300000;
+  async function readyFile(source, { signal, unattended=false, allowBrowserUnsupported=false, waitForPreparation=true, onlyCached=source.cached===true, preparationTimeoutMs=300000, initialTimeoutMs=waitForPreparation?60000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } = {}){
+    const deadline=Date.now()+(waitForPreparation?preparationTimeoutMs:initialTimeoutMs);
+    const preparationSignal=AbortSignal.timeout(waitForPreparation?preparationTimeoutMs:initialTimeoutMs);
+    const boundedSignal=signal?AbortSignal.any([signal,preparationSignal]):preparationSignal;
+    const request=async(path,options,timeoutMs)=>{const timeout=AbortSignal.timeout(Math.max(1,Math.min(timeoutMs,deadline-Date.now())));try{return await api(path,{...options,signal:AbortSignal.any([boundedSignal,timeout])});}catch(error){if((!waitForPreparation||onlyCached)&&(timeout.aborted||preparationSignal.aborted)&&!signal?.aborted)throw automaticBudgetError();throw error;}};
+    let result=await request('/api/discover/prepare',{method:'POST',data:{source:source.id,onlyCached}},initialTimeoutMs);
     while(Date.now()<deadline){
+      if(boundedSignal.aborted){if(preparationSignal.aborted&&!signal?.aborted)throw automaticBudgetError();throw boundedSignal.reason;}
       if(result.state==='ready')return result;
       if(result.state==='browser_unsupported'){
         if(allowBrowserUnsupported)return result;
@@ -368,32 +383,39 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
         result=await request('/api/discover/status?'+new URLSearchParams({source:source.id,file:selected.id}),{},waitForPreparation?30000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS);continue;
       }
       if(result.state!=='preparing'){const error=new Error(result.message||'This source is unavailable.');if(!waitForPreparation)error.code='CACHED_SOURCE_NOT_READY';throw error;}
-      if(!waitForPreparation){const error=new Error('This cached source is not immediately ready.');error.code='CACHED_SOURCE_NOT_READY';throw error;}
-      await delay(3500);result=await request('/api/discover/status?'+new URLSearchParams({source:source.id}),{},30000);
+      // Cached additions can take a moment to appear in mylist. Poll inside the
+      // same candidate budget instead of discarding a ready copy immediately.
+      try{await abortableDelay(Math.min(waitForPreparation?3500:400,Math.max(1,deadline-Date.now())),boundedSignal);}
+      catch(error){if(preparationSignal.aborted&&!signal?.aborted)throw automaticBudgetError();throw error;}
+      result=await request('/api/discover/status?'+new URLSearchParams({source:source.id}),{},waitForPreparation?30000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS);
     }
+    if(!waitForPreparation||onlyCached)throw automaticBudgetError();
     throw new Error('TorBox is still preparing this source. Try again shortly.');
   }
 
-  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES}={}){
-    return resolveAutomaticCachedSource(sources,target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,onRejected:(source,error)=>{if(error?.code==='BROWSER_CONTAINER_UNSUPPORTED')setSourceBad(target,source,true);},prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false})});
+  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,cacheErrorCode}={}){
+    if(blockedCacheChecks.has(cacheErrorCode)){const error=new Error(cacheErrorCode==='TORBOX_RATE_LIMITED'?'TorBox is temporarily limiting requests. Wait a moment, then check again.':cacheErrorCode==='TORBOX_ACCESS_DENIED'?'TorBox could not authorize the availability check. Check your account sign-in, then retry.':cacheErrorCode==='TORBOX_NOT_CONFIGURED'?'The TorBox connection is not configured. Check your account connection.':cacheErrorCode==='TORBOX_PLAN_RESTRICTED'?'TorBox reported an account restriction while checking availability.':'TorBox returned an unreadable availability response. Check again shortly.');error.code=cacheErrorCode;throw error;}
+    return resolveAutomaticCachedSource(sources,target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,onRejected:(source,error)=>{if(error?.code==='BROWSER_CONTAINER_UNSUPPORTED')setSourceBad(target,source,true);},prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false,onlyCached:true})});
   }
 
-  async function preparedPlayback(target,resolution,{signal,onCandidate}={}){
+  async function preparedPlayback(target,resolution,{signal,onCandidate,refresh=false}={}){
     const key=JSON.stringify([target.type,target.id,target.season??null,target.episode??null,resolution,getSettings().sourceSizeProfile,$('viewer').value]);
+    if(refresh)preparations.delete(key);
     const notify=source=>{if(!signal?.aborted)onCandidate?.(source);};
     const prepared=await preparations.get(key,async backgroundSignal=>{
       const bounded=AbortSignal.any([backgroundSignal,AbortSignal.timeout(45000)]);
       let registered;
       try{
-        registered=await registeredSources(target,bounded,{fast:true});
-        try{return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify}),registered};}
+        registered=await registeredSources(target,bounded,{fast:true,refresh});
+        try{return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify,cacheErrorCode:registered.cacheErrorCode}),registered};}
         catch(error){if(error?.code!=='NO_CACHED_BROWSER_SOURCE'||registered.complete)throw error;}
-      }catch(error){if(error?.code!=='NO_CACHED_BROWSER_SOURCE'||error.complete!==false){error.registered=registered;throw error;}}
+      }catch(error){if(error?.code!=='NO_CACHED_BROWSER_SOURCE'||error.complete!==false){error.registered=registered||error.registered;throw error;}registered=registered||error.registered;}
       // The first index may have only uncached or incompatible results. Wait
       // for the existing search rather than hiding a slower correct source.
-      registered=await registeredSources(target,bounded,{complete:true});
-      try{return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify}),registered};}
-      catch(error){error.registered=registered;throw error;}
+      try{
+        registered=await registeredSources(target,bounded,{complete:true});
+        return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify,cacheErrorCode:registered.cacheErrorCode}),registered};
+      }catch(error){error.registered=registered?.sources?.length?registered:error.registered||registered;throw error;}
     },{signal});
     const remembered=applySourceMemory(target,[prepared.source])[0];
     if(remembered.memoryBad||remembered.memoryAudio==='bad'){
@@ -407,17 +429,24 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   }
 
   function clearPlaybackFallback(){const area=$('play-fallback');if(area)area.replaceChildren();}
+  async function ensureFallbackTitle(meta,target){
+    if($('title-dialog').open&&currentMeta?.id===meta.id)return true;
+    const opening=showTitle(meta,target?.season),generation=titleGeneration;
+    await opening;
+    return active&&generation===titleGeneration&&$('title-dialog').open&&!playbackActions.current;
+  }
   async function prepareAndPlayFallback(meta,target,episodeName,resolution,source,button,buttons,overrides={}){
     const action=playbackActions.begin();
     const bounded=ms=>AbortSignal.any([action.signal,AbortSignal.timeout(ms)]);
-    const resumeRow=savedResumeForTarget(target);
+    const cachedRetry=source.cached===true,label=cachedRetry?'Retry & Play':'Prepare & Play';
+    const resumeRow=overrides.forceStartOver?null:savedResumeForTarget(target);
     if(resumeRow)resumeActivity?.show?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Preparing the version you selected in TorBox.');
     try{
       for(const item of buttons)item.disabled=true;
       button.textContent='Preparing…';
       message('detail-message','Preparing this version in TorBox…');
       if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','TorBox is preparing the selected version.');
-      const result=await readyFile(source,{signal:bounded(330000),unattended:true,waitForPreparation:true});
+      const result=await readyFile(source,{signal:bounded(cachedRetry?16000:330000),unattended:true,waitForPreparation:true,onlyCached:cachedRetry,preparationTimeoutMs:cachedRetry?15000:300000,initialTimeoutMs:cachedRetry?15000:60000});
       action.check();
       const context=buildContext(meta,target,episodeName,resolution,source);
       if(resumeRow)context.resumeIntent=true;
@@ -430,19 +459,21 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       resumeActivity?.hide?.();
       message('detail-message',error.message,true);
       for(const item of buttons)item.disabled=false;
-      button.textContent='Prepare & Play';
+      button.textContent=label;
       return false;
     }
   }
-  function renderPlaybackFallback(meta,target,episodeName,resolution,sources,overrides={}){
+  function renderPlaybackFallback(meta,target,episodeName,resolution,sources,overrides={},failure={}){
     const area=$('play-fallback');if(!area)return false;
-    const options=browserPreparationOptions(sources,target.type,resolution,getSettings().sourceSizeProfile,3);
+    const blocked=blockedCacheChecks.has(failure?.code)||blockedCacheChecks.has(failure?.registered?.cacheErrorCode);
+    const options=blocked?[]:browserPreparationOptions(applySourceMemory(target,sources),target.type,resolution,getSettings().sourceSizeProfile,3);
     area.replaceChildren();
-    if(!options.length)return false;
     const panel=element('section','','play-fallback-panel');
+    const cacheUnknown=failure?.registered?.cacheAvailability==='unknown';
+    const retry=button('Check again',()=>quickPlay(meta,target,episodeName,retry,overrides,{refresh:true}));retry.dataset.action='retry-sources';
     panel.append(
-      element('strong','No cached browser-ready copy is available.','play-fallback-title'),
-      element('p','Pick a version below. The player will add it to TorBox, wait for it to become ready, and play it here. You do not need to open TorBox.','play-fallback-copy')
+      element('strong','This version could not be opened yet.','play-fallback-title'),
+      element('p',blocked?failure.message:cacheUnknown?'TorBox availability could not be confirmed. Check again, or select a version below.':options.length?'Check again for a ready copy, or select a version below. Playback stays here in the app.':'No playable version is available from the current results. Check again to refresh the search.','play-fallback-copy')
     );
     const choices=element('div','','play-fallback-choices'),buttons=[];
     for(const [index,source] of options.entries()){
@@ -453,19 +484,21 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
         element('span',[source.resolution||source.quality||'Auto',shownSize!=='—'?shownSize:''].filter(Boolean).join(' · ')),
         element('small',source.filename||source.title||'Browser-compatible source')
       );
-      const action=button('Prepare & Play',()=>prepareAndPlayFallback(meta,target,episodeName,resolution,source,action,buttons,overrides),index===0);
+      const action=button(source.cached===true?'Retry & Play':'Prepare & Play',()=>prepareAndPlayFallback(meta,target,episodeName,resolution,source,action,buttons,overrides),index===0);action.dataset.action='prepare-source';
       buttons.push(action);row.append(copy,action);choices.append(row);
     }
-    panel.append(choices,element('p','Nothing is added unless you tap Prepare & Play. TorBox may need to download the containing torrent, which can be larger than the episode file shown here.','play-fallback-note'));
+    buttons.push(retry);
+    panel.append(choices,retry);
+    if(options.length)panel.append(element('p','Check again and Retry & Play use cached copies only. Prepare & Play can start a TorBox download, including a containing torrent larger than the episode shown here.','play-fallback-note'));
     area.append(panel);
     return true;
   }
 
-  async function quickPlay(meta,target,episodeName='',trigger){
+  async function quickPlay(meta,target,episodeName='',trigger,overrides={},{refresh=false}={}){
     const action=playbackActions.begin();
     const bounded=ms=>AbortSignal.any([action.signal,AbortSignal.timeout(ms)]);
     const original=trigger?.textContent;if(trigger){trigger.disabled=true;trigger.textContent='Opening…';}
-    const resumeRow=showResumeActivity(meta,target,episodeName,false);
+    const resumeRow=showResumeActivity(meta,target,episodeName,overrides.forceStartOver===true);
     clearPlaybackFallback();message('detail-message','Finding the recommended source…');
     let resolution,registered;
     try{
@@ -473,7 +506,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       await ensureService();action.check();
       if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Finding a playable source.');
       resolution=getResolution(target);
-      const {source:best,result,registered:readySources}=await preparedPlayback(target,resolution,{signal:bounded(45000),onCandidate:()=>{
+      const {source:best,result,registered:readySources}=await preparedPlayback(target,resolution,{signal:bounded(45000),refresh,onCandidate:()=>{
         action.check();message('detail-message','Checking cached browser-compatible source…');
         if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Checking a ready browser-compatible version.');
       }});
@@ -481,14 +514,15 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       action.check();
       const context=buildContext(meta,target,episodeName,resolution,best);
       if(resumeRow)context.resumeIntent=true;
+      Object.assign(context,overrides);
       if(resumeRow)resumeActivity?.update?.('Resuming '+resumeTitle(meta,target,episodeName)+'…','Opening the video and loading your saved position.');
       if($('source-dialog').open)$('source-dialog').close();closeTitleForPlayback();
       action.check();action.finish();
       const moved=await play(result.file,context);if(!moved)resumeActivity?.hide?.();return moved;
     }catch(e){if(!action.current())return false;action.finish();registered=e.registered||registered;
       resumeActivity?.hide?.();
-      if(e?.code==='NO_CACHED_BROWSER_SOURCE'&&registered?.sources?.length&&renderPlaybackFallback(meta,target,episodeName,resolution,registered.sources)){
-        message('detail-message','Choose a browser-compatible version below.');
+      if(isRecoverableSourceFailure(e)&&await ensureFallbackTitle(meta,target)&&renderPlaybackFallback(meta,target,episodeName,resolution,registered?.sources||[],overrides,e)){
+        message('detail-message','Playback needs another check. See the options below.');
         return false;
       }
       message('detail-message',e.message,true);
@@ -703,9 +737,9 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       action.check();action.finish();
       const moved=await play(result.file,context);if(!moved)resumeActivity?.hide?.();message('catalog-message','');return moved;
     }catch(e){if(!action.current())return false;action.finish();resumeActivity?.hide?.();registered=e.registered||registered;
-      if(e?.code==='NO_CACHED_BROWSER_SOURCE'&&meta&&registered?.sources?.length){
-        await showTitle(meta,target?.season);
-        if(renderPlaybackFallback(meta,target,name,resolution,registered.sources,{forceStartOver:startOver,startOverIntent:startOver,resumeIntent:!startOver,rewindOnResumeSeconds:startOver?0:getSettings().resumeRewindSeconds})){message('detail-message','Choose a browser-compatible version below.');return false;}
+      if(isRecoverableSourceFailure(e)&&meta){
+        if(!await ensureFallbackTitle(meta,target))return false;
+        if(renderPlaybackFallback(meta,target,name,resolution,registered?.sources||[],{forceStartOver:startOver,startOverIntent:startOver,resumeIntent:!startOver,rewindOnResumeSeconds:startOver?0:getSettings().resumeRewindSeconds},e)){message('detail-message','Playback needs another check. See the options below.');return false;}
       }
       message('catalog-message',e.message,true);return false;
     }

@@ -18,7 +18,8 @@ test('resume actions use a prominent activity overlay until playback begins', as
   assert.ok(app.includes("updateResumeOverlay('Resuming at '+formatResumeTime(position)+'…'"));
   assert.ok(discover.includes("resumeActivity?.show?.(startOver?'Starting '+entry.title+' over…':'Resuming '+entry.title+'…'"));
   assert.ok(discover.includes('context.resumeIntent=!startOver;context.startOverIntent=startOver'));
-  assert.ok(discover.includes('const resumeRow=showResumeActivity(meta,target,episodeName,false)'));
+  assert.ok(discover.includes('const resumeRow=showResumeActivity(meta,target,episodeName,overrides.forceStartOver===true)'));
+  assert.ok(discover.includes('Object.assign(context,overrides)'));
   assert.ok(style.includes('.resume-overlay{position:fixed;inset:0;z-index:200'));
   assert.ok(style.includes('@keyframes resume-spin'));
 });

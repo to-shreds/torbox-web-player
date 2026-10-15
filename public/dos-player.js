@@ -1,8 +1,8 @@
-import {getKidProfile} from './parental-controls.js?v=release-1.2.3-games.1';
+import {getKidProfile} from './parental-controls.js?v=release-1.2.4-recovery.1';
 
 const $ = id => document.getElementById(id);
 const canvas = $('dos-canvas'), paint = canvas.getContext('2d', {alpha: false});
-const BUILD = 'release-1.2.3-games.1', VENDOR_VERSION = '8.5.2';
+const BUILD = 'release-1.2.4-recovery.1', VENDOR_VERSION = '8.5.2';
 const MAX_BUNDLE = 32 * 1024 * 1024, START_TIMEOUT = 20000;
 const origin = location.origin, workers = new Map(), heldKeys = new Map(), heldMouse = new Map();
 const mousePulses = new Map();

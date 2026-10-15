@@ -264,7 +264,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.2.3', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.2.4', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/relay/health') {
         if(!corsAllowed)throw new AppError('BAD_ORIGIN','This frontend is not allowed to use the TorBox bridge.',403);
         response.setHeader('X-TorBox-Bridge','render');
@@ -508,7 +508,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
             episode: url.searchParams.has('episode') ? Number(url.searchParams.get('episode')) : undefined
           } : {}) };
           if (!guestAllows(target)) throw new AppError('GUEST_FORBIDDEN', 'This temporary link is limited to the shared title.', 403);
-          result = await sourceLookup.lookup(target, { fast: url.searchParams.get('fast') === '1', complete: url.searchParams.get('complete') === '1' });
+          result = await sourceLookup.lookup(target, { fast: url.searchParams.get('fast') === '1', complete: url.searchParams.get('complete') === '1', ...(url.searchParams.get('refresh') === '1' ? { refresh: true } : {}) });
         } else if (path === '/api/discover/sources' && method === 'POST') {
           const data = await discoveryBody(request);
           if (!guestAllows(data.target)) throw new AppError('GUEST_FORBIDDEN', 'This temporary link is limited to the shared title.', 403);
@@ -585,6 +585,6 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.2.3' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.2.4' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }

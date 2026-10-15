@@ -1,4 +1,4 @@
-import {DEFAULT_BUFFSTREAMS_BASE,buffstreamsBase,cleanBuffstreamsCatalog,buffstreamsPlayerUrl,requestBuffstreams} from './buffstreams.js?v=release-1.2.3-games.1';
+import {DEFAULT_BUFFSTREAMS_BASE,buffstreamsBase,cleanBuffstreamsCatalog,buffstreamsPlayerUrl,requestBuffstreams} from './buffstreams.js?v=release-1.2.4-recovery.1';
 
 const $=id=>document.getElementById(id);
 const KEY='tw-buffstreams-state-v1';
@@ -76,7 +76,7 @@ export function createBuffstreamsDesk({adult,stopLocalPlayback}){
     if(!permit())return;
     const request=begin(button);button.disabled=true;button.textContent='Opening…';stopLocalPlayback();
     try{
-      request.popup=window.open('./buffstreams-opening.html?v=release-1.2.3-games.1','_blank');
+      request.popup=window.open('./buffstreams-opening.html?v=release-1.2.4-recovery.1','_blank');
       if(request.popup)request.popup.opener=null;
     }catch{try{request.popup?.close();}catch{}request.popup=null;}
     message('Finding the selected game player…');

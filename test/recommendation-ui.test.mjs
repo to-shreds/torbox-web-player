@@ -59,9 +59,9 @@ test('no-cache Play failure renders in-app Prepare-and-Play choices instead of r
     readFile(new URL('../public/discover.js',import.meta.url),'utf8'),
     readFile(new URL('../public/index.html',import.meta.url),'utf8')
   ]);
-  assert.ok(source.includes("e?.code==='NO_CACHED_BROWSER_SOURCE'"));
-  assert.ok(source.includes('renderPlaybackFallback(meta,target,episodeName,resolution,registered.sources)'));
-  assert.ok(source.includes('browserPreparationOptions(sources'));
+  assert.ok(source.includes('isRecoverableSourceFailure(e)'));
+  assert.ok(source.includes('renderPlaybackFallback(meta,target,episodeName,resolution,registered?.sources||[],overrides,e)'));
+  assert.ok(source.includes('browserPreparationOptions(applySourceMemory(target,sources)'));
   assert.ok(source.includes("'Prepare & Play'"));
   assert.ok(source.includes("waitForPreparation:true"));
   assert.ok(source.includes("source.cached===true"));
@@ -107,10 +107,8 @@ test('automatic cached checks share one total timeout budget',async()=>{
 });
 test('automatic playback stays bounded and never opens the technical source picker',async()=>{
   const source=await readFile(new URL('../public/discover.js',import.meta.url),'utf8');
-  const stop=source.indexOf("if(!waitForPreparation)");
-  const poll=source.indexOf('await delay(3500)',stop);
-  assert.ok(stop>0&&poll>stop);
-  assert.ok(source.includes('unattended:true,waitForPreparation:false'));
+  assert.ok(source.includes('unattended:true,waitForPreparation:false,onlyCached:true'));
+  assert.ok(source.includes('AbortSignal.timeout(waitForPreparation?preparationTimeoutMs:initialTimeoutMs)'));
   assert.ok(source.includes('unattended?selectAutomaticVideoFile(result.files):result.files[0]'));
   assert.ok(!source.includes("if(e?.code==='NO_CACHED_BROWSER_SOURCE')await openOptions(meta,target,episodeName)"));
   assert.ok(!source.includes('await openOptions('));
