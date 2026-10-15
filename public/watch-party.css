@@ -2,4 +2,4 @@
 
 #player-media-shell #party-resume{position:absolute;z-index:12;top:.65rem;left:.65rem;min-height:42px;background:#a7e5df;color:#112423;font-size:.8rem}#player-media-shell:fullscreen #party-resume{top:max(.65rem,env(safe-area-inset-top));left:max(.65rem,env(safe-area-inset-left))}
 
-.player-presentation-bar{padding-right:46px;flex-wrap:wrap}
+.player-presentation-bar{padding-right:60px;flex-wrap:wrap}
