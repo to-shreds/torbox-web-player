@@ -13,10 +13,11 @@ const media = {
   aac: { bytes: await readFile(new URL('../fixtures/fixture.mp4', import.meta.url)), mime: 'video/mp4', suffix: 'H264.AAC.mp4' },
   intro: { bytes: await readFile(new URL('../fixtures/h264-aac-silent-intro.mp4', import.meta.url)), mime: 'video/mp4', suffix: 'H264.AAC.mp4' },
 };
-const results = [];
+const results = [], mediaRequests = [];
 let browser, mediaServer, mediaOrigin;
 before(async () => {
   mediaServer = createServer((request, response) => {
+    mediaRequests.push({ pathname: request.url.split('?')[0], range: request.headers.range || null });
     const selected = media[request.url.slice(1)];
     if (!selected) { response.writeHead(404); response.end(); return; }
     const bytes = selected.bytes, range = /bytes=(\d+)-(\d*)/.exec(request.headers.range || '');
@@ -43,7 +44,19 @@ async function setup(t, { main = 'eac3', alternative = true, missingCounter = fa
   const fixture = await startFixture(Number(process.env.AUDIO_TEST_PORT) || 4215);
   const context = await browser.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, serviceWorkers: 'block' });
   const page = await context.newPage(), errors = [], prepares = [], redirects = [], observations = [];
+  const firstMediaRequest = mediaRequests.length;
   if (crossOrigin) {
+    // This test substitutes a loopback server for the public CDN. New Chromium
+    // requires local-network permission when an intercepted redirect reaches
+    // that server. Scope the permission to this disposable fixture origin;
+    // production media still uses the unchanged public-CDN policy.
+    await context.grantPermissions(['local-network-access'], { origin: fixture.origin });
+    page.on('console', message => {
+      if (/security policy|cors|blocked|local network|access.*denied/i.test(message.text())) observations.push({ browserConsole: message.text().replace(/https?:\/\/[^\s"']+/g, value => { try { const url = new URL(value); return url.origin + (url.pathname.startsWith('/media/') ? '/media/[redacted]' : url.pathname); } catch { return '[url]'; } }).slice(0, 1500) });
+    });
+    page.on('requestfailed', request => {
+      if (request.resourceType() === 'media') { const url = new URL(request.url()); observations.push({ mediaRequestFailure: { origin: url.origin, pathname: url.pathname.startsWith('/media/') ? '/media/[redacted]' : url.pathname, failure: request.failure()?.errorText } }); }
+    });
     const cdp = await context.newCDPSession(page); await cdp.send('Media.enable');
     cdp.on('Media.playerPropertiesChanged', event => {
       for (const property of event.properties) if (['kAudioTracks', 'kAudioDecoderName'].includes(property.name)) observations.push({ mediaDiagnostic: property });
@@ -114,8 +127,11 @@ async function setup(t, { main = 'eac3', alternative = true, missingCounter = fa
   });
   t.after(async () => {
     controls.releaseRecovery?.();
-    if (!page.isClosed()) observations.push(...await page.evaluate(() => window.__audioObservations));
-    const row = { name: t.name, requests: { playback: fixture.control.playbackCalls, prepare: prepares.length, onlyCached: prepares.every(body => body.onlyCached === true), newTorrents: fixture.control.creates, serverMediaFetches: fixture.control.mediaFetches }, redirects, observations };
+    if (!page.isClosed()) {
+      observations.push(...await page.evaluate(() => window.__audioObservations));
+      if (crossOrigin) observations.push({ finalMediaState: await page.locator('#video-slot video').evaluate(video => ({ readyState: video.readyState, networkState: video.networkState, error: video.error && { code: video.error.code, message: video.error.message }, paused: video.paused, currentTime: video.currentTime })).catch(() => null) });
+    }
+    const row = { name: t.name, browser: await browser.version(), requests: { playback: fixture.control.playbackCalls, prepare: prepares.length, onlyCached: prepares.every(body => body.onlyCached === true), newTorrents: fixture.control.creates, serverMediaFetches: fixture.control.mediaFetches }, redirects, cdnRequests: mediaRequests.slice(firstMediaRequest), observations };
     results.push(row); t.diagnostic(JSON.stringify(row));
     await context.close(); await fixture.close();
     assert.deepEqual(errors, []); assert.equal(fixture.control.mediaFetches, 0); assert.equal(fixture.control.creates, 0);
