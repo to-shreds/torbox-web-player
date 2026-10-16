@@ -6,6 +6,18 @@ Read this first. The code repository controls implementation; `to-shreds/Project
 
 The user explicitly confirmed **My Workspace** (`tea-dakujgmk1f9s73d2v8ng`) on 2026-10-10 and requested blanket confirmation because this is the account's only workspace. Reuse that workspace for authorized Render work without asking again unless the user changes the choice. Pass its ID explicitly on Render calls.
 
+## PiP screen-timeout investigation · 2026-10-16
+
+Jon reports that the screen still times out during PiP. This requirement is **unresolved**. No new PiP/wake-lock release or device fix was made by this investigation; the website remains **release-1.2.7-audio.2**. The No sound removal/feedback repair remains published and verified.
+
+The prior PiP change only prevented application code from explicitly releasing a page wake lock. It cannot override browser policy: the Screen Wake Lock specification releases locks when a document becomes hidden and rejects hidden-document acquisition. PiP visibility does not make the parent document visible. Chromium separately has a native video wake lock that explicitly includes playing PiP regardless of page visibility. Do not conclude that all Android PiP is unable to keep the screen on, or represent another JavaScript request/polling loop as a verified fix.
+
+Primary sources inspected: https://www.w3.org/TR/screen-wake-lock/ sections8.1/11.3; https://www.w3.org/TR/picture-in-picture/ section3.6; https://developer.chrome.com/docs/capabilities/web-apis/wake-lock ; current VideoWakeLock::ShouldBeActive() at https://chromium.googlesource.com/chromium/src/+/main/third_party/blink/renderer/core/html/media/video_wake_lock.cc . Chromium bug561613785 has merged native video-wake-lock policy fixes: main CL8428425, M154 CL8462123 and M155 CL8464522 at chromium-review.googlesource.com. Root verified the main merged commit01df72b34847da8a1662b6f0f2de0a23e93ef5a0 through Gerrit's public API; independent audit verified the backports. These changes establish a browser defect and fix, not that Jon has an affected installed build. Main movie playback is a top-level video, with no demonstrated website policy change that fixes this symptom.
+
+Existing PiP tests are source-string assertions, not Android screen-timeout verification. Separate wake-lock acquisition/release races were found in code review and remain unfixed; they do not establish the cause or a solution for this PiP complaint. A local shell transport failure prevented further local execution, but the investigation and project state are persisted directly through GitHub. No runtime files, deployment, service plan or native APK were changed.
+
+Next material fact: browser name and exact installed version. Compare it with the browser fix before selecting an update or device-side solution. Keep browser and native APK separate; no new wrapper or phone-test claim is authorized by this investigation.
+
 ## Remove accidental No sound rejection · 2026-10-16
 
 Frontend **release-1.2.7-audio.2** supersedes the manual No sound controls described below. Jon reported accidentally touching it during working playback, which stopped the video and persistently avoided that version. All three No sound buttons and their event paths are removed, including fullscreen and the advanced health panel. Native volume/mute, fullscreen exit, Sound works, separate advanced Bad source feedback and automatic decoder recovery retain their existing behavior.
