@@ -1,0 +1,1384 @@
+{
+  "experiment": "Native Chromium HTMLVideoElement synthetic Matroska container and audio decode probe",
+  "sourceCommit": "34460c5a7434728873b66d6fa8ffb7a6ea5a7c62",
+  "browserVersion": "141.0.7390.0",
+  "executablePath": "/tmp/chromium",
+  "capabilities": {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",
+    "platform": "Linux x86_64",
+    "canPlayType": {
+      "video/mp4": "maybe",
+      "video/mp4; codecs=\"avc1.64000a, mp4a.40.2\"": "probably",
+      "video/x-matroska": "",
+      "video/matroska": "",
+      "video/x-matroska; codecs=\"avc1.64000a, mp4a.40.2\"": "",
+      "video/x-matroska; codecs=\"avc1.64000a, opus\"": "",
+      "video/webm": "maybe",
+      "video/webm; codecs=\"avc1.64000a, mp4a.40.2\"": ""
+    },
+    "mediaSourceIsTypeSupported": {
+      "video/mp4": false,
+      "video/mp4; codecs=\"avc1.64000a, mp4a.40.2\"": true,
+      "video/x-matroska": false,
+      "video/matroska": false,
+      "video/x-matroska; codecs=\"avc1.64000a, mp4a.40.2\"": false,
+      "video/x-matroska; codecs=\"avc1.64000a, opus\"": false,
+      "video/webm": false,
+      "video/webm; codecs=\"avc1.64000a, mp4a.40.2\"": false
+    }
+  },
+  "commands": [
+    [
+      "ffmpeg",
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-y",
+      "-i",
+      "test/fixtures/fixture.mp4",
+      "-f",
+      "lavfi",
+      "-i",
+      "sine=frequency=440:sample_rate=48000:duration=12",
+      "-t",
+      "12",
+      "-map",
+      "0:v:0",
+      "-map",
+      "1:a:0",
+      "-c:v",
+      "copy",
+      "-c:a",
+      "aac",
+      "-strict",
+      "-2",
+      "-ac",
+      "2",
+      "-b:a",
+      "192k",
+      "/tmp/torbox-audio-regression/h264-aac.mkv"
+    ],
+    [
+      "ffmpeg",
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-y",
+      "-i",
+      "test/fixtures/fixture.mp4",
+      "-f",
+      "lavfi",
+      "-i",
+      "sine=frequency=440:sample_rate=48000:duration=12",
+      "-t",
+      "12",
+      "-map",
+      "0:v:0",
+      "-map",
+      "1:a:0",
+      "-c:v",
+      "copy",
+      "-c:a",
+      "ac3",
+      "-strict",
+      "-2",
+      "-ac",
+      "2",
+      "-b:a",
+      "192k",
+      "/tmp/torbox-audio-regression/h264-ac3.mkv"
+    ],
+    [
+      "ffmpeg",
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-y",
+      "-i",
+      "test/fixtures/fixture.mp4",
+      "-f",
+      "lavfi",
+      "-i",
+      "sine=frequency=440:sample_rate=48000:duration=12",
+      "-t",
+      "12",
+      "-map",
+      "0:v:0",
+      "-map",
+      "1:a:0",
+      "-c:v",
+      "copy",
+      "-c:a",
+      "eac3",
+      "-strict",
+      "-2",
+      "-ac",
+      "2",
+      "-b:a",
+      "192k",
+      "/tmp/torbox-audio-regression/h264-eac3.mkv"
+    ],
+    [
+      "ffmpeg",
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-y",
+      "-i",
+      "test/fixtures/fixture.mp4",
+      "-f",
+      "lavfi",
+      "-i",
+      "sine=frequency=440:sample_rate=48000:duration=12",
+      "-t",
+      "12",
+      "-map",
+      "0:v:0",
+      "-map",
+      "1:a:0",
+      "-c:v",
+      "copy",
+      "-c:a",
+      "dca",
+      "-strict",
+      "-2",
+      "-ac",
+      "2",
+      "-b:a",
+      "768k",
+      "/tmp/torbox-audio-regression/h264-dca.mkv"
+    ]
+  ],
+  "files": {
+    "h264-aac.mkv": {
+      "size": 294531,
+      "sha256": "09edaa09f44ef23162b3185a760be1cc5c16b0db0859b072b76f2a137fd89a52",
+      "ffprobe": {
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "profile": "High",
+            "codec_type": "video",
+            "codec_tag_string": "[0][0][0][0]",
+            "codec_tag": "0x0000",
+            "width": 160,
+            "height": 90,
+            "coded_width": 160,
+            "coded_height": 90,
+            "closed_captions": 0,
+            "film_grain": 0,
+            "has_b_frames": 2,
+            "sample_aspect_ratio": "1:1",
+            "display_aspect_ratio": "16:9",
+            "pix_fmt": "yuv420p",
+            "level": 10,
+            "chroma_location": "left",
+            "field_order": "progressive",
+            "refs": 1,
+            "is_avc": "true",
+            "nal_length_size": "4",
+            "r_frame_rate": "2/1",
+            "avg_frame_rate": "1/1",
+            "time_base": "1/1000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "bits_per_raw_sample": "8",
+            "extradata_size": 46,
+            "disposition": {
+              "default": 1,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0
+            },
+            "tags": {
+              "HANDLER_NAME": "VideoHandler",
+              "VENDOR_ID": "[0][0][0][0]",
+              "ENCODER": "Lavc60.31.102 libx264",
+              "DURATION": "00:00:17.000000000"
+            }
+          },
+          {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_long_name": "AAC (Advanced Audio Coding)",
+            "profile": "LC",
+            "codec_type": "audio",
+            "codec_tag_string": "[0][0][0][0]",
+            "codec_tag": "0x0000",
+            "sample_fmt": "fltp",
+            "sample_rate": "48000",
+            "channels": 2,
+            "channel_layout": "stereo",
+            "bits_per_sample": 0,
+            "initial_padding": 1024,
+            "r_frame_rate": "0/0",
+            "avg_frame_rate": "0/0",
+            "time_base": "1/1000",
+            "start_pts": -21,
+            "start_time": "-0.021000",
+            "extradata_size": 5,
+            "disposition": {
+              "default": 0,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0
+            },
+            "tags": {
+              "ENCODER": "Lavc60.31.102 aac",
+              "DURATION": "00:00:12.021000000"
+            }
+          }
+        ],
+        "format": {
+          "filename": "/tmp/torbox-audio-regression/h264-aac.mkv",
+          "nb_streams": 2,
+          "nb_programs": 0,
+          "format_name": "matroska,webm",
+          "format_long_name": "Matroska / WebM",
+          "start_time": "-0.021000",
+          "duration": "17.000000",
+          "size": "294531",
+          "bit_rate": "138602",
+          "probe_score": 100,
+          "tags": {
+            "COMPATIBLE_BRANDS": "isomiso2avc1mp41",
+            "MAJOR_BRAND": "isom",
+            "MINOR_VERSION": "512",
+            "ENCODER": "Lavf60.16.100"
+          }
+        }
+      }
+    },
+    "h264-ac3.mkv": {
+      "size": 292668,
+      "sha256": "f6a5e765203dc8fc9f12e5bab9d6c2c02458ff15abeb4289ee5c6a50ee296577",
+      "ffprobe": {
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "profile": "High",
+            "codec_type": "video",
+            "codec_tag_string": "[0][0][0][0]",
+            "codec_tag": "0x0000",
+            "width": 160,
+            "height": 90,
+            "coded_width": 160,
+            "coded_height": 90,
+            "closed_captions": 0,
+            "film_grain": 0,
+            "has_b_frames": 2,
+            "sample_aspect_ratio": "1:1",
+            "display_aspect_ratio": "16:9",
+            "pix_fmt": "yuv420p",
+            "level": 10,
+            "chroma_location": "left",
+            "field_order": "progressive",
+            "refs": 1,
+            "is_avc": "true",
+            "nal_length_size": "4",
+            "r_frame_rate": "2/1",
+            "avg_frame_rate": "1/1",
+            "time_base": "1/1000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "bits_per_raw_sample": "8",
+            "extradata_size": 46,
+            "disposition": {
+              "default": 1,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0
+            },
+            "tags": {
+              "HANDLER_NAME": "VideoHandler",
+              "VENDOR_ID": "[0][0][0][0]",
+              "ENCODER": "Lavc60.31.102 libx264",
+              "DURATION": "00:00:17.000000000"
+            }
+          },
+          {
+            "index": 1,
+            "codec_name": "ac3",
+            "codec_long_name": "ATSC A/52A (AC-3)",
+            "codec_type": "audio",
+            "codec_tag_string": "[0][0][0][0]",
+            "codec_tag": "0x0000",
+            "sample_fmt": "fltp",
+            "sample_rate": "48000",
+            "channels": 2,
+            "channel_layout": "stereo",
+            "bits_per_sample": 0,
+            "initial_padding": 256,
+            "r_frame_rate": "0/0",
+            "avg_frame_rate": "0/0",
+            "time_base": "1/1000",
+            "start_pts": -5,
+            "start_time": "-0.005000",
+            "bit_rate": "192000",
+            "disposition": {
+              "default": 0,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0
+            },
+            "tags": {
+              "ENCODER": "Lavc60.31.102 ac3",
+              "DURATION": "00:00:12.000000000"
+            }
+          }
+        ],
+        "format": {
+          "filename": "/tmp/torbox-audio-regression/h264-ac3.mkv",
+          "nb_streams": 2,
+          "nb_programs": 0,
+          "format_name": "matroska,webm",
+          "format_long_name": "Matroska / WebM",
+          "start_time": "-0.005000",
+          "duration": "17.000000",
+          "size": "292668",
+          "bit_rate": "137726",
+          "probe_score": 100,
+          "tags": {
+            "COMPATIBLE_BRANDS": "isomiso2avc1mp41",
+            "MAJOR_BRAND": "isom",
+            "MINOR_VERSION": "512",
+            "ENCODER": "Lavf60.16.100"
+          }
+        }
+      }
+    },
+    "h264-eac3.mkv": {
+      "size": 292662,
+      "sha256": "b799fd8e80f2c6bdd9b0c84dfa86fbc6c36b1e03c4acef11af71105d47272785",
+      "ffprobe": {
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "profile": "High",
+            "codec_type": "video",
+            "codec_tag_string": "[0][0][0][0]",
+            "codec_tag": "0x0000",
+            "width": 160,
+            "height": 90,
+            "coded_width": 160,
+            "coded_height": 90,
+            "closed_captions": 0,
+            "film_grain": 0,
+            "has_b_frames": 2,
+            "sample_aspect_ratio": "1:1",
+            "display_aspect_ratio": "16:9",
+            "pix_fmt": "yuv420p",
+            "level": 10,
+            "chroma_location": "left",
+            "field_order": "progressive",
+            "refs": 1,
+            "is_avc": "true",
+            "nal_length_size": "4",
+            "r_frame_rate": "2/1",
+            "avg_frame_rate": "1/1",
+            "time_base": "1/1000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "bits_per_raw_sample": "8",
+            "extradata_size": 46,
+            "disposition": {
+              "default": 1,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0
+            },
+            "tags": {
+              "HANDLER_NAME": "VideoHandler",
+              "VENDOR_ID": "[0][0][0][0]",
+              "ENCODER": "Lavc60.31.102 libx264",
+              "DURATION": "00:00:17.000000000"
+            }
+          },
+          {
+            "index": 1,
+            "codec_name": "eac3",
+            "codec_long_name": "ATSC A/52B (AC-3, E-AC-3)",
+            "codec_type": "audio",
+            "codec_tag_string": "[0][0][0][0]",
+            "codec_tag": "0x0000",
+            "sample_fmt": "fltp",
+            "sample_rate": "48000",
+            "channels": 2,
+            "channel_layout": "stereo",
+            "bits_per_sample": 0,
+            "initial_padding": 256,
+            "r_frame_rate": "0/0",
+            "avg_frame_rate": "0/0",
+            "time_base": "1/1000",
+            "start_pts": -5,
+            "start_time": "-0.005000",
+            "bit_rate": "192000",
+            "disposition": {
+              "default": 0,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0
+            },
+            "tags": {
+              "ENCODER": "Lavc60.31.102 eac3",
+              "DURATION": "00:00:12.000000000"
+            }
+          }
+        ],
+        "format": {
+          "filename": "/tmp/torbox-audio-regression/h264-eac3.mkv",
+          "nb_streams": 2,
+          "nb_programs": 0,
+          "format_name": "matroska,webm",
+          "format_long_name": "Matroska / WebM",
+          "start_time": "-0.005000",
+          "duration": "17.000000",
+          "size": "292662",
+          "bit_rate": "137723",
+          "probe_score": 100,
+          "tags": {
+            "COMPATIBLE_BRANDS": "isomiso2avc1mp41",
+            "MAJOR_BRAND": "isom",
+            "MINOR_VERSION": "512",
+            "ENCODER": "Lavf60.16.100"
+          }
+        }
+      }
+    },
+    "h264-dca.mkv": {
+      "size": 1161904,
+      "sha256": "16e5b6fe1abd0ee4ddb364c633706b1f0df861cf159566f2c3abaa9767b02d98",
+      "ffprobe": {
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "profile": "High",
+            "codec_type": "video",
+            "codec_tag_string": "[0][0][0][0]",
+            "codec_tag": "0x0000",
+            "width": 160,
+            "height": 90,
+            "coded_width": 160,
+            "coded_height": 90,
+            "closed_captions": 0,
+            "film_grain": 0,
+            "has_b_frames": 2,
+            "sample_aspect_ratio": "1:1",
+            "display_aspect_ratio": "16:9",
+            "pix_fmt": "yuv420p",
+            "level": 10,
+            "chroma_location": "left",
+            "field_order": "progressive",
+            "refs": 1,
+            "is_avc": "true",
+            "nal_length_size": "4",
+            "r_frame_rate": "2/1",
+            "avg_frame_rate": "1/1",
+            "time_base": "1/1000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "bits_per_raw_sample": "8",
+            "extradata_size": 46,
+            "disposition": {
+              "default": 1,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0
+            },
+            "tags": {
+              "HANDLER_NAME": "VideoHandler",
+              "VENDOR_ID": "[0][0][0][0]",
+              "ENCODER": "Lavc60.31.102 libx264",
+              "DURATION": "00:00:17.000000000"
+            }
+          },
+          {
+            "index": 1,
+            "codec_name": "dts",
+            "codec_long_name": "DCA (DTS Coherent Acoustics)",
+            "profile": "DTS",
+            "codec_type": "audio",
+            "codec_tag_string": "[0][0][0][0]",
+            "codec_tag": "0x0000",
+            "sample_fmt": "fltp",
+            "sample_rate": "48000",
+            "channels": 2,
+            "channel_layout": "stereo",
+            "bits_per_sample": 0,
+            "initial_padding": 0,
+            "r_frame_rate": "0/0",
+            "avg_frame_rate": "0/0",
+            "time_base": "1/1000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "bit_rate": "768000",
+            "disposition": {
+              "default": 0,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0
+            },
+            "tags": {
+              "ENCODER": "Lavc60.31.102 dca",
+              "DURATION": "00:00:12.000000000"
+            }
+          }
+        ],
+        "format": {
+          "filename": "/tmp/torbox-audio-regression/h264-dca.mkv",
+          "nb_streams": 2,
+          "nb_programs": 0,
+          "format_name": "matroska,webm",
+          "format_long_name": "Matroska / WebM",
+          "start_time": "0.000000",
+          "duration": "17.000000",
+          "size": "1161904",
+          "bit_rate": "546778",
+          "probe_score": 100,
+          "tags": {
+            "COMPATIBLE_BRANDS": "isomiso2avc1mp41",
+            "MAJOR_BRAND": "isom",
+            "MINOR_VERSION": "512",
+            "ENCODER": "Lavf60.16.100"
+          }
+        }
+      }
+    }
+  },
+  "results": [
+    {
+      "filename": "h264-aac.mkv",
+      "mime": "video/x-matroska",
+      "initialPlayback": true,
+      "initial": {
+        "currentTime": 1.061333,
+        "duration": 17,
+        "readyState": 4,
+        "renderedFrames": 2,
+        "audioPeak": 0.09141141176223755,
+        "signalSamples": 53,
+        "decodedVideoFrames": 5,
+        "decodedAudioBytes": 31516,
+        "lastFrameMediaTime": 1
+      },
+      "seek": {
+        "settled": true,
+        "advanced": true,
+        "currentTime": 6.416,
+        "renderedFrames": 3,
+        "lastFrameMediaTime": 6,
+        "audioPeak": 0.09141141176223755,
+        "signalSamples": 75
+      },
+      "playError": null,
+      "errors": [],
+      "events": [
+        {
+          "event": "waiting",
+          "currentTime": 0,
+          "readyState": 0
+        },
+        {
+          "event": "loadedmetadata",
+          "currentTime": 0,
+          "readyState": 1
+        },
+        {
+          "event": "loadeddata",
+          "currentTime": 0,
+          "readyState": 4
+        },
+        {
+          "event": "canplay",
+          "currentTime": 0,
+          "readyState": 4
+        },
+        {
+          "event": "playing",
+          "currentTime": 0,
+          "readyState": 4
+        },
+        {
+          "event": "seeking",
+          "currentTime": 6,
+          "readyState": 1
+        },
+        {
+          "event": "seeked",
+          "currentTime": 6,
+          "readyState": 4
+        },
+        {
+          "event": "canplay",
+          "currentTime": 6,
+          "readyState": 4
+        },
+        {
+          "event": "playing",
+          "currentTime": 6,
+          "readyState": 4
+        }
+      ],
+      "mediaDiagnostics": {
+        "properties": [
+          {
+            "name": "kVideoDecoderName",
+            "value": "FFmpegVideoDecoder"
+          },
+          {
+            "name": "kIsStreaming",
+            "value": "false"
+          },
+          {
+            "name": "kFrameUrl",
+            "value": "http://127.0.0.1:40007/"
+          },
+          {
+            "name": "kAudioTracks",
+            "value": "[{\"bytes per channel\":4,\"bytes per frame\":8,\"channel layout\":\"STEREO\",\"channels\":2,\"codec\":\"aac\",\"codec delay\":1024,\"discard decoder delay\":true,\"encryption scheme\":\"Unencrypted\",\"has extra data\":true,\"profile\":\"unknown\",\"sample format\":\"Float 32-bit planar\",\"samples per second\":48000,\"seek preroll\":\"0us\"}]"
+          },
+          {
+            "name": "kResolution",
+            "value": "160x90"
+          },
+          {
+            "name": "kRendererName",
+            "value": "RendererImpl"
+          },
+          {
+            "name": "kTotalBytes",
+            "value": "0x47e83"
+          },
+          {
+            "name": "kMaxDuration",
+            "value": "17.0"
+          },
+          {
+            "name": "kFrameTitle",
+            "value": "Synthetic codec probe"
+          },
+          {
+            "name": "kIsPlatformAudioDecoder",
+            "value": "false"
+          },
+          {
+            "name": "kAudioDecoderName",
+            "value": "FFmpegAudioDecoder"
+          },
+          {
+            "name": "kVideoTracks",
+            "value": "[{\"alpha mode\":\"is_opaque\",\"codec\":\"h264\",\"coded size\":\"160x90\",\"color space\":{\"matrix\":\"SMPTE170M\",\"primaries\":\"SMPTE170M\",\"range\":\"LIMITED\",\"transfer\":\"SMPTE170M\"},\"encryption scheme\":\"Unencrypted\",\"has extra data\":true,\"hdr metadata\":\"unset\",\"natural size\":\"160x90\",\"orientation\":\"0\u00b0\",\"profile\":\"h264 high\",\"visible rect\":\"0,0 160x90\"}]"
+          },
+          {
+            "name": "kIsRangeHeaderSupported",
+            "value": "true"
+          },
+          {
+            "name": "kIsVideoDecryptingDemuxerStream",
+            "value": "false"
+          },
+          {
+            "name": "kStartTime",
+            "value": "-0.021"
+          },
+          {
+            "name": "kBitrate",
+            "value": "138602"
+          },
+          {
+            "name": "kIsPlatformVideoDecoder",
+            "value": "false"
+          },
+          {
+            "name": "kIsSingleOrigin",
+            "value": "true"
+          },
+          {
+            "name": "kIsAudioDecryptingDemuxerStream",
+            "value": "false"
+          }
+        ],
+        "errors": [],
+        "events": [
+          {
+            "timestamp": 32596.354272,
+            "value": "{\"created\":\"2026-10-16 00:40:17.282814 UTC\",\"event\":\"kMediaLogCreated\"}"
+          },
+          {
+            "timestamp": 32596.35924,
+            "value": "{\"event\":\"kWebMediaPlayerCreated\",\"origin_url\":\"http://127.0.0.1:40007/\"}"
+          },
+          {
+            "timestamp": 32596.359616,
+            "value": "{\"event\":\"kLoad\",\"url\":\"http://127.0.0.1:40007/h264-aac.mkv?mime=video%2Fx-matroska\"}"
+          },
+          {
+            "timestamp": 32596.375116,
+            "value": "{\"event\":\"kPipelineStateChange\",\"pipeline_state\":\"kStarting\"}"
+          },
+          {
+            "timestamp": 32596.395058,
+            "value": "{\"event\":\"kPipelineStateChange\",\"pipeline_state\":\"kPlaying\"}"
+          },
+          {
+            "timestamp": 32596.399643,
+            "value": "{\"dimensions\":\"160x90\",\"event\":\"kVideoSizeChanged\"}"
+          },
+          {
+            "timestamp": 32596.38492,
+            "value": "{\"duration\":17.0,\"event\":\"kDurationChanged\"}"
+          },
+          {
+            "timestamp": 32596.405821,
+            "value": "{\"event\":\"kBufferingStateChanged\",\"video_buffering_state\":{\"state\":\"BUFFERING_HAVE_ENOUGH\"}}"
+          },
+          {
+            "timestamp": 32596.39697,
+            "value": "{\"audio_buffering_state\":{\"state\":\"BUFFERING_HAVE_ENOUGH\"},\"event\":\"kBufferingStateChanged\"}"
+          },
+          {
+            "timestamp": 32596.405875,
+            "value": "{\"event\":\"kBufferingStateChanged\",\"pipeline_buffering_state\":{\"for_suspended_start\":false,\"state\":\"BUFFERING_HAVE_ENOUGH\"}}"
+          },
+          {
+            "timestamp": 32596.385476,
+            "value": "{\"event\":\"kPlay\"}"
+          }
+        ]
+      }
+    },
+    {
+      "filename": "h264-ac3.mkv",
+      "mime": "video/x-matroska",
+      "initialPlayback": false,
+      "initial": {
+        "currentTime": 5.957749,
+        "duration": 17,
+        "readyState": 4,
+        "renderedFrames": 6,
+        "audioPeak": 0,
+        "signalSamples": 0,
+        "decodedVideoFrames": 10,
+        "decodedAudioBytes": 0,
+        "lastFrameMediaTime": 5
+      },
+      "seek": null,
+      "playError": null,
+      "errors": [],
+      "events": [
+        {
+          "event": "waiting",
+          "currentTime": 0,
+          "readyState": 0
+        },
+        {
+          "event": "loadedmetadata",
+          "currentTime": 0,
+          "readyState": 1
+        },
+        {
+          "event": "loadeddata",
+          "currentTime": 0.000174,
+          "readyState": 4
+        },
+        {
+          "event": "canplay",
+          "currentTime": 0.000195,
+          "readyState": 4
+        },
+        {
+          "event": "playing",
+          "currentTime": 0.000205,
+          "readyState": 4
+        }
+      ],
+      "mediaDiagnostics": {
+        "properties": [
+          {
+            "name": "kVideoDecoderName",
+            "value": "FFmpegVideoDecoder"
+          },
+          {
+            "name": "kIsStreaming",
+            "value": "false"
+          },
+          {
+            "name": "kFrameUrl",
+            "value": "http://127.0.0.1:40007/"
+          },
+          {
+            "name": "kAudioTracks",
+            "value": "[]"
+          },
+          {
+            "name": "kResolution",
+            "value": "160x90"
+          },
+          {
+            "name": "kRendererName",
+            "value": "RendererImpl"
+          },
+          {
+            "name": "kTotalBytes",
+            "value": "0x4773c"
+          },
+          {
+            "name": "kMaxDuration",
+            "value": "17.0"
+          },
+          {
+            "name": "kFrameTitle",
+            "value": "Synthetic codec probe"
+          },
+          {
+            "name": "kVideoTracks",
+            "value": "[{\"alpha mode\":\"is_opaque\",\"codec\":\"h264\",\"coded size\":\"160x90\",\"color space\":{\"matrix\":\"SMPTE170M\",\"primaries\":\"SMPTE170M\",\"range\":\"LIMITED\",\"transfer\":\"SMPTE170M\"},\"encryption scheme\":\"Unencrypted\",\"has extra data\":true,\"hdr metadata\":\"unset\",\"natural size\":\"160x90\",\"orientation\":\"0\u00b0\",\"profile\":\"h264 high\",\"visible rect\":\"0,0 160x90\"}]"
+          },
+          {
+            "name": "kIsRangeHeaderSupported",
+            "value": "true"
+          },
+          {
+            "name": "kIsVideoDecryptingDemuxerStream",
+            "value": "false"
+          },
+          {
+            "name": "kStartTime",
+            "value": "-0.005"
+          },
+          {
+            "name": "kBitrate",
+            "value": "137726"
+          },
+          {
+            "name": "kIsPlatformVideoDecoder",
+            "value": "false"
+          },
+          {
+            "name": "kIsSingleOrigin",
+            "value": "true"
+          }
+        ],
+        "errors": [],
+        "events": [
+          {
+            "timestamp": 32597.992989,
+            "value": "{\"created\":\"2026-10-16 00:40:18.921531 UTC\",\"event\":\"kMediaLogCreated\"}"
+          },
+          {
+            "timestamp": 32597.99607,
+            "value": "{\"event\":\"kWebMediaPlayerCreated\",\"origin_url\":\"http://127.0.0.1:40007/\"}"
+          },
+          {
+            "timestamp": 32597.996235,
+            "value": "{\"event\":\"kLoad\",\"url\":\"http://127.0.0.1:40007/h264-ac3.mkv?mime=video%2Fx-matroska\"}"
+          },
+          {
+            "timestamp": 32598.016726,
+            "value": "{\"event\":\"kPipelineStateChange\",\"pipeline_state\":\"kStarting\"}"
+          },
+          {
+            "timestamp": 32598.02846,
+            "value": "{\"event\":\"kPipelineStateChange\",\"pipeline_state\":\"kPlaying\"}"
+          },
+          {
+            "timestamp": 32598.033793,
+            "value": "{\"dimensions\":\"160x90\",\"event\":\"kVideoSizeChanged\"}"
+          },
+          {
+            "timestamp": 32598.018753,
+            "value": "{\"duration\":17.0,\"event\":\"kDurationChanged\"}"
+          },
+          {
+            "timestamp": 32598.038509,
+            "value": "{\"event\":\"kBufferingStateChanged\",\"video_buffering_state\":{\"state\":\"BUFFERING_HAVE_ENOUGH\"}}"
+          },
+          {
+            "timestamp": 32598.038577,
+            "value": "{\"event\":\"kBufferingStateChanged\",\"pipeline_buffering_state\":{\"for_suspended_start\":false,\"state\":\"BUFFERING_HAVE_ENOUGH\"}}"
+          },
+          {
+            "timestamp": 32598.019005,
+            "value": "{\"event\":\"kPlay\"}"
+          },
+          {
+            "timestamp": 32603.996313,
+            "value": "{\"event\":\"kPause\"}"
+          }
+        ]
+      }
+    },
+    {
+      "filename": "h264-eac3.mkv",
+      "mime": "video/x-matroska",
+      "initialPlayback": false,
+      "initial": {
+        "currentTime": 5.975207,
+        "duration": 17,
+        "readyState": 4,
+        "renderedFrames": 6,
+        "audioPeak": 0,
+        "signalSamples": 0,
+        "decodedVideoFrames": 10,
+        "decodedAudioBytes": 0,
+        "lastFrameMediaTime": 5
+      },
+      "seek": null,
+      "playError": null,
+      "errors": [],
+      "events": [
+        {
+          "event": "waiting",
+          "currentTime": 0,
+          "readyState": 0
+        },
+        {
+          "event": "loadedmetadata",
+          "currentTime": 0,
+          "readyState": 1
+        },
+        {
+          "event": "loadeddata",
+          "currentTime": 0.00018,
+          "readyState": 4
+        },
+        {
+          "event": "canplay",
+          "currentTime": 0.000199,
+          "readyState": 4
+        },
+        {
+          "event": "playing",
+          "currentTime": 0.000213,
+          "readyState": 4
+        }
+      ],
+      "mediaDiagnostics": {
+        "properties": [
+          {
+            "name": "kVideoDecoderName",
+            "value": "FFmpegVideoDecoder"
+          },
+          {
+            "name": "kIsStreaming",
+            "value": "false"
+          },
+          {
+            "name": "kFrameUrl",
+            "value": "http://127.0.0.1:40007/"
+          },
+          {
+            "name": "kAudioTracks",
+            "value": "[]"
+          },
+          {
+            "name": "kResolution",
+            "value": "160x90"
+          },
+          {
+            "name": "kRendererName",
+            "value": "RendererImpl"
+          },
+          {
+            "name": "kTotalBytes",
+            "value": "0x47736"
+          },
+          {
+            "name": "kMaxDuration",
+            "value": "17.0"
+          },
+          {
+            "name": "kFrameTitle",
+            "value": "Synthetic codec probe"
+          },
+          {
+            "name": "kVideoTracks",
+            "value": "[{\"alpha mode\":\"is_opaque\",\"codec\":\"h264\",\"coded size\":\"160x90\",\"color space\":{\"matrix\":\"SMPTE170M\",\"primaries\":\"SMPTE170M\",\"range\":\"LIMITED\",\"transfer\":\"SMPTE170M\"},\"encryption scheme\":\"Unencrypted\",\"has extra data\":true,\"hdr metadata\":\"unset\",\"natural size\":\"160x90\",\"orientation\":\"0\u00b0\",\"profile\":\"h264 high\",\"visible rect\":\"0,0 160x90\"}]"
+          },
+          {
+            "name": "kIsRangeHeaderSupported",
+            "value": "true"
+          },
+          {
+            "name": "kIsVideoDecryptingDemuxerStream",
+            "value": "false"
+          },
+          {
+            "name": "kStartTime",
+            "value": "-0.005"
+          },
+          {
+            "name": "kBitrate",
+            "value": "137723"
+          },
+          {
+            "name": "kIsPlatformVideoDecoder",
+            "value": "false"
+          },
+          {
+            "name": "kIsSingleOrigin",
+            "value": "true"
+          }
+        ],
+        "errors": [],
+        "events": [
+          {
+            "timestamp": 32604.075686,
+            "value": "{\"created\":\"2026-10-16 00:40:25.004228 UTC\",\"event\":\"kMediaLogCreated\"}"
+          },
+          {
+            "timestamp": 32604.076942,
+            "value": "{\"event\":\"kWebMediaPlayerCreated\",\"origin_url\":\"http://127.0.0.1:40007/\"}"
+          },
+          {
+            "timestamp": 32604.077094,
+            "value": "{\"event\":\"kLoad\",\"url\":\"http://127.0.0.1:40007/h264-eac3.mkv?mime=video%2Fx-matroska\"}"
+          },
+          {
+            "timestamp": 32604.087709,
+            "value": "{\"event\":\"kPipelineStateChange\",\"pipeline_state\":\"kStarting\"}"
+          },
+          {
+            "timestamp": 32604.096684,
+            "value": "{\"event\":\"kPipelineStateChange\",\"pipeline_state\":\"kPlaying\"}"
+          },
+          {
+            "timestamp": 32604.099289,
+            "value": "{\"dimensions\":\"160x90\",\"event\":\"kVideoSizeChanged\"}"
+          },
+          {
+            "timestamp": 32604.090149,
+            "value": "{\"duration\":17.0,\"event\":\"kDurationChanged\"}"
+          },
+          {
+            "timestamp": 32604.102898,
+            "value": "{\"event\":\"kBufferingStateChanged\",\"video_buffering_state\":{\"state\":\"BUFFERING_HAVE_ENOUGH\"}}"
+          },
+          {
+            "timestamp": 32604.102948,
+            "value": "{\"event\":\"kBufferingStateChanged\",\"pipeline_buffering_state\":{\"for_suspended_start\":false,\"state\":\"BUFFERING_HAVE_ENOUGH\"}}"
+          },
+          {
+            "timestamp": 32604.09046,
+            "value": "{\"event\":\"kPlay\"}"
+          },
+          {
+            "timestamp": 32610.078166,
+            "value": "{\"event\":\"kPause\"}"
+          }
+        ]
+      }
+    },
+    {
+      "filename": "h264-dca.mkv",
+      "mime": "video/x-matroska",
+      "initialPlayback": false,
+      "initial": {
+        "currentTime": 5.945504,
+        "duration": 17,
+        "readyState": 4,
+        "renderedFrames": 6,
+        "audioPeak": 0,
+        "signalSamples": 0,
+        "decodedVideoFrames": 9,
+        "decodedAudioBytes": 0,
+        "lastFrameMediaTime": 5
+      },
+      "seek": null,
+      "playError": null,
+      "errors": [],
+      "events": [
+        {
+          "event": "waiting",
+          "currentTime": 0,
+          "readyState": 0
+        },
+        {
+          "event": "loadedmetadata",
+          "currentTime": 0,
+          "readyState": 1
+        },
+        {
+          "event": "loadeddata",
+          "currentTime": 0.000162,
+          "readyState": 4
+        },
+        {
+          "event": "canplay",
+          "currentTime": 0.000185,
+          "readyState": 4
+        },
+        {
+          "event": "playing",
+          "currentTime": 0.000197,
+          "readyState": 4
+        }
+      ],
+      "mediaDiagnostics": {
+        "properties": [
+          {
+            "name": "kVideoDecoderName",
+            "value": "FFmpegVideoDecoder"
+          },
+          {
+            "name": "kIsStreaming",
+            "value": "false"
+          },
+          {
+            "name": "kFrameUrl",
+            "value": "http://127.0.0.1:40007/"
+          },
+          {
+            "name": "kAudioTracks",
+            "value": "[]"
+          },
+          {
+            "name": "kResolution",
+            "value": "160x90"
+          },
+          {
+            "name": "kRendererName",
+            "value": "RendererImpl"
+          },
+          {
+            "name": "kTotalBytes",
+            "value": "0x11bab0"
+          },
+          {
+            "name": "kMaxDuration",
+            "value": "17.0"
+          },
+          {
+            "name": "kFrameTitle",
+            "value": "Synthetic codec probe"
+          },
+          {
+            "name": "kVideoTracks",
+            "value": "[{\"alpha mode\":\"is_opaque\",\"codec\":\"h264\",\"coded size\":\"160x90\",\"color space\":{\"matrix\":\"SMPTE170M\",\"primaries\":\"SMPTE170M\",\"range\":\"LIMITED\",\"transfer\":\"SMPTE170M\"},\"encryption scheme\":\"Unencrypted\",\"has extra data\":true,\"hdr metadata\":\"unset\",\"natural size\":\"160x90\",\"orientation\":\"0\u00b0\",\"profile\":\"h264 high\",\"visible rect\":\"0,0 160x90\"}]"
+          },
+          {
+            "name": "kIsRangeHeaderSupported",
+            "value": "true"
+          },
+          {
+            "name": "kIsVideoDecryptingDemuxerStream",
+            "value": "false"
+          },
+          {
+            "name": "kStartTime",
+            "value": "0.0"
+          },
+          {
+            "name": "kBitrate",
+            "value": "546778"
+          },
+          {
+            "name": "kIsPlatformVideoDecoder",
+            "value": "false"
+          },
+          {
+            "name": "kIsSingleOrigin",
+            "value": "true"
+          }
+        ],
+        "errors": [],
+        "events": [
+          {
+            "timestamp": 32610.15819,
+            "value": "{\"created\":\"2026-10-16 00:40:31.086733 UTC\",\"event\":\"kMediaLogCreated\"}"
+          },
+          {
+            "timestamp": 32610.159181,
+            "value": "{\"event\":\"kWebMediaPlayerCreated\",\"origin_url\":\"http://127.0.0.1:40007/\"}"
+          },
+          {
+            "timestamp": 32610.159338,
+            "value": "{\"event\":\"kLoad\",\"url\":\"http://127.0.0.1:40007/h264-dca.mkv?mime=video%2Fx-matroska\"}"
+          },
+          {
+            "timestamp": 32610.171942,
+            "value": "{\"event\":\"kPipelineStateChange\",\"pipeline_state\":\"kStarting\"}"
+          },
+          {
+            "timestamp": 32610.183218,
+            "value": "{\"event\":\"kPipelineStateChange\",\"pipeline_state\":\"kPlaying\"}"
+          },
+          {
+            "timestamp": 32610.191711,
+            "value": "{\"dimensions\":\"160x90\",\"event\":\"kVideoSizeChanged\"}"
+          },
+          {
+            "timestamp": 32610.180285,
+            "value": "{\"duration\":17.0,\"event\":\"kDurationChanged\"}"
+          },
+          {
+            "timestamp": 32610.2128,
+            "value": "{\"event\":\"kBufferingStateChanged\",\"video_buffering_state\":{\"state\":\"BUFFERING_HAVE_ENOUGH\"}}"
+          },
+          {
+            "timestamp": 32610.212835,
+            "value": "{\"event\":\"kBufferingStateChanged\",\"pipeline_buffering_state\":{\"for_suspended_start\":false,\"state\":\"BUFFERING_HAVE_ENOUGH\"}}"
+          },
+          {
+            "timestamp": 32610.182878,
+            "value": "{\"event\":\"kPlay\"}"
+          },
+          {
+            "timestamp": 32616.15837,
+            "value": "{\"event\":\"kPause\"}"
+          }
+        ]
+      }
+    }
+  ],
+  "requests": [
+    {
+      "filename": "h264-aac.mkv",
+      "mime": "video/x-matroska",
+      "range": "bytes=0-"
+    },
+    {
+      "filename": "h264-ac3.mkv",
+      "mime": "video/x-matroska",
+      "range": "bytes=0-"
+    },
+    {
+      "filename": "h264-eac3.mkv",
+      "mime": "video/x-matroska",
+      "range": "bytes=0-"
+    },
+    {
+      "filename": "h264-dca.mkv",
+      "mime": "video/x-matroska",
+      "range": "bytes=0-"
+    }
+  ],
+  "officialReference": "https://www.chromium.org/audio-video/",
+  "limitations": [
+    "Desktop Linux Chromium 141.0.7390.0 only; no physical Android/Chrome, device hardware decoder, or audio output listening verification.",
+    "Original repository fixture is synthetic H264 video only. A generated 440 Hz sine track supplies test AAC/Opus audio; no real episode or TorBox credentials are used.",
+    "Audio analyser nonzero PCM, decoded frames, advancing time, and successful seek exercise actual playback. canPlayType and MediaSource checks are recorded separately and do not decide actual native playback.",
+    "Small synthetic clips do not establish support for every Matroska file, codec profile, subtitle track, media size, range server, or CDN MIME header."
+  ],
+  "pathNormalization": "The historical input path is shown relative to the repository; measurements and hashes are unchanged."
+}

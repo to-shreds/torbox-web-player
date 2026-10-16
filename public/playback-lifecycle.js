@@ -1,3 +1,29 @@
+// Native video can advance after the browser drops an unsupported audio track,
+// without a media error. Decoder bytes are positive evidence even during a
+// silent scene. Do not route CDN audio through Web Audio: absent CORS permission
+// would itself silence otherwise working playback.
+export class PlaybackAudioCheck {
+  constructor({ graceSeconds = 5 } = {}) {
+    this.graceSeconds = graceSeconds; this.elapsed = 0; this.previous = null; this.state = 'unknown';
+  }
+  sample(video, now, visible = true) {
+    if (this.state === 'decoded') return this.state;
+    const bytes = video.webkitAudioDecodedByteCount;
+    const supported = typeof bytes === 'number' && Number.isFinite(bytes) && bytes >= 0;
+    if (supported && bytes > 0) { this.state = 'decoded'; return this.state; }
+    const current = Number(video.currentTime), rate = Math.max(.25, Number(video.playbackRate) || 1);
+    const advancing = supported && visible && !video.paused && !video.ended && !video.seeking && video.readyState >= 3 && !video.muted && video.volume > 0;
+    const previous = this.previous;
+    this.previous = { now, current, advancing };
+    if (!advancing || !previous?.advancing || !Number.isFinite(current)) return this.state;
+    const wall = (now - previous.now) / 1000, media = (current - previous.current) / rate;
+    // A seek or a throttled background callback is not time spent checking sound.
+    if (wall > 0 && wall <= 1.5 && media > 0 && media <= wall * 2 + .5) this.elapsed += Math.min(wall, media);
+    if (this.elapsed >= this.graceSeconds) this.state = 'missing';
+    return this.state;
+  }
+}
+
 // One foreground playback choice at a time. Slow work from an older choice may
 // settle, but cannot reopen a player, replace a newer choice, or hide its status.
 export class LatestPlaybackAction {

@@ -73,14 +73,17 @@ test('playback diagnostics copy only safe counts on demand and remain visible wh
   const visible=page.locator('#play-fallback details');assert.equal(await visible.isVisible(),true);assert.equal(await visible.evaluate(node=>node.open),true);assert.deepEqual(JSON.parse(await visible.locator('pre').textContent()),details);
 });
 
-test('actual raw audio-language and codec markers survive the UI and registration, offering English conditional MKV ahead of risky Dolby Vision',async t=>{
+test('actual raw source metadata offers attested AAC ahead of English unknown-audio MKV and excludes risky Dolby Vision',async t=>{
   const sources=normalizeStremioStreams(rawSnapshot,rawSnapshot.target,rawSnapshot.provider);
   const {page,registered,preparedBodies}=await pageFor(t,{sources});await openEpisode(page);
   const firstRow=page.locator('#play-fallback .play-fallback-row').first(),filename=await firstRow.locator('small').textContent();
-  assert.match(filename,/S01E02/i);assert.match(filename,/\.mkv$/i);assert.match(await firstRow.textContent(),/English/);
+  assert.match(filename,/S01E02/i);assert.match(filename,/\.mp4$/i);assert.match(await firstRow.textContent(),/Language unconfirmed/);
   const selected=registered.flatMap(result=>result.sources).find(source=>source.filename===filename);assert.ok(selected);
-  assert.deepEqual(selected.languages,['en']);assert.equal(selected.videoCodec,'H264');assert.equal(selected.containerStatus,'conditional');assert.equal(selected.browserUnsupported,false);
-  assert.deepEqual(selected.audioCodecs,[],'unknown audio codec must remain unknown rather than being invented as AAC');
+  assert.deepEqual(selected.languages,[]);assert.equal(selected.videoCodec,'H264');assert.equal(selected.containerStatus,'supported');assert.equal(selected.browserUnsupported,false);
+  assert.ok(selected.audioCodecs.includes('AAC'),'the chosen filename must provide positive AAC evidence');
+  assert.equal(selected.audioRisk,false);assert.equal(selected.videoRisk,false);
+  const englishUnknown=registered.flatMap(result=>result.sources).find(source=>source.languages.includes('en')&&!source.audioCodecs.length&&!source.audioRisk&&!source.videoRisk);
+  assert.ok(englishUnknown,'the test must include the previously preferred English source with unconfirmed audio');
   const dolby=registered.flatMap(result=>result.sources).find(source=>source.filename.includes('DV.P5'));
   if(dolby){assert.equal(dolby.videoRisk,true);assert.equal(dolby.audioRisk,true);}
   assert.equal(fixture.control.creates,0);assert.equal(preparedBodies.length,0,'this test verifies metadata eligibility without pretending to play the real release');

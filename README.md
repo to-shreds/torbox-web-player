@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.6**, frontend build **release-1.2.6-playback.1**
+Current version: **1.2.7**, frontend build **release-1.2.7-audio.1**
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
@@ -94,9 +94,9 @@ Text search uses Cinemeta's query-aware endpoint and falls back to catalog-valid
 
 Source discovery aggregates Zilean, Torrentio, and MediaFusion Torznab, with StremThru fallbacks when needed. Results are deduplicated before TorBox cache checks.
 
-Configured add-on paths are preserved for StremThru requests. Explicit audio-language and codec information survives normalization and exact-file merges. English-only choices rank ahead of mixed-language and unconfirmed-language choices; known foreign-only sources are offered explicitly rather than selected automatically. Subtitle flags and release groups do not establish an audio language. Matroska/MKV is attempted conditionally through native playback, with MP4/WebM preferred when otherwise equivalent. Browser and codec support still vary; no conversion or media relay is added. Playback recovery can copy a small diagnostic report containing public title/episode identity, error codes and counts, without credentials, file URLs or torrent hashes.
+Configured add-on paths are preserved for StremThru requests. Explicit audio-language and codec information survives normalization and exact-file merges. User-confirmed sound and compatible audio codec tags rank ahead of unknown audio. Within the same audio confidence, English-only choices rank ahead of mixed-language and unconfirmed-language choices; known foreign-only sources are offered explicitly rather than selected automatically. Subtitle flags and release groups do not establish an audio language. Matroska/MKV is attempted conditionally through native playback, with MP4/WebM preferred when otherwise equivalent. Browser and codec support still vary; no conversion or media relay is added. Playback recovery can copy a small diagnostic report containing public title/episode identity, error codes and counts, without credentials, file URLs or torrent hashes.
 
-Automatic source selection continues to prioritize browser-friendly cached sources and penalize known risky audio/video formats. In Simple mode, Play never opens the technical torrent/source picker. Cached multi-file packages are resolved to a browser-compatible matching episode file automatically when that can be done safely; otherwise Play reports that no cached browser-compatible source could be opened. The source picker remains an explicit Full-mode Options tool only.
+Automatic source selection excludes known risky audio/video formats and checks the actual selected filename before playback. The player checks native decoded-audio bytes during advancing playback, so video alone cannot establish source success. A missing audio decoder triggers bounded cached-only recovery without restarting the episode, while unavailable counters, mute, seeking and quiet decoded audio do not count as failure. Automatic observations are kept only for the current tab; explicit No sound feedback stays on this device. No sound is available in Simple mode and fullscreen. In Simple mode, Play never opens the technical torrent/source picker. Cached multi-file packages are resolved to a browser-compatible matching episode file automatically when that can be done safely; otherwise Play reports that no cached browser-compatible source could be opened. The source picker remains an explicit Full-mode Options tool only.
 
 Automatic selection also supports:
 

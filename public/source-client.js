@@ -1,5 +1,5 @@
 // Shared source normalization and authenticated backend lookup. No provider keys here.
-import { apiUrl, apiMode, getSessionToken, credentialsMode } from './runtime.js?v=release-1.2.6-playback.1';
+import { apiUrl, apiMode, getSessionToken, credentialsMode } from './runtime.js?v=release-1.2.7-audio.1';
 export const SOURCE_PATH = '/api/discover/lookup';
 export const MAX_SOURCES = 40;
 export function targetOf(input) {
@@ -49,6 +49,20 @@ export function parseSizeBytes(value) {
   const bytes = Number(m[1]) * units[m[2].toUpperCase()];
   return Number.isSafeInteger(Math.round(bytes)) && bytes > 0 ? Math.round(bytes) : null;
 }
+export function audioCodecHints(value) {
+  // Release names often attach the channel layout directly: DDP5.1, AAC2.0.
+  // Accept that suffix without accepting codec-like fragments inside words.
+  const end = '(?=$|[^a-z0-9]|[1-9]\\.[0-9](?:\\.[0-9])?(?=$|[^a-z0-9]))';
+  const token = pattern => new RegExp('(?:^|[^a-z0-9])(?:' + pattern + ')' + end, 'i').test(String(value || ''));
+  const rules = [
+    ['EAC3', 'e[ ._-]?ac[ ._-]?3|ddp|dd\\+|dolby[ ._-]?digital[ ._-]?plus'],
+    ['AC3', 'ac[ ._-]?3|dd(?!\\+)|dolby[ ._-]?digital(?![ ._-]?plus)'],
+    ['TrueHD', 'true[ ._-]?hd'], ['DTS', 'dts(?:[ ._-]?(?:hd(?:[ ._-]?ma)?|ma))?'],
+    ['Dolby Atmos', '(?:dolby[ ._-]?)?atmos'], ['AAC', 'aac'],
+    ['MP3', 'mp3|mpeg[ ._-]?audio'], ['Opus', 'opus']
+  ];
+  return rules.filter(([, pattern]) => token(pattern)).map(([codec]) => codec);
+}
 export function sourceHints(source) {
   const structuredAudio = Array.isArray(source.audioCodecs) ? source.audioCodecs.join(' ') : '';
   const name = `${source.filename || ''} ${source.title || ''} ${source.label || ''} ${source.videoCodec || ''} ${structuredAudio} ${source.resolution || ''}`;
@@ -57,10 +71,9 @@ export function sourceHints(source) {
   const hevc = /\b(hevc|h[ ._-]?265|x265)\b/i.test(name);
   const av1 = /\bav1\b/i.test(name);
   const legacyVideo = /\b(?:xvid|divx|mpeg[ ._-]?4(?:[ ._-]?part[ ._-]?2)?)\b/i.test(name);
-  const aac = /\baac\b/i.test(name);
-  const mp3 = /\b(mp3|mpeg[ ._-]?audio)\b/i.test(name);
-  const opus = /\bopus\b/i.test(name);
-  const difficultAudio = /\b(dts(?:[ ._-]?hd)?|truehd|e[ ._-]?ac[ ._-]?3|ac[ ._-]?3|ddp|dd\+|dolby[ ._-]?digital(?:[ ._-]?plus)?|dolby[ ._-]?atmos)\b/i.test(name);
+  const audioCodecs = audioCodecHints(name);
+  const aac = audioCodecs.includes('AAC'), mp3 = audioCodecs.includes('MP3'), opus = audioCodecs.includes('Opus');
+  const difficultAudio = audioCodecs.some(codec => ['EAC3','AC3','TrueHD','DTS','Dolby Atmos'].includes(codec));
   const containerHints = browserContainerHints(source);
   const quality = cleanText(source.resolution, 20).toUpperCase() || /\b(2160p|1080p|720p|480p|4k)\b/i.exec(name)?.[1].toUpperCase() || '';
   const browserFriendly = h264 && (aac || mp3 || (opus && containerHints.container === 'mkv')) && !hevc && !av1 && !legacyVideo && !difficultAudio && !containerHints.browserUnsupported;
@@ -85,7 +98,18 @@ export function sourceHints(source) {
   else if (aac) hint = 'AAC audio indicated';
   else if (mp4) hint = 'MP4 container · audio codec unconfirmed';
   else if (containerHints.container === 'mkv') hint = 'Matroska · browser and codec support vary';
-  return { quality, score, hint, browserFriendly, audioRisk, videoRisk, ...containerHints };
+  return { quality, score, hint, browserFriendly, audioRisk, audioCompatible: (aac || mp3 || opus) && !audioRisk, videoRisk, ...containerHints };
+}
+export function preparedSourceCompatibility(source = {}, file = {}, declared = {}) {
+  const actual = browserContainerHints(file);
+  const videoCodec = [source.videoCodec, declared.videoCodec].filter(Boolean).join(' ');
+  const audioCodecs = [...new Set([...(source.audioCodecs || []), ...(declared.audioCodecs || []), ...audioCodecHints(file.filename || file.title)])];
+  const hints = sourceHints({ ...source, filename: file.filename || file.title || source.filename,
+    title: [source.filename, source.title, file.title].filter(Boolean).join(' '), videoCodec, audioCodecs });
+  const audioRisk = source.audioRisk === true || declared.audioRisk === true || hints.audioRisk;
+  const videoRisk = source.videoRisk === true || declared.videoRisk === true || hints.videoRisk;
+  return { ...hints, ...(actual.container ? actual : {}), videoCodec, audioCodecs, audioRisk, videoRisk,
+    audioCompatible: hints.audioCompatible && !audioRisk, browserFriendly: hints.browserFriendly && !audioRisk && !videoRisk };
 }
 export function normalizeSources(raw) {
   if (!Array.isArray(raw)) throw new Error('The source provider did not return a source list.');

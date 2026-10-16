@@ -1,4 +1,7 @@
 const KEY='torbox-source-memory-v1';
+// A decoder observation is provisional and local to this tab. Only explicit
+// user feedback is persisted, so a delayed track cannot create a permanent ban.
+const audioDecodeFailures = new Set();
 const QUALITY=new Set(['480p','720p','1080p','2160p']);
 const clean=(value,max=240)=>typeof value==='string'?value.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,max):'';
 const storage=()=>{try{return localStorage}catch{return null}};
@@ -36,8 +39,9 @@ export function sourceMemory(target,source,store=storage()){
   return {bad:exact?.bad===true,audio:exact?.audio||'unknown',successes:Number(exact?.successes)||0,bonus};
 }
 export function applySourceMemory(target,sources,store=storage()){
-  return (Array.isArray(sources)?sources:[]).map(source=>{const memory=sourceMemory(target,source,store);return{...source,memoryBad:memory.bad,memoryAudio:memory.audio,memoryBonus:memory.bonus};});
+  return (Array.isArray(sources)?sources:[]).map(source=>{const memory=sourceMemory(target,source,store),failed=audioDecodeFailures.has(`${titleKey(target)}:${sourceKey(source)}`);return{...source,memoryBad:memory.bad,memoryAudio:failed?'bad':memory.audio,memoryBonus:memory.bonus};});
 }
+export function noteAudioDecodeFailure(target,source){const key=sourceKey(source);if(titleKey(target)&&key){audioDecodeFailures.add(`${titleKey(target)}:${key}`);if(audioDecodeFailures.size>200)audioDecodeFailures.delete(audioDecodeFailures.values().next().value);}}
 function updateSource(target,source,patch,store=storage()){
   if(!store)return false;const identity=sourceIdentity(source),key=sourceKey(source);if(!identity||!key)return false;
   const data=load(store),row=titleRow(data,target,true);if(!row)return false;const old=row.sources[key]||{};
@@ -47,7 +51,8 @@ export function rememberSourceSuccess(target,source,store=storage()){
   const current=sourceMemory(target,source,store);return updateSource(target,source,{successes:current.successes+1,bad:false},store);
 }
 export function setAudioFeedback(target,source,status,store=storage()){
+  audioDecodeFailures.delete(`${titleKey(target)}:${sourceKey(source)}`);
   const audio=status==='good'||status==='bad'?status:'unknown';return updateSource(target,source,{audio,bad:audio==='bad'},store);
 }
 export function setSourceBad(target,source,bad=true,store=storage()){return updateSource(target,source,{bad:bad===true},store);}
-export function clearSourceMemory(store=storage()){try{store?.removeItem(KEY);return true;}catch{return false;}}
+export function clearSourceMemory(store=storage()){audioDecodeFailures.clear();try{store?.removeItem(KEY);return true;}catch{return false;}}
