@@ -96,7 +96,7 @@ Source discovery aggregates Zilean, Torrentio, and MediaFusion Torznab, with Str
 
 Configured add-on paths are preserved for StremThru requests. Explicit audio-language and codec information survives normalization and exact-file merges. User-confirmed sound and compatible audio codec tags rank ahead of unknown audio. Within the same audio confidence, English-only choices rank ahead of mixed-language and unconfirmed-language choices; known foreign-only sources are offered explicitly rather than selected automatically. Subtitle flags and release groups do not establish an audio language. Matroska/MKV is attempted conditionally through native playback, with MP4/WebM preferred when otherwise equivalent. Browser and codec support still vary; no conversion or media relay is added. Playback recovery can copy a small diagnostic report containing public title/episode identity, error codes and counts, without credentials, file URLs or torrent hashes.
 
-Automatic source selection excludes known risky audio/video formats and checks the actual selected filename before playback. The player checks native decoded-audio bytes during advancing playback, so video alone cannot establish source success. A missing audio decoder triggers bounded cached-only recovery without restarting the episode, while unavailable counters, mute, seeking and quiet decoded audio do not count as failure. Automatic observations are kept only for the current tab; explicit No sound feedback stays on this device. No sound is available in Simple mode and fullscreen. In Simple mode, Play never opens the technical torrent/source picker. Cached multi-file packages are resolved to a browser-compatible matching episode file automatically when that can be done safely; otherwise Play reports that no cached browser-compatible source could be opened. The source picker remains an explicit Full-mode Options tool only.
+Automatic source selection excludes known risky audio/video formats and checks the actual selected filename before playback. The player checks native decoded-audio bytes during advancing playback, so video alone cannot establish source success. A missing audio decoder triggers bounded cached-only recovery without restarting the episode, while unavailable counters, mute, seeking and quiet decoded audio do not count as failure. Automatic observations are kept only for the current tab. The No sound action has been removed; opening the updated player restores its saved negative-audio exclusions without clearing other preferences. In Simple mode, Play never opens the technical torrent/source picker. Cached multi-file packages are resolved to a browser-compatible matching episode file automatically when that can be done safely; otherwise Play reports that no cached browser-compatible source could be opened. The source picker remains an explicit Full-mode Options tool only.
 
 Automatic selection also supports:
 
@@ -104,9 +104,9 @@ Automatic selection also supports:
 - Per-title quality overrides.
 - Local source success memory.
 - Local release-family preference based on sources that have worked.
-- Manual Sound works and No sound feedback in Full mode.
+- Manual Sound works confirmation in Full mode.
 - A local bad-source list.
-- Automatic exclusion of sources marked bad or known to have no sound on this device.
+- Automatic exclusion of separately blocked sources and tab-local missing-audio observations.
 
 These preferences are browser-local and do not change TorBox account data.
 
@@ -138,7 +138,7 @@ Automatic next episode uses a cancellable countdown. The countdown can be immedi
 
 If a stream buffers continuously or fails, automatic recovery can try at most two alternatives, for no more than three sources total. A fresh playback request obtains a new temporary TorBox link if the previous direct link expires. The buffering threshold is configurable.
 
-Full mode includes a playback-health panel that distinguishes states such as Opening, Ready, Playing, Buffering, Stalled, Recovering, Paused, Finished, and failure. It also exposes Sound works, No sound, and Bad source feedback for the current source.
+Full mode includes a playback-health panel that distinguishes states such as Opening, Ready, Playing, Buffering, Stalled, Recovering, Paused, Finished, and failure. It also exposes Sound works and separate Bad source feedback for the current source.
 
 The player can remember a source after sustained successful playback and favor it or its release family later. This learning can be disabled or cleared in Settings.
 
