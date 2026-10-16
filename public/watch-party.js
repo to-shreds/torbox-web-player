@@ -1,8 +1,8 @@
-import {normalizePartySnapshot,createPartyClock,partyDriftCorrection,partyUpdateIsNewer} from './watch-party-core.js?v=release-1.2.7-audio.1';
+import {normalizePartySnapshot,createPartyClock,partyDriftCorrection,partyUpdateIsNewer} from './watch-party-core.js?v=release-1.2.8-party.1';
 
 const $=id=>document.getElementById(id);
 const TOKEN=/^[A-Za-z0-9_-]{43}$/;
-export function createWatchParty({api,getPlayback,playFile,isAllowed,isSignedIn,getViewer}) {
+export function createWatchParty({api,getPlayback,playFile,isAllowed,isSignedIn,getViewer,isPartyGuest=()=>false,adoptPartySession=()=>{},onGuestExit=()=>{},onInvitation=()=>{},requestAccess=action=>action()}) {
   let room=null,snapshot=null,invite='',generation=0,operation=null,pollTimer=null,tickTimer=null,startTimer=null,inFlight=false;
   let videoAbort=null,bound=null,pendingCommand=null,commandSeq=0,expectedSeek=null,userSeeking=false,expectedPauses=0,expectedPlays=[];
   let buffering=false,blocked=false,connectionLost=false,preparing=false,transitioning=false,unlocking=false,failures=0,playPending=false,selectedViewer='';
@@ -31,13 +31,16 @@ export function createWatchParty({api,getPlayback,playFile,isAllowed,isSignedIn,
   function render(){
     const active=!!room,phase=room?.state.phase||'';
     dialog.dataset.phase=phase;$('party-status').dataset.phase=phase;
-    $('party-create').disabled=active||transitioning||!getPlayback()?.playbackProof||!permitted();
-    $('party-join').disabled=active||transitioning||!permitted();$('party-leave').hidden=!active;
+    $('party-create').hidden=isPartyGuest()||!isSignedIn();
+    $('party-host-access').hidden=active||isPartyGuest()||!isSignedIn();
+    $('party-create').disabled=active||transitioning||!getPlayback()?.playbackProof||!permitted()||!$('party-trust-viewer').checked;
+    $('party-join').disabled=active||transitioning||!isAllowed();$('party-leave').hidden=!active;
+    $('party-join-section').hidden=active;
     $('party-share').hidden=!active||!invite;$('party-controls').hidden=!active;
     $('party-play').disabled=!active||preparing;$('party-pause').disabled=!active||preparing;
     $('party-sync').disabled=!active||!bound;$('party-ready').hidden=!active||(!blocked&&bound?.ready===true);
     $('party-ready').disabled=!bound?.ready||preparing||unlocking;$('party-resume').disabled=!bound?.ready||preparing||unlocking;
-    if(!active){$('party-summary').textContent='Start a video to create a party, or paste an invitation to join. Each person connects TorBox on their own device.';setInline('');return;}
+    if(!active){$('party-summary').textContent='Start a video to host a party, or paste an invitation to join. Only the host needs TorBox.';setInline('');return;}
     $('party-summary').textContent=[room.media.title,room.media.fileTitle].filter(Boolean).join(' · ');
     const count=Number(!!room.members.host?.present)+Number(!!room.members.guest?.present);
     const reason=connectionLost?'Connection interrupted. Playback is paused while reconnecting.':preparing?'Loading the exact party video…':blocked?'Tap Ready to watch to allow playback.':!room.members.guest?'Waiting for the other viewer.':phase==='playing'?'Watching together · shared play, pause and seeking.':phase==='scheduled'?'Starting together…':room.state.reason||'Paused together.';
@@ -92,7 +95,7 @@ export function createWatchParty({api,getPlayback,playFile,isAllowed,isSignedIn,
       if(!accept(result,current))throw new Error('The party returned an invalid update.');
     }catch(error){
       if(current!==generation||operation?.signal.aborted)return;
-      if(['WATCH_PARTY_NOT_FOUND','WATCH_PARTY_MEDIA_MISMATCH','WATCH_PARTY_DURATION_MISMATCH','WATCH_PARTY_PLAYBACK_REQUIRED','LOGIN_REQUIRED'].includes(error.code)){await leave({notify:false,notice:error.message});return;}
+      if(['WATCH_PARTY_ENDED','WATCH_PARTY_NOT_FOUND','WATCH_PARTY_MEDIA_MISMATCH','WATCH_PARTY_DURATION_MISMATCH','WATCH_PARTY_PLAYBACK_REQUIRED','LOGIN_REQUIRED'].includes(error.code)){await leave({notify:false,notice:error.message});return;}
       if(command&&!pendingCommand)pendingCommand=command;
       connectionLost=true;failures++;pauseLocal();render();
     }finally{if(current===generation){inFlight=false;schedule(pendingCommand?0:Math.min(5000,800*Math.max(1,failures)));}}
@@ -128,12 +131,12 @@ export function createWatchParty({api,getPlayback,playFile,isAllowed,isSignedIn,
     window.dispatchEvent(new CustomEvent('watch-party-start'));
   }
   async function create(){
-    if(room||transitioning||!permitted())return;
+    if(room||transitioning||!permitted()||isPartyGuest()||!$('party-trust-viewer').checked)return;
     const context=getPlayback();if(!context?.playbackProof||!context.ready){message('Start a video, then create a party.',true);return;}
     const current=++generation;operation?.abort();operation=new AbortController();clock.reset();
     transitioning=true;render();internal(()=>context.video.pause());message('Creating your party…');
     try{
-      const result=await call('create',{playbackProof:context.playbackProof,target:context.playbackContext?.current||null,title:context.playbackContext?.title||context.file.title,position:context.video.currentTime,duration:context.video.duration});
+      const result=await call('create',{playbackProof:context.playbackProof,target:context.playbackContext?.current||null,title:context.playbackContext?.title||context.file.title,position:context.video.currentTime,duration:context.video.duration,allowAccountKeyInPlayback:true});
       if(current!==generation||!permitted())return;activate(result);attach(context);
     }catch(error){if(current===generation)message(error.message,true);}finally{if(current===generation){transitioning=false;render();}}
   }
@@ -142,19 +145,29 @@ export function createWatchParty({api,getPlayback,playFile,isAllowed,isSignedIn,
     try{const url=new URL(value),base=path=>path.replace(/index\.html$/,'').replace(/key\/$/,'');if(url.origin!==location.origin||url.username||url.password||url.search||base(url.pathname)!==base(location.pathname))return '';const m=/^#party=([A-Za-z0-9_-]{43})$/.exec(url.hash);return m?.[1]||'';}catch{return '';}
   }
   async function join(){
-    if(room||transitioning||!permitted())return;
+    if(room||transitioning||!isAllowed())return;
     const token=invitation($('party-join-code').value);if(!token){message('Paste a complete party invitation or code.',true);return;}
     const current=++generation;operation?.abort();operation=new AbortController();clock.reset();transitioning=true;render();message('Joining the party…');
     try{
-      const result=await call('join',{token});if(current!==generation||!permitted())return;
-      activate(result);preparing=true;render();pauseLocal();
-      const prepared=await call('prepare',{roomId:room.id},{timeoutMs:65000});if(current!==generation||!room||!permitted())return;
-      const ok=await playFile(prepared.file,{...prepared.playbackContext,watchPartyRoom:room.id,forceStartOver:true});
-      if(current!==generation)return;
-      if(!ok)throw new Error('The party video could not start on this device.');
-      preparing=false;pendingInvite='';if(fromHash())history.replaceState(null,'',location.pathname+location.search);render();schedule(0);
-      if(dialog.open)dialog.close();
-    }catch(error){if(current===generation){if(room)await leave({notice:error.message});else message(error.message,true);}}finally{if(current===generation){transitioning=false;render();}}
+      internal(()=>getPlayback()?.video.pause());
+      const result=await call('join',{token});if(current!==generation||!isAllowed())return;
+      await adoptPartySession(result);if(current!==generation||!permitted())return;
+      await loadGuest(result,current);
+    }catch(error){if(current===generation){if(room||isPartyGuest())await leave({notice:error.message});else message(error.message,true);}}finally{if(current===generation){transitioning=false;render();}}
+  }
+  async function loadGuest(result,current){
+    activate(result);preparing=true;render();pauseLocal();
+    const prepared=await call('prepare',{roomId:room.id},{timeoutMs:65000});if(current!==generation||!room||!permitted())return;
+    const ok=await playFile(prepared.file,{...prepared.playbackContext,watchPartyRoom:room.id,forceStartOver:true});
+    if(current!==generation)return;
+    if(!ok)throw new Error('The party video could not start on this device.');
+    preparing=false;pendingInvite='';if(fromHash())history.replaceState(null,'',location.pathname+location.search);render();schedule(0);
+    if(dialog.open)dialog.close();
+  }
+  async function restore(result){
+    if(room||transitioning||!permitted())return;
+    const current=++generation;operation?.abort();operation=new AbortController();clock.reset();transitioning=true;render();message('Reconnecting to the party…');
+    try{await loadGuest(result,current);}catch(error){if(current===generation)await leave({notify:false,notice:error.message});}finally{if(current===generation){transitioning=false;render();}}
   }
   async function ready(){
     if(!room||!bound?.ready||!permitted()||unlocking)return;
@@ -164,26 +177,28 @@ export function createWatchParty({api,getPlayback,playFile,isAllowed,isSignedIn,
     finally{clearTimeout(deadline);if(current===generation){unlocking=false;if(!room?.state.playing)pauseLocal();render();schedule(0);}}
   }
   async function leave({notify=true,notice='You left the watch party.',quiet=false}={}){
-    const previous=room;generation++;operation?.abort();operation=null;cancelTimers();pauseLocal();unbind();room=null;snapshot=null;invite='';preparing=false;transitioning=false;pendingCommand=null;inFlight=false;blocked=false;connectionLost=false;playPending=false;clock.reset();render();
+    const previous=room,guest=isPartyGuest();generation++;operation?.abort();operation=null;cancelTimers();pauseLocal();unbind();room=null;snapshot=null;invite='';preparing=false;transitioning=false;pendingCommand=null;inFlight=false;blocked=false;connectionLost=false;playPending=false;clock.reset();$('party-trust-viewer').checked=false;render();
     if(!quiet)message(notice);
     if(previous&&notify)try{await call('leave',{roomId:previous.id},{signal:AbortSignal.timeout(5000),keepalive:true});}catch{}
+    if(guest)await onGuestExit(notice);
   }
-  function open(){refreshAccess();if(!isAllowed())return;if(!isSignedIn()){message('Connect TorBox on this device before joining a watch party.',true);return;}if(!dialog.open)dialog.showModal();render();}
+  function open(){if(fromHash())inviteShown=true;requestAccess(()=>{if(!isAllowed())return;if(!dialog.open){if(!room)$('party-trust-viewer').checked=false;dialog.showModal();}render();});}
   function refreshAccess(){
     $('open-watch-party').hidden=!isAllowed();$('player-watch-party').hidden=!isAllowed();
     if(!isAllowed()&&dialog.open)dialog.close();
     if(room&&!permitted())void leave({notice:'The party ended because the viewer changed.'});
-    if(pendingInvite&&!inviteShown&&isSignedIn()&&isAllowed()){inviteShown=true;open();}
+    if(pendingInvite&&!inviteShown){inviteShown=true;onInvitation();open();}
   }
   $('open-watch-party').addEventListener('click',open);$('player-watch-party').addEventListener('click',open);
   $('close-watch-party').addEventListener('click',()=>dialog.close());
+  $('party-trust-viewer').addEventListener('change',render);
   $('party-create').addEventListener('click',()=>void create());$('party-join').addEventListener('click',()=>void join());
   $('party-leave').addEventListener('click',()=>void leave());$('party-play').addEventListener('click',()=>command('play',bound?.video.currentTime));$('party-pause').addEventListener('click',()=>command('pause',bound?.video.currentTime));
   $('party-sync').addEventListener('click',()=>{correct();schedule(0);});$('party-ready').addEventListener('click',()=>void ready());$('party-resume').addEventListener('click',()=>void ready());
   $('party-copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('party-link').value);message('Invitation copied. Send it to the other viewer.');}catch{$('party-link').focus();$('party-link').select();message('Select and copy the invitation above.');}});
   window.addEventListener('hashchange',()=>{const token=fromHash();if(token){pendingInvite=token;inviteShown=false;$('party-join-code').value=token;refreshAccess();}});
   document.addEventListener('visibilitychange',()=>{if(room){if(hidden())pauseLocal();schedule(0);}});
-  window.addEventListener('pagehide',()=>{if(room)void leave({quiet:true});});
+  window.addEventListener('pagehide',()=>{if(room&&!isPartyGuest())void leave({quiet:true});});
   setInterval(refreshAccess,1000);refreshAccess();
-  return {isActive:()=>!!room,beforePlayback(context){if(!(room&&preparing&&context?.watchPartyRoom===room.id))void leave({quiet:!room,notice:'The party ended because the video changed.'});},onPlayback(context){if(room&&preparing&&context.playbackContext?.watchPartyRoom===room.id)attach(context);},mediaReady(context){if(room&&bound===context){pauseLocal();render();schedule(0);return true;}return false;},leave};
+  return {isActive:()=>!!room,open,restore,beforePlayback(context){if(!(room&&preparing&&context?.watchPartyRoom===room.id))void leave({quiet:!room,notice:'The party ended because the video changed.'});},onPlayback(context){if(room&&preparing&&context.playbackContext?.watchPartyRoom===room.id)attach(context);},mediaReady(context){if(room&&bound===context){pauseLocal();render();schedule(0);return true;}return false;},leave};
 }

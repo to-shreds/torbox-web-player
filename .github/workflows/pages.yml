@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'public/**'
+      - 'test/**'
       - '.github/workflows/pages.yml'
       - '.github/workflows/release-checks.yml'
   workflow_dispatch:

@@ -52,7 +52,69 @@
   "limits": [
     "Original synthetic media; no authenticated account or real episode media.",
     "Native Chromium 141 Linux, not physical Android speaker output.",
-    "Compatible codec tags and language metadata are not a verification of actual release audio."
+    "Compatible codec tags and language metadata are not a verification of actual release audio.",
+    "Final release CI passed on native Chromium151.0.7922.34 Linux; this still does not verify physical Android speaker output."
   ],
-  "publication": "Pending GitHub Pages release gate and Render mirror deployment."
+  "publication": {
+    "status": "complete",
+    "checkedAt": "2026-10-16T01:22:00.104656+00:00",
+    "rootAndKeyAssets": 50,
+    "publicApiChecks": 8,
+    "allPassed": true,
+    "report": "publication.json",
+    "renderReport": "render-publication.json",
+    "ciReport": "ci-results.json"
+  },
+  "initialBroadBrowserRun": {
+    "registered": 150,
+    "passed": 149,
+    "failed": 1,
+    "durationMs": 479595.528657,
+    "failure": "Prior metadata expectation required the now-deprioritized unknown-audio MKV. Updated to require compatible AAC and retained identity/risk assertions. Corrected suite passed3/3. The final mute case was added after this run started and passed in the focused7-case suite. Final complete gate is GitHub Actions."
+  },
+  "runtimeCommit": "37e15de8bc094268136478935b38b052daf54b6a",
+  "runtimeTree": "70fc577ab8cadc014270e9fa9884ce50be9f6c49",
+  "releaseGateCommit": "17a3e9a6c465b6001fc2081399562b0d2ec0ea60",
+  "releaseGateTree": "03a5827606fb0502126d5a1269ee838046c8276e",
+  "initialCI": {
+    "run": 38832193247,
+    "nodePassed": 586,
+    "browserRegistered": 151,
+    "browserPassed": 150,
+    "browserFailed": 1,
+    "failure": "Synthetic local-CDN cross-origin test did not reach metadata in Chrome151. Scoped local-network permission for the disposable fixture resolves the test; production media policy unchanged. Added diagnostics and run the seven audio cases first so failures stop the gate promptly."
+  },
+  "audioCI": {
+    "run": 38833693581,
+    "job": 116758240324,
+    "browser": "151.0.7922.34",
+    "passed": 7,
+    "failed": 0
+  },
+  "finalCI": {
+    "run": 38833693581,
+    "job": 116758240324,
+    "browser": "151.0.7922.34",
+    "node": {
+      "registered": 592,
+      "passed": 586,
+      "failed": 0,
+      "skipped": 6,
+      "durationMs": 6655.529579
+    },
+    "audio": {
+      "registered": 7,
+      "passed": 7,
+      "failed": 0,
+      "durationMs": 46857.458539
+    },
+    "coreBrowser": {
+      "registered": 144,
+      "passed": 144,
+      "failed": 0,
+      "durationMs": 391986.331988
+    },
+    "deploymentJob": 116760513941,
+    "deploymentFinishedAt": "2026-10-16T01:20:09Z"
+  }
 }

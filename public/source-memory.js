@@ -54,5 +54,31 @@ export function setAudioFeedback(target,source,status,store=storage()){
   audioDecodeFailures.delete(`${titleKey(target)}:${sourceKey(source)}`);
   const audio=status==='good'||status==='bad'?status:'unknown';return updateSource(target,source,{audio,bad:audio==='bad'},store);
 }
+// Retire the one-click No sound feedback. Older rows did not record which
+// action last changed `bad`, so keep the original negative-audio rows locally
+// while restoring their eligibility. Separate bad-source rows stay unchanged.
+export function resetNegativeAudioFeedback(store=storage()){
+  if(!store)return 0;
+  try{
+    const raw=store.getItem(KEY);if(!raw)return 0;
+    const data=JSON.parse(raw),object=value=>value&&typeof value==='object'&&!Array.isArray(value);
+    if(!object(data)||!object(data.titles)||data.negativeAudioReset===1)return 0;
+    const retired=Object.assign(Object.create(null),object(data.retiredAudioFeedback)?data.retiredAudioFeedback:{});
+    let restored=0;
+    for(const [title,row] of Object.entries(data.titles)){
+      if(!object(row)||!object(row.sources))continue;
+      for(const [key,feedback] of Object.entries(row.sources)){
+        if(!object(feedback)||feedback.audio!=='bad')continue;
+        const backups=Object.assign(Object.create(null),object(retired[title])?retired[title]:{});
+        backups[key]={...feedback};retired[title]=backups;
+        feedback.audio='unknown';feedback.bad=false;restored++;
+      }
+    }
+    if(restored)data.retiredAudioFeedback=retired;
+    data.negativeAudioReset=1;
+    store.setItem(KEY,JSON.stringify(data));
+    return restored;
+  }catch{return 0;}
+}
 export function setSourceBad(target,source,bad=true,store=storage()){return updateSource(target,source,{bad:bad===true},store);}
 export function clearSourceMemory(store=storage()){audioDecodeFailures.clear();try{store?.removeItem(KEY);return true;}catch{return false;}}

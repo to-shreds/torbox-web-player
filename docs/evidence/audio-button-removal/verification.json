@@ -1,0 +1,82 @@
+{
+  "recordedAt": "2026-10-16T14:05:38.518267+00:00",
+  "build": "release-1.2.7-audio.2",
+  "runtimeCommit": "a3d51f443d06b37a49e64e19b6136b471a852d72",
+  "runtimeTree": "641f79fd5a7acfa0af01c05d877ec7dbdcc87df1",
+  "baseline": "dbf38ceb7bf1903b306deb0560be6c994cfe2692",
+  "sourceHashes": {
+    "public/app.js": "be2665d956c3840ee4f9475b727f15f45772920c53c55ecd141a79d9446c6f25",
+    "public/boot.js": "a23812ec05a731bdc62201bb945e18946ed48dcc54446a36076d54062936ab77",
+    "public/buffstreams-opening.html": "a9c6d683423dac3c7de096ff30f6f312f74c36eb996a0b8193204b9dbaa55c48",
+    "public/buffstreams-ui.js": "ee62a5a502d256ad8ec4cf9edb32ae5202b871908c6950a4c3d4dd124fad42f4",
+    "public/discover.js": "d94dec12d76407c7a45b22c610e0d40ca6be0af5432b5d5d1e1e3dcff46309f0",
+    "public/dos-player.html": "de90a9c0c4939983aa904b51bb0c929be8934960806854d8081a8673362507ff",
+    "public/dos-player.js": "49dc4e4219ed64f0c1684508c35052f9747d52b8625b5c69a6e4f58083dec594",
+    "public/extra-games-core.js": "4971e74a05fc5423d45821d58b85c3bf1c0bb77180532e04bde65c001f4cfbf2",
+    "public/extra-games.js": "c07b577beb96a7f5ee4e3f7bf8b5277fcc02fd959db58108c6e9290e331f6e97",
+    "public/games-nav.js": "e137ac5d10e2b50e201bd511e19e1f268c3c5edaaa1a3b839b4687997b95d74a",
+    "public/games-web/skifree/game.js": "af8d587470322f7804fa60ac0553e44b3e3a7139dca0977fb189968862491ecd",
+    "public/games-web/skifree/index.html": "06455ae54353033e3c6a3bef1e5234ffbf12a03169e53ebb275f80f6b136f2b4",
+    "public/games.js": "d07d0330e1013b5482c47515c66a4580c9695b64f353c8f6716a685175d5659e",
+    "public/history.js": "fb6c40ee04c3e6cd018f86b85b7126277d47cf3015ce173a2178db65e5229681",
+    "public/index.html": "0ef6c82ee4f41eedb72fe496066c1e947233f416e1f4526b6a060913737106c7",
+    "public/playback-errors.js": "8cef5cd6450a098d3890aae760983cf442ed9ed802877ba3af98a2e11a5bb7e6",
+    "public/source-client.js": "533244cc84b10d1ae342cce7a51521631b2c814f766a9173fcb5eaa89edd0785",
+    "public/source-memory.js": "e03bb31e2e60f4743e93ae31f8abbca13afed8c96ccee228f75f7777bcb31a60",
+    "public/sports-player.html": "776634c4cbfe966c458d80e8ab186915f9e6cdc28d12dd681d5f6e23ccb1c3b8",
+    "public/sports-player.js": "7ee87e99c9e616ca53b004751c8a53ff4c5b9ec8a5479e3486b22911dbf308e8",
+    "public/sports.js": "e7b350a49cb5d98129e2a384c9ffae2dbf7a191caf0be33cfc1ab6ffad781c14",
+    "public/style.css": "08d04197c06e88a91463dc60a999a5a1be4fe3893ea6acc429186a908fb90a30",
+    "public/sw.js": "a01b84acf8bc02a2f44556d7da126234c15b79fa07bff54cb4dc945dbfffd921",
+    "public/watch-party.js": "bebb4ddc9d855671e905e3b08bdb0c97dc59926f1e7d1c95c07b4eeb481a3c70",
+    "test/audio-feedback-reset.test.mjs": "0ee397d1bd1bff2ea5a44eb7ba84bd79428cd1ba30f2938d88fc18c961f49a91",
+    "test/browser/audio-recovery.mjs": "dfd5d940e08e7f92529ff8b691f2d6ddc1ee4119d3cd312d3dda5ee78d76f005",
+    "test/browser/reliability.mjs": "ca47b1b2c6624cb14cdfe480d440d73083ece2ad232f436463652214d700b750",
+    "test/browser/ski-game.mjs": "6b48c3b933804d961d39c019da3341ef348892f0b756abea8876487a22e1263e",
+    "test/browser/source-recovery.mjs": "3f662b928969da58579bf5fa4da1a9a6b5d651aa6d3c53ae5e0837d978988246",
+    "test/browser/sports.mjs": "297082da93508610d27a0ea01c2fa779aadeb7904481e404d6affe78dd74a44c",
+    "test/extra-games.test.mjs": "95c56f4e7d463c85c974aa5603a41a101ad0924de6e8c8d9018ef47a99909bd3",
+    "test/reliability-http.test.mjs": "98f48ecdef252444e7a98c32c50da6217b9eee86d872cd984d001f734c3f8003",
+    "test/service-worker-isolation.test.mjs": "b38dafe9495222d7f7a973e0e7ac9129c0de6704b032546b7dbaf252d37da074",
+    "test/split-hosting.test.mjs": "66167700ba33f1fb7c7d1ef66f87bfe5b69ebad09017bbc89f311f8cad4d5f1b",
+    "test/startup-cache-recovery.test.mjs": "36756b4e921be835180c97f1832a5c4fa8f5b6ff32c3b9db1ec7df8062583dc8",
+    "test/v013-experience.test.mjs": "ccefa059209424906091bd80490cbb27c06092779ff782c575d3527e8f9cc36d"
+  },
+  "node": {
+    "registered": 601,
+    "passed": 595,
+    "failed": 0,
+    "skipped": 6,
+    "durationMs": 4530.52049
+  },
+  "syntax": "passed including pinned JSNES patch reproduction",
+  "focusedMigration": {
+    "registered": 9,
+    "passed": 9,
+    "failed": 0
+  },
+  "browser": {
+    "run": 38912852476,
+    "browser": "151.0.7922.34",
+    "audioCasesPassed": 7,
+    "coreCasesPassed": 144,
+    "totalPassed": 151,
+    "failed": 0,
+    "ciReport": "ci-results.json"
+  },
+  "publication": {
+    "status": "complete",
+    "checkedAt": "2026-10-16T14:16:00.272664+00:00",
+    "rootAndKeyAssets": 48,
+    "publicApiChecks": 8,
+    "allPassed": true,
+    "report": "publication.json",
+    "ciReport": "ci-results.json",
+    "backendUnchanged": true
+  },
+  "limits": [
+    "No actual account or physical phone was accessed. The local repair executes in that browser when the updated site opens.",
+    "Legacy negative-audio rows lack action provenance. All audio:bad rows are restored with exact local backup, rather than claiming accidental clicks can be distinguished.",
+    "Separate bad-source-only rows and unrelated browser storage remain unchanged. Backend/package1.2.7 and its Render deployment are unchanged."
+  ]
+}

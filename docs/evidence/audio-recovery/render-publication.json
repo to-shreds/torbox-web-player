@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-10-16T00:58:48.177528+00:00",
+  "workspace": "tea-dakujgmk1f9s73d2v8ng",
+  "service": "srv-damu91142hec73chb7qg",
+  "deployment": "dep-db8ncdgn74is73c49sfg",
+  "commit": "3aed7eb3298e2e8f7fae7d61520c1e4abe54664a",
+  "tree": "70fc577ab8cadc014270e9fa9884ce50be9f6c49",
+  "status": "live",
+  "trigger": "api",
+  "createdAt": "2026-10-16T00:56:22.076057Z",
+  "finishedAt": "2026-10-16T00:57:05.928864Z",
+  "health": {
+    "ok": true,
+    "version": "1.2.7",
+    "stage": "catalog-first-preview"
+  },
+  "configurationChanged": false,
+  "manualTriggers": 1,
+  "note": "Two post-branch deployment checks found no configured automatic deployment. One explicit trigger; free service and environment unchanged.",
+  "errorLogCheck": {
+    "from": "2026-10-16T00:57:05Z",
+    "through": "2026-10-16T00:58:20Z",
+    "errors": 0
+  }
+}
