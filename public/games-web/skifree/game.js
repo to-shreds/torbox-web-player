@@ -1,4 +1,4 @@
-import {getKidProfile} from '../../parental-controls.js?v=release-1.2.7-audio.2';
+import {getKidProfile} from '../../parental-controls.js?v=release-1.2.8-party.1';
 // Adapted from Warboy's MIT-licensed canvas remake; see UPSTREAM.md and LICENSE.
 (() => {
   'use strict';

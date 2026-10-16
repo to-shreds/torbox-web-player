@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.7**, frontend build **release-1.2.7-audio.2**
+Current version: **1.2.8**, frontend build **release-1.2.7-audio.2**
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
@@ -12,7 +12,7 @@ Backend: `https://torbox-web-player-key.onrender.com`
 
 ## Watch party
 
-While playing a movie or episode, choose **Watch party → Create party for this video**, then copy the invitation. The other person connects TorBox on their own device and joins with the link or code. Joining loads the exact same cached file. Both viewers can play, pause and seek; buffering holds playback until both are ready. Tap **Ready to watch** if the browser asks. Video streams directly to each device, with only small control messages using the existing free Render service. No extra account or paid service is required. Parties last up to six hours and end when the host leaves or the service restarts. Source switching and auto-next are held during a party. This feature applies to the movie/episode player. [Details and limits](docs/watch-party.md).
+While playing a movie or episode, choose **Watch party → Create party for this video**, then copy the invitation. The other person opens the invitation and joins without connecting TorBox or entering an API key. Both viewers use the host’s TorBox connection, with a separate playback link for each device. Creating a party requires confirming that the invited viewer is trusted with the TorBox account: TorBox CDN links can reveal the host’s full API key. The app limits guest controls to the exact party file; the key itself can grant broader account access outside the app. Both viewers can play, pause and seek; buffering holds playback until both are ready. Tap **Ready to watch** if the browser asks. Video streams directly to each device, with only small control messages using the existing free Render service. No extra account or paid service is required. Parties last up to six hours and end when the host leaves or the service restarts. Source switching and auto-next are held during a party. This feature applies to the movie/episode player. [Details and limits](docs/watch-party.md).
 
 ## Playback startup patch
 
@@ -74,7 +74,7 @@ Settings now includes **Sync & devices → Transfer this setup**. It creates a o
 
 Transferred state includes the selected viewer, general settings, Continue Watching history, My list, search history, and Kid Mode/PIN/allowance state. Device-specific source/audio compatibility learning is intentionally not transferred. If the API key is not remembered on the source device, Settings asks for it once and verifies it against the current session before creating the encrypted package. Opening a transfer link on the destination device validates the debrid credential before applying the imported state and stores the credential using the destination browser's existing encrypted vault. This transfer does not yet enable ongoing cloud synchronization.
 
-Normal owner video bytes no longer pass through Render. The browser still receives an opaque, expiring `/media/<ticket>` path, and Render answers that request with a redirect to the TorBox CDN. On this TorBox account the CDN URL itself contains the account API key, so the key can be visible to the signed-in owner's browser network stack during playback even though it is never returned in playback JSON or written into the page. Guest playback requires a key-free direct TorBox link. If TorBox cannot provide one, playback fails clearly; it never falls back to a video relay.
+Normal owner video bytes no longer pass through Render. The browser still receives an opaque, expiring `/media/<ticket>` path, and Render answers that request with a redirect to the TorBox CDN. On this TorBox account the CDN URL itself contains the account API key, so the key can be visible to the signed-in owner's browser network stack during playback even though it is never returned in playback JSON or written into the page. A host can explicitly authorize key-bearing direct playback when creating a watch party, after a notice explains the invited viewer can extract the full key and access the TorBox account outside this app. This consent is per-party and is never a saved preference. Without that consent, guest playback requires a key-free direct TorBox link and fails clearly if TorBox cannot provide one. It never falls back to a video relay.
 
 Owner playback path:
 
@@ -82,7 +82,7 @@ Owner playback path:
 
 Temporary guest playback path:
 
-`TorBox CDN -> guest browser`, only when TorBox supplies a guest-safe link.
+`TorBox CDN -> guest browser`, with a key-free link or explicit per-party host authorization of account-bearing playback links.
 
 Render handles control/API operations such as catalog and source lookup, cache checks, preparation, playback-link generation, owner redirect issuance, TorBox status checks, and temporary progress leases. It never transports video bytes. New Google Drive exports are disabled because Drive adds a separate storage quota; the old cleanup endpoints remain available for previously exported files.
 

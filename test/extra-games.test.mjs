@@ -24,8 +24,8 @@ test('extra metadata and touch keys are bounded and invalid rows do not break ot
   for (const row of invalid) assert.deepEqual(cleanExtraGamesCatalog({version:1,items:[row,web]}).items,[web]);
 });
 test('launch URLs stay relative and identify only the selected self-hosted game',() => {
-  assert.equal(extraPlayerUrl(dos),'./dos-player.html?game=original-dos&v=release-1.2.7-audio.2');
-  assert.equal(extraPlayerUrl(web),'./games-web/original-web/index.html?v=release-1.2.7-audio.2');
+  assert.equal(extraPlayerUrl(dos),'./dos-player.html?game=original-dos&v=release-1.2.8-party.1');
+  assert.equal(extraPlayerUrl(web),'./games-web/original-web/index.html?v=release-1.2.8-party.1');
   assert.throws(() => extraPlayerUrl({...web,page:'api/session'}));
   assert.throws(() => extraPlayerUrl(dos,'../../../secret'));
 });

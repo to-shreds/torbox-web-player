@@ -1,5 +1,5 @@
 // Shared source normalization and authenticated backend lookup. No provider keys here.
-import { apiUrl, apiMode, getSessionToken, credentialsMode } from './runtime.js?v=release-1.2.7-audio.2';
+import { apiUrl, apiMode, getSessionToken, credentialsMode } from './runtime.js?v=release-1.2.8-party.1';
 export const SOURCE_PATH = '/api/discover/lookup';
 export const MAX_SOURCES = 40;
 export function targetOf(input) {

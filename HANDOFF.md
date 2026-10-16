@@ -2,6 +2,16 @@
 
 Read this first. The code repository controls implementation; `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md` controls readiness and the next action.
 
+## Host-backed watch parties · 2026-10-16
+
+Release **1.2.8**, frontend **release-1.2.8-party.1**, changes guests to use the host’s TorBox connection. Invitations work from a fresh browser without a guest API key or sign-in. Joining creates a distinct room/file-scoped temporary session. Existing owner sessions, encrypted keys, settings, source memory and same-title resume state are preserved and restored after leaving. A separate party lobby prevents catalog/owner UI from loading; Kid Mode still requires a Parent PIN, including after reload. Reload reopens the exact party file from the server snapshot.
+
+**Actual TorBox credential constraint:** `docs/INTEGRATION.md` records a real CDN URL whose token was the master API key; removing it returned HTTP400. Do not replace that evidence with a hypothetical safe token from fixtures. TorBox documents redirect=true as a redirect, not a restricted credential. The host must explicitly check a per-party trust box after a notice that the invited viewer can extract the full key and use the TorBox account outside this app. The notice explains ending a party does not revoke copied keys; reset the key in TorBox to revoke account access. Consent defaults false in the backend, is not persisted as a preference, is set only by the host at creation, and is rechecked at the native media handoff. Legacy/nonconsented parties still require a key-free link and fail closed when unavailable.
+
+Guest video gets an independently requested link from the host provider, rather than reusing the host’s link. No key enters the invitation, party/control JSON or guest storage; native CDN redirects can contain it after explicit host consent. App routes remain confined to the exact room/file, but that restriction does not constrain an extracted master key. API/media handoffs revalidate membership, host session and current host proof, including after asynchronous provider work. Host leave/logout/playback replacement, expiry and guest replacement stop further app access. Issued CDN links remain governed by TorBox expiry. No video relay, paid service, plan change or APK change is introduced.
+
+Local syntax and full Node verification are being finalized; browser acceptance is pending the native Chrome CI gate because local Playwright downloads are truncated. No real account, physical-device or live Internet synchronization result is claimed. Publication is pending. Previous website is archived at `archive/web-before-host-party-2026-10-16` (8edc707c006d293f573e94b0dd97aa7298325f9b); previous backend at `archive/backend-before-host-party-2026-10-16` (3aed7eb3298e2e8f7fae7d61520c1e4abe54664a). PiP timeout remains unresolved, and the No sound removal/feedback repair remain preserved.
+
 ## Standing Render workspace choice
 
 The user explicitly confirmed **My Workspace** (`tea-dakujgmk1f9s73d2v8ng`) on 2026-10-10 and requested blanket confirmation because this is the account's only workspace. Reuse that workspace for authorized Render work without asking again unless the user changes the choice. Pass its ID explicitly on Render calls.

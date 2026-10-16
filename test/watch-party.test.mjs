@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { WatchParties, prepareExactPartyFile, samePartyMedia } from '../lib/watch-party.mjs';
+import { WatchParties, prepareExactPartyFile, prepareHostedPartyFile, samePartyMedia } from '../lib/watch-party.mjs';
 
 const identity = { kind: 'torrent', hash: '0123456789abcdef0123456789abcdef01234567', path: 'Show/Season 01/Episode.mp4', size: 2_400_000 };
 const target = { type: 'series', id: 'tt1234567', season: 1, episode: 2 };
@@ -120,6 +120,15 @@ test('bound proofs remain valid beyond 30 minutes during a long movie until play
   const { room } = f.parties.get(f.id, 'host-session-private');
   assert.equal(room.guest.ready, false);
   assert.equal(room.guest.blocked, true);
+});
+
+test('replacing the host playback ends the previous room and invitation immediately', () => {
+  const f = withGuest();
+  const replacement = f.parties.issuePlayback('host-session-private', file, identity);
+  assert.notEqual(replacement, f.hostProof);
+  assert.equal(f.parties.rooms.size, 0);
+  assert.throws(() => f.parties.get(f.id, 'guest-session-private'), errorCode('WATCH_PARTY_NOT_FOUND'));
+  assert.throws(() => f.parties.invited(f.created.joinToken), errorCode('WATCH_PARTY_NOT_FOUND'));
 });
 
 test('play begins at a shared server anchor two seconds ahead after both players are within 0.75 seconds', () => {
@@ -314,6 +323,18 @@ test('exact preparation reuses an existing item and matches the full relative pa
   const selected = await prepareExactPartyFile(identity, { find: async hash => { assert.equal(hash, identity.hash); return value; }, cached: () => assert.fail('existing item does not need a cache lookup'), create: () => assert.fail('existing item must not be recreated') });
   assert.equal(selected.id, 'torrents:7:3');
   assert.equal(selected.title, 'Episode.mp4');
+});
+
+test('hosted preparation only reopens the host selected file and verifies its current fingerprint', async () => {
+  let calls = 0;
+  const provider = { resolveFile: async id => { calls++; assert.equal(id, file.id); return { file, mediaIdentity: identity }; } };
+  assert.deepEqual(await prepareHostedPartyFile(identity, file.id, provider), file);
+  assert.equal(calls, 1);
+  for (const patch of [{ hash: 'f'.repeat(40) }, { path: 'Different/Episode.mp4' }, { size: identity.size + 1 }]) {
+    await assert.rejects(prepareHostedPartyFile(identity, file.id, { resolveFile: async () => ({ file, mediaIdentity: { ...identity, ...patch } }) }), errorCode('WATCH_PARTY_MEDIA_MISMATCH'));
+  }
+  const removed = Object.assign(new Error('Host file was removed.'), { code: 'FILE_REMOVED' });
+  await assert.rejects(prepareHostedPartyFile(identity, file.id, { resolveFile: async () => { throw removed; } }), errorCode('FILE_REMOVED'));
 });
 
 test('exact preparation creates only an already cached hash and requests cached-only provider creation', async () => {

@@ -6,18 +6,20 @@ import { chromium } from 'playwright';
 import { createApp } from '../../server.mjs';
 import { TorBox } from '../../lib/torbox.mjs';
 
-// Independent browser sessions use independent TorBox providers and opaque
-// playback tickets. Only the original, locally generated video fixture crosses
-// the browser boundary; this suite never contacts TorBox or relays real media.
+// Independent browser sessions share the host's TorBox provider through a
+// restricted party session and separate opaque playback tickets. Only the
+// original, locally generated video fixture crosses the browser boundary;
+// this suite never contacts TorBox or relays real media.
 const media = await readFile(new URL('../fixtures/fixture.mp4', import.meta.url));
 const target = { type: 'series', id: 'tt1234567', season: 1, episode: 1 };
 const hash = 'a'.repeat(40);
 const filename = 'Fixture.Show.S01E01.One.720p.H264.AAC.mp4';
 const path = 'Fixture Show/' + filename;
 const keys = { host: 'watch-party-host-fixture-key', guest: 'watch-party-guest-fixture-key' };
+const temporaryLinkToken = 'temporary-host-file-token';
 let browser;
 const saveEvidence = process.env.WATCH_PARTY_EVIDENCE === '1';
-const evidence = { generatedAt: new Date().toISOString(), scope: 'Local production UI/server with two synthetic TorBox accounts and original fixture.mp4; no real accounts or media.', measurements: {} };
+const evidence = { generatedAt: new Date().toISOString(), scope: 'Local production UI/server with a synthetic host TorBox account, a restricted no-key party guest, an optional preexisting guest account, and original fixture.mp4; no real accounts or media.', measurements: {} };
 const sourcePaths = ['public/watch-party.js', 'public/watch-party-core.js', 'public/app.js', 'lib/watch-party.mjs', 'server.mjs'];
 async function sourceHashes() { return Object.fromEntries(await Promise.all(sourcePaths.map(async path => [path, createHash('sha256').update(await readFile(new URL('../../' + path, import.meta.url))).digest('hex')]))); }
 before(async () => {
@@ -31,7 +33,7 @@ after(async () => {
 
 async function fixtureFor(t, { mismatch = false } = {}) {
   const origin = 'http://127.0.0.1:4202';
-  const control = { mediaFetches: 0, playback: { host: [], guest: [] }, redirects: { host: [], guest: [] } };
+  const control = { mediaFetches: 0, logins: 0, providerCalls: [], playback: { host: [], guest: [] }, redirects: { host: [], guest: [] } };
   const rows = Object.fromEntries(['host', 'guest'].map((role, index) => [role, {
     id: 11 + index * 11, hash, name: 'Fixture Show', download_finished: true, download_present: true,
     files: [{ id: 0, name: role === 'guest' && mismatch ? 'Different Cut/' + filename : path, short_name: filename, mimetype: 'video/mp4', size: media.length }]
@@ -46,10 +48,14 @@ async function fixtureFor(t, { mismatch = false } = {}) {
     const key = options.headers?.Authorization?.replace(/^Bearer /, '') || url.searchParams.get('token');
     const role = roleFor(key);
     if (!role) throw new Error('Unexpected synthetic account');
+    control.providerCalls.push({ role, path: url.pathname, redirect: url.searchParams.get('redirect') });
     if (url.pathname.endsWith('/user/me')) return Response.json({ success: true, data: { id: role, email: `${role}@fixture.invalid` } });
     if (url.pathname.endsWith('/mylist')) return Response.json({ success: true, data: url.searchParams.has('id') ? rows[role] : [rows[role]] });
     if (url.pathname.endsWith('/checkcached')) return Response.json({ success: true, data: { [hash]: { files: rows[role].files } } });
-    if (url.pathname.endsWith('/requestdl')) return Response.json({ success: true, data: `https://store.tb-cdn.io/${role}/fixture.mp4?token=${key}` });
+    if (url.pathname.endsWith('/requestdl')) {
+      if (url.searchParams.get('redirect') === 'true') return new Response(null, { status: 307, headers: { Location: `https://store.tb-cdn.io/${role}/fixture.mp4?token=${temporaryLinkToken}` } });
+      return Response.json({ success: true, data: `https://store.tb-cdn.io/${role}/fixture.mp4?token=${key}` });
+    }
     throw new Error('Unexpected synthetic upstream: ' + url.pathname);
   };
   const app = createApp({
@@ -61,7 +67,9 @@ async function fixtureFor(t, { mismatch = false } = {}) {
   });
   const handler = app.server.listeners('request')[0]; app.server.removeAllListeners('request');
   app.server.on('request', async (request, response) => {
-    if (new URL(request.url, origin).pathname === '/') {
+    const requestPath = new URL(request.url, origin).pathname;
+    if (requestPath === '/api/login') control.logins++;
+    if (requestPath === '/') {
       response.setHeader('Content-Type', 'text/html');
       response.end((await readFile(new URL('../../public/index.html', import.meta.url), 'utf8')).replaceAll('https://torbox-web-player-key.onrender.com', origin));
       return;
@@ -72,7 +80,7 @@ async function fixtureFor(t, { mismatch = false } = {}) {
   const contexts = [];
   t.after(async () => { await Promise.all(contexts.map(context => context.close())); app.server.closeAllConnections(); await new Promise(resolve => app.server.close(resolve)); assert.equal(control.mediaFetches, 0); });
 
-  async function user(role, { mobile = false, mediaGate = null } = {}) {
+  async function user(role, { mobile = false, mediaGate = null, signedIn = role === 'host', invitation = '' } = {}) {
     const context = await browser.newContext({ viewport: mobile ? { width: 412, height: 915 } : { width: 1100, height: 820 }, isMobile: mobile, hasTouch: mobile, serviceWorkers: 'block' }); contexts.push(context);
     const page = await context.newPage(), errors = [], partyResponses = [], pendingResponses = [];
     page.setDefaultTimeout(12000);
@@ -86,16 +94,26 @@ async function fixtureFor(t, { mismatch = false } = {}) {
       const redirect = await route.fetch({ maxRedirects: 0 });
       assert.equal(redirect.status(), 307); assert.equal((await redirect.body()).length, 0);
       const destination = new URL(redirect.headers().location);
-      assert.equal(destination.hostname, 'store.tb-cdn.io'); assert.equal(destination.pathname, `/${role}/fixture.mp4`); assert.equal(destination.searchParams.get('token'), keys[role]);
+      assert.equal(destination.hostname, 'store.tb-cdn.io'); assert.equal(destination.pathname, '/host/fixture.mp4');
+      assert.equal(destination.searchParams.get('token'), keys.host, 'the consented native media handoff uses the host account, including its provider-issued key-bearing URL');
+      assert.equal(destination.href.includes(keys.guest), false, 'a signed-in guest’s own provider key must never authorize party media');
       control.redirects[role].push(destination.href);
       if (mediaGate) await mediaGate;
       const range = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range || '');
       const start = range ? Number(range[1]) : 0, end = range?.[2] ? Math.min(Number(range[2]), media.length - 1) : media.length - 1;
       await route.fulfill({ status: range ? 206 : 200, body: media.subarray(start, end + 1), headers: { 'Content-Type': 'video/mp4', 'Accept-Ranges': 'bytes', ...(range ? { 'Content-Range': `bytes ${start}-${end}/${media.length}` } : {}) } });
     });
-    await page.goto(origin);
-    await page.locator('#api-key').fill(keys[role]); await page.locator('#login-form button[type=submit]').click();
-    await page.waitForSelector('#workspace:not([hidden])');
+    await page.goto(invitation || origin);
+    if (signedIn) {
+      await page.locator('#api-key').fill(keys[role]); await page.locator('#login-form button[type=submit]').click();
+      await page.waitForSelector('#workspace:not([hidden])');
+    } else if (invitation) {
+      await page.locator('#watch-party-dialog[open]').waitFor();
+      assert.equal(await page.locator('#api-key').isVisible(), false);
+    } else {
+      await page.locator('#login:not([hidden])').waitFor();
+      assert.equal(await page.locator('#api-key').inputValue(), '');
+    }
     t.after(async () => {
       await Promise.allSettled(pendingResponses);
       assert.deepEqual(errors, [], 'production browser should not raise page errors');
@@ -103,7 +121,11 @@ async function fixtureFor(t, { mismatch = false } = {}) {
         const serialized = JSON.stringify(data);
         assert.equal(serialized.includes(keys.host), false); assert.equal(serialized.includes(keys.guest), false);
         assert.equal(serialized.includes('store.tb-cdn.io'), false); assert.equal(serialized.includes('/media/'), false);
-        if (role === 'guest') assert.equal(serialized.includes('torrents:11:0'), false, 'guest party responses must not expose the host account-local file ID');
+      }
+      for (const data of control.playback[role]) {
+        const serialized = JSON.stringify(data);
+        for (const key of Object.values(keys)) assert.equal(serialized.includes(key), false, 'API keys belong only to the host-consented native media handoff');
+        assert.equal(serialized.includes('store.tb-cdn.io'), false, 'playback JSON must contain an opaque ticket rather than the upstream media URL');
       }
     });
     return { page, context, partyResponses };
@@ -117,6 +139,9 @@ async function playHost(page) {
 }
 async function createParty(host) {
   await playHost(host.page); await host.page.locator('#player-watch-party').click();
+  assert.equal(await host.page.locator('#party-create').isDisabled(), true, 'creating must require deliberate account-access consent');
+  assert.match(await host.page.locator('#party-host-access').innerText(), /full API key[\s\S]*access[\s\S]*TorBox account/i);
+  await host.page.locator('#party-trust-viewer').check();
   const response = host.page.waitForResponse(response => new URL(response.url()).pathname === '/api/watch-party/create' && response.request().method() === 'POST');
   await host.page.locator('#party-create').click(); const created = await (await response).json();
   assert.ok(created.room?.id); assert.match(created.joinToken, /^[A-Za-z0-9_-]{43}$/);
@@ -125,8 +150,14 @@ async function createParty(host) {
   assert.equal(invitation.search, ''); assert.equal(invitation.username, ''); assert.equal(invitation.password, '');
   return created;
 }
-async function joinParty(guest, created) {
-  await guest.page.locator('#open-watch-party').click(); await guest.page.locator('#party-join-code').fill(created.joinValue || created.joinToken); await guest.page.locator('#party-join').click();
+async function joinParty(guest, created, { paste = false } = {}) {
+  if (paste) {
+    await guest.page.locator('#login-watch-party').click(); await guest.page.locator('#party-join-code').fill(created.joinValue || created.joinToken); await guest.page.locator('#party-join').click();
+  } else {
+    if (guest.page.url() !== created.invitation) await guest.page.goto(created.invitation);
+    await guest.page.locator('#watch-party-dialog[open]').waitFor();
+    await guest.page.locator('#party-join').click();
+  }
   await guest.page.waitForFunction(() => document.querySelector('#video-slot video')?.readyState >= 2);
   await guest.page.waitForFunction(() => !document.querySelector('#watch-party-dialog').open);
   await guest.page.locator('#player-watch-party').click();
@@ -149,25 +180,47 @@ async function closePartyDialog(page) {
 // The assertions below exercise production DOM and real media playback. Browser
 // event injection is limited to a stall/recovery notification, which cannot be
 // induced deterministically by a fully cached local MP4.
-test('watch party joins the exact file through each account and keeps credentials out of party JSON', { timeout: 45000 }, async t => {
-  const fixture = await fixtureFor(t), host = await fixture.user('host'), guest = await fixture.user('guest', { mobile: true });
-  const created = await createParty(host); await joinParty(guest, { ...created, joinValue: created.invitation });
+test('a fresh invitation joins the consented host connection without a guest API key and exposes credentials only in the native media handoff', { timeout: 45000 }, async t => {
+  const fixture = await fixtureFor(t), host = await fixture.user('host');
+  const created = await createParty(host), guest = await fixture.user('guest', { mobile: true, invitation: created.invitation });
+  await joinParty(guest, created);
   await guest.page.waitForFunction(() => document.querySelector('#playing-title').textContent.includes('Fixture.Show.S01E01'));
   await host.page.locator('#party-play').click();
   const videos = await waitConverged(host, guest, { playing: true });
   assert.equal(videos[0].duration, videos[1].duration);
   for (const user of [host, guest]) await user.page.waitForFunction(() => document.querySelector('#video-slot video')?.getVideoPlaybackQuality().totalVideoFrames > 0);
   assert.ok(videos.every(video => Math.abs(video.rate - 1) <= .06), 'drift correction should keep playback close to the normal rate');
-  t.diagnostic(`Real-video drift on coordinated start: ${Math.abs(videos[0].time - videos[1].time).toFixed(3)}s; independent account-local IDs and direct CDN tickets confirmed.`);
+  t.diagnostic(`Real-video drift on coordinated start: ${Math.abs(videos[0].time - videos[1].time).toFixed(3)}s; host-backed guest and direct CDN tickets confirmed.`);
   assert.ok(fixture.control.redirects.host.length); assert.ok(fixture.control.redirects.guest.length);
-  assert.equal(fixture.control.playback.host.at(-1).file.id, 'torrents:11:0'); assert.equal(fixture.control.playback.guest.at(-1).file.id, 'torrents:22:0');
-  evidence.measurements.start = { driftSeconds: Math.abs(videos[0].time - videos[1].time), host: videos[0], guest: videos[1], separateProviderFilesAndTickets: true };
+  assert.equal(fixture.control.playback.host.at(-1).file.id, 'torrents:11:0'); assert.equal(fixture.control.playback.guest.at(-1).file.id, 'torrents:11:0');
+  assert.equal(fixture.control.playback.guest.at(-1).guestSafeLink, false);
+  assert.equal(fixture.control.playback.guest.at(-1).exposesTorBoxToken, true);
+  assert.equal(fixture.control.logins, 1, 'only the host connects a TorBox API key');
+  assert.ok(fixture.control.providerCalls.every(call => call.role === 'host'), 'no guest provider account may be used');
+  const session = await guest.page.evaluate(async () => {
+    const response = await fetch('/api/session', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem('torbox-web-session') } });
+    return response.json();
+  });
+  assert.equal(session.guest, true); assert.equal(session.partyGuest, true); assert.equal(session.partyRoomId, created.room.id);
+  const storage = await guest.page.evaluate(() => JSON.stringify({ local: { ...localStorage }, session: { ...sessionStorage } }));
+  for (const key of Object.values(keys)) assert.equal(storage.includes(key), false);
+  assert.equal(await guest.page.locator('#api-key').isVisible(), false);
+  assert.equal(await guest.page.locator('#catalog-grid').isVisible(), false);
+  const forbidden = await guest.page.evaluate(async () => {
+    const headers = { Authorization: 'Bearer ' + sessionStorage.getItem('torbox-web-session') };
+    return Promise.all(['/api/discover/catalog?type=series', '/api/library', '/api/drive/config', '/api/discover/meta?type=series&id=tt9999999'].map(async path => {
+      const response = await fetch(path, { headers }); return { path, status: response.status, body: await response.json() };
+    }));
+  });
+  for (const result of forbidden) { assert.equal(result.status, 403, result.path); assert.equal(result.body.error, 'GUEST_FORBIDDEN', result.path); }
+  assert.equal(await guest.page.locator('#party-host-access').isVisible(), false);
+  evidence.measurements.start = { driftSeconds: Math.abs(videos[0].time - videos[1].time), host: videos[0], guest: videos[1], hostProviderShared: true, guestKeySupplied: false, hostExplicitlyConsentedToKeyBearingMediaHandoff: true, keyInGuestMediaRedirect: true, keyInPartyJsonOrGuestStorage: false, forbiddenApis: forbidden.map(({ path, status }) => ({ path, status })), mediaRelayCalls: fixture.control.mediaFetches };
   if (saveEvidence) { await closePartyDialog(host.page); await closePartyDialog(guest.page); await host.page.screenshot({ path: 'docs/evidence/watch-party/watch-party-desktop.png' }); await guest.page.screenshot({ path: 'docs/evidence/watch-party/watch-party-phone.png' }); }
 });
 
 test('either participant pauses, seeks and resumes both independent video elements at the same time', { timeout: 45000 }, async t => {
   const fixture = await fixtureFor(t), host = await fixture.user('host'), guest = await fixture.user('guest');
-  const created = await createParty(host); await joinParty(guest, created); await host.page.locator('#party-play').click(); await waitConverged(host, guest, { playing: true });
+  const created = await createParty(host); await joinParty(guest, { ...created, joinValue: created.invitation }, { paste: true }); await host.page.locator('#party-play').click(); await waitConverged(host, guest, { playing: true });
   await guest.page.locator('#party-pause').click(); await waitConverged(host, guest, { playing: false });
   await guest.page.locator('#video-slot video').evaluate(video => { video.currentTime = 32; });
   await waitConverged(host, guest, { playing: false, near: 32 });
@@ -181,17 +234,55 @@ test('either participant pauses, seeks and resumes both independent video elemen
   await host.page.locator('#video-slot video').evaluate(video => video.pause()); await waitConverged(host, guest, { playing: false });
 });
 
-test('a different full file path cannot silently join as the same cut', { timeout: 35000 }, async t => {
-  const fixture = await fixtureFor(t, { mismatch: true }), host = await fixture.user('host'), guest = await fixture.user('guest');
+test('joining from a signed-in browser uses a separate host-backed session instead of that viewer’s account', { timeout: 40000 }, async t => {
+  const fixture = await fixtureFor(t, { mismatch: true }), host = await fixture.user('host'), guest = await fixture.user('guest', { signedIn: true });
   const created = await createParty(host);
-  await guest.page.locator('#open-watch-party').click(); await guest.page.locator('#party-join-code').fill(created.joinToken);
-  const rejected = guest.page.waitForResponse(response => new URL(response.url()).pathname === '/api/watch-party/prepare');
-  await guest.page.locator('#party-join').click(); const response = await rejected;
-  assert.equal(response.status(), 409); assert.equal((await response.json()).error, 'WATCH_PARTY_MEDIA_MISMATCH');
-  await guest.page.waitForFunction(() => /match|different|unavailable|find/i.test(document.querySelector('#party-status').textContent));
-  assert.equal(fixture.control.playback.guest.length, 0, 'a title and filename match cannot authorize a different full-path file');
-  assert.equal(await guest.page.locator('#player').evaluate(dialog => dialog.open), false);
-  assert.equal(await host.page.locator('#video-slot video').evaluate(video => video.paused), true);
+  const preservedSetup = await guest.page.evaluate(async ({ key, target }) => {
+    const { rememberApiKey, loadRememberedApiKey } = await import('./vault.js');
+    const { updateSettings } = await import('./settings.js');
+    const { recordRecent } = await import('./history.js');
+    await rememberApiKey(key); updateSettings({ resolution: '1080p', resumeRewindSeconds: 15, autoNext: false });
+    recordRecent({ current: target, title: 'Previously watched through my own connection', resolution: '1080p' }, 65, 120);
+    return { settings: localStorage.getItem('torbox-settings-v1'), history: localStorage.getItem('torbox-recent-v1'), rememberedKey: await loadRememberedApiKey() };
+  }, { key: keys.guest, target });
+  const oldSession = await guest.page.evaluate(() => sessionStorage.getItem('torbox-web-session'));
+  const providerCalls = fixture.control.providerCalls.length;
+  await joinParty(guest, created);
+  const partySession = await guest.page.evaluate(() => sessionStorage.getItem('torbox-web-session'));
+  assert.notEqual(partySession, oldSession);
+  assert.ok(fixture.control.providerCalls.slice(providerCalls).every(call => call.role === 'host'), 'joining must not search or prepare through the viewer’s independent account');
+  assert.equal(fixture.control.playback.guest.at(-1).file.id, 'torrents:11:0');
+  await host.page.locator('#party-play').click(); await waitConverged(host, guest, { playing: true });
+  await guest.page.locator('#party-leave').click();
+  await guest.page.waitForFunction(previous => sessionStorage.getItem('torbox-web-session') === previous && !document.querySelector('#workspace').hidden, oldSession);
+  const restored = await guest.page.evaluate(async () => (await fetch('/api/session', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem('torbox-web-session') } })).json());
+  assert.equal(restored.authenticated, true); assert.equal(restored.guest, false);
+  assert.deepEqual(await guest.page.evaluate(async () => ({ settings: localStorage.getItem('torbox-settings-v1'), history: localStorage.getItem('torbox-recent-v1'), rememberedKey: await (await import('./vault.js')).loadRememberedApiKey() })), preservedSetup, 'the party overlay must preserve the independent account’s episode resume, settings and encrypted remembered key');
+});
+
+test('a no-key guest reloads the same party session and can leave and rejoin the host’s invitation', { timeout: 55000 }, async t => {
+  const fixture = await fixtureFor(t), host = await fixture.user('host'), guest = await fixture.user('guest');
+  const created = await createParty(host); await joinParty(guest, created);
+  await host.page.locator('#party-play').click(); await waitConverged(host, guest, { playing: true });
+  await host.page.locator('#party-pause').click(); await waitConverged(host, guest, { playing: false });
+  await host.page.locator('#video-slot video').evaluate(video => { video.currentTime = 27; });
+  await waitConverged(host, guest, { playing: false, near: 27 });
+  const originalSession = await guest.page.evaluate(() => sessionStorage.getItem('torbox-web-session'));
+  const previousPlays = fixture.control.playback.guest.length;
+  await guest.page.reload();
+  await guest.page.waitForFunction(() => document.querySelector('#video-slot video')?.readyState >= 2);
+  assert.equal(await guest.page.evaluate(() => sessionStorage.getItem('torbox-web-session')), originalSession);
+  await waitConverged(host, guest, { playing: false, near: 27 });
+  assert.ok(fixture.control.playback.guest.length > previousPlays, 'reload must issue a fresh consented playback ticket through the existing restricted session');
+  if (!(await guest.page.locator('#watch-party-dialog').evaluate(dialog => dialog.open))) await guest.page.locator('#player-watch-party').click();
+  await guest.page.locator('#party-play').click(); await waitConverged(host, guest, { playing: true, near: 27 });
+  await guest.page.locator('#party-leave').click();
+  await host.page.waitForFunction(() => document.querySelector('#party-status').dataset.phase === 'waiting');
+  await guest.page.locator('#login:not([hidden])').waitFor();
+  await joinParty(guest, created);
+  assert.notEqual(await guest.page.evaluate(() => sessionStorage.getItem('torbox-web-session')), originalSession);
+  await host.page.locator('#party-play').click(); await waitConverged(host, guest, { playing: true });
+  assert.equal(fixture.control.logins, 1, 'reloading and rejoining never require another TorBox sign-in');
 });
 
 test('closing playback leaves the party and cannot reopen a stopped player', { timeout: 40000 }, async t => {
@@ -210,7 +301,7 @@ test('a delayed real media load holds the ready viewer until both videos can sta
   const gate = new Promise(resolve => { release = resolve; }); t.after(() => release());
   const fixture = await fixtureFor(t), host = await fixture.user('host'), guest = await fixture.user('guest', { mediaGate: gate });
   const created = await createParty(host);
-  await guest.page.locator('#open-watch-party').click(); await guest.page.locator('#party-join-code').fill(created.joinToken); await guest.page.locator('#party-join').click();
+  await guest.page.goto(created.invitation); await guest.page.locator('#watch-party-dialog[open]').waitFor(); await guest.page.locator('#party-join').click();
   await guest.page.waitForFunction(() => document.querySelector('#video-slot video')?.currentSrc);
   assert.equal(await guest.page.locator('#party-resume').isDisabled(), true, 'Ready must remain disabled before actual media metadata arrives');
   await guest.page.locator('#party-resume').evaluate(button => button.click());
@@ -255,6 +346,32 @@ test('changing the viewer detaches its party before a stale heartbeat can affect
   assert.equal(fixture.control.playback.guest.length, requests); assert.equal(await guest.page.locator('#player').evaluate(dialog => dialog.open), false);
 });
 
+test('a no-key invitation preserves Kid Mode and requires the Parent PIN again after reload', { timeout: 50000 }, async t => {
+  const fixture = await fixtureFor(t), host = await fixture.user('host'), guest = await fixture.user('guest');
+  const created = await createParty(host);
+  await guest.page.evaluate(async () => {
+    const { setParentPin, updateKidProfile } = await import('./parental-controls.js');
+    await setParentPin('2468'); updateKidProfile('viewer-1', { enabled: true });
+  });
+  await guest.page.goto(created.invitation);
+  await guest.page.locator('#parent-pin-dialog[open]').waitFor();
+  assert.equal(fixture.control.playback.guest.length, 0);
+  await guest.page.locator('#parent-pin-input').fill('1111'); await guest.page.locator('#parent-pin-form button[type=submit]').click();
+  await guest.page.waitForFunction(() => document.querySelector('#parent-pin-message').textContent.includes('Incorrect'));
+  assert.equal(fixture.control.playback.guest.length, 0);
+  await guest.page.locator('#parent-pin-input').fill('2468'); await guest.page.locator('#parent-pin-form button[type=submit]').click();
+  await guest.page.locator('#watch-party-dialog[open]').waitFor(); await guest.page.locator('#party-join').click();
+  await guest.page.waitForFunction(() => document.querySelector('#video-slot video')?.readyState >= 2);
+  assert.equal(await guest.page.evaluate(async () => (await import('./parental-controls.js')).getKidProfile('viewer-1').enabled), true);
+  const previousPlays = fixture.control.playback.guest.length;
+  await guest.page.reload(); await guest.page.locator('#parent-pin-dialog[open]').waitFor();
+  assert.equal(fixture.control.playback.guest.length, previousPlays, 'a restored guest session cannot load media before renewed parent approval');
+  await guest.page.locator('#parent-pin-input').fill('2468'); await guest.page.locator('#parent-pin-form button[type=submit]').click();
+  await guest.page.waitForFunction(() => document.querySelector('#video-slot video')?.readyState >= 2);
+  await host.page.locator('#party-play').click(); await waitConverged(host, guest, { playing: true });
+  assert.equal(fixture.control.logins, 1);
+});
+
 test('Kid Mode enabled in another tab leaves the adult party and keeps further controls unavailable', { timeout: 40000 }, async t => {
   const fixture = await fixtureFor(t), host = await fixture.user('host'), guest = await fixture.user('guest');
   const created = await createParty(host); await joinParty(guest, created); await host.page.locator('#party-play').click(); await waitConverged(host, guest, { playing: true });
@@ -271,7 +388,7 @@ test('the host leaving ends the invitation and cleanly detaches the other player
   const fixture = await fixtureFor(t), host = await fixture.user('host'), guest = await fixture.user('guest');
   const created = await createParty(host); await joinParty(guest, created); await host.page.locator('#party-play').click(); await waitConverged(host, guest, { playing: true });
   await host.page.locator('#party-leave').click();
-  await guest.page.waitForFunction(() => document.querySelector('#party-player-status').hidden === true && document.querySelector('#video-slot video').paused === true);
+  await guest.page.waitForFunction(() => document.querySelector('#party-player-status').hidden === true && (!document.querySelector('#video-slot video') || document.querySelector('#video-slot video').paused === true));
   assert.equal(await host.page.locator('#party-controls').isVisible(), false); assert.equal(await guest.page.locator('#party-controls').isVisible(), false);
   const rejected = await guest.page.evaluate(async invitation => {
     const response = await fetch('/api/watch-party/join', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + sessionStorage.getItem('torbox-web-session') }, body: JSON.stringify({ token: invitation }) });

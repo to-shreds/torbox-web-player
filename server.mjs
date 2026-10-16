@@ -12,7 +12,7 @@ import { Catalog } from './lib/catalog.mjs';
 import { DriveTransferTests } from './lib/drive-share.mjs';
 import { TorBoxStatusChecker } from './lib/torbox-status.mjs';
 import { SetupTransfers } from './lib/setup-transfer.mjs';
-import { WatchParties, prepareExactPartyFile } from './lib/watch-party.mjs';
+import { WatchParties, prepareExactPartyFile, prepareHostedPartyFile, samePartyMedia } from './lib/watch-party.mjs';
 import { browserContainerHints } from './public/source-client.js';
 const root = dirname(fileURLToPath(import.meta.url));
 const publicFiles = new Map([
@@ -247,6 +247,23 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
   const catalogRate = new Limiter(90, 60000, now), preparationRate = new Limiter(8, 60000, now);
   const configured = apiKeyMode || validHash(passwordHash);
   const setCookie = (response, value, maxAge = 30 * 86400) => response.setHeader('Set-Cookie', `tw_session=${value}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${production ? '; Secure' : ''}`);
+  const revokePartyGuest = session => {
+    mediaTickets.revokeSession(session.id); watchParties.revokeSession(session.id); sessions.revoke(session.id);
+  };
+  const partyAccess = session => {
+    if (!session?.partyGuest) return null;
+    try {
+      sessions.prune();
+      const { room, member } = watchParties.get(session.partyRoomId, session.id);
+      const host = sessions.rows.get(room.host.sessionId), proof = watchParties.proofs.get(room.host.sessionId);
+      if (!sessions.rows.has(session.id) || member !== room.guest || !host || host.guest || host.id !== session.ownerId ||
+        (host.provider || torbox) !== session.provider || !room.host.proof || proof?.proof !== room.host.proof || !samePartyMedia(proof.identity, room.media.identity)) throw new Error('Party authorization ended');
+      return { room, member, host, proof };
+    } catch {
+      revokePartyGuest(session);
+      throw new AppError('WATCH_PARTY_ENDED', 'This watch party ended or the host’s connection changed.', 401);
+    }
+  };
   const server = http.createServer(async (request, response) => {
     response.setHeader('Cache-Control', 'no-store, private');
     response.setHeader('Pragma', 'no-cache');
@@ -264,7 +281,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.2.7', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.2.8', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/relay/health') {
         if(!corsAllowed)throw new AppError('BAD_ORIGIN','This frontend is not allowed to use the TorBox bridge.',403);
         response.setHeader('X-TorBox-Bridge','render');
@@ -296,10 +313,17 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
       const bearer = bearerId(request), cookie = cookieId(request), sessionToken = bearer || cookie;
       const session = configured ? sessions.read(sessionToken) : null;
       const bearerSession = !!bearer && !!session;
+      if (session?.partyGuest) partyAccess(session);
       if (path.startsWith('/media/')) {
         if (!['GET', 'HEAD'].includes(method)) throw new AppError('METHOD_NOT_ALLOWED', 'This media request method is not allowed.', 405);
         const mediaId = path.slice('/media/'.length);
-        const ticket = session ? mediaTickets.read(mediaId, session.id) : mediaTickets.readAny(mediaId);
+        let ticket = session ? mediaTickets.read(mediaId, session.id) : mediaTickets.readAny(mediaId);
+        // Native video cannot attach the temporary bearer token. An owner cookie
+        // preserved for a signed-in guest must not hide its separate party ticket.
+        if (!ticket) {
+          const candidate = mediaTickets.readAny(mediaId);
+          if (sessions.rows.get(candidate?.sessionId)?.partyGuest) ticket = candidate;
+        }
         sessions.prune();
         const ticketSession = ticket ? sessions.rows.get(ticket.sessionId) : null;
         if (!ticket || !ticketSession) {
@@ -307,9 +331,14 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
           if (!session) throw new AppError('LOGIN_REQUIRED', 'This playback ticket is no longer available. Reopen the video.', 401);
           throw new AppError('MEDIA_NOT_FOUND', 'This playback session is no longer available. Reopen the video.', 404);
         }
+        let partyMediaAccess = null;
+        if (ticketSession.partyGuest) {
+          partyMediaAccess = partyAccess(ticketSession);
+          if (!ticketSession.allowedVideos?.has(ticket.videoId)) throw new AppError('GUEST_FORBIDDEN', 'This playback is outside the watch party.', 403);
+        }
         const range = validatedRange(request.headers.range);
         // Never fetch media here. Owners and eligible guests get header-only redirects.
-        const directUrl = ticketSession.guest
+        const directUrl = ticketSession.guest && !partyMediaAccess?.room.allowAccountKeyInPlayback
           ? safePlaybackUrl(ticket.upstreamUrl, (ticketSession.provider || torbox).key, mediaHosts)
           : validatedPlaybackUrl(ticket.upstreamUrl, mediaHosts);
         response.statusCode = 307;
@@ -322,7 +351,31 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
       }
       if (!path.startsWith('/api/')) throw new AppError('NOT_FOUND', 'Page not found.', 404);
       if (!['GET', 'HEAD'].includes(method) && !trustedOrigin(request.headers.origin)) throw new AppError('BAD_ORIGIN', 'Reload the website before trying again.', 403);
-      if (path === '/api/session' && method === 'GET') return json(response, 200, { authenticated: !!session, setupRequired: !configured, authMode: apiKeyMode ? 'api-key' : 'household', ...(session ? { csrf: session.csrf, viewers: VIEWERS, durable: false, guest: session.guest === true, scope: session.guest ? session.scope : undefined, keyConfigured: session.guest ? true : (apiKeyMode ? !!session.provider : !!(env.TORBOX_API_KEY || provider)) } : {}) });
+      if (path === '/api/session' && method === 'GET') return json(response, 200, { authenticated: !!session, setupRequired: !configured, authMode: apiKeyMode ? 'api-key' : 'household', ...(session ? { csrf: session.csrf, viewers: VIEWERS, durable: false, guest: session.guest === true, scope: session.guest ? session.scope : undefined, ...(session.partyGuest ? { partyGuest: true, partyRoomId: session.partyRoomId, partySnapshot: watchParties.snapshot(partyAccess(session).room, session.id), expiresAt: new Date(session.expires).toISOString() } : {}), keyConfigured: session.guest ? true : (apiKeyMode ? !!session.provider : !!(env.TORBOX_API_KEY || provider)) } : {}) });
+      if (path === '/api/watch-party/join' && method === 'POST') {
+        if (!partyJoinRate.allow('ip:' + (request.socket.remoteAddress || 'unknown'))) throw new AppError('SLOW_DOWN', 'Please wait before trying another party link.', 429);
+        const data = await body(request, 8192), room = watchParties.invited(data.token);
+        sessions.prune();
+        const host = sessions.rows.get(room.host.sessionId), proof = watchParties.proofs.get(room.host.sessionId);
+        if (!host || host.guest || !room.host.proof || proof?.proof !== room.host.proof || !samePartyMedia(proof.identity, room.media.identity)) {
+          watchParties.remove(room);
+          throw new AppError('WATCH_PARTY_NOT_FOUND', 'The host is no longer sharing this playback. Ask for a new party link.', 404);
+        }
+        // Retrying a lost response from the same guest keeps its existing seat.
+        if (session?.partyGuest && session.partyRoomId === room.id) return json(response, 200, {
+          ...watchParties.join(session.id, data.token), sessionToken, csrf: session.csrf, guest: true, partyGuest: true, scope: session.scope, expiresAt: new Date(session.expires).toISOString()
+        });
+        const created = sessions.create();
+        if (!created) throw new AppError('SESSION_LIMIT', 'Too many temporary sessions are open. Try again later.', 429);
+        let joined;
+        try { joined = watchParties.join(created.row.id, data.token); }
+        catch (error) { sessions.revoke(created.row.id); throw error; }
+        Object.assign(created.row, { guest: true, partyGuest: true, partyRoomId: room.id, ownerId: host.id,
+          scope: { ...room.media.target, name: room.media.title }, provider: host.provider || torbox, allowedVideos: new Set(),
+          expires: Math.min(created.row.expires, room.expires, host.expires) });
+        if (!session || session.guest) setCookie(response, created.id, Math.max(1, Math.floor((created.row.expires - now()) / 1000)));
+        return json(response, 200, { ...joined, sessionToken: created.id, csrf: created.row.csrf, guest: true, partyGuest: true, scope: created.row.scope, expiresAt: new Date(created.row.expires).toISOString() });
+      }
       if (path === '/api/setup-transfer' && method === 'GET') {
         if (!transferRedeemRate.allow(request.socket.remoteAddress || 'unknown')) throw new AppError('SLOW_DOWN', 'Too many transfer attempts. Try again in a minute.', 429);
         const row=setupTransfers.take(url.searchParams.get('id')||'');
@@ -372,6 +425,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         return json(response, 200, { ok: true, guest: true, scope: created.row.scope, csrf: created.row.csrf, sessionToken: created.id, expiresAt: new Date(created.row.expires).toISOString() });
       }
       if (!session) throw new AppError('LOGIN_REQUIRED', apiKeyMode ? 'Enter your TorBox API key to sign in.' : 'Sign in to your household first.', 401);
+      if (session.partyGuest && !['/api/watch-party/prepare', '/api/watch-party/sync', '/api/watch-party/leave', '/api/playback', '/api/progress', '/api/logout'].includes(path)) throw new AppError('GUEST_FORBIDDEN', 'This temporary session is limited to the watch party’s exact video.', 403);
       const activeProvider = session.provider || torbox;
       const activeDiscovery = session.discovery || discovery;
       const guestScope = session.guest ? session.scope : null;
@@ -384,7 +438,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
       };
       if (!['GET', 'HEAD'].includes(method) && !bearerSession && request.headers['x-csrf-token'] !== session.csrf) throw new AppError('BAD_CSRF', 'Reload the page and try again.', 403);
       if (path.startsWith('/api/watch-party/') && method === 'POST') {
-        if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'Watch parties require each viewer’s own TorBox connection.', 403);
+        if (session.guest && !session.partyGuest) throw new AppError('GUEST_FORBIDDEN', 'Use the watch party invitation to join this playback.', 403);
         const data = await body(request, 8192);
         // Prune parties when a participant's authenticated session has expired or been revoked.
         sessions.prune();
@@ -393,21 +447,25 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
           if (!partyCreateRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Please wait before creating another watch party.', 429);
           return json(response, 200, watchParties.create(session.id, data));
         }
-        if (path === '/api/watch-party/join') {
-          if (!partyJoinRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Please wait before trying another party link.', 429);
-          return json(response, 200, watchParties.join(session.id, data.token));
-        }
         if (path === '/api/watch-party/prepare') {
           if (!partyPrepareRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Please wait before checking the party video again.', 429);
-          const result = await watchParties.prepare(session.id, data.roomId, (identity, state) => prepareExactPartyFile(identity, activeDiscovery.gateway, state));
+          const access = session.partyGuest ? partyAccess(session) : null;
+          const result = await watchParties.prepare(session.id, data.roomId, (identity, state) => access
+            ? prepareHostedPartyFile(identity, access.proof.file.id, activeProvider)
+            : prepareExactPartyFile(identity, activeDiscovery.gateway, state));
           if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
+          if (session.partyGuest) { partyAccess(session); session.allowedVideos = new Set([result.file.id]); }
           return json(response, 200, result);
         }
         if (path === '/api/watch-party/sync') {
           if (!partySyncRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Watch party updates are arriving too quickly.', 429);
           return json(response, 200, watchParties.sync(session.id, data));
         }
-        if (path === '/api/watch-party/leave') return json(response, 200, watchParties.leave(session.id, data.roomId));
+        if (path === '/api/watch-party/leave') {
+          const result = watchParties.leave(session.id, data.roomId);
+          if (session.partyGuest) revokePartyGuest(session);
+          return json(response, 200, result);
+        }
         throw new AppError('NOT_FOUND', 'This watch party action is unavailable.', 404);
       }
       if (path === '/api/setup-transfer' && method === 'POST') {
@@ -425,7 +483,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
           for (const [id, row] of sessions.rows) if (row.guest && row.ownerId === session.id) { row.discovery?.revokeAll(); mediaTickets.revokeSession(id); watchParties.revokeSession(id); sessions.rows.delete(id); }
           if (session.provider) session.provider.key = '';
         }
-        mediaTickets.revokeSession(session.id); sessions.revoke(session.id); setCookie(response, '', 0); return json(response, 200, { ok: true });
+        mediaTickets.revokeSession(session.id); sessions.revoke(session.id); if (!session.partyGuest) setCookie(response, '', 0); return json(response, 200, { ok: true });
       }
       if (path === '/api/torbox-status' && method === 'GET') {
         const cached = session.torboxStatus;
@@ -543,11 +601,18 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         let stream;
         if (session.guest) {
           try {
-            const direct = await activeProvider.resolveGuest(data.videoId);
-            stream = { file: direct.file, upstreamUrl: safePlaybackUrl(direct.url, activeProvider.key, mediaHosts) };
+            if (session.partyGuest && partyAccess(session).room.allowAccountKeyInPlayback) {
+              // TorBox's normal CDN link can contain its master key. A host may
+              // explicitly permit that account access for this trusted viewer.
+              stream = await activeProvider.resolveForRelay(data.videoId);
+              stream.upstreamUrl = validatedPlaybackUrl(stream.upstreamUrl, mediaHosts);
+            } else {
+              const direct = await activeProvider.resolveGuest(data.videoId);
+              stream = { file: direct.file, mediaIdentity: direct.mediaIdentity, upstreamUrl: safePlaybackUrl(direct.url, activeProvider.key, mediaHosts) };
+            }
           } catch (error) {
             if (['UNSAFE_PROVIDER_URL', 'GUEST_LINK_UNAVAILABLE'].includes(error?.code)) {
-              throw new AppError('GUEST_DIRECT_UNAVAILABLE', 'TorBox cannot provide a private direct link for this guest. Video relaying is disabled to avoid bandwidth charges. The guest can use their own TorBox connection.', 409);
+              throw new AppError('GUEST_DIRECT_UNAVAILABLE', session.partyGuest ? 'TorBox could not provide a private direct link for the host’s selected video. Ask the host to reopen the video and try a new party link.' : 'TorBox cannot provide a private direct link for this guest. Video relaying is disabled to avoid bandwidth charges. The guest can use their own TorBox connection.', 409);
             }
             throw error;
           }
@@ -559,10 +624,12 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         }
         if (!progress.isCurrent(progressViewer, intent)) throw new AppError('PLAYBACK_SUPERSEDED', 'A newer playback request replaced this one.', 409);
         if (!sessions.read(sessionToken)) throw new AppError('LOGIN_REQUIRED', 'This session has been revoked.', 401);
+        if (session.partyGuest && !samePartyMedia(stream.mediaIdentity, partyAccess(session).room.media.identity)) throw new AppError('WATCH_PARTY_MEDIA_MISMATCH', 'The host’s selected file changed. Ask them to create a new watch party.', 409);
         const lease = progress.start(progressViewer, data.videoId, { reset: data.startOver === true, sessionId: session.id });
         const mediaToken = mediaTickets.create(session.id, data.videoId, stream.upstreamUrl, stream.file);
-        const playbackProof = session.guest ? null : watchParties.issuePlayback(session.id, stream.file, stream.mediaIdentity);
-        return json(response, 200, { file: stream.file, mediaUrl: `/media/${mediaToken}`, mediaIdentity: stream.mediaIdentity || null, playbackProof, delivery: 'direct', conversion: false, exposesTorBoxToken: session.guest ? false : true, guestSafeLink: session.guest === true, ...lease });
+        const playbackProof = session.guest && !session.partyGuest ? null : watchParties.issuePlayback(session.id, stream.file, stream.mediaIdentity);
+        const partyKeyConsent = session.partyGuest && partyAccess(session).room.allowAccountKeyInPlayback;
+        return json(response, 200, { file: stream.file, mediaUrl: `/media/${mediaToken}`, mediaIdentity: stream.mediaIdentity || null, playbackProof, delivery: 'direct', conversion: false, exposesTorBoxToken: !session.guest || partyKeyConsent === true, guestSafeLink: session.guest === true && !partyKeyConsent, ...lease });
       }
       if (path === '/api/progress' && method === 'PUT') {
         if (!progressRate.allow(session.id)) throw new AppError('SLOW_DOWN', 'Progress is being saved too frequently.', 429);
@@ -585,6 +652,6 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.2.7' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.2.8' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }

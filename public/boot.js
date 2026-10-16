@@ -1,4 +1,4 @@
-const BUILD='release-1.2.7-audio.2';
+const BUILD='release-1.2.8-party.1';
 const startedAt=Date.now();
 let startupTimer=null;
 const stageNode=()=>document.querySelector('#startup-stage');
