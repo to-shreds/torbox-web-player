@@ -1,16 +1,17 @@
-import {createWatchParty} from './watch-party.js?v=release-1.2.7-audio.1';
-import { createDiscoveryUI, bindArtworkImage } from './discover.js?v=release-1.2.7-audio.1';
-import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.7-audio.1';
-import { PlaybackAudioCheck } from './playback-lifecycle.js?v=release-1.2.7-audio.1';
-import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.7-audio.1';
-import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.7-audio.1';
-import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.7-audio.1';
-import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.7-audio.1';
-import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.7-audio.1';
-import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory, noteAudioDecodeFailure } from './source-memory.js?v=release-1.2.7-audio.1';
-import { clearSearchHistory } from './search-history.js?v=release-1.2.7-audio.1';
-import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.7-audio.1';
+import {createWatchParty} from './watch-party.js?v=release-1.2.7-audio.2';
+import { createDiscoveryUI, bindArtworkImage } from './discover.js?v=release-1.2.7-audio.2';
+import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.7-audio.2';
+import { PlaybackAudioCheck } from './playback-lifecycle.js?v=release-1.2.7-audio.2';
+import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.7-audio.2';
+import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.7-audio.2';
+import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.7-audio.2';
+import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.7-audio.2';
+import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.7-audio.2';
+import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory, noteAudioDecodeFailure, resetNegativeAudioFeedback } from './source-memory.js?v=release-1.2.7-audio.2';
+import { clearSearchHistory } from './search-history.js?v=release-1.2.7-audio.2';
+import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.7-audio.2';
 const $ = id => document.getElementById(id);
+resetNegativeAudioFeedback();
 let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null, fullscreenExitControlTimer = null;
 let discoveryUI, watchParty=null;
 let activeSetupTransferLink='';
@@ -34,8 +35,7 @@ function setPlaybackHealth(state,detail=''){
 function setHealthSource(context=active){
   const source=context?.playbackContext?.sourceInfo;if(!$('health-source'))return;
   $('health-source').textContent=source?[source.resolution,source.provider,source.videoCodec,(source.audioCodecs||[]).slice(0,2).join('/')].filter(Boolean).join(' · '):'';
-  for(const id of ['health-sound-good','health-sound-bad','health-source-bad'])$(id).disabled=!source;
-  $('player-sound-bad').hidden=!source;
+  for(const id of ['health-sound-good','health-source-bad'])$(id).disabled=!source;
 }
 function text(id, value, error = false) { $(id).textContent = value; $(id).classList.toggle('error', error); }
 function updateResumeOverlay(title,detail=''){
@@ -68,10 +68,10 @@ function playerIsFullscreen(){const shell=playerMediaShell(),video=active?.video
 function playerIsPiP(context=active){return !!context?.video&&document.pictureInPictureElement===context.video;}
 function showFullscreenExitControl(){
   const control=$('fullscreen-exit-overlay');if(!control||document.fullscreenElement!==playerMediaShell())return;
-  clearTimeout(fullscreenExitControlTimer);control.hidden=false;if($('fullscreen-sound-bad'))$('fullscreen-sound-bad').hidden=!active?.playbackContext?.sourceInfo;
-  fullscreenExitControlTimer=setTimeout(()=>{fullscreenExitControlTimer=null;if(control)control.hidden=true;if($('fullscreen-sound-bad'))$('fullscreen-sound-bad').hidden=true;},3200);
+  clearTimeout(fullscreenExitControlTimer);control.hidden=false;
+  fullscreenExitControlTimer=setTimeout(()=>{fullscreenExitControlTimer=null;if(control)control.hidden=true;},3200);
 }
-function hideFullscreenExitControl(){clearTimeout(fullscreenExitControlTimer);fullscreenExitControlTimer=null;const control=$('fullscreen-exit-overlay');if(control)control.hidden=true;if($('fullscreen-sound-bad'))$('fullscreen-sound-bad').hidden=true;}
+function hideFullscreenExitControl(){clearTimeout(fullscreenExitControlTimer);fullscreenExitControlTimer=null;const control=$('fullscreen-exit-overlay');if(control)control.hidden=true;}
 function updatePlayerModeActions(){
   const fs=$('toggle-fullscreen'),pip=$('toggle-pip'),shell=playerMediaShell(),video=active?.video;
   const playerFullscreen=document.fullscreenElement===shell||document.fullscreenElement===video;
@@ -798,26 +798,21 @@ $('watch-credits').addEventListener('click',()=>{
   if(getSettings().autoNext)void ensureNextPrepared(context);
   text('player-message','Watching credits · the next episode will start when this one ends.');
 });
-async function rejectCurrentSource(kind){
+async function rejectCurrentSource(){
   if(watchParty?.isActive()){text('player-message','Leave the watch party before changing sources.',true);return;}
   const context=active,playback=context?.playbackContext,source=playback?.sourceInfo;if(!context||!playback?.current||!source)return;
   if(context.recovering)return;
-  if(kind==='audio'&&(context.video.muted||context.video.volume===0)){context.video.muted=false;context.video.volume=1;text('player-message','Player sound is on. If it is still silent, tap No sound again.');return;}
   const generation=playGeneration;
   context.recovering=true;clearTimeout(context.healthyTimer);
   playback.recoveryPosition=Number.isFinite(context.video.currentTime)?context.video.currentTime:0;
-  if(kind==='audio')playback.audioRecovery=true;
-  if(kind==='audio')setAudioFeedback(playback.current,source,'bad');else setSourceBad(playback.current,source,true);
-  setPlaybackHealth('Recovering',kind==='audio'?'Remembered: no sound. Finding another source…':'Source blocked on this device. Finding another source…');
+  setSourceBad(playback.current,source,true);
+  setPlaybackHealth('Recovering','Source blocked on this device. Finding another source…');
   await saveProgress(context);if(active!==context||generation!==playGeneration)return;
   context.video.pause();const moved=await discoveryUI.recoverPlayback(playback,{signal:context.eventAbort.signal});
-  if(!moved&&active===context){context.recovering=false;setPlaybackHealth('Needs attention','No acceptable alternative source was found.');text('player-message',kind==='audio'?'That version is now avoided. No cached version with compatible sound was found. Close the player to choose or prepare another version.':'That source is now avoided, but no automatic alternative was available.',true);}
+  if(!moved&&active===context){context.recovering=false;setPlaybackHealth('Needs attention','No acceptable alternative source was found.');text('player-message','That source is now avoided, but no automatic alternative was available.',true);}
 }
 $('health-sound-good').addEventListener('click',()=>{const p=active?.playbackContext;if(!p?.sourceInfo||active.recovering)return;active.audioConfirmed=true;setAudioFeedback(p.current,p.sourceInfo,'good');rememberSourceSuccess(p.current,p.sourceInfo);active.sourceLearned=true;setPlaybackHealth('Playing','Sound confirmed on this device.');});
-$('health-sound-bad').addEventListener('click',()=>rejectCurrentSource('audio'));
-$('player-sound-bad').addEventListener('click',()=>rejectCurrentSource('audio'));
-$('fullscreen-sound-bad').addEventListener('click',()=>rejectCurrentSource('audio'));
-$('health-source-bad').addEventListener('click',()=>rejectCurrentSource('source'));
+$('health-source-bad').addEventListener('click',()=>rejectCurrentSource());
 $('keep-watching').addEventListener('click',()=>{
   if(!active)return;
   const block=canStartKidPlayback(viewer,active.playbackContext);if(!block.allowed){hideStillWatchingPrompt();showKidLimit(block);return;}

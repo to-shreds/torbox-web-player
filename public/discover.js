@@ -1,10 +1,10 @@
-import { LatestPlaybackAction, PlaybackPreparationCache } from './playback-lifecycle.js?v=release-1.2.7-audio.1';
-import { loadPublicSources, browserContainerHints, sourceHints, preparedSourceCompatibility } from './source-client.js?v=release-1.2.7-audio.1';
-import { getSettings, updateSettings } from './settings.js?v=release-1.2.7-audio.1';
-import { listRecent, formatResumeTime } from './history.js?v=release-1.2.7-audio.1';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=release-1.2.7-audio.1';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=release-1.2.7-audio.1';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=release-1.2.7-audio.1';
+import { LatestPlaybackAction, PlaybackPreparationCache } from './playback-lifecycle.js?v=release-1.2.7-audio.2';
+import { loadPublicSources, browserContainerHints, sourceHints, preparedSourceCompatibility } from './source-client.js?v=release-1.2.7-audio.2';
+import { getSettings, updateSettings } from './settings.js?v=release-1.2.7-audio.2';
+import { listRecent, formatResumeTime } from './history.js?v=release-1.2.7-audio.2';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=release-1.2.7-audio.2';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=release-1.2.7-audio.2';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=release-1.2.7-audio.2';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };

@@ -78,7 +78,7 @@ test('guest key-bearing links fail closed with no ticket, redirect, or byte rela
 
 test('every startup module is served on the backend mirror, including vault', async t => {
   const f = await fixture(t);
-  const response = await f.call('/vault.js?v=release-1.2.7-audio.1');
+  const response = await f.call('/vault.js?v=release-1.2.7-audio.2');
   assert.equal(response.status, 200);
   assert.match(response.headers.get('content-type'), /javascript/);
   assert.match(await response.text(), /loadRememberedApiKey/);

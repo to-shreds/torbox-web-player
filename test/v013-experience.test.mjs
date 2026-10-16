@@ -12,7 +12,7 @@ test('home experience includes My list, Next Up, Continue Watching, and removabl
 });
 test('Full mode exposes per-title quality, source feedback, and playback health without adding requested exclusions 12 or 13',async()=>{
   const [html,discover,app]=await Promise.all([readFile(new URL('../public/index.html',import.meta.url),'utf8'),readFile(new URL('../public/discover.js',import.meta.url),'utf8'),readFile(new URL('../public/app.js',import.meta.url),'utf8')]);
-  for(const id of ['playback-health','health-sound-good','health-sound-bad','health-source-bad'])assert.ok(html.includes(`id="${id}"`),id);
+  for(const id of ['playback-health','health-sound-good','health-source-bad'])assert.ok(html.includes(`id="${id}"`),id);
   assert.ok(discover.includes('This title quality'));assert.ok(app.includes('rememberSourceSuccess'));assert.ok(!html.includes('Replay last 30'));assert.ok(!html.includes('Recommended because:'));
 });
 test('PWA shell is installable and refuses to cache API or video traffic',async()=>{
