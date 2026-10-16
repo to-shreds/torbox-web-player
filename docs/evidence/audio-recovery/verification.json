@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-10-16T00:52:06.553813+00:00",
+  "build": "release-1.2.7-audio.1",
+  "baseline": "34460c5a7434728873b66d6fa8ffb7a6ea5a7c62",
+  "sourceHashes": {
+    "entry.mjs": "a6eebe4b52b9e77c129ad57c7b616feafe6c0d059104d24c0b182c3b83c36ddc",
+    "lib/discovery.mjs": "3072896df0cc5010ef051a3c6a2908f6954dcd5ba397018e1fc26bf5ea11ba79",
+    "lib/source-lookup.mjs": "f402164884290117bf66280c149f9fd4a5d4a89ab87d017305668ea94602be6f",
+    "package-lock.json": "99532d11a5846a3a996056eceffec4bc487ab77c12cfc8a3b83689e41a24d7b9",
+    "package.json": "35da7366b1386b0a05493e660a752041bf10321394e0e1c356e723f405480212",
+    "public/app.js": "531161ab602e0deafbaf58a89d64e6531ef7e92dd0eebc08612affaaaf2396fe",
+    "public/boot.js": "a3cc70572471e6ffeebbd57ee8cdee0010bb83bf06099908b2c657dad828bf64",
+    "public/buffstreams-opening.html": "6108a9821fce6d777c3c4d2df2c967b64f1c5365c2874a767acc169205769a43",
+    "public/buffstreams-ui.js": "3e33df9536e2389ec575a8dde2df03cb066fcb853de8d263e88249c801795bd1",
+    "public/discover.js": "ca9231fc4ed4b5c996d671140a2480efa5c22814780805ea742f4fa13518afd6",
+    "public/dos-player.html": "359e96a940aa70a19bb4ce0a5350435c06a37c8a12de71977fea41188736ad9b",
+    "public/dos-player.js": "00ae46bb387c0a6d71a56cb79c82dbf3d4dbd1354c10804281b66fc3780eea4c",
+    "public/extra-games-core.js": "25713a2cd31c1d84524396f19fa66b726b05a685da7e90ae12ca24fb4bea41b6",
+    "public/extra-games.js": "1f48d2be7afe0e11d99f818a15ea74604226d5bdfe66e3654e32dcc296273e6b",
+    "public/games-nav.js": "f87dc96d4de23caafa1c6a2a61cc12280836c2eb9ffa440eccd01331f696eb8c",
+    "public/games-web/skifree/game.js": "037b9aae1015127a720ba7404d0e16f76c12257332ccd19895a984d9f4d07b81",
+    "public/games-web/skifree/index.html": "49b33922a1548c8013ed14c7f282f5e5cf87a229e6970007f0a01202bbaed8c1",
+    "public/games.js": "4f204f9f8707fae467e8df9d45bbc2ee0e0ced63701d26ccf8c3633947a29162",
+    "public/history.js": "5a50aba76d279cf70787b0e869a319a3e263f9a5dad6f3e6c9bbd519124cf1f5",
+    "public/index.html": "515781c24f2708c916d49609317eeb28f0a3bac8b39fc6b64d764d87e0f20ca1",
+    "public/playback-errors.js": "d483e6b98af78ea50851036ba5f7a753c9ed9e825e5250433ecf95f95cee07f2",
+    "public/playback-lifecycle.js": "850b372459ad649bcb8d5335e8ab9b8a0055cfca9a7cb6f286f2ac820efc1039",
+    "public/source-client.js": "36c681664e911d3e277a3f09d49cd40ec840521e86324635bc053935c932e408",
+    "public/source-memory.js": "b5803695eeef6b72836171f125f23deb702ab3cc0945ff5201b1dee6a47345d1",
+    "public/sports-player.html": "e1b7f1e730271073a573293a8b60bae67a26230d241d2e98ca4b568ac3296b83",
+    "public/sports-player.js": "1b7ab4d8354fe2955d0d15a0148e0054031e62fc4b2285e07ef7221b26d6f48e",
+    "public/sports.js": "6ef5d650faf09dfa3d3095a29f6bb1a56920cd49075121efd8c4f06138be4d48",
+    "public/style.css": "8690c440a5121ffa7db5918609abba465ff27bcdfa7d9d5bb006b73e4912e38b",
+    "public/sw.js": "a7da6a317410df19a959d39169255f665226a351aeb9db6f541a1d991f1dfefc",
+    "public/watch-party.js": "8f3107ab9c2d8d87b16f40a5be811fa1c3e994c20161047056e7987220b97435",
+    "server.mjs": "dbbc37f98df1801227c03db3025fc08489a0ab689ac3c061a6e62deb2765a2d0"
+  },
+  "node": {
+    "registered": 592,
+    "passed": 586,
+    "failed": 0,
+    "skipped": 6,
+    "durationMs": 7123.661153
+  },
+  "focusedBrowser": {
+    "audioCases": 7,
+    "audioPassed": 7,
+    "durationMs": 53259,
+    "metadataCases": 3,
+    "metadataPassed": 3
+  },
+  "limits": [
+    "Original synthetic media; no authenticated account or real episode media.",
+    "Native Chromium 141 Linux, not physical Android speaker output.",
+    "Compatible codec tags and language metadata are not a verification of actual release audio."
+  ],
+  "publication": "Pending GitHub Pages release gate and Render mirror deployment."
+}

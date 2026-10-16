@@ -1,0 +1,271 @@
+{
+  "recordedAt": "2026-10-16T00:47:57.111Z",
+  "baseline": "34460c5a7434728873b66d6fa8ffb7a6ea5a7c62",
+  "networkRequests": 0,
+  "actualMediaDownloads": 0,
+  "accountAccess": false,
+  "target": {
+    "type": "series",
+    "id": "tt33043892",
+    "season": 1,
+    "episode": 2
+  },
+  "fixture": "test/fixtures/dexter-resurrection-s01e02-streams.json",
+  "fixtureSha256": "a1e8a17e69d6cb8d9f0cf845343be3fe876fba0190c318bd83fb0847d0ca6e4c",
+  "cacheAssumption": "All metadata rows are marked cached only to compare selection order. This does not attest real TorBox availability.",
+  "before": {
+    "beforeCap": {
+      "count": 389,
+      "compatibleAudioAttested": 11,
+      "compatibleAudioAndVideoAttested": 9,
+      "unknownAudio": 265,
+      "knownAudioOrVideoRisk": 196
+    },
+    "afterCap": {
+      "count": 40,
+      "compatibleAudioAttested": 11,
+      "compatibleAudioAndVideoAttested": 9,
+      "unknownAudio": 26,
+      "knownAudioOrVideoRisk": 13
+    },
+    "automatic": {
+      "count": 40,
+      "compatibleAudioAttested": 11,
+      "compatibleAudioAndVideoAttested": 9,
+      "unknownAudio": 26,
+      "knownAudioOrVideoRisk": 13
+    },
+    "firstEightAutomatic": [
+      {
+        "filename": "Dexter.Resurrection.S01E02.720p.x264-FENiX.mkv",
+        "languages": [
+          "en"
+        ],
+        "audioCodecs": [],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter Resurrection - S01E02 - Camera Shy.mkv",
+        "languages": [
+          "en"
+        ],
+        "audioCodecs": [],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "dexter.resurrection.s01e02.720p.web.h264-sylix[EZTVx.to].mkv",
+        "languages": [
+          "en"
+        ],
+        "audioCodecs": [],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter.Resurrection.S01E02.480p.x264-mSD[EZTVx.to].mkv",
+        "languages": [
+          "en"
+        ],
+        "audioCodecs": [],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "dexter.resurrection.s01e02.1080p.web.h264-successfulcrab[EZTVx.to].mkv",
+        "languages": [
+          "en"
+        ],
+        "audioCodecs": [],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "dexter.resurrection.s01e02.1080p.web.h264-successfulcrab.mkv",
+        "languages": [
+          "en"
+        ],
+        "audioCodecs": [],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter.Resurreccion.S01e02.2025.1080P-Dual-Lat.mkv",
+        "languages": [
+          "en",
+          "es"
+        ],
+        "audioCodecs": [],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter.Resurrection.S01E02.720p.AMZN.WEB-DL.H264.mkv",
+        "languages": [
+          "en",
+          "ru"
+        ],
+        "audioCodecs": [],
+        "audioRisk": false,
+        "videoRisk": false
+      }
+    ],
+    "preparationChoices": [
+      {
+        "filename": "Dexter.Resurrection.S01E02.720p.x264-FENiX.mkv",
+        "languages": [
+          "en"
+        ],
+        "audioCodecs": [],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter Resurrection - S01E02 - Camera Shy.mkv",
+        "languages": [
+          "en"
+        ],
+        "audioCodecs": [],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "dexter.resurrection.s01e02.720p.web.h264-sylix[EZTVx.to].mkv",
+        "languages": [
+          "en"
+        ],
+        "audioCodecs": [],
+        "audioRisk": false,
+        "videoRisk": false
+      }
+    ]
+  },
+  "after": {
+    "beforeCap": {
+      "count": 389,
+      "compatibleAudioAttested": 11,
+      "compatibleAudioAndVideoAttested": 9,
+      "unknownAudio": 265,
+      "knownAudioOrVideoRisk": 196
+    },
+    "afterCap": {
+      "count": 40,
+      "compatibleAudioAttested": 11,
+      "compatibleAudioAndVideoAttested": 9,
+      "unknownAudio": 26,
+      "knownAudioOrVideoRisk": 13
+    },
+    "automatic": {
+      "count": 27,
+      "compatibleAudioAttested": 9,
+      "compatibleAudioAndVideoAttested": 9,
+      "unknownAudio": 18,
+      "knownAudioOrVideoRisk": 0
+    },
+    "firstEightAutomatic": [
+      {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "languages": [],
+        "audioCodecs": [
+          "AAC"
+        ],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "languages": [],
+        "audioCodecs": [
+          "AAC"
+        ],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "languages": [],
+        "audioCodecs": [
+          "AAC"
+        ],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "languages": [],
+        "audioCodecs": [
+          "AAC"
+        ],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "languages": [],
+        "audioCodecs": [
+          "AAC"
+        ],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "languages": [],
+        "audioCodecs": [
+          "AAC"
+        ],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "languages": [],
+        "audioCodecs": [
+          "AAC"
+        ],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.DUB.le-production.mp4",
+        "languages": [],
+        "audioCodecs": [
+          "AAC"
+        ],
+        "audioRisk": false,
+        "videoRisk": false
+      }
+    ],
+    "preparationChoices": [
+      {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "languages": [],
+        "audioCodecs": [
+          "AAC"
+        ],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "languages": [],
+        "audioCodecs": [
+          "AAC"
+        ],
+        "audioRisk": false,
+        "videoRisk": false
+      },
+      {
+        "filename": "Dexter.Resurrection.S01E02.1080p.H264.AAC.WEBRip.le-production.mp4",
+        "languages": [],
+        "audioCodecs": [
+          "AAC"
+        ],
+        "audioRisk": false,
+        "videoRisk": false
+      }
+    ]
+  },
+  "limits": "Codec names are metadata evidence, not decoded sound. Selected AAC MP4 language remains unconfirmed. User account and physical Android episode playback remain unverified."
+}

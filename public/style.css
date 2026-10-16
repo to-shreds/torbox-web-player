@@ -23,3 +23,5 @@
 .resume-spinner{width:38px;height:38px;border-radius:50%;border:4px solid #2a3949;border-top-color:#a7e5df;animation:resume-spin .85s linear infinite;margin-bottom:.15rem}
 @keyframes resume-spin{to{transform:rotate(360deg)}}
 @media(max-width:600px){.resume-overlay-card{padding:1rem}.resume-overlay-card strong{font-size:1rem}}
+
+.player-media-shell:fullscreen .fullscreen-sound-bad{right:auto;left:max(.55rem,env(safe-area-inset-left))}

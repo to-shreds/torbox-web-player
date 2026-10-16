@@ -1,0 +1,376 @@
+{
+  "checkedAt": "2026-10-15T20:57:39.952303+00:00",
+  "build": "release-1.2.6-playback.1",
+  "assets": [
+    {
+      "path": "app.js",
+      "status": 200,
+      "sha256": "cb43feb9edc9cd46d0834427096bfbee785f324b091ba05c1d6c32f83d28ba32",
+      "expected": "cb43feb9edc9cd46d0834427096bfbee785f324b091ba05c1d6c32f83d28ba32",
+      "ok": true
+    },
+    {
+      "path": "boot.js",
+      "status": 200,
+      "sha256": "9095d38e77b4fbc6d08194a2e73b4f5f1b13092480d994440cc5223cba60b0fc",
+      "expected": "9095d38e77b4fbc6d08194a2e73b4f5f1b13092480d994440cc5223cba60b0fc",
+      "ok": true
+    },
+    {
+      "path": "buffstreams-opening.html",
+      "status": 200,
+      "sha256": "f8fae113f621357b6e8c5c7a972efb1995121469b1fbaa5d5619edd68a54682e",
+      "expected": "f8fae113f621357b6e8c5c7a972efb1995121469b1fbaa5d5619edd68a54682e",
+      "ok": true
+    },
+    {
+      "path": "buffstreams-ui.js",
+      "status": 200,
+      "sha256": "f12cc6e44b84a9cbeb2ee160ea856d31f5b7507c1587a90311bcf12fb9ebdb64",
+      "expected": "f12cc6e44b84a9cbeb2ee160ea856d31f5b7507c1587a90311bcf12fb9ebdb64",
+      "ok": true
+    },
+    {
+      "path": "discover.js",
+      "status": 200,
+      "sha256": "7468451aa567da9f4871c4cc52d539dd1c63a5b2802b7b138d38b65ae30b3666",
+      "expected": "7468451aa567da9f4871c4cc52d539dd1c63a5b2802b7b138d38b65ae30b3666",
+      "ok": true
+    },
+    {
+      "path": "dos-player.html",
+      "status": 200,
+      "sha256": "7a34e09b33aaa3e21b57486098b020952a6cec7c2e71c2951aed91c4631e13dd",
+      "expected": "7a34e09b33aaa3e21b57486098b020952a6cec7c2e71c2951aed91c4631e13dd",
+      "ok": true
+    },
+    {
+      "path": "dos-player.js",
+      "status": 200,
+      "sha256": "bbc011a890738ad8d664fcdc7fc348ebbc407535c85f22b4abdc0e5a697034ca",
+      "expected": "bbc011a890738ad8d664fcdc7fc348ebbc407535c85f22b4abdc0e5a697034ca",
+      "ok": true
+    },
+    {
+      "path": "extra-games-core.js",
+      "status": 200,
+      "sha256": "35b58579169b0e796c4488943cfe31e165cefa747da12abdb60cca2fb377936e",
+      "expected": "35b58579169b0e796c4488943cfe31e165cefa747da12abdb60cca2fb377936e",
+      "ok": true
+    },
+    {
+      "path": "extra-games.js",
+      "status": 200,
+      "sha256": "c2a30ca2630369b5fb1378120fa9285c129d0a6cd9155930249d843a305cf12f",
+      "expected": "c2a30ca2630369b5fb1378120fa9285c129d0a6cd9155930249d843a305cf12f",
+      "ok": true
+    },
+    {
+      "path": "games-nav.js",
+      "status": 200,
+      "sha256": "a912e99ae76a2dbd25983a506a2ca415b331c1f8f9a44451fbc1945a861c88b5",
+      "expected": "a912e99ae76a2dbd25983a506a2ca415b331c1f8f9a44451fbc1945a861c88b5",
+      "ok": true
+    },
+    {
+      "path": "games-web/skifree/game.js",
+      "status": 200,
+      "sha256": "00fb0b3892975bf28d080cc2004126d06404fb7764ecba4f48ddcf2c654be0da",
+      "expected": "00fb0b3892975bf28d080cc2004126d06404fb7764ecba4f48ddcf2c654be0da",
+      "ok": true
+    },
+    {
+      "path": "games-web/skifree/index.html",
+      "status": 200,
+      "sha256": "c1520e0fa67425d43468fa4b4acd250a6460809a2929f343c1bae167f9cb20f0",
+      "expected": "c1520e0fa67425d43468fa4b4acd250a6460809a2929f343c1bae167f9cb20f0",
+      "ok": true
+    },
+    {
+      "path": "games.js",
+      "status": 200,
+      "sha256": "fc3c84c74d93f1317551697cb7b3b7783d6ee36139f099d1245fb78fab1b2b6f",
+      "expected": "fc3c84c74d93f1317551697cb7b3b7783d6ee36139f099d1245fb78fab1b2b6f",
+      "ok": true
+    },
+    {
+      "path": "history.js",
+      "status": 200,
+      "sha256": "e9d44eaeeb9dcbbbfbc9f692403e6544b9ba8f77109f7950966a4af09a25256b",
+      "expected": "e9d44eaeeb9dcbbbfbc9f692403e6544b9ba8f77109f7950966a4af09a25256b",
+      "ok": true
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "sha256": "7300d177637013b328d2d6b9bd4e0f546ced8cbff13c430e7d6c735aeb8d00f3",
+      "expected": "7300d177637013b328d2d6b9bd4e0f546ced8cbff13c430e7d6c735aeb8d00f3",
+      "ok": true
+    },
+    {
+      "path": "playback-errors.js",
+      "status": 200,
+      "sha256": "b8c0f304fc768ad6f890b2dcb172225c9a906e1ebd18ada470e4270110f69f62",
+      "expected": "b8c0f304fc768ad6f890b2dcb172225c9a906e1ebd18ada470e4270110f69f62",
+      "ok": true
+    },
+    {
+      "path": "source-client.js",
+      "status": 200,
+      "sha256": "7e1b69b2b925166e9bb22ead94b1db29bd85a2f173e2aa699dee1e3f08436099",
+      "expected": "7e1b69b2b925166e9bb22ead94b1db29bd85a2f173e2aa699dee1e3f08436099",
+      "ok": true
+    },
+    {
+      "path": "sports-player.html",
+      "status": 200,
+      "sha256": "38ed9005234c3bd92b0128d581718ffcfb6f9956b50f49709d7ba5c769207213",
+      "expected": "38ed9005234c3bd92b0128d581718ffcfb6f9956b50f49709d7ba5c769207213",
+      "ok": true
+    },
+    {
+      "path": "sports-player.js",
+      "status": 200,
+      "sha256": "6df474a2d4cf32f9e909103a206f2566ffe0282861fd534f2125fca33fca20f6",
+      "expected": "6df474a2d4cf32f9e909103a206f2566ffe0282861fd534f2125fca33fca20f6",
+      "ok": true
+    },
+    {
+      "path": "sports.js",
+      "status": 200,
+      "sha256": "b63a409e0b874b9fb5fbbbfe9f5846b29bc772f7706611e383c31fec01b27d7b",
+      "expected": "b63a409e0b874b9fb5fbbbfe9f5846b29bc772f7706611e383c31fec01b27d7b",
+      "ok": true
+    },
+    {
+      "path": "sw.js",
+      "status": 200,
+      "sha256": "d300ddecb6f74c0e41c52424225450d2894171385d99aaa3f3814a9bed2a73aa",
+      "expected": "d300ddecb6f74c0e41c52424225450d2894171385d99aaa3f3814a9bed2a73aa",
+      "ok": true
+    },
+    {
+      "path": "watch-party.js",
+      "status": 200,
+      "sha256": "491214f99907dc04d9d1d185955bc2d4a1aa88537a613cc0b5607588deb2538f",
+      "expected": "491214f99907dc04d9d1d185955bc2d4a1aa88537a613cc0b5607588deb2538f",
+      "ok": true
+    },
+    {
+      "path": "key/app.js",
+      "status": 200,
+      "sha256": "cb43feb9edc9cd46d0834427096bfbee785f324b091ba05c1d6c32f83d28ba32",
+      "expected": "cb43feb9edc9cd46d0834427096bfbee785f324b091ba05c1d6c32f83d28ba32",
+      "ok": true
+    },
+    {
+      "path": "key/boot.js",
+      "status": 200,
+      "sha256": "9095d38e77b4fbc6d08194a2e73b4f5f1b13092480d994440cc5223cba60b0fc",
+      "expected": "9095d38e77b4fbc6d08194a2e73b4f5f1b13092480d994440cc5223cba60b0fc",
+      "ok": true
+    },
+    {
+      "path": "key/buffstreams-opening.html",
+      "status": 200,
+      "sha256": "f8fae113f621357b6e8c5c7a972efb1995121469b1fbaa5d5619edd68a54682e",
+      "expected": "f8fae113f621357b6e8c5c7a972efb1995121469b1fbaa5d5619edd68a54682e",
+      "ok": true
+    },
+    {
+      "path": "key/buffstreams-ui.js",
+      "status": 200,
+      "sha256": "f12cc6e44b84a9cbeb2ee160ea856d31f5b7507c1587a90311bcf12fb9ebdb64",
+      "expected": "f12cc6e44b84a9cbeb2ee160ea856d31f5b7507c1587a90311bcf12fb9ebdb64",
+      "ok": true
+    },
+    {
+      "path": "key/discover.js",
+      "status": 200,
+      "sha256": "7468451aa567da9f4871c4cc52d539dd1c63a5b2802b7b138d38b65ae30b3666",
+      "expected": "7468451aa567da9f4871c4cc52d539dd1c63a5b2802b7b138d38b65ae30b3666",
+      "ok": true
+    },
+    {
+      "path": "key/dos-player.html",
+      "status": 200,
+      "sha256": "7a34e09b33aaa3e21b57486098b020952a6cec7c2e71c2951aed91c4631e13dd",
+      "expected": "7a34e09b33aaa3e21b57486098b020952a6cec7c2e71c2951aed91c4631e13dd",
+      "ok": true
+    },
+    {
+      "path": "key/dos-player.js",
+      "status": 200,
+      "sha256": "bbc011a890738ad8d664fcdc7fc348ebbc407535c85f22b4abdc0e5a697034ca",
+      "expected": "bbc011a890738ad8d664fcdc7fc348ebbc407535c85f22b4abdc0e5a697034ca",
+      "ok": true
+    },
+    {
+      "path": "key/extra-games-core.js",
+      "status": 200,
+      "sha256": "35b58579169b0e796c4488943cfe31e165cefa747da12abdb60cca2fb377936e",
+      "expected": "35b58579169b0e796c4488943cfe31e165cefa747da12abdb60cca2fb377936e",
+      "ok": true
+    },
+    {
+      "path": "key/extra-games.js",
+      "status": 200,
+      "sha256": "c2a30ca2630369b5fb1378120fa9285c129d0a6cd9155930249d843a305cf12f",
+      "expected": "c2a30ca2630369b5fb1378120fa9285c129d0a6cd9155930249d843a305cf12f",
+      "ok": true
+    },
+    {
+      "path": "key/games-nav.js",
+      "status": 200,
+      "sha256": "a912e99ae76a2dbd25983a506a2ca415b331c1f8f9a44451fbc1945a861c88b5",
+      "expected": "a912e99ae76a2dbd25983a506a2ca415b331c1f8f9a44451fbc1945a861c88b5",
+      "ok": true
+    },
+    {
+      "path": "key/games-web/skifree/game.js",
+      "status": 200,
+      "sha256": "00fb0b3892975bf28d080cc2004126d06404fb7764ecba4f48ddcf2c654be0da",
+      "expected": "00fb0b3892975bf28d080cc2004126d06404fb7764ecba4f48ddcf2c654be0da",
+      "ok": true
+    },
+    {
+      "path": "key/games-web/skifree/index.html",
+      "status": 200,
+      "sha256": "c1520e0fa67425d43468fa4b4acd250a6460809a2929f343c1bae167f9cb20f0",
+      "expected": "c1520e0fa67425d43468fa4b4acd250a6460809a2929f343c1bae167f9cb20f0",
+      "ok": true
+    },
+    {
+      "path": "key/games.js",
+      "status": 200,
+      "sha256": "fc3c84c74d93f1317551697cb7b3b7783d6ee36139f099d1245fb78fab1b2b6f",
+      "expected": "fc3c84c74d93f1317551697cb7b3b7783d6ee36139f099d1245fb78fab1b2b6f",
+      "ok": true
+    },
+    {
+      "path": "key/history.js",
+      "status": 200,
+      "sha256": "e9d44eaeeb9dcbbbfbc9f692403e6544b9ba8f77109f7950966a4af09a25256b",
+      "expected": "e9d44eaeeb9dcbbbfbc9f692403e6544b9ba8f77109f7950966a4af09a25256b",
+      "ok": true
+    },
+    {
+      "path": "key/index.html",
+      "status": 200,
+      "sha256": "7300d177637013b328d2d6b9bd4e0f546ced8cbff13c430e7d6c735aeb8d00f3",
+      "expected": "7300d177637013b328d2d6b9bd4e0f546ced8cbff13c430e7d6c735aeb8d00f3",
+      "ok": true
+    },
+    {
+      "path": "key/playback-errors.js",
+      "status": 200,
+      "sha256": "b8c0f304fc768ad6f890b2dcb172225c9a906e1ebd18ada470e4270110f69f62",
+      "expected": "b8c0f304fc768ad6f890b2dcb172225c9a906e1ebd18ada470e4270110f69f62",
+      "ok": true
+    },
+    {
+      "path": "key/source-client.js",
+      "status": 200,
+      "sha256": "7e1b69b2b925166e9bb22ead94b1db29bd85a2f173e2aa699dee1e3f08436099",
+      "expected": "7e1b69b2b925166e9bb22ead94b1db29bd85a2f173e2aa699dee1e3f08436099",
+      "ok": true
+    },
+    {
+      "path": "key/sports-player.html",
+      "status": 200,
+      "sha256": "38ed9005234c3bd92b0128d581718ffcfb6f9956b50f49709d7ba5c769207213",
+      "expected": "38ed9005234c3bd92b0128d581718ffcfb6f9956b50f49709d7ba5c769207213",
+      "ok": true
+    },
+    {
+      "path": "key/sports-player.js",
+      "status": 200,
+      "sha256": "6df474a2d4cf32f9e909103a206f2566ffe0282861fd534f2125fca33fca20f6",
+      "expected": "6df474a2d4cf32f9e909103a206f2566ffe0282861fd534f2125fca33fca20f6",
+      "ok": true
+    },
+    {
+      "path": "key/sports.js",
+      "status": 200,
+      "sha256": "b63a409e0b874b9fb5fbbbfe9f5846b29bc772f7706611e383c31fec01b27d7b",
+      "expected": "b63a409e0b874b9fb5fbbbfe9f5846b29bc772f7706611e383c31fec01b27d7b",
+      "ok": true
+    },
+    {
+      "path": "key/sw.js",
+      "status": 200,
+      "sha256": "d300ddecb6f74c0e41c52424225450d2894171385d99aaa3f3814a9bed2a73aa",
+      "expected": "d300ddecb6f74c0e41c52424225450d2894171385d99aaa3f3814a9bed2a73aa",
+      "ok": true
+    },
+    {
+      "path": "key/watch-party.js",
+      "status": 200,
+      "sha256": "491214f99907dc04d9d1d185955bc2d4a1aa88537a613cc0b5607588deb2538f",
+      "expected": "491214f99907dc04d9d1d185955bc2d4a1aa88537a613cc0b5607588deb2538f",
+      "ok": true
+    }
+  ],
+  "apiChecks": [
+    {
+      "path": "/healthz",
+      "status": 200,
+      "result": {
+        "ok": true,
+        "version": "1.2.6",
+        "stage": "catalog-first-preview"
+      },
+      "ok": true
+    },
+    {
+      "path": "/api/session",
+      "status": 200,
+      "result": {
+        "authenticated": false,
+        "setupRequired": false,
+        "authMode": "api-key"
+      },
+      "ok": true
+    },
+    {
+      "path": "/api/discover/lookup?type=movie&id=tt1234567&refresh=1",
+      "status": 401,
+      "result": {
+        "error": "LOGIN_REQUIRED",
+        "message": "Enter your TorBox API key to sign in."
+      },
+      "ok": true
+    },
+    {
+      "path": "/api/discover/prepare",
+      "origin": "https://to-shreds.github.io",
+      "status": 401,
+      "ok": true
+    },
+    {
+      "path": "/api/discover/sources",
+      "origin": "https://to-shreds.github.io",
+      "status": 401,
+      "ok": true
+    },
+    {
+      "path": "/api/watch-party/create",
+      "origin": "https://to-shreds.github.io",
+      "status": 401,
+      "ok": true
+    },
+    {
+      "path": "/api/discover/prepare",
+      "origin": "https://untrusted.invalid",
+      "status": 403,
+      "ok": true
+    },
+    {
+      "path": "/discover.js",
+      "status": 200,
+      "ok": true
+    }
+  ],
+  "success": true,
+  "scope": "Published bytes and public API boundaries. No authenticated TorBox session or real episode was used."
+}

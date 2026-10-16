@@ -1,5 +1,5 @@
-import {getKidProfile} from './parental-controls.js?v=release-1.2.6-playback.1';
-import {leaveSports} from './sports.js?v=release-1.2.6-playback.1';
+import {getKidProfile} from './parental-controls.js?v=release-1.2.7-audio.1';
+import {leaveSports} from './sports.js?v=release-1.2.7-audio.1';
 
 const $=id=>document.getElementById(id);
 let generation=0;
@@ -34,7 +34,7 @@ async function openGames(){
   if(!location.hash||location.hash==='#sports'||location.hash==='#games')history.replaceState(null,'',location.pathname+location.search+'#games');
   window.dispatchEvent(new CustomEvent('games-playback-start'));
   try{
-    await import('./games.js?v=release-1.2.6-playback.1');
+    await import('./games.js?v=release-1.2.7-audio.1');
     if(current!==generation||!document.body.classList.contains('games-active'))return;
     window.dispatchEvent(new CustomEvent('games-tab-open'));
   }catch{

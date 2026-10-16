@@ -1,0 +1,62 @@
+{
+  "test": "reproduce unknown EAC3 MKV silent video marked successful by app",
+  "result": "pass",
+  "duration_ms": 18446.776127,
+  "browser": "141.0.7390.0",
+  "fixture": {
+    "file": "generated h264-eac3-30s.mkv",
+    "size": 729443,
+    "sha256": "cc6192651cfd8d48f19690f076399b21ac6eb69e6e4bc61f99522d45dc17220c"
+  },
+  "decoded": {
+    "currentTime": 0.766131,
+    "duration": 33,
+    "decodedVideoFrames": 4,
+    "decodedAudioBytes": 0,
+    "audioPeak": 0,
+    "error": null
+  },
+  "afterSeek": {
+    "currentTime": 17.033148,
+    "decodedAudioBytes": 0,
+    "error": null,
+    "sourceMemory": {
+      "titles": {
+        "series:tt1234567": {
+          "quality": "",
+          "sources": {
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+              "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "id": "43a310de-bf3b-438c-b7da-0fb7b1ff13e2",
+              "group": "",
+              "provider": "synthetic matroska fixture",
+              "resolution": "720p",
+              "label": "Fixture.Show.S01E01.One.720p.H264.mkv",
+              "successes": 1,
+              "bad": false,
+              "updatedAt": 1792111284377
+            }
+          }
+        }
+      }
+    },
+    "healthState": "Playing",
+    "healthDetail": "Stream is advancing normally."
+  },
+  "redirects": [
+    {
+      "status": 307,
+      "bodyBytes": 0,
+      "hostname": "store.tb-cdn.io",
+      "pathname": "/fixture.mkv",
+      "range": "bytes=0-"
+    }
+  ],
+  "prepareRequests": 1,
+  "onlyCached": true,
+  "newTorrents": 0,
+  "serverMediaFetches": 0,
+  "limitations": "Synthetic unknown EAC3 Matroska baseline reproduction through real app UI/backend, with Playwright standing in for CDN media delivery. Desktop Chromium with a mobile viewport; not a physical Android decoder or live TorBox account test.",
+  "interpretation": "Reproduced bug in published1.2.6: video advances without any decoded audio and is incorrectly learned as a successful source.",
+  "sourceCommit": "34460c5a7434728873b66d6fa8ffb7a6ea5a7c62"
+}

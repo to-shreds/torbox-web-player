@@ -1,0 +1,37 @@
+{
+  "browser": "141.0.7390.0",
+  "sameElement": true,
+  "cdnCorsHeaders": false,
+  "rows": [
+    {
+      "kind": "aac",
+      "afterReset": 0,
+      "time": 1.357741,
+      "audioBytes": 3805,
+      "videoFrames": 5,
+      "error": null,
+      "src": "http://127.0.0.1:38381/aac",
+      "crossOrigin": null
+    },
+    {
+      "kind": "eac3",
+      "afterReset": 0,
+      "time": 1.401201,
+      "audioBytes": 0,
+      "videoFrames": 5,
+      "error": null,
+      "src": "http://127.0.0.1:38381/eac3",
+      "crossOrigin": null
+    },
+    {
+      "kind": "aac",
+      "afterReset": 0,
+      "time": 1.328985,
+      "audioBytes": 3753,
+      "videoFrames": 5,
+      "error": null,
+      "src": "http://127.0.0.1:38381/aac",
+      "crossOrigin": null
+    }
+  ]
+}

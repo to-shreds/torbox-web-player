@@ -1,10 +1,10 @@
-import { LatestPlaybackAction, PlaybackPreparationCache } from './playback-lifecycle.js?v=release-1.2.6-playback.1';
-import { loadPublicSources, browserContainerHints } from './source-client.js?v=release-1.2.6-playback.1';
-import { getSettings, updateSettings } from './settings.js?v=release-1.2.6-playback.1';
-import { listRecent, formatResumeTime } from './history.js?v=release-1.2.6-playback.1';
-import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=release-1.2.6-playback.1';
-import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=release-1.2.6-playback.1';
-import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=release-1.2.6-playback.1';
+import { LatestPlaybackAction, PlaybackPreparationCache } from './playback-lifecycle.js?v=release-1.2.7-audio.1';
+import { loadPublicSources, browserContainerHints, sourceHints, preparedSourceCompatibility } from './source-client.js?v=release-1.2.7-audio.1';
+import { getSettings, updateSettings } from './settings.js?v=release-1.2.7-audio.1';
+import { listRecent, formatResumeTime } from './history.js?v=release-1.2.7-audio.1';
+import { listWatchlist, isWatchlisted, toggleWatchlist } from './watchlist.js?v=release-1.2.7-audio.1';
+import { listSearchHistory, recordSearch, removeSearch } from './search-history.js?v=release-1.2.7-audio.1';
+import { applySourceMemory, getTitleQuality, setTitleQuality, setSourceBad, setAudioFeedback } from './source-memory.js?v=release-1.2.7-audio.1';
 const $ = id => document.getElementById(id);
 const GB = 1024 ** 3;
 const element = (tag, text = '', className = '') => { const el = document.createElement(tag); if (text) el.textContent = text; if (className) el.className = className; return el; };
@@ -55,9 +55,16 @@ export function sourceLanguageLabel(source){
   const names={en:'English',ru:'Russian',fr:'French',es:'Spanish',de:'German',it:'Italian',pt:'Portuguese',pl:'Polish',ja:'Japanese',ko:'Korean',zh:'Chinese',hi:'Hindi',uk:'Ukrainian'};
   return languages.length?languages.map(code=>names[code]||code.toUpperCase()).join(' / '):sourceLanguagePreference(source)===1?'Dubbed · language unconfirmed':'Language unconfirmed';
 }
+export function sourceAudioConfidence(source){
+  if(source?.memoryAudio==='bad'||source?.audioRisk===true||sourceHints(source||{}).audioRisk)return 0;
+  if(source?.memoryAudio==='good')return 3;
+  return sourceHints(source||{}).audioCompatible?2:1;
+}
 export function recommendSource(list, type = 'movie', resolution = 'auto', sizeProfile = getSettings().sourceSizeProfile, allowBrowserUnsupported = false) {
   let visible = filterSourcesByResolution(list, resolution).filter(source=>source.memoryBad!==true&&source.memoryAudio!=='bad'&&(allowBrowserUnsupported||source.browserUnsupported!==true)); if (!visible.length) return null;
-  const safe=visible.filter(source=>!source.audioRisk&&!source.videoRisk),languagePool=safe.length?safe:visible;
+  const safe=visible.filter(source=>!source.audioRisk&&!source.videoRisk),audioPool=safe.length?safe:visible;
+  const preferredAudio=Math.max(...audioPool.map(sourceAudioConfidence));
+  const languagePool=audioPool.filter(source=>sourceAudioConfidence(source)===preferredAudio);
   const preferredLanguage=Math.max(...languagePool.map(sourceLanguagePreference));
   visible=languagePool.filter(source=>sourceLanguagePreference(source)===preferredLanguage);
   const cachedVerified = visible.filter(s => s.cached === true && s.cachedBrowserPlayable === true && !s.audioRisk && !s.videoRisk);
@@ -82,7 +89,7 @@ export function recommendSource(list, type = 'movie', resolution = 'auto', sizeP
 }
 export const preferredSource = list => recommendSource(list, 'movie', 'auto');
 export function automaticSourceOrder(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
-  let remaining=(Array.isArray(list)?list:[]).filter(source=>source.memoryBad!==true&&source.memoryAudio!=='bad'&&source.browserUnsupported!==true&&source.cachedBrowserPlayable!==false&&sourceLanguagePreference(source)>0),ordered=[];
+  let remaining=(Array.isArray(list)?list:[]).filter(source=>source.memoryBad!==true&&source.memoryAudio!=='bad'&&source.browserUnsupported!==true&&source.cachedBrowserPlayable!==false&&source.audioRisk!==true&&source.videoRisk!==true&&sourceAudioConfidence(source)>0&&sourceLanguagePreference(source)>0),ordered=[];
   const passes=resolution&&resolution!=='auto'?[resolution,'auto']:['auto'];
   for(const pass of passes){
     while(true){
@@ -97,8 +104,18 @@ export const AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS = 5000;
 export const AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS = 18000;
 export const AUTOMATIC_SOURCE_CANDIDATES = 8;
 export function isAutomaticCandidateFailure(error) {
-  if (['BROWSER_CONTAINER_UNSUPPORTED','CACHED_SOURCE_NOT_READY','PREPARED_ITEM_MISSING'].includes(error?.code)) return true;
+  if (['BROWSER_CONTAINER_UNSUPPORTED','BROWSER_AUDIO_UNSUPPORTED','BROWSER_VIDEO_UNSUPPORTED','AUDIO_COMPATIBILITY_UNCONFIRMED','CACHED_SOURCE_NOT_READY','PREPARED_ITEM_MISSING'].includes(error?.code)) return true;
   return error?.code === 'TORBOX_OPERATION_FAILED' && /\bcach(?:e|ed)\b/i.test(error?.message || '');
+}
+export function validatePreparedSource(source,result,{unattended=false,requireCompatibleAudio=false,allowBrowserUnsupported=false}={}){
+  const compatibility=preparedSourceCompatibility(source,result?.file,result?.compatibility);
+  let code='',message='';
+  if(unattended&&compatibility.browserUnsupported&&!allowBrowserUnsupported){code='BROWSER_CONTAINER_UNSUPPORTED';message='This file uses a format that cannot play in this browser. Trying another version.';}
+  else if(unattended&&compatibility.audioRisk){code='BROWSER_AUDIO_UNSUPPORTED';message='This file has Dolby/DTS audio that may be silent in this browser. Trying another version.';}
+  else if(unattended&&compatibility.videoRisk){code='BROWSER_VIDEO_UNSUPPORTED';message='This file uses a video codec that may not play in this browser. Trying another version.';}
+  else if(requireCompatibleAudio&&sourceAudioConfidence({...source,...compatibility})<2){code='AUDIO_COMPATIBILITY_UNCONFIRMED';message='This alternative has no compatible audio information. Trying another version.';}
+  if(code){const error=new Error(message);error.code=code;throw error;}
+  return compatibility;
 }
 export function automaticCachedSourceOrder(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
   // An unavailable cache lookup is not proof that a source is uncached. The
@@ -127,7 +144,9 @@ export function browserPreparationCandidate(list, type = 'movie', resolution = '
   return browserPreparationOptions(list,type,resolution,sizeProfile,1)[0]||null;
 }
 export function selectAutomaticVideoFile(files = []) {
-  const rows=(Array.isArray(files)?files:[]).filter(file=>file&&file.id);
+  let rows=(Array.isArray(files)?files:[]).filter(file=>{if(!file?.id)return false;const hints=sourceHints({...file,filename:file.filename||file.title});return !hints.browserUnsupported&&!hints.audioRisk&&!hints.videoRisk;});
+  const compatible=rows.filter(file=>sourceHints({...file,filename:file.filename||file.title}).audioCompatible);
+  if(compatible.length)rows=compatible;
   const supported=rows.find(file=>{const hints=browserContainerHints(file);return hints.browserContainer&&hints.containerStatus!=='conditional';});
   if(supported)return supported;
   const conditional=rows.find(file=>browserContainerHints(file).browserContainer);
@@ -139,7 +158,7 @@ export function isRecoverableSourceFailure(error) {
   return error?.name==='TimeoutError'||['NO_CACHED_BROWSER_SOURCE','CACHED_SOURCE_NOT_READY','PREPARED_ITEM_MISSING','SOURCE_EXPIRED','SOURCE_TIMEOUT','SOURCE_ALL_UNAVAILABLE','TORBOX_UNAVAILABLE','TORBOX_TIMEOUT','TORBOX_CONNECTION_ERROR','TORBOX_HTTP_ERROR','TORBOX_RATE_LIMITED','TORBOX_PLAN_RESTRICTED','TORBOX_ACCESS_DENIED','TORBOX_NOT_CONFIGURED','CACHE_SCHEMA','INVALID_PROVIDER_RESPONSE','PROVIDER_RESPONSE_TOO_LARGE'].includes(error?.code)||isAutomaticCandidateFailure(error);
 }
 const blockedCacheChecks=new Set(['TORBOX_RATE_LIMITED','TORBOX_PLAN_RESTRICTED','TORBOX_ACCESS_DENIED','TORBOX_NOT_CONFIGURED','CACHE_SCHEMA','INVALID_PROVIDER_RESPONSE','PROVIDER_RESPONSE_TOO_LARGE']);
-const diagnosticCodes=new Set([...blockedCacheChecks,'NO_CACHED_BROWSER_SOURCE','CACHED_SOURCE_NOT_READY','PREPARED_ITEM_MISSING','SOURCE_EXPIRED','SOURCE_TIMEOUT','SOURCE_ALL_UNAVAILABLE','SOURCE_RESPONSE_INVALID','SOURCE_RESPONSE_TOO_LARGE','SOURCE_IDENTITY_MISMATCH','TORBOX_UNAVAILABLE','TORBOX_TIMEOUT','TORBOX_HTTP_ERROR','TORBOX_OPERATION_FAILED','CACHE_CHECK_FAILED','BROWSER_CONTAINER_UNSUPPORTED','CREATE_UNCERTAIN','SLOW_DOWN']);
+const diagnosticCodes=new Set([...blockedCacheChecks,'NO_CACHED_BROWSER_SOURCE','CACHED_SOURCE_NOT_READY','PREPARED_ITEM_MISSING','SOURCE_EXPIRED','SOURCE_TIMEOUT','SOURCE_ALL_UNAVAILABLE','SOURCE_RESPONSE_INVALID','SOURCE_RESPONSE_TOO_LARGE','SOURCE_IDENTITY_MISMATCH','TORBOX_UNAVAILABLE','TORBOX_TIMEOUT','TORBOX_HTTP_ERROR','TORBOX_OPERATION_FAILED','CACHE_CHECK_FAILED','BROWSER_CONTAINER_UNSUPPORTED','BROWSER_AUDIO_UNSUPPORTED','BROWSER_VIDEO_UNSUPPORTED','AUDIO_COMPATIBILITY_UNCONFIRMED','CREATE_UNCERTAIN','SLOW_DOWN']);
 export function playbackFailureDetails(target,sources,failure={},eligibleCount=0,build=new URL(import.meta.url).searchParams.get('v')||'unversioned'){
   const rows=Array.isArray(sources)?sources:[],containers={},languages={english:0,foreignOnly:0,unconfirmed:0};
   const knownContainers=new Set(['mp4','m4v','webm','mkv','avi','wmv','ts','m2ts','mts','mpg','mpeg','mov','ogv','ogg','iso','dmg']);
@@ -196,15 +215,19 @@ export function sourceRecoveryKey(source) {
 export const MAX_AUTOMATIC_SOURCE_ATTEMPTS = 3;
 export function recoverySourceOrder(list, context = {}, type = context?.current?.type || 'movie', sizeProfile = 'balanced') {
   const attempted=new Set(Array.isArray(context?.recoveryTried)?context.recoveryTried:[]),currentKey=sourceRecoveryKey(context?.sourceInfo);if(currentKey)attempted.add(currentKey);
-  let remaining=(Array.isArray(list)?list:[]).filter(source=>{const key=sourceRecoveryKey(source);return key&&!attempted.has(key)&&source.audioRisk!==true&&source.videoRisk!==true&&source.browserUnsupported!==true&&sourceLanguagePreference(source)>0;});
+  let remaining=(Array.isArray(list)?list:[]).filter(source=>{const key=sourceRecoveryKey(source);return key&&!attempted.has(key)&&source.audioRisk!==true&&source.videoRisk!==true&&source.browserUnsupported!==true&&sourceAudioConfidence(source)>0&&sourceLanguagePreference(source)>0;});
   const current=String(context?.sourceResolution||context?.sourceInfo?.resolution||'').toLowerCase();
   const currentTier=current.includes('2160')||current.includes('4k')?'2160p':current.includes('1080')?'1080p':current.includes('720')?'720p':current.includes('480')?'480p':'';
   const requested=context?.resolution&&context.resolution!=='auto'?context.resolution:currentTier||'auto';
   const tiers=[...new Set([requested,...lowerResolutionOrder(currentTier||context?.sourceResolution,context?.resolution||'auto'),'auto'])];
   const ordered=[];
-  for(const resolution of tiers){
+  // After a sound failure, known sound outranks resolution. Unknown metadata
+  // may still be checked after those options, but readyFile must obtain
+  // positive audio evidence from the actual prepared file before playing it.
+  for(const confidence of context.audioRecovery?[3,2,1]:[null])for(const resolution of tiers){
     while(true){
-      const best=recommendSource(remaining,type,resolution,sizeProfile);if(!best)break;
+      const pool=confidence===null?remaining:remaining.filter(source=>sourceAudioConfidence(source)===confidence);
+      const best=recommendSource(pool,type,resolution,sizeProfile);if(!best)break;
       ordered.push(best);const key=sourceRecoveryKey(best);remaining=remaining.filter(source=>source!==best&&sourceRecoveryKey(source)!==key);
     }
   }
@@ -378,7 +401,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   }
 
   function buildContext(meta,target,episodeName,resolution,source){
-    return {title:meta?.name||'',poster:meta?.poster||'',episodeName:episodeName||'',resolution,current:{...target,name:episodeName||''},sourceResolution:source?.resolution||source?.quality||'',sourceInfo:source?{id:source.id||'',hash:source.hash||'',filename:source.filename||'',title:source.title||'',provider:source.provider||'',resolution:source.resolution||source.quality||'',container:source.container||'',browserContainer:source.browserContainer===true,browserUnsupported:source.browserUnsupported===true,videoCodec:source.videoCodec||'',audioCodecs:Array.isArray(source.audioCodecs)?source.audioCodecs.slice(0,6):[]}:null,queue:target.type==='series'?episodeQueue(meta,target):[]};
+    return {title:meta?.name||'',poster:meta?.poster||'',episodeName:episodeName||'',resolution,current:{...target,name:episodeName||''},sourceResolution:source?.resolution||source?.quality||'',sourceInfo:source?{id:source.id||'',hash:source.hash||'',filename:source.playbackFilename||source.filename||'',title:source.title||'',provider:source.provider||'',resolution:source.resolution||source.quality||'',container:source.container||'',containerStatus:source.containerStatus||'',browserContainer:source.browserContainer===true,browserUnsupported:source.browserUnsupported===true,audioRisk:source.audioRisk===true,videoRisk:source.videoRisk===true,audioCompatible:source.audioCompatible===true,memoryAudio:source.memoryAudio||'unknown',videoCodec:source.videoCodec||'',audioCodecs:Array.isArray(source.audioCodecs)?source.audioCodecs.slice(0,6):[]}:null,queue:target.type==='series'?episodeQueue(meta,target):[]};
   }
   const closeTitleForPlayback = () => { if (!guestMode && $('title-dialog').open) {closingTitleForPlayback=true;$('title-dialog').close();} };
 
@@ -390,7 +413,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     if(!result.sources?.length){const error=new Error('No supported source found.');error.code='NO_CACHED_BROWSER_SOURCE';error.complete=lookup.complete;throw error;}return {...result,complete:lookup.complete,sources:applySourceMemory(target,result.sources)};
   }
 
-  async function readyFile(source, { signal, unattended=false, allowBrowserUnsupported=false, waitForPreparation=true, onlyCached=source.cached===true, preparationTimeoutMs=300000, initialTimeoutMs=waitForPreparation?60000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } = {}){
+  async function readyFile(source, { signal, unattended=false, allowBrowserUnsupported=false, requireCompatibleAudio=false, waitForPreparation=true, onlyCached=source.cached===true, preparationTimeoutMs=300000, initialTimeoutMs=waitForPreparation?60000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } = {}){
     const deadline=Date.now()+(waitForPreparation?preparationTimeoutMs:initialTimeoutMs);
     const preparationSignal=AbortSignal.timeout(waitForPreparation?preparationTimeoutMs:initialTimeoutMs);
     const boundedSignal=signal?AbortSignal.any([signal,preparationSignal]):preparationSignal;
@@ -398,7 +421,11 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     let result=await request('/api/discover/prepare',{method:'POST',data:{source:source.id,onlyCached}},initialTimeoutMs);
     while(Date.now()<deadline){
       if(boundedSignal.aborted){if(preparationSignal.aborted&&!signal?.aborted)throw automaticBudgetError();throw boundedSignal.reason;}
-      if(result.state==='ready')return result;
+      if(result.state==='ready'){
+        const compatibility=validatePreparedSource(source,result,{unattended,requireCompatibleAudio,allowBrowserUnsupported});
+        Object.assign(source,compatibility,{playbackFilename:result.file?.filename||result.file?.title||source.filename});
+        return {...result,compatibility};
+      }
       if(result.state==='browser_unsupported'){
         if(allowBrowserUnsupported)return result;
         const error=new Error(result.message||'This source uses a file format Android Chrome cannot play.');error.code='BROWSER_CONTAINER_UNSUPPORTED';throw error;
@@ -658,7 +685,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       const box=element('section','','recommended'),copy=element('div','','recommended-copy');
       copy.append(element('div','Recommended','recommended-kicker'),element('div',best.title,'recommended-title'),element('p',[best.cached?'Cached':'Not cached',qualityText(best),formatBytes(best.size),Number.isSafeInteger(best.seeders)?best.seeders+' seeders':''].filter(Boolean).join(' · '),'recommended-meta'));
       const recommendedActions=element('div','','recommended-actions');
-      recommendedActions.append(button(best.cached?'Play':'Prepare',async()=>{try{await ensureService();const result=await readyFile(best,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();closeTitleForPlayback();await play(result.file,context);}catch(e){status.textContent=e.message;status.classList.add('error');}},true));
+      recommendedActions.append(button(best.cached?'Play':'Prepare',async()=>{try{await ensureService();const result=await readyFile(best,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();closeTitleForPlayback();await play(result.file,buildContext(meta,target,episodeName,resolution,best));}catch(e){status.textContent=e.message;status.classList.add('error');}},true));
       if(!guestMode&&typeof driveTest==='function')recommendedActions.append(button('Share',async()=>{try{await ensureService();const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});$('source-dialog').close();if($('title-dialog').open)$('title-dialog').close();await driveTest(result.file,context);}catch(e){status.textContent=e.message;status.classList.add('error');}}));
       box.append(copy,recommendedActions);area.append(box);
     }
@@ -729,10 +756,10 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       for(const best of candidates){
         if(budgetSignal.aborted)break;
         try{
-          const result=await readyFile(best,{signal:budgetSignal,unattended:true,waitForPreparation:false});
+          const result=await readyFile(best,{signal:budgetSignal,unattended:true,requireCompatibleAudio:context.audioRecovery===true,waitForPreparation:false});
           if(signal?.aborted||!active)return false;
           const candidateKey=sourceRecoveryKey(best);if(candidateKey)attempted.add(candidateKey);context.recoveryTried=[...attempted];
-          const nextContext={...context,...buildContext({name:context.title,poster:context.poster,episodes:[]},context.current,context.episodeName||'',context.resolution||'auto',best),queue:context.queue||[],recoveryTried:[...attempted]};
+          const nextContext={...context,...buildContext({name:context.title,poster:context.poster,episodes:[]},context.current,context.episodeName||'',context.resolution||'auto',best),forceStartOver:false,rewindOnResumeSeconds:0,queue:context.queue||[],recoveryTried:[...attempted]};
           const moved=await play(result.file,nextContext);if(moved)return true;
         }catch(error){if(budgetSignal.aborted)break;if(!isAutomaticCandidateFailure(error))break;}
       }

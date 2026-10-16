@@ -1,0 +1,221 @@
+// Real native decoding exercises the silent-video failure, not mocked media events.
+// Original synthetic fixture provenance: docs/evidence/audio-recovery/fixture-provenance.json.
+import test, { before, after } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { dirname } from 'node:path';
+import { createServer } from 'node:http';
+import { chromium } from 'playwright';
+import { startFixture } from './fixture.mjs';
+
+const media = {
+  eac3: { bytes: await readFile(new URL('../fixtures/h264-eac3.mkv', import.meta.url)), mime: 'video/x-matroska', suffix: 'H264.mkv' },
+  aac: { bytes: await readFile(new URL('../fixtures/fixture.mp4', import.meta.url)), mime: 'video/mp4', suffix: 'H264.AAC.mp4' },
+  intro: { bytes: await readFile(new URL('../fixtures/h264-aac-silent-intro.mp4', import.meta.url)), mime: 'video/mp4', suffix: 'H264.AAC.mp4' },
+};
+const results = [];
+let browser, mediaServer, mediaOrigin;
+before(async () => {
+  mediaServer = createServer((request, response) => {
+    const selected = media[request.url.slice(1)];
+    if (!selected) { response.writeHead(404); response.end(); return; }
+    const bytes = selected.bytes, range = /bytes=(\d+)-(\d*)/.exec(request.headers.range || '');
+    const start = range ? Number(range[1]) : 0, end = range?.[2] ? Math.min(Number(range[2]), bytes.length - 1) : bytes.length - 1;
+    // Deliberately no CORS header: direct native playback must not require it.
+    response.writeHead(range ? 206 : 200, { 'Content-Type': selected.mime, 'Accept-Ranges': 'bytes', 'Content-Length': end - start + 1, ...(range ? { 'Content-Range': `bytes ${start}-${end}/${bytes.length}` } : {}) });
+    response.end(bytes.subarray(start, end + 1));
+  });
+  await new Promise(resolve => mediaServer.listen(0, '127.0.0.1', resolve));
+  mediaOrigin = `http://127.0.0.1:${mediaServer.address().port}`;
+  browser = await chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE ? { executablePath: process.env.CHROME_EXECUTABLE } : {}), args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'], ignoreDefaultArgs: ['--mute-audio'] });
+});
+after(async () => {
+  const report = { browser: await browser.version(), cases: results, limitations: 'Synthetic original media through the real application and backend with a browser CDN route. No real account, episode media, physical Android decoder or speaker-output acceptance.' };
+  await browser?.close();
+  await new Promise(resolve => mediaServer.close(resolve));
+  if (process.env.AUDIO_RECOVERY_EVIDENCE_PATH) {
+    await mkdir(dirname(process.env.AUDIO_RECOVERY_EVIDENCE_PATH), { recursive: true });
+    await writeFile(process.env.AUDIO_RECOVERY_EVIDENCE_PATH, JSON.stringify(report, null, 2) + '\n');
+  }
+});
+
+async function setup(t, { main = 'eac3', alternative = true, missingCounter = false, holdRecovery = false, crossOrigin = false } = {}) {
+  const fixture = await startFixture(Number(process.env.AUDIO_TEST_PORT) || 4215);
+  const context = await browser.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, serviceWorkers: 'block' });
+  const page = await context.newPage(), errors = [], prepares = [], redirects = [], observations = [];
+  if (crossOrigin) {
+    const cdp = await context.newCDPSession(page); await cdp.send('Media.enable');
+    cdp.on('Media.playerPropertiesChanged', event => {
+      for (const property of event.properties) if (['kAudioTracks', 'kAudioDecoderName'].includes(property.name)) observations.push({ mediaDiagnostic: property });
+    });
+  }
+  const controls = { started: false, recoveryRequested: false, releaseRecovery: null };
+  const recoveryGate = holdRecovery ? new Promise(resolve => { controls.releaseRecovery = resolve; }) : Promise.resolve();
+  const items = [main, 'aac'].map((kind, index) => {
+    const hash = String.fromCharCode(97 + index).repeat(40), selected = media[kind];
+    const filename = `Fixture.Show.S01E01.One.720p.${selected.suffix}`;
+    return { id: index + 1, hash, kind, name: 'Fixture Show', download_finished: true, download_present: true, files: [{ id: 0, short_name: filename, mimetype: selected.mime, size: selected.bytes.length }] };
+  });
+  fixture.sourceLookup.lookup = async () => {
+    fixture.control.lookupCalls++;
+    if (controls.started) { controls.recoveryRequested = true; await recoveryGate; }
+    const rows = controls.started && alternative ? items : items.slice(0, 1);
+    return { complete: true, sources: rows.map(item => ({ hash: item.hash, title: item.files[0].short_name, filename: item.files[0].short_name, resolution: '720p', videoCodec: 'H264', audioCodecs: item.kind === 'eac3' ? [] : ['AAC'], size: item.files[0].size, provider: 'Synthetic audio regression' })) };
+  };
+  fixture.discovery.gateway.cached = async hashes => Object.fromEntries(hashes.map(hash => {
+    const item = items.find(row => row.hash === hash);
+    return [hash, { cached: Boolean(item), files: item ? [{ name: item.files[0].short_name, size: item.files[0].size, mime: item.files[0].mimetype }] : [] }];
+  }));
+  fixture.provider.request = async (path, params) => params?.id ? items.find(item => item.id === Number(params.id)) : items;
+  fixture.provider.resolveForRelay = async id => {
+    const item = items[Number(id.split(':')[1]) - 1];
+    return { file: { id, title: item.files[0].short_name, mime: item.files[0].mimetype, state: 'Ready to watch' }, upstreamUrl: `https://store.tb-cdn.io/${item.kind}?token=fixture-master-key` };
+  };
+  page.setDefaultTimeout(16000);
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('request', request => { if (new URL(request.url()).pathname === '/api/discover/prepare') prepares.push(request.postDataJSON()); });
+  await page.addInitScript(({ token, missingCounter }) => {
+    sessionStorage.setItem('torbox-web-session', token);
+    localStorage.setItem('torbox-settings-v1', JSON.stringify({ autoNext: false, showPlaybackHealth: false, interfaceMode: 'simple' }));
+    if (missingCounter) Object.defineProperty(HTMLMediaElement.prototype, 'webkitAudioDecodedByteCount', { configurable: true, get: () => undefined });
+    window.__audioObservations = [];
+    document.addEventListener('loadedmetadata', event => {
+      if (event.target instanceof HTMLVideoElement) window.__audioObservations.push({ event: 'loadedmetadata', time: event.target.currentTime });
+    }, true);
+    document.addEventListener('seeked', event => {
+      if (event.target instanceof HTMLVideoElement) window.__audioObservations.push({ event: 'seeked', time: event.target.currentTime });
+    }, true);
+  }, { token: fixture.session(), missingCounter });
+  await context.route('https://**/*', route => route.abort());
+  if (crossOrigin) await context.route(fixture.origin + '/', async route => {
+    const response = await route.fetch();
+    // The local CDN origin substitutes for an allowed production CDN host.
+    // Extend only the fixture document policy with that one local origin.
+    const html = (await response.text()).replace("media-src 'self'", `media-src 'self' ${mediaOrigin}`);
+    await route.fulfill({ response, body: html });
+  });
+  await context.route('**/media/*', async route => {
+    const redirect = await route.fetch({ maxRedirects: 0 });
+    assert.equal(redirect.status(), 307); assert.equal((await redirect.body()).length, 0);
+    const location = new URL(redirect.headers().location);
+    assert.equal(location.hostname, 'store.tb-cdn.io');
+    const selected = media[location.pathname.slice(1)], bytes = selected.bytes;
+    const range = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range || '');
+    const start = range ? Number(range[1]) : 0, end = range?.[2] ? Math.min(Number(range[2]), bytes.length - 1) : bytes.length - 1;
+    redirects.push({ status: 307, bodyBytes: 0, kind: location.pathname.slice(1), crossOrigin, corsHeaders: !crossOrigin });
+    if (crossOrigin) {
+      // Inspect the production empty TorBox redirect, then map the synthetic
+      // CDN to a separate real HTTP origin. The browser follows this empty
+      // redirect and consumes media without CORS or response interception.
+      await route.fulfill({ status: 307, headers: { Location: mediaOrigin + location.pathname }, body: '' });
+      return;
+    }
+    await route.fulfill({ status: range ? 206 : 200, headers: { 'Content-Type': selected.mime, 'Accept-Ranges': 'bytes', 'Access-Control-Allow-Origin': '*', ...(range ? { 'Content-Range': `bytes ${start}-${end}/${bytes.length}` } : {}) }, body: bytes.subarray(start, end + 1) });
+  });
+  t.after(async () => {
+    controls.releaseRecovery?.();
+    if (!page.isClosed()) observations.push(...await page.evaluate(() => window.__audioObservations));
+    const row = { name: t.name, requests: { playback: fixture.control.playbackCalls, prepare: prepares.length, onlyCached: prepares.every(body => body.onlyCached === true), newTorrents: fixture.control.creates, serverMediaFetches: fixture.control.mediaFetches }, redirects, observations };
+    results.push(row); t.diagnostic(JSON.stringify(row));
+    await context.close(); await fixture.close();
+    assert.deepEqual(errors, []); assert.equal(fixture.control.mediaFetches, 0); assert.equal(fixture.control.creates, 0);
+    assert.ok(prepares.length); assert.ok(prepares.every(body => body.onlyCached === true));
+  });
+  await page.goto(fixture.origin); await page.waitForSelector('#workspace:not([hidden])');
+  await page.locator('#catalog-type').selectOption('series');
+  await page.locator('#catalog-grid button').first().click();
+  await page.locator('#episode-area button').filter({ hasText: /^Play$/ }).first().click();
+  await page.waitForFunction(() => { const video = document.querySelector('#video-slot video'); return video && video.currentTime > 0.2 && video.webkitDecodedFrameCount > 0 && !video.paused; });
+  controls.started = true;
+  return { page, fixture, controls, observations, redirects };
+}
+
+async function state(page) {
+  return page.evaluate(() => {
+    const video = document.querySelector('#video-slot video');
+    return { time: video?.currentTime, paused: video?.paused, audioBytes: video?.webkitAudioDecodedByteCount, videoFrames: video?.webkitDecodedFrameCount, error: video?.error?.code || null, title: document.querySelector('#playing-title').textContent, message: document.querySelector('#player-message').textContent, health: document.querySelector('#health-state').textContent, memory: JSON.parse(localStorage.getItem('torbox-source-memory-v1') || '{"titles":{}}') };
+  });
+}
+async function audioPeak(page) {
+  return page.locator('#video-slot video').evaluate(async video => {
+    if (!window.__audioGraph) {
+      const audioContext = new AudioContext(), source = audioContext.createMediaElementSource(video), analyser = audioContext.createAnalyser();
+      source.connect(analyser); analyser.connect(audioContext.destination); await audioContext.resume();
+      window.__audioGraph = { audioContext, analyser };
+    }
+    const { analyser } = window.__audioGraph, samples = new Float32Array(analyser.fftSize); let peak = 0;
+    for (let i = 0; i < 15; i++) { analyser.getFloatTimeDomainData(samples); peak = Math.max(peak, ...samples.map(Math.abs)); await new Promise(resolve => setTimeout(resolve, 20)); }
+    return peak;
+  });
+}
+
+test('cross-origin EAC3 video automatically recovers to cached AAC decoding and keeps the current position without CORS', async t => {
+  const { page, fixture, observations } = await setup(t, { crossOrigin: true });
+  const silent = await state(page); observations.push({ silent });
+  assert.ok(silent.videoFrames > 0); assert.equal(silent.audioBytes, 0); assert.equal(silent.error, null);
+  await page.waitForFunction(() => { const video = document.querySelector('#video-slot video'); return video?.webkitAudioDecodedByteCount > 0 && document.querySelector('#playing-title').textContent.includes('AAC'); });
+  const recovered = await state(page); observations.push({ recovered });
+  assert.equal(fixture.control.playbackCalls, 2); assert.ok(recovered.time >= 4.5, 'switch must keep the elapsed position'); assert.ok(recovered.audioBytes > 0);
+  const old = recovered.memory.titles['series:tt1234567']?.sources['a'.repeat(40)];
+  assert.equal(old?.successes || 0, 0, 'silent video must not become a learned success');
+});
+
+test('audio exhaustion pauses silent video and leaves a visible recovery action without a retry loop', async t => {
+  const { page, fixture, observations } = await setup(t, { alternative: false });
+  await page.waitForFunction(() => { const video = document.querySelector('#video-slot video'); return video?.paused && /No cached version with compatible audio was found/i.test(document.querySelector('#player-message').textContent); });
+  const failed = await state(page); observations.push({ failed });
+  assert.equal(fixture.control.playbackCalls, 1); assert.equal(failed.audioBytes, 0);
+  assert.equal(await page.locator('#player-sound-bad').isVisible(), true);
+  assert.equal(await page.locator('#playback-health').isVisible(), false, 'action must work with health panel disabled');
+  await page.waitForTimeout(700); assert.equal(fixture.control.playbackCalls, 1);
+  assert.equal(failed.memory.titles['series:tt1234567']?.sources['a'.repeat(40)]?.successes || 0, 0);
+});
+
+test('a real AAC track with an eight-second silent introduction is not rejected for quiet PCM', async t => {
+  const { page, fixture, observations } = await setup(t, { main: 'intro' });
+  assert.ok((await state(page)).audioBytes > 0);
+  const introPeak = await audioPeak(page); assert.equal(introPeak, 0, 'fixture actually begins with silent decoded audio');
+  await page.waitForFunction(() => document.querySelector('#video-slot video')?.currentTime > 9);
+  const audiblePeak = await audioPeak(page), current = await state(page); observations.push({ introPeak, audiblePeak, current });
+  assert.ok(audiblePeak > 0.0001); assert.equal(fixture.control.playbackCalls, 1); assert.equal(current.paused, false);
+});
+
+test('an unavailable browser decode counter remains unknown and never invents an audio failure or success', async t => {
+  const { page, fixture, observations } = await setup(t, { missingCounter: true });
+  await page.waitForFunction(() => document.querySelector('#video-slot video')?.currentTime > 16.1, undefined, { timeout: 20000 });
+  const current = await state(page); observations.push({ current });
+  assert.equal(current.audioBytes, undefined); assert.equal(current.paused, false); assert.equal(fixture.control.playbackCalls, 1);
+  assert.equal(current.memory.titles['series:tt1234567']?.sources['a'.repeat(40)]?.successes || 0, 0);
+});
+
+test('No sound remains visible in simple mode and explicitly switches to an AAC source when counters are unavailable', async t => {
+  const { page, fixture, observations } = await setup(t, { missingCounter: true });
+  assert.equal(await page.locator('#playback-health').isVisible(), false);
+  assert.equal(await page.locator('#player-sound-bad').isVisible(), true);
+  await page.locator('#player-sound-bad').click();
+  await page.waitForFunction(() => document.querySelector('#playing-title').textContent.includes('AAC') && document.querySelector('#video-slot video')?.currentTime > 0.2);
+  const peak = await audioPeak(page), current = await state(page); observations.push({ current, peak });
+  assert.ok(peak > 0.0001); assert.equal(fixture.control.playbackCalls, 2);
+});
+
+test('closing the player while audio recovery lookup is pending cancels the obsolete source switch', async t => {
+  const { page, fixture, controls, observations } = await setup(t, { holdRecovery: true });
+  const deadline = Date.now() + 13000;
+  while (!controls.recoveryRequested && Date.now() < deadline) await page.waitForTimeout(50);
+  assert.equal(controls.recoveryRequested, true, 'native silent playback must actually begin recovery');
+  observations.push({ beforeClose: await state(page) });
+  await page.locator('#close-player').click(); controls.releaseRecovery();
+  await page.waitForTimeout(600);
+  assert.equal(await page.locator('#player').isVisible(), false); assert.equal(fixture.control.playbackCalls, 1);
+  assert.equal(await page.locator('#video-slot video').count(), 0);
+});
+
+test('No sound first unmutes a muted native AAC player without rejecting or replacing the source', async t => {
+  const { page, fixture, observations } = await setup(t, { main: 'aac' });
+  await page.locator('#video-slot video').evaluate(video => { video.muted = true; video.volume = 0; });
+  await page.locator('#player-sound-bad').click();
+  const output = await page.locator('#video-slot video').evaluate(video => ({ muted: video.muted, volume: video.volume }));
+  const peak = await audioPeak(page), current = await state(page); observations.push({ output, current, peak });
+  assert.deepEqual(output, { muted: false, volume: 1 }); assert.ok(peak > 0.0001); assert.equal(fixture.control.playbackCalls, 1);
+  assert.equal(current.memory.titles['series:tt1234567']?.sources['a'.repeat(40)]?.bad || false, false);
+});

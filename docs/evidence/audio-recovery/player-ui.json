@@ -1,0 +1,27 @@
+{
+  "normal": {
+    "buttonVisible": true,
+    "bounds": {
+      "x": 144.078125,
+      "y": 11.5,
+      "width": 61.59375,
+      "height": 32
+    },
+    "healthVisible": false,
+    "state": {
+      "audioBytes": 1541,
+      "time": 0.337775
+    }
+  },
+  "fullscreen": {
+    "active": "player-media-shell",
+    "buttonVisible": true,
+    "bounds": {
+      "x": 8.796875,
+      "y": 8.796875,
+      "width": 85.34375,
+      "height": 42
+    }
+  },
+  "limitations": "Desktop Chromium with mobile emulation. Visibility and native playback only; no physical phone or real account."
+}

@@ -51,10 +51,10 @@ test('English-only beats multilingual audio, but risky English codecs do not dis
   assert.equal(recommendSource([risky,safeUnknown],'series').id,'d');
 });
 
-test('an unconfirmed DUB version cannot outrank an unconfirmed original merely for an AAC tag',()=>{
+test('compatible audio precedes unknown audio while DUB still makes no language claim',()=>{
   const dubbed=safe('a',{filename:'Fixture.Show.S01E01.H264.AAC.DUB.mp4',score:1000});
   const unconfirmed=safe('b',{filename:'Fixture.Show.S01E01.H264.mp4',browserFriendly:false,score:0});
-  assert.equal(recommendSource([dubbed,unconfirmed],'series').id,'b');
+  assert.equal(recommendSource([dubbed,unconfirmed],'series').id,'a');
   assert.equal(sourceLanguageLabel(dubbed),'Dubbed · language unconfirmed');
 });
 
