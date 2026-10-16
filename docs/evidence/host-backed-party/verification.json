@@ -1,0 +1,79 @@
+{
+  "checkedAt": "2026-10-16T18:06:07.559684+00:00",
+  "runtimeCommit": "c44c9b11234c9a2e00d40f4adeca3e44d5ec9ad2",
+  "runtimeTree": "1711c980a2f55741550b5e34750b1493d1c6eb66",
+  "local": {
+    "syntax": "passed",
+    "node": {
+      "registered": 619,
+      "passed": 613,
+      "failed": 0,
+      "skipped": 6
+    },
+    "browser": "Not run locally: Playwright archives truncated"
+  },
+  "releaseRun": {
+    "id": 38942277256,
+    "url": "https://github.com/to-shreds/torbox-web-player/actions/runs/38942277256",
+    "partyStep": "passed",
+    "audioStep": "passed",
+    "remainingCoreStep": "passed",
+    "status": "completed",
+    "conclusion": "success",
+    "browser": {
+      "party": 14,
+      "audio": 7,
+      "core": 132,
+      "totalPassed": 153,
+      "failed": 0
+    },
+    "browserVersion": "151.0.7922.34",
+    "measuredFixtureStartDriftSeconds": 0.176
+  },
+  "limitations": [
+    "Original synthetic media and account fixtures only",
+    "No real TorBox account or physical Android device accessed",
+    "No live Internet timing acceptance",
+    "Host-consented CDN URLs may expose a full API key; party termination cannot revoke a copied key",
+    "Existing PiP screen timeout remains unresolved"
+  ],
+  "backendDeployment": {
+    "serviceId": "srv-damu91142hec73chb7qg",
+    "workspaceId": "tea-dakujgmk1f9s73d2v8ng",
+    "commit": "356948d97b827f636e9b17770b637b7edf332e2c",
+    "deployId": "dep-db96bf3odcbs73ck8cm0",
+    "status": "live",
+    "finishedAt": "2026-10-16T17:59:10.257231Z",
+    "trigger": "api",
+    "notes": "Configured automatic deployment did not produce any deploy/event after the branch update; one explicit deployment was triggered without changing plan or configuration. No errors returned in the initial post-deploy log query.",
+    "errorLogsThrough": "2026-10-16T18:03:18Z",
+    "returnedErrorLogs": 0
+  },
+  "pagesRun": {
+    "id": 38943440362,
+    "url": "https://github.com/to-shreds/torbox-web-player/actions/runs/38943440362",
+    "status": "completed",
+    "conclusion": "success",
+    "verificationFinishedAt": "2026-10-16T18:03:57Z",
+    "deploymentFinishedAt": "2026-10-16T18:04:17Z",
+    "node": {
+      "registered": 619,
+      "passed": 613,
+      "failed": 0,
+      "skipped": 6
+    },
+    "browser": {
+      "party": 14,
+      "audio": 7,
+      "core": 132,
+      "totalPassed": 153,
+      "failed": 0
+    },
+    "measuredFixtureStartDriftSeconds": 0.127
+  },
+  "publication": {
+    "assetsPassed": 46,
+    "apiChecksPassed": 8,
+    "success": true
+  }
+}

@@ -1,0 +1,23 @@
+2026-10-16T17:56:02.1190966Z ℹ tests 619
+2026-10-16T17:56:02.1191450Z ℹ pass 613
+2026-10-16T17:56:02.1191656Z ℹ fail 0
+2026-10-16T17:56:02.1192117Z ℹ skipped 6
+2026-10-16T17:56:02.1192605Z ℹ duration_ms 5139.221745
+2026-10-16T17:56:13.3686357Z Downloading Chrome for Testing 151.0.7922.34 (playwright chromium v1234) from https://cdn.playwright.dev/builds/cft/151.0.7922.34/linux64/chrome-linux64.zip
+2026-10-16T17:56:17.5384780Z Chrome for Testing 151.0.7922.34 (playwright chromium v1234) downloaded to /home/runner/.cache/ms-playwright/chromium-1234
+2026-10-16T17:56:25.5562382Z ℹ Real-video drift on coordinated start: 0.127s; host-backed guest and direct CDN tickets confirmed.
+2026-10-16T17:57:55.7342968Z ℹ tests 14
+2026-10-16T17:57:55.7343466Z ℹ pass 14
+2026-10-16T17:57:55.7343629Z ℹ fail 0
+2026-10-16T17:57:55.7344019Z ℹ skipped 0
+2026-10-16T17:57:55.7344372Z ℹ duration_ms 93649.681867
+2026-10-16T17:58:57.1000098Z ℹ tests 7
+2026-10-16T17:58:57.1000486Z ℹ pass 7
+2026-10-16T17:58:57.1000671Z ℹ fail 0
+2026-10-16T17:58:57.1001136Z ℹ skipped 0
+2026-10-16T17:58:57.1001619Z ℹ duration_ms 61260.773747
+2026-10-16T18:03:54.4193126Z ℹ tests 132
+2026-10-16T18:03:54.4193656Z ℹ pass 132
+2026-10-16T18:03:54.4193867Z ℹ fail 0
+2026-10-16T18:03:54.4194293Z ℹ skipped 0
+2026-10-16T18:03:54.4194744Z ℹ duration_ms 297213.467603
