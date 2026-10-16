@@ -1,0 +1,434 @@
+{
+  "recordedAt": "2026-10-16T01:20:25.849Z",
+  "run": 38833693581,
+  "url": "https://github.com/to-shreds/torbox-web-player/actions/runs/38833693581",
+  "commit": "17a3e9a6c465b6001fc2081399562b0d2ec0ea60",
+  "tree": "03a5827606fb0502126d5a1269ee838046c8276e",
+  "runtimeCommit": "37e15de8bc094268136478935b38b052daf54b6a",
+  "runtimeTree": "70fc577ab8cadc014270e9fa9884ce50be9f6c49",
+  "verificationJob": 116758240324,
+  "browser": "151.0.7922.34",
+  "node": {
+    "registered": 592,
+    "passed": 586,
+    "failed": 0,
+    "skipped": 6,
+    "durationMs": 6655.529579
+  },
+  "audio": {
+    "registered": 7,
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0,
+    "durationMs": 46857.458539
+  },
+  "coreBrowser": {
+    "registered": 144,
+    "passed": 144,
+    "failed": 0,
+    "skipped": 0,
+    "durationMs": 391986.331988
+  },
+  "browserTotal": {
+    "registered": 151,
+    "passed": 151,
+    "failed": 0,
+    "durationMs": 438843.79052700003
+  },
+  "audioObservations": [
+    {
+      "name": "cross-origin EAC3 video automatically recovers to cached AAC decoding and keeps the current position without CORS",
+      "browser": "151.0.7922.34",
+      "requests": {
+        "playback": 2,
+        "prepare": 2,
+        "onlyCached": true,
+        "newTorrents": 0,
+        "serverMediaFetches": 0
+      },
+      "redirects": [
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "eac3",
+          "crossOrigin": true,
+          "corsHeaders": false
+        },
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "aac",
+          "crossOrigin": true,
+          "corsHeaders": false
+        }
+      ],
+      "cdnRequests": [
+        {
+          "pathname": "/eac3",
+          "range": "bytes=0-"
+        },
+        {
+          "pathname": "/aac",
+          "range": "bytes=0-"
+        }
+      ],
+      "observations": [
+        {
+          "browserConsole": "Service Worker registration blocked by Playwright"
+        },
+        {
+          "silent": {
+            "time": 0.212299,
+            "paused": false,
+            "audioBytes": 0,
+            "videoFrames": 4,
+            "error": null,
+            "title": "Fixture.Show.S01E01.One.720p.H264.mkv",
+            "message": "",
+            "health": "Playing",
+            "memory": {
+              "titles": {}
+            }
+          }
+        },
+        {
+          "recovered": {
+            "time": 5.031231,
+            "paused": false,
+            "audioBytes": 11528,
+            "videoFrames": 9,
+            "error": null,
+            "title": "Fixture.Show.S01E01.One.720p.H264.AAC.mp4",
+            "message": "Resuming 0:05",
+            "health": "Ready",
+            "memory": {
+              "titles": {}
+            }
+          }
+        },
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        },
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        },
+        {
+          "event": "seeked",
+          "time": 5.031231
+        },
+        {
+          "finalMediaState": {
+            "readyState": 4,
+            "networkState": 1,
+            "error": null,
+            "paused": false,
+            "currentTime": 5.031231
+          }
+        }
+      ]
+    },
+    {
+      "name": "audio exhaustion pauses silent video and leaves a visible recovery action without a retry loop",
+      "browser": "151.0.7922.34",
+      "requests": {
+        "playback": 1,
+        "prepare": 1,
+        "onlyCached": true,
+        "newTorrents": 0,
+        "serverMediaFetches": 0
+      },
+      "redirects": [
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "eac3",
+          "crossOrigin": false,
+          "corsHeaders": true
+        }
+      ],
+      "cdnRequests": [],
+      "observations": [
+        {
+          "failed": {
+            "time": 5.026138,
+            "paused": true,
+            "audioBytes": 0,
+            "videoFrames": 10,
+            "error": null,
+            "title": "Fixture.Show.S01E01.One.720p.H264.mkv",
+            "message": "The picture plays, but this browser has not decoded any sound from this version. No cached version with compatible audio was found. Automatic recovery stopped after 1 source.",
+            "health": "Could not play",
+            "memory": {
+              "titles": {}
+            }
+          }
+        },
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        }
+      ]
+    },
+    {
+      "name": "a real AAC track with an eight-second silent introduction is not rejected for quiet PCM",
+      "browser": "151.0.7922.34",
+      "requests": {
+        "playback": 1,
+        "prepare": 1,
+        "onlyCached": true,
+        "newTorrents": 0,
+        "serverMediaFetches": 0
+      },
+      "redirects": [
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "intro",
+          "crossOrigin": false,
+          "corsHeaders": true
+        }
+      ],
+      "cdnRequests": [],
+      "observations": [
+        {
+          "introPeak": 0,
+          "audiblePeak": 0.22200807929039001,
+          "current": {
+            "time": 9.321276,
+            "paused": false,
+            "audioBytes": 9052,
+            "videoFrames": 15,
+            "error": null,
+            "title": "Fixture.Show.S01E01.One.720p.H264.AAC.mp4",
+            "message": "",
+            "health": "Playing",
+            "memory": {
+              "titles": {}
+            }
+          }
+        },
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        }
+      ]
+    },
+    {
+      "name": "an unavailable browser decode counter remains unknown and never invents an audio failure or success",
+      "browser": "151.0.7922.34",
+      "requests": {
+        "playback": 1,
+        "prepare": 1,
+        "onlyCached": true,
+        "newTorrents": 0,
+        "serverMediaFetches": 0
+      },
+      "redirects": [
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "eac3",
+          "crossOrigin": false,
+          "corsHeaders": true
+        }
+      ],
+      "cdnRequests": [],
+      "observations": [
+        {
+          "current": {
+            "time": 16.112844,
+            "paused": false,
+            "videoFrames": 14,
+            "error": null,
+            "title": "Fixture.Show.S01E01.One.720p.H264.mkv",
+            "message": "",
+            "health": "Playing",
+            "memory": {
+              "titles": {}
+            }
+          }
+        },
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        }
+      ]
+    },
+    {
+      "name": "No sound remains visible in simple mode and explicitly switches to an AAC source when counters are unavailable",
+      "browser": "151.0.7922.34",
+      "requests": {
+        "playback": 2,
+        "prepare": 2,
+        "onlyCached": true,
+        "newTorrents": 0,
+        "serverMediaFetches": 0
+      },
+      "redirects": [
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "eac3",
+          "crossOrigin": false,
+          "corsHeaders": true
+        },
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "aac",
+          "crossOrigin": false,
+          "corsHeaders": true
+        }
+      ],
+      "cdnRequests": [],
+      "observations": [
+        {
+          "current": {
+            "time": 0.545806,
+            "paused": false,
+            "videoFrames": 4,
+            "error": null,
+            "title": "Fixture.Show.S01E01.One.720p.H264.AAC.mp4",
+            "message": "",
+            "health": "Playing",
+            "memory": {
+              "titles": {
+                "series:tt1234567": {
+                  "quality": "",
+                  "sources": {
+                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+                      "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "id": "e80b5147-40b0-4cbf-84b7-50aba6c1c748",
+                      "group": "",
+                      "provider": "synthetic audio regression",
+                      "resolution": "720p",
+                      "label": "Fixture.Show.S01E01.One.720p.H264.mkv",
+                      "audio": "bad",
+                      "bad": true,
+                      "updatedAt": 1792113186242
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "peak": 0.18496295809745789
+        },
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        },
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        },
+        {
+          "event": "seeked",
+          "time": 0.255139
+        }
+      ]
+    },
+    {
+      "name": "closing the player while audio recovery lookup is pending cancels the obsolete source switch",
+      "browser": "151.0.7922.34",
+      "requests": {
+        "playback": 1,
+        "prepare": 1,
+        "onlyCached": true,
+        "newTorrents": 0,
+        "serverMediaFetches": 0
+      },
+      "redirects": [
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "eac3",
+          "crossOrigin": false,
+          "corsHeaders": true
+        }
+      ],
+      "cdnRequests": [],
+      "observations": [
+        {
+          "beforeClose": {
+            "time": 5.03387,
+            "paused": true,
+            "audioBytes": 0,
+            "videoFrames": 10,
+            "error": null,
+            "title": "Fixture.Show.S01E01.One.720p.H264.mkv",
+            "message": "This version has no decodable sound. Trying another version\u2026",
+            "health": "Recovering",
+            "memory": {
+              "titles": {}
+            }
+          }
+        },
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        }
+      ]
+    },
+    {
+      "name": "No sound first unmutes a muted native AAC player without rejecting or replacing the source",
+      "browser": "151.0.7922.34",
+      "requests": {
+        "playback": 1,
+        "prepare": 1,
+        "onlyCached": true,
+        "newTorrents": 0,
+        "serverMediaFetches": 0
+      },
+      "redirects": [
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "aac",
+          "crossOrigin": false,
+          "corsHeaders": true
+        }
+      ],
+      "cdnRequests": [],
+      "observations": [
+        {
+          "output": {
+            "muted": false,
+            "volume": 1
+          },
+          "current": {
+            "time": 0.685333,
+            "paused": false,
+            "audioBytes": 2149,
+            "videoFrames": 4,
+            "error": null,
+            "title": "Fixture.Show.S01E01.One.720p.H264.AAC.mp4",
+            "message": "Player sound is on. If it is still silent, tap No sound again.",
+            "health": "Playing",
+            "memory": {
+              "titles": {}
+            }
+          },
+          "peak": 0.18497778475284576
+        },
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Release gate changes after the runtime commit only affect test harness, workflow paths/steps and browser scripts in package.json. Production public/lib/server/entry/package-lock bytes are unchanged.",
+    "Initial run38832193247 passed586 Node and150 of151 browser cases; its synthetic cross-origin local CDN fixture did not reach metadata in Chrome151. Scoped local-network permission was added only to that disposable fixture, with diagnostics. The corrected cross-origin case passes in this run.",
+    "No authenticated real episode, live provider media, physical Android hardware or speaker output was tested."
+  ],
+  "deployment": {
+    "job": 116760513941,
+    "conclusion": "success",
+    "finishedAt": "2026-10-16T01:20:09Z"
+  },
+  "verificationFinishedAt": "2026-10-16T01:19:48Z"
+}
