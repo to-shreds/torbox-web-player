@@ -23,6 +23,23 @@ const randomBase64url=length=>{
 };
 const safeId=id=>typeof id==='string'&&/^[a-zA-Z0-9_-]{20,128}$/.test(id)?id:'';
 
+
+function restoreCachedRows(raw,playback){
+  if(!Array.isArray(raw))return [];
+  const seen=new Set(),rows=[];
+  for(const item of raw){
+    if(!item||!imdb(item.id)||!['series','movie'].includes(item.type))continue;
+    const key=item.type==='movie'?'movie:'+item.id:'series:'+item.id+':'+number(item.season)+':'+number(item.episode);
+    if(item.key!==key||seen.has(key)||!Number.isFinite(item.updatedAt)||item.updatedAt<=0)continue;
+    if(playback&&!(number(item.traktPercent)>1&&number(item.traktPercent)<95))continue;
+    const row={key,type:item.type,id:item.id,season:item.type==='series'?number(item.season):null,episode:item.type==='series'?number(item.episode):null,title:clean(item.title)||'Untitled',episodeName:clean(item.episodeName),poster:'',resolution:'auto',position:0,duration:0,completed:!playback,updatedAt:item.updatedAt};
+    if(playback)row.traktPercent=number(item.traktPercent);
+    rows.push(row);seen.add(key);
+    if(rows.length>=(playback?MAX_REMOTE_PROGRESS:MAX_WATCHED))break;
+  }
+  return rows;
+}
+
 export function traktMedia(item) {
   const target=item?.current;
   const id=imdb(target?.id);
@@ -105,11 +122,11 @@ export class TraktIntegration {
     const v=allowedViewer(viewer);
     if(!this.remote.has(v)){
       const cached=jsonGet(HISTORY_KEY+v,{});
-      this.remote.set(v,{watched:normalizeTraktHistory(cached.watched),playback:normalizeTraktPlayback(cached.playback),updatedAt:number(cached.updatedAt)});
+      this.remote.set(v,{watched:restoreCachedRows(cached.watched,false),playback:restoreCachedRows(cached.playback,true),updatedAt:number(cached.updatedAt)});
     }
     return this.remote.get(v);
   }
-  canScrobble(viewer){return this.credentials.has(viewer)&&this.preferences(viewer).enabled===true&&!!this.id();}
+  canScrobble(viewer){return this.credentials.get(viewer)?.client_id===this.id()&&this.preferences(viewer).enabled===true;}
   recentPlayback(viewer=this.viewer()){
     if(!this.credentials.has(viewer)||!this.preferences(viewer).importHistory)return [];
     return this.cache(viewer).playback;
@@ -141,7 +158,7 @@ export class TraktIntegration {
   }
   async completeOAuth(){
     const url=new URL(location.href),code=url.searchParams.get('code'),state=url.searchParams.get('state'),error=url.searchParams.get('error');
-    const pending=jsonGet(PENDING_KEY,null);
+    let pending=null;try{pending=JSON.parse(sessionStorage.getItem(PENDING_KEY)||'null');}catch{}
     if(!state||(!code&&!error)||!pending)return;
     url.searchParams.delete('code');url.searchParams.delete('state');url.searchParams.delete('error');url.searchParams.delete('error_description');
     history.replaceState(null,'',url.pathname+url.search+url.hash);
