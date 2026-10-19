@@ -1,4 +1,5 @@
-const BUILD='release-1.2.8-party.1';
+const BUILD='release-1.2.8-trakt.1';
+const STATIC_BUILD='release-1.2.8-party.1';
 const startedAt=Date.now();
 let startupTimer=null;
 const stageNode=()=>document.querySelector('#startup-stage');
@@ -43,8 +44,8 @@ function showStartupFailure(){
 }
 
 // Public tabs initialize independently, before any private service request.
-try{await import(`./sports.js?v=${BUILD}`);}catch{const message=document.querySelector('#sports-nav-message');if(message)message.textContent='Sports could not start. Reload to retry.';}
-try{await import(`./games-nav.js?v=${BUILD}`);}catch{const message=document.querySelector('#sports-nav-message');if(message)message.textContent='Games could not start. Reload to retry.';}
+try{await import(`./sports.js?v=${STATIC_BUILD}`);}catch{const message=document.querySelector('#sports-nav-message');if(message)message.textContent='Sports could not start. Reload to retry.';}
+try{await import(`./games-nav.js?v=${STATIC_BUILD}`);}catch{const message=document.querySelector('#sports-nav-message');if(message)message.textContent='Games could not start. Reload to retry.';}
 
 let cinemaStarted=false;
 async function startCinema(){
