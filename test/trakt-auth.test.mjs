@@ -35,13 +35,13 @@ function fixture(){
   };
   const context=vm.createContext({
     localStorage,sessionStorage,document,location,history,fetch,
-    crypto:webcrypto,URL,TextEncoder,TextDecoder,AbortSignal,
+    crypto:webcrypto,URL,TextEncoder,TextDecoder,AbortSignal,isSecureContext:true,
     btoa:value=>Buffer.from(value,'binary').toString('base64'),
     saveTraktCredentials:async(viewer,value)=>{tokens.set(viewer,value);},
     loadTraktCredentials:async(viewer)=>tokens.get(viewer)||null,
     removeTraktCredentials:async viewer=>{tokens.delete(viewer);}
   });
-  vm.runInContext(source+'\\nthis.Integration=TraktIntegration;',context);
+  vm.runInContext(source+'\nthis.Integration=TraktIntegration;',context);
   return {TraktIntegration:context.Integration,location,localStorage,sessionStorage,document,calls,tokens,clientId};
 }
 
@@ -104,7 +104,7 @@ test('episode scrobble looks up exact episode id, then reports that episode',asy
   app.playing({viewer:'viewer-1',playbackContext:{current:{type:'series',id:'tt0903747',season:1,episode:2}},video:{currentTime:30,duration:60}});
   await app.requests;
   assert.equal(f.calls.length,2);
-  assert.match(f.calls[0].url,/\\/shows\\/tt0903747\\/seasons\\/1\\/episodes\\/2$/);
+  assert.match(f.calls[0].url,/\/shows\/tt0903747\/seasons\/1\/episodes\/2$/);
   assert.equal(f.calls[1].url,'https://api.trakt.tv/scrobble/start');
   assert.deepEqual(JSON.parse(f.calls[1].options.body),{episode:{ids:{trakt:54321}},progress:50});
 });
