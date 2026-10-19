@@ -159,11 +159,11 @@ export class TraktIntegration {
   async completeOAuth(){
     const url=new URL(location.href),code=url.searchParams.get('code'),state=url.searchParams.get('state'),error=url.searchParams.get('error');
     let pending=null;try{pending=JSON.parse(sessionStorage.getItem(PENDING_KEY)||'null');}catch{}
-    if(!state||(!code&&!error)||!pending)return;
+    if(!state||(!code&&!error))return;
     url.searchParams.delete('code');url.searchParams.delete('state');url.searchParams.delete('error');url.searchParams.delete('error_description');
     history.replaceState(null,'',url.pathname+url.search+url.hash);
     try{sessionStorage.removeItem(PENDING_KEY);}catch{}
-    if(pending.state!==state||Date.now()-pending.time>600000||Date.now()<pending.time||!safeId(pending.clientId)) {this.message='Trakt sign-in could not be verified. Connect again.';return;}
+    if(!pending||pending.state!==state||Date.now()-pending.time>600000||Date.now()<pending.time||!safeId(pending.clientId)) {this.message='Trakt sign-in could not be verified. Connect again.';return;}
     if(error){this.message='Trakt authorization was cancelled.';return;}
     try{
       const response=await fetch(API+'/oauth/token',{method:'POST',mode:'cors',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,client_id:pending.clientId,redirect_uri:pending.redirect,grant_type:'authorization_code',code_verifier:pending.verifier}),signal:AbortSignal.timeout(15000)});
@@ -315,9 +315,7 @@ export class TraktIntegration {
   renderHistory(){
     const section=document.getElementById('trakt-recent-section'),list=document.getElementById('trakt-recent-list');
     if(!section||!list)return;
-    const local=jsonGet('torbox-recent-v1',[]);
-    const seen=new Set(Array.isArray(local)?local.map(row=>row.key):[]);
-    const rows=this.recentWatched().filter(row=>!seen.has(row.key)).slice(0,12);
+    const rows=this.recentWatched().slice(0,12);
     section.hidden=!rows.length||document.getElementById('discover-panel')?.hidden===true;
     const frag=document.createDocumentFragment();
     for(const row of rows){
