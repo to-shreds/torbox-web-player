@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const BUILD='release-1.2.8-party.1';
+const BUILD='release-1.2.8-trakt.1';
+const STATIC_BUILD='release-1.2.8-party.1';
 
 test('published page boots through a versioned recovery loader instead of directly importing app.js',async()=>{
   const [html,boot]=await Promise.all([
@@ -38,7 +39,7 @@ test('opening screen reports live startup stages and elapsed time',async()=>{
 test('startup module graph is cache-busted consistently',async()=>{
   for(const file of ['app.js','discover.js','history.js','playback-errors.js','source-client.js']){
     const js=await readFile(new URL(`../public/${file}`,import.meta.url),'utf8');
-    for(const match of js.matchAll(/from '(\.\/[^']+\.js)(\?[^']*)?';/g))assert.equal(match[2],`?v=${BUILD}`,`${file}: ${match[1]}`);
+    for(const match of js.matchAll(/from '(\.\/[^']+\.js)(\?[^']*)?';/g))assert.equal(match[2],`?v=${match[1]==='./trakt.js'?BUILD:STATIC_BUILD}`,`${file}: ${match[1]}`);
   }
 });
 
