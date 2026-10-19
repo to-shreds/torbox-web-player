@@ -43,5 +43,5 @@ test('service worker activation preserves other GitHub Pages apps and the legacy
   let done;
   handlers.activate({ waitUntil: promise => { done = promise; } });
   await done;
-  assert.deepEqual(deleted, [own + 'old']);
+  assert.deepEqual(deleted, [own + 'old', own + 'release-1.2.8-party.1']);
 });
