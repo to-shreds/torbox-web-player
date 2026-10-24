@@ -1,4 +1,4 @@
-import { saveTraktCredentials, loadTraktCredentials, removeTraktCredentials } from './trakt-vault.js?v=release-1.2.8-trakt.1';
+import { saveTraktCredentials, loadTraktCredentials, removeTraktCredentials } from './trakt-vault.js?v=release-1.2.9-stability.1';
 
 const API='https://api.trakt.tv';
 const AUTHORIZE='https://auth.trakt.tv/oauth/authorize';
@@ -13,6 +13,7 @@ const allowedViewer=value=>value==='viewer-2'?'viewer-2':'viewer-1';
 const imdb=value=>/^tt[0-9]{5,12}$/.test(value||'')?value:'';
 const clean=value=>typeof value==='string'?value.slice(0,180):'';
 const number=value=>Number.isFinite(Number(value))?Number(value):0;
+const episodeNumber=value=>typeof value==='number'||typeof value==='string'&&/^\d+$/.test(value)?Number(value):NaN;
 const epoch=value=>{const n=Date.parse(value||'');return Number.isFinite(n)?n:0;};
 const asPercent=(position,duration)=>Number.isFinite(duration)&&duration>0&&Number.isFinite(position)?Math.max(0,Math.min(100,position/duration*100)):0;
 const jsonGet=(key,fallback)=>{try{const data=JSON.parse(localStorage.getItem(key)||'null');return data??fallback;}catch{return fallback;}};
@@ -29,6 +30,7 @@ function restoreCachedRows(raw,playback){
   const seen=new Set(),rows=[];
   for(const item of raw){
     if(!item||!imdb(item.id)||!['series','movie'].includes(item.type))continue;
+    if(item.type==='series'&&(!Number.isSafeInteger(episodeNumber(item.season))||episodeNumber(item.season)<0||!Number.isSafeInteger(episodeNumber(item.episode))||episodeNumber(item.episode)<1))continue;
     const key=item.type==='movie'?'movie:'+item.id:'series:'+item.id+':'+number(item.season)+':'+number(item.episode);
     if(item.key!==key||seen.has(key)||!Number.isFinite(item.updatedAt)||item.updatedAt<=0)continue;
     if(playback&&!(number(item.traktPercent)>1&&number(item.traktPercent)<95))continue;
@@ -45,7 +47,7 @@ export function traktMedia(item) {
   const id=imdb(target?.id);
   if(!id||!['movie','series'].includes(target.type))return null;
   if(target.type==='movie')return {type:'movie',id};
-  const season=number(target.season),episode=number(target.episode);
+  const season=episodeNumber(target.season),episode=episodeNumber(target.episode);
   if(!Number.isSafeInteger(season)||!Number.isSafeInteger(episode)||season<0||episode<1)return null;
   return {type:'series',id,season,episode};
 }
@@ -56,8 +58,8 @@ function rowFromTrakt(entry,playback=false){
   if(!series&&entry.type!=='movie')return null;
   const id=imdb(series?entry.show?.ids?.imdb:entry.movie?.ids?.imdb);
   if(!id)return null;
-  const season=series?number(entry.episode?.season):null;
-  const episode=series?number(entry.episode?.number):null;
+  const season=series?episodeNumber(entry.episode?.season):null;
+  const episode=series?episodeNumber(entry.episode?.number):null;
   if(series&&(!Number.isSafeInteger(season)||season<0||!Number.isSafeInteger(episode)||episode<1))return null;
   const title=clean(series?entry.show?.title:entry.movie?.title)||'Untitled';
   const key=series?'series:'+id+':'+season+':'+episode:'movie:'+id;
@@ -77,8 +79,8 @@ export function normalizeTraktPlayback(entries,limit=MAX_REMOTE_PROGRESS){
 }
 export function mergeContinueWatching(local=[],remote=[],limit=6){
   const originals=Array.isArray(local)?local.filter(Boolean):[];
-  const keys=new Set(originals.map(row=>row.key));
-  const merged=[...originals,...(Array.isArray(remote)?remote:[]).filter(row=>row&&!keys.has(row.key))];
+  const keys=new Set(originals.map(row=>row.type+':'+row.id));
+  const merged=[...originals,...(Array.isArray(remote)?remote:[]).filter(row=>row&&!keys.has(row.type+':'+row.id))];
   const seen=new Set(),result=[];
   for(const row of merged.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))){
     const titleKey=row.type+':'+row.id;
@@ -107,6 +109,7 @@ export class TraktIntegration {
     this.credentials=new Map();
     this.inflight=new Map();
     this.refresher=new Map();
+    this.generations=new Map();
     this.remote=new Map();
     this.episodes=new Map();
     this.states=new WeakMap();
@@ -126,17 +129,21 @@ export class TraktIntegration {
     }
     return this.remote.get(v);
   }
-  canScrobble(viewer){return this.credentials.get(viewer)?.client_id===this.id()&&this.preferences(viewer).enabled===true;}
+  generation(viewer){return this.generations.get(viewer)||0;}
+  connected(viewer){return this.credentials.has(viewer)&&this.credentials.get(viewer)?.client_id===this.id();}
+  current(viewer,generation){return this.generation(viewer)===generation&&this.connected(viewer);}
+  assertCurrent(viewer,generation){if(!this.current(viewer,generation))throw new Error('Trakt connection changed.');}
+  canScrobble(viewer){return this.connected(viewer)&&this.preferences(viewer).enabled===true;}
   recentPlayback(viewer=this.viewer()){
-    if(!this.credentials.has(viewer)||!this.preferences(viewer).importHistory)return [];
+    if(!this.connected(viewer)||!this.preferences(viewer).importHistory)return [];
     return this.cache(viewer).playback;
   }
   recentWatched(viewer=this.viewer()){
-    if(!this.credentials.has(viewer)||!this.preferences(viewer).importHistory)return [];
+    if(!this.connected(viewer)||!this.preferences(viewer).importHistory)return [];
     return this.cache(viewer).watched;
   }
   remotePercent(target,viewer=this.viewer()){
-    if(!this.credentials.has(viewer)||!this.preferences(viewer).importHistory)return 0;
+    if(!this.connected(viewer)||!this.preferences(viewer).importHistory)return 0;
     const media=traktMedia({current:target});
     if(!media)return 0;
     const key=media.type==='series'?'series:'+media.id+':'+media.season+':'+media.episode:'movie:'+media.id;
@@ -147,8 +154,9 @@ export class TraktIntegration {
     // Clean OAuth codes out of the URL before any backend or third-party requests.
     await this.completeOAuth();
     await Promise.all(['viewer-1','viewer-2'].map(async v=>{
+      const generation=this.generation(v);
       const credentials=await loadTraktCredentials(v);
-      if(credentials&&credentials.client_id===this.id())this.credentials.set(v,credentials);
+      if(generation===this.generation(v)&&credentials&&credentials.client_id===this.id())this.credentials.set(v,credentials);
     }));
     this.cache('viewer-1');this.cache('viewer-2');
     this.updateUI();
@@ -165,12 +173,15 @@ export class TraktIntegration {
     try{sessionStorage.removeItem(PENDING_KEY);}catch{}
     if(!pending||pending.state!==state||Date.now()-pending.time>600000||Date.now()<pending.time||!safeId(pending.clientId)) {this.message='Trakt sign-in could not be verified. Connect again.';return;}
     if(error){this.message='Trakt authorization was cancelled.';return;}
+    const generation=this.generation(pending.viewer);
     try{
-      const response=await fetch(API+'/oauth/token',{method:'POST',mode:'cors',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,client_id:pending.clientId,redirect_uri:pending.redirect,grant_type:'authorization_code',code_verifier:pending.verifier}),signal:AbortSignal.timeout(15000)});
+      const response=await fetch(API+'/oauth/token',{method:'POST',mode:'cors',credentials:'omit',redirect:'error',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,client_id:pending.clientId,redirect_uri:pending.redirect,grant_type:'authorization_code',code_verifier:pending.verifier}),signal:AbortSignal.timeout(15000)});
       if(!response.ok)throw new Error('Trakt could not complete authorization ('+response.status+').');
       const tokens=await response.json();
       const credentials=this.normalizeCredentials(tokens,pending.clientId);
+      if(generation!==this.generation(pending.viewer)||pending.clientId!==this.id())return;
       await saveTraktCredentials(pending.viewer,credentials);
+      if(generation!==this.generation(pending.viewer)||pending.clientId!==this.id())return;
       this.credentials.set(pending.viewer,credentials);
       this.setPreferences(pending.viewer,{enabled:true,importHistory:true});
       this.message='Trakt connected to '+(pending.viewer==='viewer-2'?'Viewer 2':'Viewer 1')+'.';
@@ -199,15 +210,17 @@ export class TraktIntegration {
     location.assign(url.href);
   }
   async ensureToken(viewer){
-    const saved=this.credentials.get(viewer);
+    const saved=this.credentials.get(viewer),generation=this.generation(viewer);
     if(!saved||saved.client_id!==this.id())throw new Error('Connect Trakt in Settings.');
     if(saved.expires_at>Date.now()+60000)return saved.access_token;
     if(!this.refresher.has(viewer)){
       const task=(async()=>{
-        const response=await fetch(API+'/oauth/token',{method:'POST',mode:'cors',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({refresh_token:saved.refresh_token,client_id:saved.client_id,redirect_uri:REDIRECT,grant_type:'refresh_token'}),signal:AbortSignal.timeout(15000)});
+        const response=await fetch(API+'/oauth/token',{method:'POST',mode:'cors',credentials:'omit',redirect:'error',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({refresh_token:saved.refresh_token,client_id:saved.client_id,redirect_uri:REDIRECT,grant_type:'refresh_token'}),signal:AbortSignal.timeout(15000)});
         if(!response.ok)throw new Error('Trakt authorization expired. Reconnect in Settings.');
         const current=this.normalizeCredentials(await response.json(),saved.client_id);
-        await saveTraktCredentials(viewer,current); // single-use refresh tokens must rotate atomically
+        this.assertCurrent(viewer,generation);
+        await saveTraktCredentials(viewer,current);
+        this.assertCurrent(viewer,generation);
         this.credentials.set(viewer,current);
         return current.access_token;
       })();
@@ -217,8 +230,10 @@ export class TraktIntegration {
     return this.refresher.get(viewer);
   }
   async request(viewer,path,{method='GET',body}={}){
+    const generation=this.generation(viewer),clientId=this.id();
     const token=await this.ensureToken(viewer);
-    const result=await fetch(API+path,{method,mode:'cors',credentials:'omit',cache:'no-store',headers:{'Content-Type':'application/json','trakt-api-version':'2','trakt-api-key':this.id(),Authorization:'Bearer '+token},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(18000)});
+    this.assertCurrent(viewer,generation);
+    const result=await fetch(API+path,{method,mode:'cors',credentials:'omit',redirect:'error',cache:'no-store',headers:{'Content-Type':'application/json','trakt-api-version':'2','trakt-api-key':clientId,Authorization:'Bearer '+token},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(18000)});
     if(result.status===204)return null;
     if(result.status===429)throw new Error('Trakt is rate-limiting requests. Try again later.');
     if(!result.ok)throw new Error('Trakt request failed ('+result.status+').');
@@ -228,13 +243,14 @@ export class TraktIntegration {
     const key=media.id+':'+media.season+':'+media.episode;
     if(this.episodes.has(key))return this.episodes.get(key);
     const result=await this.request(viewer,'/shows/'+media.id+'/seasons/'+media.season+'/episodes/'+media.episode);
-    if(!traktScrobbleObject(media,result))throw new Error('Trakt could not identify this episode; skipping scrobble.');
+    if(result?.season!==media.season||result?.number!==media.episode||!traktScrobbleObject(media,result))throw new Error('Trakt could not identify this episode; skipping scrobble.');
     this.episodes.set(key,result);
     return result;
   }
   async syncHistory(viewer=this.viewer()){
-    if(!this.credentials.has(viewer)||!this.preferences(viewer).importHistory)return;
+    if(!this.connected(viewer)||!this.preferences(viewer).importHistory)return;
     if(this.inflight.has(viewer))return this.inflight.get(viewer);
+    const generation=this.generation(viewer);
     const task=(async()=>{
       try{
         const [watched,playback]=await Promise.all([
@@ -242,12 +258,12 @@ export class TraktIntegration {
           this.request(viewer,'/sync/playback')
         ]);
         const rows={watched:normalizeTraktHistory(watched),playback:normalizeTraktPlayback(playback),updatedAt:Date.now()};
-        if(!this.credentials.has(viewer)||!this.preferences(viewer).importHistory)return;
+        if(!this.current(viewer,generation)||!this.preferences(viewer).importHistory)return;
         this.remote.set(viewer,rows);
         jsonSet(HISTORY_KEY+viewer,rows);
         this.message='Trakt watch history updated.';
         this.onChanged();
-      }catch(e){this.message='Trakt history could not be updated: '+e.message;}
+      }catch(e){if(this.current(viewer,generation))this.message='Trakt history could not be updated: '+e.message;}
       finally{this.updateUI();}
     })();
     this.inflight.set(viewer,task);
@@ -255,15 +271,17 @@ export class TraktIntegration {
   }
   async disconnect(){
     const v=this.viewer(),existing=this.credentials.get(v);
-    await removeTraktCredentials(v);
-    this.credentials.delete(v);
+    // Invalidate pending refreshes, history and queued scrobbles before awaiting storage.
+    this.generations.set(v,this.generation(v)+1);
+    this.credentials.delete(v);this.refresher.delete(v);this.inflight.delete(v);
     this.setPreferences(v,{enabled:false,importHistory:false});
     this.remote.delete(v);
     try{localStorage.removeItem(HISTORY_KEY+v);}catch{}
     this.message='Trakt disconnected on this device. You can also revoke access in your Trakt account.';
     this.updateUI();this.onChanged();
+    await removeTraktCredentials(v);
     if(existing?.access_token){
-      void fetch(API+'/oauth/revoke',{method:'POST',mode:'cors',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:existing.access_token,client_id:existing.client_id}),signal:AbortSignal.timeout(8000)}).catch(()=>{});
+      void fetch(API+'/oauth/revoke',{method:'POST',mode:'cors',credentials:'omit',redirect:'error',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:existing.access_token,client_id:existing.client_id}),signal:AbortSignal.timeout(8000)}).catch(()=>{});
     }
   }
   queueAction(context,action,progress){
@@ -271,18 +289,18 @@ export class TraktIntegration {
     const playback=context?.playbackContext;
     const media=traktMedia(playback);
     if(!media||!this.canScrobble(viewer))return;
-    const bodyBase=media;
+    const bodyBase=media,generation=this.generation(viewer);
     const work=async()=>{
-      if(!this.canScrobble(viewer))return;
+      if(!this.current(viewer,generation)||!this.canScrobble(viewer))return;
       try{
         const item=traktScrobbleObject(bodyBase,bodyBase.type==='series'?await this.lookupEpisode(bodyBase,viewer):null);
-        if(!item||!this.canScrobble(viewer))return;
+        if(!item||!this.current(viewer,generation)||!this.canScrobble(viewer))return;
         const delay=Math.max(0,1100-(Date.now()-this.lastPost));
         if(delay)await new Promise(resolve=>setTimeout(resolve,delay));
-        if(!this.canScrobble(viewer))return;
+        if(!this.current(viewer,generation)||!this.canScrobble(viewer))return;
         this.lastPost=Date.now();
         await this.request(viewer,'/scrobble/'+action,{method:'POST',body:{...item,progress:Math.round(Math.max(0,Math.min(100,progress))*100)/100}});
-      }catch(e){this.message='Trakt scrobbling unavailable: '+e.message;this.updateUI();}
+      }catch(e){if(this.current(viewer,generation)){this.message='Trakt scrobbling unavailable: '+e.message;this.updateUI();}}
     };
     this.requests=this.requests.then(work,work);
   }

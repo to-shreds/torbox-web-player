@@ -71,3 +71,15 @@ test('Trakt cannot start without explicit user authorization, and stays outside 
   assert.ok(app.includes('trakt.stopped(context,true)'));
   assert.ok(sw.includes('trakt-vault.js?v='));
 });
+test('a newer remote episode cannot replace an existing local Continue Watching show',()=>{
+  const local={key:'series:'+show+':2:3',id:show,type:'series',season:2,episode:3,position:450,duration:900,updatedAt:10,completed:false};
+  const remote={...local,key:'series:'+show+':4:7',season:4,episode:7,updatedAt:20,traktPercent:80,position:0,duration:0};
+  assert.deepEqual(mergeContinueWatching([local],[remote],6),[local]);
+});
+test('missing or blank season never becomes a guessed specials-season identity',()=>{
+  for(const season of [undefined,null,'',false]){
+    assert.equal(traktMedia({current:{type:'series',id:show,season,episode:3}}),null);
+    assert.deepEqual(normalizeTraktHistory([{...watched[0],episode:{season,number:3}}]),[]);
+  }
+  assert.deepEqual(traktMedia({current:{type:'series',id:show,season:0,episode:3}}),{type:'series',id:show,season:0,episode:3});
+});

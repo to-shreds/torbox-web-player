@@ -1,4 +1,4 @@
-const BUILD='release-1.2.8-trakt.1';
+const BUILD='release-1.2.9-stability.1';
 const STATIC_BUILD='release-1.2.8-party.1';
 const startedAt=Date.now();
 let startupTimer=null;

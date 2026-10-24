@@ -2,6 +2,16 @@
 
 Read this first. The code repository controls implementation; `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md` controls readiness and the next action.
 
+## Error and stress-test repair · 2026-10-23
+
+Prepared backend **1.2.9** and frontend **release-1.2.9-stability.1** from main `2df34c7a1868679a855b5c1de3c682ddff453953`. The Trakt candidate actually failed its Node gate, so it was never published. Three stale expectations were repaired, and HTTP tests reproduced a genuine startup failure: the backend did not serve the two new Trakt modules or stylesheet. Static routes are now present.
+
+The review also reproduced and repaired late Trakt refresh/history/queued-event results crossing Disconnect/reconnect boundaries, ambiguous/mismatched episode identity, remote episodes overriding local same-show progress, and concurrent vault initialization/save/delete races. Credentials retain their existing encrypted, device-bound format. Wake-lock acquisition is coalesced; canceled or stale grants are released, old release callbacks cannot erase a new lock, and stale playback completion cannot update a replacement player. These repairs do not establish a solution to physical Android PiP screen timeout.
+
+Expanded local stress passed with **96 simulated devices, 2,304 playback starts, 4,608 seeks, zero media-body bytes and zero upstream media fetches**. No load was sent to real accounts or provider media. New browser checks cover real IndexedDB/WebCrypto across independent tabs and default-off/per-viewer Trakt controls. Full Chrome release verification and publication are pending; see the final release report for completed evidence. The native APK audit is separate and does not automatically require a rebuild.
+
+Preserve all games/saves, audio repair, Sports/Buffstreams, host-backed party consent and exact-file guards, cached-only source selection, local resume, encrypted keys/PIN/history and direct video delivery. Previous main is retained at `archive/web-before-stress-2026-10-24`. Next: finish release CI, publish tested runtime, verify live root/key/backend, then update ProjectStatus last.
+
 ## Optional Trakt scrobbling · 2026-10-19
 
 PR [#20](https://github.com/to-shreds/torbox-web-player/pull/20) was merged into main as `163b76e6f7e1cc3fffc026f841ca21a303b46a29`. It adds a strictly optional, frontend-only Trakt OAuth 2.0 PKCE connection in Settings, a small per-viewer Scrobble toggle in Discover, and separate watched and incomplete playback import. User-provided Trakt application Client ID is required; no secret, token or app ID is in the repository. Exact movie/episode IDs are required for scrobbling. Local resume retains precedence and is not overwritten. Tokens are encrypted in separate device-bound IndexedDB records, not synchronized by setup transfer. Trakt calls go directly from the browser to Trakt; Render, TorBox media routing and native APK are unchanged. See `docs/TRAKT.md` and `test/trakt*.test.mjs`.

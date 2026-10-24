@@ -47,7 +47,7 @@ test('Continue Watching UI never offers finished-title mode and supports long-pr
   ]);
   assert.ok(!html.includes('setting-show-completed-recent'));
   assert.ok(!app.includes('showCompletedRecent'));
-  assert.ok(app.includes('continueWatchingItems(listRecent(),settings.recentLimit)'));
+  assert.ok(app.includes('mergeContinueWatching(listRecent(),trakt.recentPlayback(),settings.recentLimit)'));
   assert.ok(app.includes('discoveryUI.openHistoryTitle(item)'));
   assert.ok(discover.includes('async function openHistoryTitle(entry)'));
   assert.ok(discover.includes('renderEpisodes(currentMeta,preferredSeason)'));

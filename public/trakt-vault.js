@@ -3,6 +3,10 @@
 const DATABASE='torbox-trakt-credentials-v1';
 const OBJECT='secrets';
 const DEVICE_KEY='aes-key';
+// Preserve mutation order through encryption/storage awaits. Disconnect must win
+// over a refresh save already in progress in this page.
+let mutations=Promise.resolve();
+function mutate(work){const task=mutations.then(work,work);mutations=task.catch(()=>{});return task;}
 const slot=viewer=>'oauth-'+(viewer==='viewer-2'?'viewer-2':'viewer-1');
 
 async function open() {
@@ -35,18 +39,36 @@ async function write(name,value) {
     });
   } finally {db.close();}
 }
-export async function saveTraktCredentials(viewer,credentials) {
-  if(!crypto?.subtle||!credentials?.access_token||!credentials?.refresh_token)throw new Error('Secure credential storage is unavailable.');
-  let key=await read(DEVICE_KEY);
-  if(!key){key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);await write(DEVICE_KEY,key);}
-  const iv=crypto.getRandomValues(new Uint8Array(12));
-  const plaintext=new TextEncoder().encode(JSON.stringify(credentials));
-  const bytes=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,plaintext));
-  await write(slot(viewer),{iv:Array.from(iv),bytes:Array.from(bytes)});
+async function deviceKey() {
+  const existing=await read(DEVICE_KEY);
+  if(existing)return existing;
+  const candidate=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  const db=await open();
+  try{
+    // The check and write share one transaction, including across browser tabs.
+    return await new Promise((resolve,reject)=>{
+      const tx=db.transaction(OBJECT,'readwrite'),store=tx.objectStore(OBJECT),req=store.get(DEVICE_KEY);
+      let key;
+      req.onsuccess=()=>{key=req.result||candidate;if(!req.result)store.put(key,DEVICE_KEY);};
+      tx.oncomplete=()=>resolve(key);
+      tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
+    });
+  }finally{db.close();}
+}
+export function saveTraktCredentials(viewer,credentials) {
+  return mutate(async()=>{
+    if(!globalThis.crypto?.subtle||!credentials?.access_token||!credentials?.refresh_token)throw new Error('Secure credential storage is unavailable.');
+    const key=await deviceKey();
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const plaintext=new TextEncoder().encode(JSON.stringify(credentials));
+    const bytes=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,plaintext));
+    await write(slot(viewer),{iv:Array.from(iv),bytes:Array.from(bytes)});
+  });
 }
 export async function loadTraktCredentials(viewer) {
   try{
-    if(!crypto?.subtle)return null;
+    await mutations;
+    if(!globalThis.crypto?.subtle)return null;
     const [key,record]=await Promise.all([read(DEVICE_KEY),read(slot(viewer))]);
     if(!key||!record?.iv||!record?.bytes)return null;
     const plaintext=await crypto.subtle.decrypt({name:'AES-GCM',iv:new Uint8Array(record.iv)},key,new Uint8Array(record.bytes));
@@ -54,7 +76,8 @@ export async function loadTraktCredentials(viewer) {
     return value?.access_token&&value?.refresh_token?value:null;
   }catch{return null;}
 }
-export async function removeTraktCredentials(viewer) {
+export function removeTraktCredentials(viewer) {
+  return mutate(async()=>{
   const db=await open();
   try{
     await new Promise((resolve,reject)=>{
@@ -63,4 +86,5 @@ export async function removeTraktCredentials(viewer) {
       tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
     });
   }finally{db.close();}
+  });
 }

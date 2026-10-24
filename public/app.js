@@ -7,13 +7,13 @@ import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v
 import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.8-party.1';
 import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.8-party.1';
 import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.8-party.1';
-import { TraktIntegration, mergeContinueWatching } from './trakt.js?v=release-1.2.8-trakt.1';
+import { TraktIntegration, mergeContinueWatching } from './trakt.js?v=release-1.2.9-stability.1';
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory, noteAudioDecodeFailure, resetNegativeAudioFeedback } from './source-memory.js?v=release-1.2.8-party.1';
 import { clearSearchHistory } from './search-history.js?v=release-1.2.8-party.1';
 import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.8-party.1';
 const $ = id => document.getElementById(id);
 resetNegativeAudioFeedback();
-let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null, fullscreenExitControlTimer = null;
+let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null, fullscreenExitControlTimer = null;
 let discoveryUI, watchParty=null;
 let partyGuestMode=false,partyKidApproved=false,partyExitPromise=null,partyLobbyActive=false;
 try{partyGuestMode=!!sessionToken&&sessionStorage.getItem('torbox-party-session')===sessionToken;if(partyGuestMode)guestMode=true;}catch{}
@@ -655,22 +655,43 @@ function updateNextEpisodePrompt(context){
   const delay=getSettings().autoNextDelaySeconds,elapsed=Math.max(0,current-context.nextCountdownStart);
   if(delay===0||elapsed>=delay)void openNextEpisode(context);
 }
-async function releaseWakeLock(){try{await wakeLock?.release();}catch{}wakeLock=null;}
-async function acquireWakeLock(context=active){
-  if(!getSettings().keepAwake||!('wakeLock' in navigator)||!context?.video||context.video.paused||context.video.ended)return false;
+// Playback wake lock ownership survives overlapping browser events and late promises.
+let wakeLock=null,wakeLockEpoch=0,wakeLockRequest=null;
+function wantsWakeLock(context){
+  if(context!==active||!getSettings().keepAwake||!('wakeLock' in navigator)||!context?.video||context.video.paused||context.video.ended)return false;
   const pip=playerIsPiP(context);
   if(document.visibilityState!=='visible'&&!pip)return false;
-  try{
-    if(wakeLock&&!wakeLock.released)return true;
-    wakeLock=await navigator.wakeLock.request('screen');
-    wakeLock.addEventListener('release',()=>{wakeLock=null;},{once:true});
-    return true;
-  }catch{return false;}
+  return true;
+}
+async function releaseWakeLock(){
+  wakeLockEpoch++;wakeLockRequest=null;
+  const previous=wakeLock;wakeLock=null;
+  try{await previous?.release();}catch{}
+}
+async function acquireWakeLock(context=active){
+  if(!wantsWakeLock(context))return false;
+  if(wakeLock&&!wakeLock.released)return true;
+  if(wakeLockRequest)return wakeLockRequest.promise;
+  const request={epoch:wakeLockEpoch,promise:null};wakeLockRequest=request;
+  request.promise=(async()=>{
+    try{
+      const sentinel=await navigator.wakeLock.request('screen');
+      if(request.epoch!==wakeLockEpoch||!wantsWakeLock(context)){
+        try{await sentinel.release();}catch{}return false;
+      }
+      if(sentinel.released)return false;
+      wakeLock=sentinel;
+      sentinel.addEventListener('release',()=>{if(wakeLock===sentinel)wakeLock=null;},{once:true});
+      return true;
+    }catch{return false;}
+    finally{if(wakeLockRequest===request)wakeLockRequest=null;}
+  })();
+  return request.promise;
 }
 async function refreshWakeLockForPlayback(context=active){
-  if(!context?.video||context.video.paused||context.video.ended){await releaseWakeLock();return false;}
-  if(document.visibilityState==='visible'||playerIsPiP(context))return acquireWakeLock(context);
-  await releaseWakeLock();return false;
+  if(context&&context!==active)return false;
+  if(!wantsWakeLock(context)){await releaseWakeLock();return false;}
+  return acquireWakeLock(context);
 }
 function armSleepTimer(context){
   clearTimeout(context.sleepTimer);context.sleepTimer=null;
@@ -847,6 +868,7 @@ async function startPlayback(file, playbackContext = null) {
       if (active !== context) return; tickKidUsage(context,true);trakt.stopped(context,true); clearBuffer(); hidePauseCard(); void saveProgress(context);
       context.nextEnded=true;markPlaybackCompleted(context);
       clearTimeout(context.healthyTimer);setPlaybackHealth('Finished','Playback completed.');await releaseWakeLock();
+      if(active!==context)return;
       if(!queuedNext(context)){hideUpNextCard();text('player-message','Finished');return;}
       if(getSettings().autoNext){renderUpNextCard(context,{ended:true});await openNextEpisode(context,{fromEnded:true});}
       else{context.nextPromptActive=true;renderUpNextCard(context,{ended:true});text('player-message','Finished');}
