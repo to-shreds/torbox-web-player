@@ -228,14 +228,14 @@ public final class MainActivity extends Activity {
 
     private void refresh() {
         if (busy || installerActive) return;
-        final int operation = beginOperation("Loading APKs from GitHub...");
+        final int operation = beginOperation("Loading APKs and GitHub Releases...");
         final GitHubClient.Cancellation cancellation = active;
         final RepoConfig source = config;
         final String auth = token;
-        emptyLabel.setText("Loading your folder...");
+        emptyLabel.setText("Loading your APKs and Releases...");
         worker.execute(() -> {
             try {
-                final GitHubClient.Listing result = client.list(source, auth, cancellation);
+                final GitHubClient.Listing result = client.listAll(source, auth, cancellation);
                 main.post(() -> {
                     if (!current(operation)) return;
                     endOperation();
@@ -243,8 +243,8 @@ public final class MainActivity extends Activity {
                     entries.addAll(result.entries);
                     adapter.notifyDataSetChanged();
                     countLabel.setText(entries.size() + (entries.size() == 1 ? " APK" : " APKS"));
-                    emptyLabel.setText("No APKs in this folder yet.\nUpload an .apk to the configured GitHub folder, then select Refresh.");
-                    String message = entries.isEmpty() ? "Folder connected. Ready for your first APK."
+                    emptyLabel.setText("No APKs found yet.\nUpload an .apk to this GitHub folder or attach it to a published Release, then select Refresh.");
+                    String message = entries.isEmpty() ? "GitHub connected. Ready for your first APK or Release asset."
                             : "Select an APK to download it and open the installer.";
                     if (result.warning != null && !result.warning.isEmpty()) message = result.warning;
                     if (credentialsError != null) message = credentialsError;
@@ -369,7 +369,7 @@ public final class MainActivity extends Activity {
         generation++;
         endOperation();
         statusLabel.setText(message);
-        if (entries.isEmpty()) emptyLabel.setText("Select Refresh to load your APK folder.");
+        if (entries.isEmpty()) emptyLabel.setText("Select Refresh to load your APKs and Releases.");
         refreshButton.requestFocus();
     }
 
@@ -434,7 +434,7 @@ public final class MainActivity extends Activity {
         form.setOrientation(LinearLayout.VERTICAL);
         form.setPadding(dp(24), dp(10), dp(24), dp(14));
         scroll.addView(form);
-        TextView explanation = text("Use any GitHub repository folder. Public folders need no token. Only APKs directly in this folder are listed.", 14, MUTED);
+        TextView explanation = text("APKs from this GitHub folder and all published Releases in the repository appear together. Public sources need no token. Files in subfolders are not listed.", 14, MUTED);
         form.addView(explanation);
         EditText repository = field(form, "Repository (owner/name)", config.owner + "/" + config.repo, false);
         EditText ref = field(form, "Branch or tag (blank uses the default branch)", config.ref, false);
@@ -653,7 +653,9 @@ public final class MainActivity extends Activity {
             }
             GitHubClient.ApkEntry entry = getItem(position);
             filename.setText(entry.name);
-            detail.setText(size(entry.size) + "    Select to download and install");
+            detail.setText(size(entry.size) + (entry.release
+                    ? "    Release: " + entry.releaseTitle
+                    : "    Repository file") + "    Select to download and install");
             return row;
         }
     }
