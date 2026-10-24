@@ -15,7 +15,7 @@ async function setup(t){
   context.on('page',page=>{page.setDefaultTimeout(10000);page.on('pageerror',e=>errors.push(e.message));});
   await context.route('https://**/*',route=>{if(new URL(route.request().url()).hostname.endsWith('trakt.tv'))traktRequests.push(route.request().url());return route.abort();});
   const token=fixture.session();
-  await context.addInitScript(token=>sessionStorage.setItem('torbox-web-session',token),token);
+  await context.addInitScript(({token,origin})=>{if(location.origin===origin)sessionStorage.setItem('torbox-web-session',token);},{token,origin:fixture.origin});
   t.after(async()=>{await context.close();assert.deepEqual(errors,[]);assert.deepEqual(traktRequests,[]);});
   const page=await context.newPage();
   return {context,page};
