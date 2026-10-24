@@ -29,6 +29,10 @@ import java.util.zip.ZipFile;
 /** Small synchronous client. Call its methods from a worker thread. */
 public final class GitHubClient {
     public static final long MAX_APK_BYTES = 100L * 1024L * 1024L;
+    public static final long MAX_RELEASE_APK_BYTES = 2L * 1024L * 1024L * 1024L;
+    private static final int MAX_RELEASE_PAGES = 5;
+    private static final int MAX_ASSET_PAGES = 10;
+    private static final String BINARY_ACCEPT = "application/octet-stream";
     private static final int MAX_JSON_BYTES = 8 * 1024 * 1024;
     private static final String JSON_ACCEPT = "application/vnd.github.object+json";
     private static final String RAW_ACCEPT = "application/vnd.github.raw+json";
@@ -90,12 +94,27 @@ public final class GitHubClient {
         public final String path;
         public final String sha;
         public final long size;
+        public final boolean release;
+        public final long releaseAssetId;
+        public final String releaseUrl;
+        public final String releaseSha256;
+        public final String releaseTitle;
 
         public ApkEntry(String name, String path, String sha, long size) {
+            this(name, path, sha, size, false, 0, "", "", "");
+        }
+
+        private ApkEntry(String name, String path, String sha, long size, boolean release,
+                         long releaseAssetId, String releaseUrl, String releaseSha256, String releaseTitle) {
             this.name = name;
             this.path = path;
             this.sha = sha;
             this.size = size;
+            this.release = release;
+            this.releaseAssetId = releaseAssetId;
+            this.releaseUrl = releaseUrl;
+            this.releaseSha256 = releaseSha256;
+            this.releaseTitle = releaseTitle;
         }
     }
 
@@ -128,6 +147,130 @@ public final class GitHubClient {
             return parseContents(entries, config, cancellation);
         } catch (JSONException e) {
             throw new IOException("GitHub returned an unreadable folder listing. Try Refresh.", e);
+        }
+    }
+
+    /** Show normal folder APKs and published GitHub Release assets in the same list. */
+    public Listing listAll(RepoConfig config, String token, Cancellation cancellation) throws IOException {
+        Listing folder = list(config, token, cancellation);
+        cancellation.check();
+        try {
+            Listing releases = listReleases(config, token, cancellation);
+            List<ApkEntry> combined = new ArrayList<ApkEntry>(folder.entries);
+            combined.addAll(releases.entries);
+            Listing result = sorted(combined);
+            return new Listing(result.entries, releases.warning);
+        } catch (IOException e) {
+            cancellation.check();
+            return new Listing(folder.entries,
+                    "Repository APKs loaded, but Releases could not be loaded: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Fetch published releases and their assets, independent of the selected Git branch/folder.
+     * Only downloadable APKs with a GitHub-provided SHA-256 digest are accepted.
+     */
+    private Listing listReleases(RepoConfig config, String token, Cancellation cancellation) throws IOException {
+        List<ApkEntry> result = new ArrayList<ApkEntry>();
+        Set<Long> seenIds = new HashSet<Long>();
+        boolean skippedUnverified = false;
+        boolean truncated = false;
+        String credential = validToken(token);
+        try {
+            for (int page = 1; page <= MAX_RELEASE_PAGES; page++) {
+                cancellation.check();
+                JSONArray releases = new JSONArray(getJson(config.apiBase()
+                        + "/releases?per_page=100&page=" + page, credential, cancellation));
+                for (int index = 0; index < releases.length(); index++) {
+                    cancellation.check();
+                    JSONObject release = releases.getJSONObject(index);
+                    if (release.optBoolean("draft", false)) continue;
+                    String title = release.optString("name", "").trim();
+                    if (title.isEmpty() || RepoConfig.hasControl(title) || title.length() > 100) {
+                        title = release.optString("tag_name", "").trim();
+                    }
+                    if (RepoConfig.hasControl(title) || title.length() > 100) title = "GitHub release";
+                    JSONArray assets = release.optJSONArray("assets");
+                    if (assets == null) continue;
+                    // GitHub may limit embedded assets to 100; page that list when necessary.
+                    if (assets.length() >= 100) {
+                        long releaseId = release.optLong("id", -1);
+                        if (releaseId <= 0) throw new IOException("GitHub returned an invalid release ID.");
+                        for (int assetPage = 1; assetPage <= MAX_ASSET_PAGES; assetPage++) {
+                            JSONArray paged = new JSONArray(getJson(config.apiBase() + "/releases/"
+                                    + releaseId + "/assets?per_page=100&page=" + assetPage,
+                                    credential, cancellation));
+                            skippedUnverified |= addReleaseAssets(result, seenIds, paged, title, config);
+                            if (paged.length() < 100) break;
+                            if (assetPage == MAX_ASSET_PAGES) truncated = true;
+                        }
+                    } else {
+                        skippedUnverified |= addReleaseAssets(result, seenIds, assets, title, config);
+                    }
+                }
+                if (releases.length() < 100) break;
+                if (page == MAX_RELEASE_PAGES) truncated = true;
+            }
+        } catch (JSONException e) {
+            throw new IOException("GitHub returned an unreadable Releases listing. Try Refresh.", e);
+        }
+        String warning = null;
+        if (truncated) warning = "There are too many Releases to list in one refresh. Only the first entries were shown.";
+        if (skippedUnverified) warning = (warning == null ? "" : warning + " ")
+                + "Some Release APKs had no usable SHA-256 checksum and were skipped.";
+        return new Listing(result, warning);
+    }
+
+    private boolean addReleaseAssets(List<ApkEntry> output, Set<Long> seenIds, JSONArray assets,
+                                     String title, RepoConfig config) throws JSONException, IOException {
+        boolean skippedUnverified = false;
+        for (int i = 0; i < assets.length(); i++) {
+            JSONObject asset = assets.getJSONObject(i);
+            if (!"uploaded".equals(asset.optString("state"))) continue;
+            String name = asset.optString("name");
+            if (!isApkName(name)) continue;
+            long size = asset.optLong("size", -1);
+            if (size <= 0 || size > MAX_RELEASE_APK_BYTES) continue;
+            String checksum = asset.optString("digest", "");
+            if (!checksum.matches("sha256:[a-fA-F0-9]{64}")) {
+                skippedUnverified = true;
+                continue;
+            }
+            long id = asset.optLong("id", -1);
+            if (id <= 0) throw new IOException("GitHub returned an invalid APK Release asset.");
+            String address = asset.optString("browser_download_url");
+            validateReleaseUrl(config, name, address);
+            if (!seenIds.add(id)) continue;
+            String sha256 = checksum.substring(7).toLowerCase(Locale.US);
+            String storageId = releaseStorageId(config, id, sha256);
+            output.add(new ApkEntry(name, "releases/assets/" + id, storageId, size, true, id,
+                    address, sha256, title));
+        }
+        return skippedUnverified;
+    }
+
+    private static String releaseStorageId(RepoConfig config, long id, String sha256) throws IOException {
+        MessageDigest digest = sha1();
+        digest.update((config.repository().toLowerCase(Locale.US) + "/release/" + id + "/" + sha256)
+                .getBytes("UTF-8"));
+        return hex(digest.digest());
+    }
+
+    private static void validateReleaseUrl(RepoConfig config, String name, String address) throws IOException {
+        URL url;
+        try { url = new URL(address); }
+        catch (Exception e) { throw new IOException("GitHub returned an invalid Release download URL.", e); }
+        if (!"https".equalsIgnoreCase(url.getProtocol()) || !"github.com".equalsIgnoreCase(url.getHost())
+                || url.getUserInfo() != null || (url.getPort() != -1 && url.getPort() != 443)
+                || url.getQuery() != null || url.getRef() != null) {
+            throw new IOException("GitHub returned an untrusted Release download URL.");
+        }
+        String prefix = "/" + config.repository() + "/releases/download/";
+        String path = url.getPath();
+        if (!path.toLowerCase(Locale.US).startsWith(prefix.toLowerCase(Locale.US))
+                || !path.endsWith("/" + RepoConfig.encodeSegment(name))) {
+            throw new IOException("GitHub returned a Release download outside this repository.");
         }
     }
 
@@ -238,14 +381,37 @@ public final class GitHubClient {
                          Cancellation cancellation, Progress progress) throws IOException {
         String credential = validToken(token);
         cancellation.check();
-        if (selected == null || !isApkName(selected.name)
-                || !folderPath(config, selected.name).equals(selected.path)) {
-            throw new IOException("Choose an APK from the current folder.");
+        if (selected == null || !isApkName(selected.name)) {
+            throw new IOException("Choose an APK from the current folder or Releases.");
         }
-        ApkEntry apk = entry(selected.name, selected.path, selected.sha, selected.size);
+        final ApkEntry apk;
+        final long maxBytes;
+        if (selected.release) {
+            if (selected.releaseAssetId <= 0
+                    || !("releases/assets/" + selected.releaseAssetId).equals(selected.path)
+                    || !selected.sha.matches("[a-f0-9]{40}")
+                    || selected.releaseSha256 == null
+                    || !selected.releaseSha256.matches("[a-f0-9]{64}")) {
+                throw new IOException("This Release APK has invalid metadata. Refresh the list.");
+            }
+            validateReleaseUrl(config, selected.name, selected.releaseUrl);
+            if (!selected.sha.equals(releaseStorageId(config,
+                    selected.releaseAssetId, selected.releaseSha256))) {
+                throw new IOException("This Release APK changed. Refresh the list.");
+            }
+            apk = selected;
+            maxBytes = MAX_RELEASE_APK_BYTES;
+        } else {
+            if (!folderPath(config, selected.name).equals(selected.path)) {
+                throw new IOException("Choose an APK from the current folder.");
+            }
+            apk = entry(selected.name, selected.path, selected.sha, selected.size);
+            maxBytes = MAX_APK_BYTES;
+        }
         if (apk.size == 0) throw new IOException("This APK file is empty. Upload a complete APK to GitHub.");
-        if (apk.size > MAX_APK_BYTES) {
-            throw new IOException("This file exceeds GitHub's 100 MB download limit. Use a regular APK below that size.");
+        if (apk.size > maxBytes) {
+            throw new IOException(apk.release ? "This Release APK exceeds GitHub's 2 GiB asset limit."
+                    : "This file exceeds GitHub's 100 MB download limit. Use a regular APK below that size.");
         }
         if ((!directory.isDirectory() && !directory.mkdirs()) || !directory.isDirectory()) {
             throw new IOException("There is no writable download folder on this device.");
@@ -257,9 +423,12 @@ public final class GitHubClient {
         File complete = new File(directory, apk.sha + ".apk");
         HttpURLConnection connection = null;
         try {
-            connection = open(config.apiBase() + "/git/blobs/" + apk.sha, credential, RAW_ACCEPT, cancellation);
-            MessageDigest digest = sha1();
-            digest.update(("blob " + apk.size + "\0").getBytes("UTF-8"));
+            String address = apk.release
+                    ? (credential.isEmpty() ? apk.releaseUrl : config.apiBase() + "/releases/assets/" + apk.releaseAssetId)
+                    : config.apiBase() + "/git/blobs/" + apk.sha;
+            connection = open(address, credential, apk.release ? BINARY_ACCEPT : RAW_ACCEPT, cancellation);
+            MessageDigest digest = apk.release ? sha256() : sha1();
+            if (!apk.release) digest.update(("blob " + apk.size + "\0").getBytes("UTF-8"));
             long received = 0;
             byte[] buffer = new byte[32 * 1024];
             if (progress != null) progress.onProgress(0, apk.size);
@@ -268,7 +437,7 @@ public final class GitHubClient {
                 while ((count = in.read(buffer)) != -1) {
                     cancellation.check();
                     received += count;
-                    if (received > apk.size || received > MAX_APK_BYTES) {
+                    if (received > apk.size || received > maxBytes) {
                         throw new IOException("The download is larger than the file listed on GitHub. Refresh and try again.");
                     }
                     out.write(buffer, 0, count);
@@ -279,7 +448,7 @@ public final class GitHubClient {
                 out.getFD().sync();
             }
             if (received != apk.size) throw new IOException("The download was incomplete. Please try again.");
-            if (!apk.sha.equals(hex(digest.digest()))) {
+            if (!(apk.release ? apk.releaseSha256 : apk.sha).equals(hex(digest.digest()))) {
                 throw new IOException("The downloaded file failed its integrity check. Refresh and try again.");
             }
             checkApkZip(part);
@@ -359,7 +528,7 @@ public final class GitHubClient {
                 connection.setConnectTimeout(15_000);
                 connection.setReadTimeout(15_000);
                 connection.setUseCaches(false);
-                connection.setRequestProperty("User-Agent", "APK-Shelf/1.0");
+                connection.setRequestProperty("User-Agent", "APK-Shelf/1.0.2");
                 connection.setRequestProperty("Accept", accept);
                 connection.setRequestProperty("Accept-Encoding", "identity");
                 if ("api.github.com".equalsIgnoreCase(url.getHost())) {
@@ -393,7 +562,8 @@ public final class GitHubClient {
     private static void validateHost(URL url) throws IOException {
         String host = url.getHost().toLowerCase(Locale.US);
         boolean trusted = "api.github.com".equals(host) || "raw.githubusercontent.com".equals(host)
-                || "objects.githubusercontent.com".equals(host) || "media.githubusercontent.com".equals(host);
+                || "objects.githubusercontent.com".equals(host) || "media.githubusercontent.com".equals(host)
+                || "github.com".equals(host) || "release-assets.githubusercontent.com".equals(host);
         if (!"https".equalsIgnoreCase(url.getProtocol()) || !trusted || url.getUserInfo() != null
                 || (url.getPort() != -1 && url.getPort() != 443)) {
             throw new IOException("GitHub returned a download outside its trusted HTTPS hosts.");
@@ -418,6 +588,14 @@ public final class GitHubClient {
             throw new IOException("The access token contains invalid characters. Enter it again in Settings.");
         }
         return value;
+    }
+
+    private static MessageDigest sha256() throws IOException {
+        try {
+            return MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException impossible) {
+            throw new IOException("This device does not provide SHA-256 integrity checking.", impossible);
+        }
     }
 
     private static MessageDigest sha1() throws IOException {
