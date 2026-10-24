@@ -1,0 +1,38 @@
+PASS owner/repo config and slash ref encoding
+PASS repository URL and default branch
+PASS Unicode and spaces encode as path data
+PASS invalid source 0
+PASS invalid source 1
+PASS invalid source 2
+PASS invalid source 3
+PASS invalid source 4
+PASS invalid source 5
+PASS invalid source 6
+PASS invalid source 7
+PASS invalid source 8
+PASS invalid source 9
+PASS invalid source 10
+PASS invalid source 11
+PASS contents filters files, sorts, skips symlinks/submodules
+PASS empty array listing
+PASS file instead of folder rejected
+PASS wrong folder returned rejected
+PASS thousand-entry list falls back to complete subtree
+PASS truncated fallback tree rejected rather than silently omitted
+PASS trusted redirect never forwards credential
+PASS unsafe redirect rejected: http://api.github.com/repos/o/r
+PASS unsafe redirect rejected: https://attacker.test/file
+PASS unsafe redirect rejected: https://api.github.com:444/file
+PASS unsafe redirect rejected: https://u@api.github.com/file
+PASS HTTP errors actionable
+PASS API header injection token rejected
+PASS verified immutable download
+PASS same-size corruption fails hash and cleans partial
+PASS truncated transfer rejected and cleaned
+PASS oversized transfer rejected and cleaned
+PASS Git LFS pointer rejected despite matching hash
+PASS ZIP without Android manifest rejected
+PASS above limit rejected before HTTP
+PASS cancellation before request
+PASS cancel during transfer disconnects and removes partial
+PASS: 37 backend tests

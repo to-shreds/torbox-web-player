@@ -1,0 +1,2 @@
+34d297f48389c0a6ff758f1d2b86d077bc3a810a7b09ee83dc79385cd07b3132  APK-Shelf-1.0.0.apk
+d660d9625f59c056ac7347c6beb982e6f3af2dd494898413e06bf1bd0caf3bed  APK-Shelf-1.0.0-source.zip

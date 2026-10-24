@@ -1,0 +1,93 @@
+{
+  "run_url": "https://github.com/to-shreds/ProjectStatus/actions/runs/40119618207",
+  "run_id": 40119618207,
+  "job_id": 120948092142,
+  "artifact_id": 12569664107,
+  "test_commit": "f6a103fd75ca8557ed9a0dfb6163db4339e3aabd",
+  "apk_sha256": "34d297f48389c0a6ff758f1d2b86d077bc3a810a7b09ee83dc79385cd07b3132",
+  "core_flow_passed": true,
+  "automated_pass_count": 10,
+  "automated_checks": [
+    {
+      "status": "PASS",
+      "check": "Download exact published artifact and verify SHA-256",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "check": "Install signed release and configure TV-sized test display",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "check": "Launch release and load both APKs from the live GitHub folder",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "check": "Reach Folder settings using only D-pad and Select; Back returns",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "check": "Select own APK and download it through APK Shelf",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "check": "Open actual Android unknown-app settings and grant permission in UI",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "check": "Return from permission settings and open Android package installer",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "check": "Cancel installer and retain verified download for retry",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "check": "Retry retained download and reopen installer without a new download",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "check": "Save a distinct valid repository setting and verify it after process restart",
+      "detail": ""
+    },
+    {
+      "status": "FAIL",
+      "check": "Install exact same signed APK through the system installer and relaunch",
+      "detail": "Command '['adb', '-s', 'emulator-5554', 'shell', 'uiautomator', 'dump', '--compressed', '/sdcard/apk-shelf-ui.xml']' timed out after 0.9403179810000211 seconds"
+    },
+    {
+      "status": "WARN",
+      "check": "Additional persistence/self-update check incomplete",
+      "detail": "Command '['adb', '-s', 'emulator-5554', 'shell', 'uiautomator', 'dump', '--compressed', '/sdcard/apk-shelf-ui.xml']' timed out after 0.9403179810000211 seconds"
+    }
+  ],
+  "independently_verified": {
+    "persisted_repository_exact": "TO-SHREDS/torbox-web-player",
+    "actual_self_install_succeeded": true,
+    "package_state_excerpts": [
+      "versionCode=1 minSdk=22 targetSdk=35",
+      "versionName=1.0.0",
+      "firstInstallTime=2026-10-24 18:14:03",
+      "lastUpdateTime=2026-10-24 18:15:31",
+      "installerPackageName=com.android.packageinstaller"
+    ],
+    "installer_log_excerpts": [
+      "10-24 18:15:31.792   423  1358 V installd: DexInv: --- END '/data/app/~~bzXeWJL3uxJQI3Yu3DrngA==/app.apkshelf.firetv-1Y5CR29Lvl47nq0TF7TfMA==/base.apk' (success) ---",
+      "10-24 18:15:31.800   503   563 I ActivityManager: Force stopping app.apkshelf.firetv appid=10130 user=0: pkg removed",
+      "10-24 18:15:31.879   503   535 I ActivityTaskManager: START u0 {dat=file:///data/user_de/0/com.android.packageinstaller/no_backup/package2706517891280753244.apk flg=0x2000000 cmp=com.android.packageinstaller/.InstallSuccess (has extras)} from uid 10070"
+    ]
+  },
+  "not_verified": [
+    "Physical Fire TV acceptance",
+    "Relaunch after the self-update"
+  ],
+  "interpretation": "The optional compound self-update/relaunch assertion timed out waiting for a visible App installed. message. Android package state and InstallSuccess independently confirm the replacement itself succeeded. No claim is made for its subsequent relaunch."
+}

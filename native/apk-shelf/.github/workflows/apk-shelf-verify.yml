@@ -1,0 +1,56 @@
+name: APK Shelf signed APK verification
+
+on:
+  push:
+    branches: [apk-shelf-verification]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apk-shelf-verification
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/apk-shelf-verification'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Enable hosted runner KVM
+        run: |
+          test -e /dev/kvm
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Exercise exact signed APK on accelerated Android 11
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: default
+          arch: x86_64
+          profile: tv_1080p
+          avd-name: apk-shelf-verify
+          ram-size: 2048M
+          cores: 2
+          disable-linux-hw-accel: false
+          enable-hw-keyboard: true
+          emulator-boot-timeout: 240
+          emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -no-metrics -gpu swiftshader -accel on -camera-back none -camera-front none
+          script: timeout 480s python3 -u tests/android/smoke_test.py --output apk-shelf-evidence
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: apk-shelf-api30-verification
+          path: apk-shelf-evidence/
+          if-no-files-found: warn
+          retention-days: 7

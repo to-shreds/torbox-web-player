@@ -1,0 +1,47 @@
+APK Shelf 1.0.0: hosted Android runtime verification
+
+Outcome: All nine core checks passed. Settings persistence also passed. An actual self-install succeeded, independently confirmed by Android package-manager state and installer logs.
+
+Run: https://github.com/to-shreds/ProjectStatus/actions/runs/40119618207
+Job: 120948092142
+Test commit: f6a103fd75ca8557ed9a0dfb6163db4339e3aabd
+Artifact ID: 12569664107
+Exact APK SHA-256: 34d297f48389c0a6ff758f1d2b86d077bc3a810a7b09ee83dc79385cd07b3132
+Environment: Official Android 11 / API 30 AOSP x86_64 emulator, KVM, 1920x1080 display at density 320; Ubuntu 24.04 GitHub hosted runner.
+Emulator boot time: 36.326 seconds.
+
+Actual automated passes: 10 (nine core checks and settings persistence).
+PASS: Download exact published artifact and verify SHA-256
+PASS: Install signed release and configure TV-sized test display
+PASS: Launch release and load both APKs from the live GitHub folder
+PASS: Reach Folder settings using only D-pad and Select; Back returns
+PASS: Select own APK and download it through APK Shelf
+PASS: Open actual Android unknown-app settings and grant permission in UI
+PASS: Return from permission settings and open Android package installer
+PASS: Cancel installer and retain verified download for retry
+PASS: Retry retained download and reopen installer without a new download
+PASS: Save a distinct valid repository setting and verify it after process restart
+
+Exact settings persistence evidence:
+PERSISTED_REPOSITORY=TO-SHREDS/torbox-web-player
+The repository field was deliberately changed through the UI, saved, the app was force-stopped and relaunched, and its reopened settings XML contained this exact non-default capitalization. The folder continued to list both APKs.
+
+Actual installer evidence:
+The app downloaded its own published APK through GitHub, opened the real unknown-app permission settings, returned to the real Android package installer, retained the verified download when Cancel was chosen, and successfully reopened the installer from that retained download.
+The subsequent self-install was also successful. Android package state recorded:
+  versionCode=1 minSdk=22 targetSdk=35; versionName=1.0.0
+  firstInstallTime=2026-10-24 18:14:03
+  lastUpdateTime=2026-10-24 18:15:31
+  installerPackageName=com.android.packageinstaller
+Logcat recorded successful dex installation for app.apkshelf.firetv, "Force stopping app.apkshelf.firetv ... pkg removed" at 18:15:31.800 during replacement, and a start of com.android.packageinstaller/.InstallSuccess at 18:15:31.879.
+
+Optional harness limitation:
+The optional self-update test waited for a persistent "App installed." screen and then intended to relaunch the app. Android replaced the running application, killed its process and returned to the launcher. The screen-text wait timed out after 60 seconds. This did not invalidate the completed installation, as confirmed independently above. Automatic or manual relaunch after that self-update was not exercised; normal launch and force-stop/relaunch persistence were exercised earlier.
+
+Limits:
+This was an Android emulator verification, not a physical Fire TV test. Amazon-specific settings and installer behavior still require acceptance on the target Fire TV. No private GitHub token was used in this runtime test.
+
+Earlier harness corrections:
+Run 40118932227 passed installation/startup/live listing, then stopped prematurely because the D-pad state signature ignored row selection. Its first Up key changed touch mode into a selected APK row, as confirmed by UI XML.
+Run 40119213653 also reached and opened the real settings dialog, but a matcher treated ElementTree leaf nodes as false. Explicit None/False matching fixed the harness and was verified against its captured title, button and text-field nodes.
+Only the verification script changed between these runs. The app source and exact signed APK remained unchanged.

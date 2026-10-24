@@ -1,0 +1,30 @@
+APK Shelf 1.0.0: attempted Android runtime verification
+
+Artifact: APK-Shelf-1.0.0.apk
+Bytes: 49707
+SHA-256: 34d297f48389c0a6ff758f1d2b86d077bc3a810a7b09ee83dc79385cd07b3132
+
+Environment
+- Official Android Emulator 37.2.12 (build 16428233).
+- Official Android 11 / API 30 default x86_64 system image, revision 11.
+- 1280x720 landscape, software CPU emulation and SwiftShader graphics.
+- Hardware acceleration was unavailable: no /dev/kvm or CPU vmx/svm flags.
+- This was an isolated Android emulator, not a physical Fire TV device.
+
+Observed results
+1. Emulator boot completed. The emulator logged: "Boot completed in 310577 ms".
+2. Android package manager and UI services became available.
+3. An initial install attempted before full boot completion returned a StorageManagerService initialization error. It was retried after sys.boot_completed became 1.
+4. The final APK appeared in the installed-package registry: "package:app.apkshelf.firetv". The retrying adb install command nevertheless exceeded its 120-second response timeout.
+5. A direct activity launch exceeded its 90-second response timeout. An internal screenshot showed the Android launcher with the system dialog "System UI isn't responding". This prevented reliable app UI acceptance checks.
+
+Not verified in this environment
+- Successful APK Shelf first-frame display and usable D-pad focus/navigation.
+- Folder settings entry, Save/Back handling, and settings persistence across relaunch.
+- Listing the live GitHub folder inside the Android UI.
+- Selecting an APK and downloading it inside the Android UI.
+- Unknown-app permission handoff and return.
+- Opening or completing the Android package installer through APK Shelf's provider.
+
+Conclusion
+The software emulator was too slow and its own System UI became unresponsive. These observations are not a passing runtime test, and do not establish an APK Shelf crash. No physical Fire TV test was performed. Separate build/signature checks and backend tests are recorded in their own reports. Physical-device acceptance remains outstanding.

@@ -1,0 +1,10 @@
+566e367cc6c4ccff4d40afae6116e62bcba5d8a4d72e06beacf41fe67caa87e5  app/src/main/AndroidManifest.xml
+1d4ece8e5fa38976efa88ec30ba1dc22fc3893d82ec8f2f0b021dcc86e856489  app/src/main/java/app/apkshelf/firetv/ApkProvider.java
+410bf9d6df80e6466e1abc65b4f818e418666d95f5af7bd38c7eb3f3b16254d2  app/src/main/java/app/apkshelf/firetv/GitHubClient.java
+076460363453d09147d2d31cc563dd78ea07d749df617b4be0fb11c83e90f29b  app/src/main/java/app/apkshelf/firetv/MainActivity.java
+6008a4425fc62188fbbf55e7e0f058dd4c706dd8c62d1b27f181e73f3b3744a2  app/src/main/java/app/apkshelf/firetv/RepoConfig.java
+0e103330e716292884d89af764d46ea71506588375fb57dc41d6fc202adf3582  app/src/main/java/app/apkshelf/firetv/TokenStore.java
+8fb91d9a9fc5076f7df7d561e1689ae345e77e8c62c5547825876d1b7d3354fb  app/src/main/res/drawable/tv_banner.png
+c7be8c0764e1b3c57ba1fc8e7f0563a64b366cf8f431baabb79d5ea850667e24  app/src/main/res/mipmap-mdpi/ic_launcher.png
+4d698c745d6f3280ad25cc1e0d71492f5f144fb3fdd2573d6b39bc2a6c6cc43d  app/src/main/res/values/styles.xml
+403112393d0c8853020fe53e3f2e959120abc428c786805d2aa4f6f9557dd785  tools/build.py
