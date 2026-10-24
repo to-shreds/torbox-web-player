@@ -95,11 +95,13 @@ test('range validation rejects reversed, zero-suffix and unsafe-integer ranges b
   assert.equal(f.mediaCalls(), 0);
 });
 
-test('24 devices can start 12 episodes and seek repeatedly without relaying any media', async t => {
-  const f = await fixture(t), devices = Array.from({length: 24}, () => f.session());
+const stressDevices=Math.max(1,Math.min(96,Number(process.env.STRESS_DEVICES)||24));
+const stressEpisodes=Math.max(1,Math.min(24,Number(process.env.STRESS_EPISODES)||12));
+test(`${stressDevices} devices can start ${stressEpisodes} episodes and seek repeatedly without relaying any media`, async t => {
+  const f = await fixture(t), devices = Array.from({length: stressDevices}, () => f.session());
   let redirects = 0, bodyBytes = 0;
   const started = performance.now(), latencies = [];
-  for(let episode=0; episode<12; episode++) {
+  for(let episode=0; episode<stressEpisodes; episode++) {
     await Promise.all(devices.map(async token => {
       const start = performance.now();
       const playback = await f.play(token, `torrents:1:${episode}`);
@@ -112,10 +114,10 @@ test('24 devices can start 12 episodes and seek repeatedly without relaying any 
       latencies.push(performance.now()-start);
     }));
   }
-  assert.equal(redirects, 576);assert.equal(bodyBytes, 0);assert.equal(f.mediaCalls(), 0);
-  assert.equal(f.mediaTickets.rows.size, 24*8);
+  assert.equal(redirects, stressDevices*stressEpisodes*2);assert.equal(bodyBytes, 0);assert.equal(f.mediaCalls(), 0);
+  assert.equal(f.mediaTickets.rows.size, stressDevices*Math.min(8,stressEpisodes));
   latencies.sort((a,b)=>a-b);
-  t.diagnostic(JSON.stringify({devices:24,playbackStarts:288,seekRedirects:redirects,mediaBodyBytes:bodyBytes,upstreamMediaFetches:f.mediaCalls(),durationMs:Math.round(performance.now()-started),p50Ms:Math.round(latencies[144]),p95Ms:Math.round(latencies[Math.floor(latencies.length*.95)])}));
+  t.diagnostic(JSON.stringify({devices:stressDevices,playbackStarts:stressDevices*stressEpisodes,seekRedirects:redirects,mediaBodyBytes:bodyBytes,upstreamMediaFetches:f.mediaCalls(),durationMs:Math.round(performance.now()-started),p50Ms:Math.round(latencies[Math.floor(latencies.length*.5)]),p95Ms:Math.round(latencies[Math.floor(latencies.length*.95)])}));
 });
 
 test('a burst of status checks shares one account check and one public status request', async t => {

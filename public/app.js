@@ -7,12 +7,13 @@ import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v
 import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.8-party.1';
 import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.8-party.1';
 import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.8-party.1';
+import { TraktIntegration, mergeContinueWatching } from './trakt.js?v=release-1.2.9-stability.1';
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory, noteAudioDecodeFailure, resetNegativeAudioFeedback } from './source-memory.js?v=release-1.2.8-party.1';
 import { clearSearchHistory } from './search-history.js?v=release-1.2.8-party.1';
 import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.8-party.1';
 const $ = id => document.getElementById(id);
 resetNegativeAudioFeedback();
-let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, wakeLock = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null, fullscreenExitControlTimer = null;
+let csrf = '', sessionToken = getSessionToken(), playGeneration = 0, active = null, recentRenderTimer, guestMode = false, driveSelected = null, driveRunId = '', drivePollTimer = null, driveConfigured = false, driveOauthUrl = '', torboxStatusCache = null, deferredInstallPrompt = null, stillWatchingTimer = null, stillWatchingDue = false, stillWatchingPromptActive = false, parentPinCallback = null, pendingKidPlayback = null, kidLimitReason = '', fullscreenIntent = false, fullscreenRestoreDeadline = 0, fullscreenExitTimer = null, fullscreenExitControlTimer = null;
 let discoveryUI, watchParty=null;
 let partyGuestMode=false,partyKidApproved=false,partyExitPromise=null,partyLobbyActive=false;
 try{partyGuestMode=!!sessionToken&&sessionStorage.getItem('torbox-party-session')===sessionToken;if(partyGuestMode)guestMode=true;}catch{}
@@ -30,6 +31,12 @@ function applyInterfaceMode(){
   const badge=$('kid-mode-badge');if(badge){badge.hidden=!kid;badge.title=kid?formatKidUsage(getKidProfile(viewer)):'';}
 }
 applyInterfaceMode();
+const trakt = new TraktIntegration({
+  getViewer:()=>viewer,
+  onChanged:()=>{renderRecent();discoveryUI?.historyChanged();},
+  openWatched:row=>discoveryUI?.openHistoryTitle(row)
+});
+void trakt.init().catch(()=>{});
 function setPlaybackHealth(state,detail=''){
   const panel=$('playback-health');if(!panel)return;
   panel.hidden=!getSettings().showPlaybackHealth;$('health-state').textContent=state;$('health-detail').textContent=detail||'';panel.dataset.state=String(state||'').toLowerCase().replace(/[^a-z]+/g,'-');
@@ -187,7 +194,7 @@ async function pollDriveTest() {
 
 function recentLabel(item) {
   const episode = item.type === 'series' ? `S${item.season}E${item.episode}${item.episodeName ? ' · ' + item.episodeName : ''}` : 'Movie';
-  const time = item.position > 0 ? `Resume ${formatResumeTime(item.position)}` : 'Start';
+  const time = item.traktPercent > 0 ? 'Trakt resume '+Math.round(item.traktPercent)+'%' : item.position > 0 ? `Resume ${formatResumeTime(item.position)}` : 'Start';
   return `${episode} · ${time}`;
 }
 function bindRecentLongPress(card,item){
@@ -209,7 +216,7 @@ function bindRecentLongPress(card,item){
   });
 }
 function renderRecent() {
-  const settings=getSettings(),rows=continueWatchingItems(listRecent(),settings.recentLimit), section = $('recent-section'), list = $('recent-list');
+  const settings=getSettings(),rows=mergeContinueWatching(listRecent(),trakt.recentPlayback(),settings.recentLimit), section = $('recent-section'), list = $('recent-list');
   $('recent-heading').textContent='Continue watching';
   section.hidden = !rows.length || $('discover-panel').hidden;
   const fragment = document.createDocumentFragment();
@@ -221,13 +228,15 @@ function renderRecent() {
     const copy = document.createElement('span'); copy.className = 'recent-copy';
     const title = document.createElement('strong'); title.className = 'recent-title'; title.textContent = item.title;
     const meta = document.createElement('span'); meta.className = 'recent-meta'; meta.textContent = recentLabel(item); copy.append(title, meta);
-    if (item.duration > 0) { const track=document.createElement('span');track.className='recent-progress';const fill=document.createElement('span');fill.style.width=`${Math.min(100,Math.max(0,item.position/item.duration*100))}%`;track.append(fill);copy.append(track); }
+    if (item.duration > 0 || item.traktPercent > 0) { const track=document.createElement('span');track.className='recent-progress';const fill=document.createElement('span');fill.style.width=`${item.traktPercent > 0 ? item.traktPercent : Math.min(100,Math.max(0,item.position/item.duration*100))}%`;track.append(fill);copy.append(track); }
     card.append(copy);bindRecentLongPress(card,item);
+    if(item.traktPercent > 0){entry.append(card);fragment.append(entry);continue;}
     const remove=document.createElement('button');remove.type='button';remove.className='recent-remove';remove.textContent='×';remove.setAttribute('aria-label',`Remove ${item.title} from Continue Watching`);
     remove.addEventListener('click',event=>{event.stopPropagation();if(confirm(`Remove "${item.title}" from Continue Watching?`)){removeRecentTitle(item);renderRecent();discoveryUI.historyChanged();}});
     if(item.position>0){const start=document.createElement('button');start.type='button';start.className='recent-start-over';start.textContent='Start over';start.addEventListener('click',event=>{event.stopPropagation();discoveryUI.startOverRecent(item);});entry.append(card,remove,start);}else entry.append(card,remove);fragment.append(entry);
   }
   list.replaceChildren(fragment);
+  trakt.renderHistory();
 }
 function scheduleRecentRender(refreshHome=false) { clearTimeout(recentRenderTimer); recentRenderTimer = setTimeout(()=>{renderRecent();if(refreshHome)discoveryUI?.historyChanged();},250); }
 
@@ -514,7 +523,7 @@ async function switchViewer(next){
   if(!['viewer-1','viewer-2'].includes(next)||next===viewer)return;
   await stopPlayback();if($('player').open)$('player').close();viewer=next;$('viewer').value=viewer;
   try{localStorage.setItem('tw-viewer',viewer);sessionStorage.setItem('tw-viewer',viewer);}catch{}
-  applyInterfaceMode();renderRecent();discoveryUI?.settingsChanged();
+  applyInterfaceMode();trakt.viewerChanged();renderRecent();discoveryUI?.settingsChanged();
 }
 $('viewer').addEventListener('change',()=>{
   const target=$('viewer').value;$('viewer').value=viewer;
@@ -646,22 +655,43 @@ function updateNextEpisodePrompt(context){
   const delay=getSettings().autoNextDelaySeconds,elapsed=Math.max(0,current-context.nextCountdownStart);
   if(delay===0||elapsed>=delay)void openNextEpisode(context);
 }
-async function releaseWakeLock(){try{await wakeLock?.release();}catch{}wakeLock=null;}
-async function acquireWakeLock(context=active){
-  if(!getSettings().keepAwake||!('wakeLock' in navigator)||!context?.video||context.video.paused||context.video.ended)return false;
+// Playback wake lock ownership survives overlapping browser events and late promises.
+let wakeLock=null,wakeLockEpoch=0,wakeLockRequest=null;
+function wantsWakeLock(context){
+  if(context!==active||!getSettings().keepAwake||!('wakeLock' in navigator)||!context?.video||context.video.paused||context.video.ended)return false;
   const pip=playerIsPiP(context);
   if(document.visibilityState!=='visible'&&!pip)return false;
-  try{
-    if(wakeLock&&!wakeLock.released)return true;
-    wakeLock=await navigator.wakeLock.request('screen');
-    wakeLock.addEventListener('release',()=>{wakeLock=null;},{once:true});
-    return true;
-  }catch{return false;}
+  return true;
+}
+async function releaseWakeLock(){
+  wakeLockEpoch++;wakeLockRequest=null;
+  const previous=wakeLock;wakeLock=null;
+  try{await previous?.release();}catch{}
+}
+async function acquireWakeLock(context=active){
+  if(!wantsWakeLock(context))return false;
+  if(wakeLock&&!wakeLock.released)return true;
+  if(wakeLockRequest)return wakeLockRequest.promise;
+  const request={epoch:wakeLockEpoch,promise:null};wakeLockRequest=request;
+  request.promise=(async()=>{
+    try{
+      const sentinel=await navigator.wakeLock.request('screen');
+      if(request.epoch!==wakeLockEpoch||!wantsWakeLock(context)){
+        try{await sentinel.release();}catch{}return false;
+      }
+      if(sentinel.released)return false;
+      wakeLock=sentinel;
+      sentinel.addEventListener('release',()=>{if(wakeLock===sentinel)wakeLock=null;},{once:true});
+      return true;
+    }catch{return false;}
+    finally{if(wakeLockRequest===request)wakeLockRequest=null;}
+  })();
+  return request.promise;
 }
 async function refreshWakeLockForPlayback(context=active){
-  if(!context?.video||context.video.paused||context.video.ended){await releaseWakeLock();return false;}
-  if(document.visibilityState==='visible'||playerIsPiP(context))return acquireWakeLock(context);
-  await releaseWakeLock();return false;
+  if(context&&context!==active)return false;
+  if(!wantsWakeLock(context)){await releaseWakeLock();return false;}
+  return acquireWakeLock(context);
 }
 function armSleepTimer(context){
   clearTimeout(context.sleepTimer);context.sleepTimer=null;
@@ -741,7 +771,7 @@ async function resumeAfterKidParentAction(){
 }
 
 async function detachPlayback({preserveVideo=false}={}) {
-  const old = active;if(old){tickKidUsage(old,true);resetNextEpisodeState(old,{abortPreparation:true});} active = null; hidePauseCard();void releaseWakeLock();
+  const old = active;if(old){tickKidUsage(old,true);trakt.stopped(old);resetNextEpisodeState(old,{abortPreparation:true});} active = null; hidePauseCard();void releaseWakeLock();
   if (!old) {const idle=$('video-slot').querySelector('video');if(idle&&!preserveVideo){idle.removeAttribute('src');idle.load();idle.remove();}return preserveVideo?idle:null;}
   clearInterval(old.timer);clearInterval(old.kidTimer);clearTimeout(old.bufferTimer);clearTimeout(old.sleepTimer);clearTimeout(old.healthyTimer);clearTimeout(old.startupTimer);old.eventAbort?.abort();
   void saveProgress(old, true);old.video.pause();
@@ -808,7 +838,9 @@ async function startPlayback(file, playbackContext = null) {
     listen('loadedmetadata', () => {
       if (active !== context) return;
       const local = playbackContext ? recentForContext(playbackContext) : null;
-      let position = Number.isFinite(playbackContext?.recoveryPosition)?Math.max(0,playbackContext.recoveryPosition):playbackContext?.forceStartOver ? 0 : (local ? resumePosition(local) : (result.progress.position || 0));
+      const remotePercent=playbackContext?.forceStartOver?0:trakt.remotePercent(playbackContext?.current,context.viewer);
+      const remotePosition=Number.isFinite(video.duration)?video.duration*remotePercent/100:0;
+      let position = Number.isFinite(playbackContext?.recoveryPosition)?Math.max(0,playbackContext.recoveryPosition):playbackContext?.forceStartOver ? 0 : (local ? resumePosition(local) : (result.progress.position || remotePosition));
       const rewind = Number(playbackContext?.rewindOnResumeSeconds) || 0;
       if (rewind > 0 && position > 0) position = Math.max(0, position - rewind);
       if (Number.isFinite(video.duration) && position > 0) video.currentTime = Math.min(position, Math.max(0, video.duration - .25));
@@ -821,7 +853,7 @@ async function startPlayback(file, playbackContext = null) {
       video.play().catch(error => { if (active === context && error.name === 'NotAllowedError') {clearTimeout(context.startupTimer);hideResumeOverlay();text('player-message', 'Tap play');} });
     });
     listen('playing', () => { if (active === context) {
-      context.started = true; context.recovering = false; clearTimeout(context.startupTimer); hideResumeOverlay(); clearBuffer(); hidePauseCard(); void refreshWakeLockForPlayback(context); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); context.kidLastAt=Date.now();context.kidLastPosition=Number.isFinite(video.currentTime)?video.currentTime:0;if(!context.kidTimer)context.kidTimer=setInterval(()=>tickKidUsage(context),5000); setPlaybackHealth('Playing','Video is playing. Checking audio decoding…'); text('player-message', '');checkAudio();
+      context.started = true; context.recovering = false; clearTimeout(context.startupTimer); hideResumeOverlay(); clearBuffer(); hidePauseCard(); void refreshWakeLockForPlayback(context); if(!context.sleepTimer)armSleepTimer(context); armStillWatchingTimer(); context.kidLastAt=Date.now();context.kidLastPosition=Number.isFinite(video.currentTime)?video.currentTime:0;if(!context.kidTimer)context.kidTimer=setInterval(()=>tickKidUsage(context),5000); setPlaybackHealth('Playing','Video is playing. Checking audio decoding…'); text('player-message', '');trakt.playing(context);checkAudio();
       clearTimeout(context.healthyTimer);if(!context.partyGuest&&getSettings().autoLearnSources&&playbackContext?.sourceInfo&&!context.sourceLearned)context.healthyTimer=setTimeout(()=>{if(active===context&&!context.recovering&&!video.paused&&video.currentTime>5&&(context.audioConfirmed||context.audioCheck.state==='decoded')){rememberSourceSuccess(playbackContext.current,playbackContext.sourceInfo);context.sourceLearned=true;setHealthSource(context);}},15000);
     } });
     listen('canplay',()=>{clearBuffer();updatePlayerModeActions();if(active===context&&context.started&&!video.paused)setPlaybackHealth('Playing','Stream is ready.');});
@@ -830,12 +862,13 @@ async function startPlayback(file, playbackContext = null) {
     listen('timeupdate', () => { if (active !== context || !context.ready) return;checkAudio();if(context.recovering||context.audioFailureHandled&&!context.audioConfirmed&&context.audioCheck.state!=='decoded')return; if (Math.abs(video.currentTime - context.lastTime) > .2) { context.lastTime = video.currentTime; clearBuffer(); } updateNextEpisodePrompt(context); if(video.paused)updatePauseCard(context); });
     for(const name of ['seeking','seeked','pause','volumechange'])listen(name,checkAudio);
     listen('waiting', armBuffer); listen('stalled',()=>{setPlaybackHealth('Stalled','The browser reports that data stopped arriving.');armBuffer();});
-    listen('pause', () => { if(active===context)tickKidUsage(context,true); if (active === context && !context.recovering) { clearTimeout(context.healthyTimer);releaseWakeLock(); if(!stillWatchingPromptActive&&!video.ended)clearStillWatchingTimer(); saveProgress(context); if(stillWatchingPromptActive){hidePauseCard();setPlaybackHealth('Still watching?','Tap Keep watching to continue.');}else if(!$('kid-limit-dialog').open){setPlaybackHealth('Paused','Playback is paused.');updatePauseCard(context);} } });
+    listen('pause', () => { if(active===context){tickKidUsage(context,true);trakt.paused(context);} if (active === context && !context.recovering) { clearTimeout(context.healthyTimer);releaseWakeLock(); if(!stillWatchingPromptActive&&!video.ended)clearStillWatchingTimer(); saveProgress(context); if(stillWatchingPromptActive){hidePauseCard();setPlaybackHealth('Still watching?','Tap Keep watching to continue.');}else if(!$('kid-limit-dialog').open){setPlaybackHealth('Paused','Playback is paused.');updatePauseCard(context);} } });
     listen('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });
     listen('ended', async () => {
-      if (active !== context) return; tickKidUsage(context,true); clearBuffer(); hidePauseCard(); void saveProgress(context);
+      if (active !== context) return; tickKidUsage(context,true);trakt.stopped(context,true); clearBuffer(); hidePauseCard(); void saveProgress(context);
       context.nextEnded=true;markPlaybackCompleted(context);
       clearTimeout(context.healthyTimer);setPlaybackHealth('Finished','Playback completed.');await releaseWakeLock();
+      if(active!==context)return;
       if(!queuedNext(context)){hideUpNextCard();text('player-message','Finished');return;}
       if(getSettings().autoNext){renderUpNextCard(context,{ended:true});await openNextEpisode(context,{fromEnded:true});}
       else{context.nextPromptActive=true;renderUpNextCard(context,{ended:true});text('player-message','Finished');}
@@ -1058,7 +1091,7 @@ function loadSettingsForm(){
   $('setting-playback-health').checked=settings.showPlaybackHealth;
   $('setting-auto-learn-sources').checked=settings.autoLearnSources;
   $('transfer-share').hidden=!navigator.share;$('transfer-key-wrap').hidden=true;$('transfer-api-key').value='';
-  updateInstallButton();text('settings-message','');text('transfer-message','');
+  updateInstallButton();trakt.updateUI();text('settings-message','');text('transfer-message','');
 }
 function openSettingsDialog(){loadSettingsForm();if(!$('settings-dialog').open)$('settings-dialog').showModal();}
 $('open-settings').addEventListener('click',()=>{if(kidEnabled()&&hasParentPin())requestParentPin('Enter the Parent PIN to open Settings.',openSettingsDialog);else openSettingsDialog();});

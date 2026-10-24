@@ -2,7 +2,7 @@
 
 Start a movie or episode, choose **Watch party**, confirm that the invited viewer is trusted with the TorBox account, then choose **Create party for this video**. Copy the invitation and send it to one other person. They open the invitation and choose **Join party**. They do not need a TorBox account or API key. The sign-in screen also accepts a party link or code. A person with their own saved TorBox connection temporarily joins through the host’s connection; leaving restores their prior session.
 
-Joining loads the exact same torrent, relative file path and byte size through the host’s account. The player will not silently choose another cut or episode. Only already-cached content can be added during joining. A third viewer cannot enter an occupied two-person room.
+Joining loads the exact same torrent, relative file path and byte size through the host’s account. The player will not silently choose another cut or episode. Joining reopens the host’s existing file; it does not add or download a separate torrent. A third viewer cannot enter an occupied two-person room.
 
 Choose **Play together** once both players are ready. If the browser asks, tap **Ready to watch** on that device. Either viewer can use the party buttons or normal video controls to play, pause and seek. **Sync now** aligns the local player with the shared position. A two-second coordinated start and ongoing clock/drift correction keep the videos aligned. Playback runs at 1×; small temporary speed corrections avoid repeated visible seeks. This is synchronized browser playback, not a promise of frame-perfect timing on every network and device.
 

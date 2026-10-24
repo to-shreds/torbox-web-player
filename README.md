@@ -2,13 +2,19 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current version: **1.2.8**, frontend build **release-1.2.7-audio.2**
+Current backend version: **1.2.9**. Frontend **release-1.2.9-stability.1** repairs startup asset routes and asynchronous Trakt/wake-lock races. Verification and publication are recorded in HANDOFF.md.
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
 Frontend: `https://to-shreds.github.io/torbox-web-player/` (legacy mirror: `/key/`)
 
 Backend: `https://torbox-web-player-key.onrender.com`
+
+## Optional Trakt scrobbling
+
+The website includes an optional Trakt OAuth 2.0 with PKCE connection in **Settings → Trakt scrobbling**, plus a compact **Scrobble** toggle in Discover. Each viewer authorizes separately and can independently enable outbound scrobbling. Trakt history import can supplement local Continue Watching and displays completed Trakt activity under Recently watched on Trakt; local resume is never overwritten. The integration requires a Trakt developer app Client ID, registered with the website's OAuth callback and JavaScript origin, and no Client Secret or new paid service.
+
+**Trakt's developer terms prohibit API data use by sites that promote piracy.** Because this player has torrent discovery and Buffstreams, obtain approval from Trakt before activating the integration. A live Trakt account authorization and scrobble has not yet been verified. Full setup and limitations: [Trakt integration](docs/TRAKT.md).
 
 ## Watch party
 
