@@ -50,7 +50,7 @@ This is for Android-based Fire OS devices, including Jon's Fire TV Stick 4K Plus
 
 Package: `app.apkshelf.firetv`. Version: `1.0.1` / code `2`. Minimum Android API: 22. Target/compile API: 35. Native Java with platform widgets and networking; no external application runtime dependencies.
 
-See [tools/README.md](tools/README.md) for the direct JDK/Android SDK build, [docs/VERIFICATION.md](docs/VERIFICATION.md) for 1.0.0 checks and remaining device acceptance, and [HANDOFF.md](HANDOFF.md) for continuation state. The release signing key is backed up separately in the private project records; it is deliberately excluded from this source archive. Preserve that key and package name for future updates.
+See [tools/README.md](tools/README.md) for the direct JDK/Android SDK build, [docs/VERIFICATION-1.0.1.md](docs/VERIFICATION-1.0.1.md) for current checks and remaining device acceptance (the original 1.0.0 record is preserved in [VERIFICATION.md](docs/VERIFICATION.md)), and [HANDOFF.md](HANDOFF.md) for continuation state. The release signing key is backed up separately in the private project records; it is deliberately excluded from this source archive. Preserve that key and package name for future updates.
 
 ## Official references
 

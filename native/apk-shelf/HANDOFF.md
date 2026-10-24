@@ -2,34 +2,33 @@
 
 ## Goal and controlling sources
 
-Create a separate, simple Fire TV utility that lists ordinary APKs in a configurable GitHub folder and downloads them into the system installer. New uploads must appear after Refresh without rebuilding the utility. User's known device is an Android-based Fire TV Stick 4K Plus.
+A separate, lightweight native Fire TV app lists ordinary APK files placed in a configurable GitHub folder, downloads them and opens the system package installer. Uploading a new APK and choosing Refresh must work without changing the utility.
 
-This source tree and the accompanying `APK-Shelf-1.0.0-source.zip` control implementation. The published source location is `native/apk-shelf/` on the `native-updates` branch of `to-shreds/torbox-web-player`; the signed APK is in `native/updates/releases/`. `to-shreds/ProjectStatus/projects/apk-shelf/STATUS.md` controls readiness. Read that record before continuing.
+The current implementation is `native/apk-shelf/` in `to-shreds/torbox-web-player`, branch `native-updates`. Version 1.0.1 Java/manifest code is commit `f07e96069b59bc3f1bb7375cc9a7dd6a5d2be3af`; later branch commits add release documentation and the built APK. The private `to-shreds/ProjectStatus/projects/apk-shelf/STATUS.md` controls readiness and next steps. Read that file first when resuming.
 
-## Implementation
+## Current release
 
-- App identity: APK Shelf, package `app.apkshelf.firetv`, version `1.0.0` / code `1`.
-- Native Java Activity and widgets, platform networking/JSON, no AndroidX, WebView, background service, Google services, or runtime dependency downloads.
-- Default source: repository `to-shreds/torbox-web-player`, branch `native-updates`, folder `native/updates/releases`. Configurable repository, ref, folder and optional encrypted GitHub token.
-- Contents listing, with nonrecursive Git Tree fallback at 1,000 entries. Lists only direct child APK files, sorted by name.
-- Downloads immutable Git blobs, verifies exact size and Git SHA, checks ZIP/manifest and Android package preflight, and exposes only completed files through a read-only private content provider with temporary installer grants.
-- Foreground operations, cancellation, stale callback guards, retained pending APK across permission/settings flow, and normal system installation confirmation.
+- **1.0.1 / versionCode 2**, package `app.apkshelf.firetv`, original APK Shelf signing certificate SHA-256 `fac7d2295ccb67ad1b9c0a8748c271d5eccd829ac0d17bf4ee10e63fb556cb14`.
+- Default repository **`to-shreds/apks`**, default branch (currently `main`) and repository root. This public repository was initialized with a README. Any ordinary APK uploaded directly to its root is shown after Refresh.
+- Original version 1.0.0 default was `to-shreds/torbox-web-player` on `native-updates` in `native/updates/releases`. The upgrade changes that *saved original default triple* to the new source; other saved/custom sources are preserved. New installations use the new default immediately.
+- Signed binary: `native/updates/releases/APK-Shelf-1.0.1.apk`. SHA-256: `137b7cbdfcde64a8a500924c6eda7528bfdf7f67d17a896a2763b2734641eac6`. The existing TorBox TV and APK Shelf 1.0.0 files remain intact for historical and update purposes.
+- Java Activity/widgets and platform networking, no WebView, background services, AndroidX or Google Services. Access optional private repositories via an Android Keystore-encrypted token.
+- GitHub API direct-child listing, 1,000-item tree fallback, immutable Git blob download with size/SHA check, native APK preflight, private read-only provider, system permission/install flow, cancellation and installer retry.
 
-## Completed and evidence
+## Tests and evidence
 
-Signed build, 37 backend test groups, real GitHub listing and 11.6 MB APK download, and independent code review passed. The final accelerated Android run passed ten automated checks covering launch/listing, D-pad settings, download, actual permission UI, installer handoff, cancellation/retry, and persisted settings after process restart. Actual self-installation was also confirmed through package-manager timestamps and install logs; the optional success-screen/relaunch assertion did not complete because self-replacement closed the caller and returned to the launcher. No APK change was required during testing. Runtime details and physical-device limits are in `docs/VERIFICATION.md` and `docs/hosted-runtime-verification.txt`. `docs/tested-source-sha256.txt` records the actual build inputs.
+- Original 1.0.0 passed 37 backend test groups and a full Android installer/remote/navigation check. See `docs/VERIFICATION.md`.
+- 1.0.1 was rebuilt with the **same private APK Shelf signing key**, signed and validated with Android build tools 35, JDK 17, versionCode 2 and the unchanged certificate. The backend logic and permissions are unchanged.
+- [Accelerated Android run 40121081573](https://github.com/to-shreds/ProjectStatus/actions/runs/40121081573) succeeded on Android 11/API 30: fresh install pointed to `to-shreds/apks` with zero APKs (README filtered out); upgrade over v1.0.0 with the original saved defaults migrated to `to-shreds/apks`; upgrade from a customized folder preserved that folder. The installer accepted the install-over upgrade. See `docs/VERIFICATION-1.0.1.md`.
+- No physical Fire TV check has occurred for this new version. Amazon's particular installer and settings screens remain device acceptance steps.
 
-APK SHA-256: `34d297f48389c0a6ff758f1d2b86d077bc3a810a7b09ee83dc79385cd07b3132`. Signing certificate SHA-256: `fac7d2295ccb67ad1b9c0a8748c271d5eccd829ac0d17bf4ee10e63fb556cb14`.
+## Do not break
 
-## Preserve
-
-- Keep this utility separate from TorBox TV and the web player. Do not modify the website's `main` branch or TorBox `native/updates/latest.json` to update this utility.
-- Preserve the APK Shelf package name and its dedicated signing key for install-over updates. Increase `versionCode` for future versions.
-- The private key/password backup is saved in the private ProjectStatus record at `projects/apk-shelf/private/APK-Shelf-Signing-Backup.zip`. Never include it in public source or APK artifacts. This key is unrelated to the TorBox TV signing key.
-- Keep actual app-install confirmation, exact size/hash checking, private provider scoping, token encryption, and GitHub-only credential forwarding.
-- Do not claim silent installation, background polling, release-asset support, LFS support, or Vega OS support.
-- Do not turn browser screenshots into deliverables; runtime images are temporary internal inspection only.
+- Preserve the exact APK Shelf package name **and original signing key**. Future version updates require a higher versionCode. Private signing backup is in the private ProjectStatus repository at `projects/apk-shelf/private/APK-Shelf-Signing-Backup.zip`. Never expose its contents, password, or private key publicly.
+- Preserve separate TorBox TV package and release manifest; do not alter `native/updates/latest.json` or the browser player's `main` branch for this utility.
+- Do not silently install apps or imply background polling, release-asset/split APK/Git LFS compatibility, or Vega OS support.
+- Preserve settings for explicitly configured sources, including during future default changes. Treat app source as authoritative; do not mistake the preexisting v1.0.0 `APK-Shelf-1.0.0-source.zip` for current code.
 
 ## Next action
 
-Jon can install APK Shelf once on his Firestick, enable its installation permission, and use the already configured public folder or change Folder settings. After that, upload ordinary APKs into the selected GitHub folder and Refresh on the TV. Physical Fire TV permission wording and remote behavior remain device acceptance checks. A future version should retain the signing key and increase the version code. If rerunning the optional self-update test, use package-manager replacement evidence and relaunch directly instead of expecting a persistent success dialog after the running app replaces itself.
+Install version 1.0.1 on the physical Fire TV once, either fresh or over version 1.0.0. It should show an empty list until APKs are uploaded directly into `https://github.com/to-shreds/apks`. Then select Refresh and an APK to verify the device's permission/installer behavior. Keep the same signing key for any later version.
