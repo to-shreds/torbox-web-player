@@ -163,7 +163,187 @@ public final class BackendTests {
                 eq(0, dir.list().length); check(factory.connections.get(0).disconnected);
             } finally { cleanup(dir); }
         }});
+        test("folder and both real-release-sized APKs appear in one sorted list", new Task() {
+            public void run() throws Exception {
+                JSONObject release = new JSONObject().put("id", 42).put("name", "Apk library")
+                        .put("tag_name", "Apk").put("draft", false).put("assets", new JSONArray()
+                                .put(releaseAsset("baba-is-you617.apk", 673616491L, 100240046L,
+                                        "7cf64f53028c645b4c78506454dd934afb73a8bf4a48bf1bf29f3793a7ec8ac7"))
+                                .put(releaseAsset("TorBox-TV-0.2.5-test-separate.apk", 673617226L, 7329790L,
+                                        "7c76e56c60904ac041db0da87fca112268dd24a3a61256f400d0b6b7c1bb700b"))
+                                .put(releaseAsset("not-a-game.txt", 888, 80, SHA)));
+                MockFactory factory = new MockFactory().add(200, new JSONArray()
+                        .put(item("small.apk", "file", 456)).toString())
+                        .add(200, new JSONArray().put(release).toString());
+                GitHubClient.Listing result = new GitHubClient(factory).listAll(CONFIG, "", new GitHubClient.Cancellation());
+                eq(3, result.entries.size());
+                eq("baba-is-you617.apk", result.entries.get(0).name);
+                eq(100240046L, result.entries.get(0).size);
+                check(result.entries.get(0).release);
+                eq("Apk library", result.entries.get(0).releaseTitle);
+                eq("small.apk", result.entries.get(1).name);
+                check(!result.entries.get(1).release);
+                eq("TorBox-TV-0.2.5-test-separate.apk", result.entries.get(2).name);
+                eq("https://api.github.com/repos/owner/repo/releases?per_page=100&page=1",
+                        factory.connections.get(1).getURL().toString());
+            }
+        }});
+        test("draft releases, incomplete assets, and files without checksum skipped", new Task() {
+            public void run() throws Exception {
+                JSONObject noDigest = releaseAsset("no-checksum.apk", 21, 123, SHA).put("digest", JSONObject.NULL);
+                JSONObject draft = new JSONObject().put("id", 1).put("draft", true)
+                        .put("assets", new JSONArray().put(releaseAsset("draft.apk", 22, 123, SHA)));
+                JSONObject published = new JSONObject().put("id", 2).put("draft", false)
+                        .put("assets", new JSONArray().put(noDigest)
+                                .put(releaseAsset("pending.apk", 23, 123, SHA).put("state", "starter"))
+                                .put(releaseAsset("too-large.apk", 24,
+                                        GitHubClient.MAX_RELEASE_APK_BYTES + 1, SHA)));
+                GitHubClient.Listing result = new GitHubClient(new MockFactory().add(200, "[]")
+                        .add(200, new JSONArray().put(draft).put(published).toString()))
+                        .listAll(CONFIG, "", new GitHubClient.Cancellation());
+                eq(0, result.entries.size());
+                check(result.warning.contains("SHA-256"));
+            }
+        }});
+        test("release listing failure leaves ordinary repository APKs usable", new Task() {
+            public void run() throws Exception {
+                GitHubClient.Listing listing = new GitHubClient(new MockFactory()
+                        .add(200, new JSONArray().put(item("small.apk", "file", 400)).toString())
+                        .add(503, "")).listAll(CONFIG, "", new GitHubClient.Cancellation());
+                eq(1, listing.entries.size());
+                check(listing.warning.contains("Releases could not be loaded"));
+            }
+        }});
+        test("untrusted release URL never appears in listing", new Task() {
+            public void run() throws Exception {
+                JSONObject malicious = releaseAsset("bad.apk", 88, 123, SHA);
+                malicious.put("browser_download_url", "https://attacker.example/file.apk");
+                GitHubClient.Listing listing = new GitHubClient(new MockFactory().add(200, "[]")
+                        .add(200, new JSONArray().put(new JSONObject().put("draft", false)
+                                .put("assets", new JSONArray().put(malicious))).toString()))
+                        .listAll(CONFIG, "", new GitHubClient.Cancellation());
+                eq(0, listing.entries.size());
+                check(listing.warning.contains("untrusted"));
+            }
+        }});
+        test("release download checks SHA-256 and only follows trusted GitHub CDN", new Task() {
+            public void run() throws Exception {
+                byte[] bytes = apkZip(true);
+                GitHubClient.ApkEntry entry = listedRelease(bytes, sha256(bytes));
+                MockFactory factory = new MockFactory()
+                        .addRedirect("https://release-assets.githubusercontent.com/signed?token=temporary")
+                        .add(200, bytes);
+                File dir = temporary();
+                try {
+                    File result = new GitHubClient(factory).download(CONFIG, "", entry, dir,
+                            new GitHubClient.Cancellation(), null);
+                    check(result.getName().matches("[a-f0-9]{40}\\.apk"));
+                    check(Arrays.equals(bytes, Files.readAllBytes(result.toPath())));
+                    eq(entry.releaseUrl, factory.connections.get(0).getURL().toString());
+                    eq(null, factory.connections.get(0).getRequestProperty("Authorization"));
+                    eq(null, factory.connections.get(1).getRequestProperty("Authorization"));
+                    eq(1, dir.list().length);
+                } finally { cleanup(dir); }
+            }
+        }});
+        test("private release asset API redirects without forwarding GitHub credentials", new Task() {
+            public void run() throws Exception {
+                byte[] bytes = apkZip(true);
+                GitHubClient.ApkEntry entry = listedRelease(bytes, sha256(bytes));
+                MockFactory factory = new MockFactory().addRedirect("https://release-assets.githubusercontent.com/private")
+                        .add(200, bytes);
+                File dir = temporary();
+                try {
+                    new GitHubClient(factory).download(CONFIG, "test-secret", entry, dir,
+                            new GitHubClient.Cancellation(), null);
+                    eq("https://api.github.com/repos/owner/repo/releases/assets/99",
+                            factory.connections.get(0).getURL().toString());
+                    eq("Bearer test-secret", factory.connections.get(0).getRequestProperty("Authorization"));
+                    eq(null, factory.connections.get(1).getRequestProperty("Authorization"));
+                } finally { cleanup(dir); }
+            }
+        }});
+        test("corrupted release fails SHA-256 and removes partial", new Task() {
+            public void run() throws Exception {
+                byte[] bytes = apkZip(true);
+                byte[] altered = bytes.clone();
+                altered[altered.length / 2] ^= 1;
+                rejectedRelease(altered, listedRelease(bytes, sha256(bytes)), "integrity");
+            }
+        }});
+        test("truncated release download rejects incomplete file", new Task() {
+            public void run() throws Exception {
+                byte[] bytes = apkZip(true);
+                rejectedRelease(Arrays.copyOf(bytes, bytes.length - 1),
+                        listedRelease(bytes, sha256(bytes)), "incomplete");
+            }
+        }});
+        test("release download bigger than listed size rejected", new Task() {
+            public void run() throws Exception {
+                byte[] bytes = apkZip(true);
+                rejectedRelease(Arrays.copyOf(bytes, bytes.length + 1),
+                        listedRelease(bytes, sha256(bytes)), "larger");
+            }
+        }});
+        test("release redirect to arbitrary internet host blocked", new Task() {
+            public void run() throws Exception {
+                byte[] bytes = apkZip(true);
+                MockFactory factory = new MockFactory().addRedirect("https://attacker.example/evil.apk");
+                File dir = temporary();
+                try {
+                    final GitHubClient.ApkEntry entry = listedRelease(bytes, sha256(bytes));
+                    fails(IOException.class, "trusted HTTPS", new Task() { public void run() throws Exception {
+                        new GitHubClient(factory).download(CONFIG, "", entry, dir, new GitHubClient.Cancellation(), null);
+                    }});
+                    eq(0, dir.list().length);
+                } finally { cleanup(dir); }
+            }
+        }});
+        test("release and repository files of same name remain separate entries", new Task() {
+            public void run() throws Exception {
+                JSONObject release = new JSONObject().put("id", 4).put("assets", new JSONArray()
+                        .put(releaseAsset("duplicate.apk", 92, 700, SHA)));
+                GitHubClient.Listing listing = new GitHubClient(new MockFactory()
+                        .add(200, new JSONArray().put(item("duplicate.apk", "file", 123)).toString())
+                        .add(200, new JSONArray().put(release).toString()))
+                        .listAll(CONFIG, "", new GitHubClient.Cancellation());
+                eq(2, listing.entries.size());
+                check(!listing.entries.get(0).release);
+                check(listing.entries.get(1).release);
+            }
+        }});
         System.out.println("PASS: " + passed + " backend tests");
+    }
+
+    private static JSONObject releaseAsset(String name, long id, long size, String sha256) {
+        return new JSONObject().put("id", id).put("name", name).put("state", "uploaded")
+                .put("size", size).put("digest", "sha256:" + sha256)
+                .put("browser_download_url", "https://github.com/owner/repo/releases/download/Apk/" + name);
+    }
+    private static String sha256(byte[] bytes) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        digest.update(bytes);
+        StringBuilder out = new StringBuilder();
+        for (byte b : digest.digest()) out.append(String.format(Locale.US, "%02x", b & 255));
+        return out.toString();
+    }
+    private static GitHubClient.ApkEntry listedRelease(byte[] bytes, String checksum) throws Exception {
+        JSONObject release = new JSONObject().put("id", 12).put("name", "Apk library").put("assets",
+                new JSONArray().put(releaseAsset("test.apk", 99, bytes.length, checksum)));
+        return new GitHubClient(new MockFactory().add(200, "[]")
+                .add(200, new JSONArray().put(release).toString()))
+                .listAll(CONFIG, "", new GitHubClient.Cancellation()).entries.get(0);
+    }
+    private static void rejectedRelease(final byte[] response, final GitHubClient.ApkEntry entry,
+                                        String message) throws Exception {
+        final File dir = temporary();
+        try {
+            fails(IOException.class, message, new Task() { public void run() throws Exception {
+                new GitHubClient(new MockFactory().add(200, response))
+                        .download(CONFIG, "", entry, dir, new GitHubClient.Cancellation(), null);
+            }});
+            eq(0, dir.list().length);
+        } finally { cleanup(dir); }
     }
 
     private static JSONObject item(String name, String type, long size) {
