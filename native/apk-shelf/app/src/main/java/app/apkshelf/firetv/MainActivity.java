@@ -43,9 +43,9 @@ import java.util.concurrent.Executors;
 
 /** Small, remote-first folder browser. All network and hashing work stays off the UI thread. */
 public final class MainActivity extends Activity {
-    static final String DEFAULT_REPO = "to-shreds/torbox-web-player";
-    static final String DEFAULT_REF = "native-updates";
-    static final String DEFAULT_FOLDER = "native/updates/releases";
+    static final String DEFAULT_REPO = "to-shreds/apks";
+    static final String DEFAULT_REF = "";
+    static final String DEFAULT_FOLDER = "";
     private static final int INSTALL_REQUEST = 40;
     private static final int SETTINGS_REQUEST = 41;
     private static final int BG = Color.rgb(11, 16, 32);
@@ -90,6 +90,7 @@ public final class MainActivity extends Activity {
         super.onCreate(state);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         preferences = getSharedPreferences("settings", MODE_PRIVATE);
+        migrateOriginalDefault();
         tokenStore = new TokenStore(this);
         try { token = tokenStore.read(); }
         catch (Exception e) { credentialsError = "Your saved GitHub token could not be opened. Re-enter it in Folder settings."; }
@@ -103,6 +104,29 @@ public final class MainActivity extends Activity {
         restorePending();
         buildScreen();
         refresh();
+    }
+
+    /**
+     * Updating an existing installation must change the original default, not
+     * just the defaults used by a new installation. Custom sources stay intact.
+     */
+    private void migrateOriginalDefault() {
+        String savedRepo = preferences.getString("repository", null);
+        String savedRef = preferences.getString("ref", null);
+        String savedFolder = preferences.getString("folder", null);
+        if ("to-shreds/torbox-web-player".equals(savedRepo)
+                && "native-updates".equals(savedRef)
+                && "native/updates/releases".equals(savedFolder)) {
+            boolean saved = preferences.edit()
+                    .putString("repository", DEFAULT_REPO)
+                    .putString("ref", DEFAULT_REF)
+                    .putString("folder", DEFAULT_FOLDER).commit();
+            if (saved) {
+                // A pending installation from the previous folder is no longer current.
+                preferences.edit().remove("pending_file").remove("pending_name")
+                        .remove("pending_description").putBoolean("waiting_permission", false).commit();
+            }
+        }
     }
 
     private void buildScreen() {
