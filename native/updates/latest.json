@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "package": "app.torboxtv",
+  "versionCode": 7,
+  "versionName": "0.2.4",
+  "apkUrl": "https://raw.githubusercontent.com/to-shreds/torbox-web-player/native-updates/native/updates/releases/TorBox-TV-0.2.4-test.apk",
+  "sha256": "c49d0de7577b7e0097fdf2b111e14b8523da064fe181b3b7e882d88610e24a7b",
+  "bytes": 11590823,
+  "notes": "Adds QR phone-browser control and GitHub APK updates. Fixes playback interruptions, remote navigation, sports cancellation/retry, source discovery races and saved-state recovery."
+}
