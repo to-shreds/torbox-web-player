@@ -4,9 +4,9 @@ A small native Android / Fire TV utility: put ordinary APK files in a GitHub fol
 
 ## Using the app
 
-1. Install `APK-Shelf-1.0.0.apk` on the Fire TV once using your usual sideloading method.
-2. Open APK Shelf. Its starting folder is `to-shreds/torbox-web-player`, branch `native-updates`, folder `native/updates/releases`.
-3. Upload an APK to [that GitHub folder](https://github.com/to-shreds/torbox-web-player/tree/native-updates/native/updates/releases), then select **Refresh** on the TV. GitHub's **Add file > Upload files** works for files up to 25 MiB.
+1. Install `APK-Shelf-1.0.1.apk` on the Fire TV once using your usual sideloading method.
+2. Open APK Shelf. It starts at the root of `to-shreds/apks`, using that repository's default branch (`main`).
+3. Upload an APK to [the APK uploads repository](https://github.com/to-shreds/apks), then select **Refresh** on the TV. GitHub's **Add file > Upload files** works for files up to 25 MiB.
 4. Select an APK. APK Shelf downloads and verifies it, then opens the normal system installer. Confirm installation there.
 
 The first time, allow APK Shelf under **Settings > My Fire TV > Developer Options > Install unknown apps**. The app has an **Allow installs** button to help. Some Fire OS versions use different wording or open the main settings screen instead. If Developer Options is hidden, open **About**, highlight the device name, and press Select seven times. Older devices use a global **Apps from Unknown Sources** setting.
@@ -23,6 +23,8 @@ Open **Folder settings** and enter:
 | Branch or tag | A branch, tag, or commit; leave blank for the repository's default branch |
 | Folder | A relative folder path such as `apks`; leave blank for the root |
 | GitHub token | Optional; needed for a private repository |
+
+Version 1.0.1 also moves the original 1.0.0 default folder to `to-shreds/apks` when upgrading an existing installation. A separately configured source is preserved.
 
 Branch and folder are separate to support branch names containing slashes. APKs in the selected folder are listed alphabetically; subfolders are not searched. Settings are saved on the device.
 
@@ -46,9 +48,9 @@ This is for Android-based Fire OS devices, including Jon's Fire TV Stick 4K Plus
 
 ## Build and maintenance
 
-Package: `app.apkshelf.firetv`. Version: `1.0.0` / code `1`. Minimum Android API: 22. Target/compile API: 35. Native Java with platform widgets and networking; no external application runtime dependencies.
+Package: `app.apkshelf.firetv`. Version: `1.0.1` / code `2`. Minimum Android API: 22. Target/compile API: 35. Native Java with platform widgets and networking; no external application runtime dependencies.
 
-See [tools/README.md](tools/README.md) for the direct JDK/Android SDK build, [docs/VERIFICATION.md](docs/VERIFICATION.md) for actual checks and remaining device acceptance, and [HANDOFF.md](HANDOFF.md) for continuation state. The release signing key is backed up separately in the private project records; it is deliberately excluded from this source archive. Preserve that key and package name for future updates.
+See [tools/README.md](tools/README.md) for the direct JDK/Android SDK build, [docs/VERIFICATION.md](docs/VERIFICATION.md) for 1.0.0 checks and remaining device acceptance, and [HANDOFF.md](HANDOFF.md) for continuation state. The release signing key is backed up separately in the private project records; it is deliberately excluded from this source archive. Preserve that key and package name for future updates.
 
 ## Official references
 
