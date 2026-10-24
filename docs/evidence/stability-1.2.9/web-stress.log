@@ -1,0 +1,24 @@
+Command: STRESS_DEVICES=96 STRESS_EPISODES=24 node --test test/reliability-http.test.mjs
+Summary excerpt: 4609 repeated media_redirect_issued event lines omitted.
+Original log SHA-256: 1f61a5b62d9b4f78a4a7c5d5108a2b8cff03c0a57dc39ffcc772981e04e8d1a5
+
+✔ slow playback on one device is not superseded by another device using Viewer 1 (48.135003ms)
+✔ two devices retain independent progress leases and private resume positions (31.507943ms)
+✔ one busy device cannot exhaust another device playback allowance (76.677586ms)
+✔ guest media redirects without any server media fetch when TorBox supplies a safe link (7.977157ms)
+✔ guest key-bearing links fail closed with no ticket, redirect, or byte relay (3.662981ms)
+✔ every startup module is served on the backend mirror, including vault (3.470125ms)
+✔ range validation rejects reversed, zero-suffix and unsafe-integer ranges before redirect (7.34529ms)
+✔ 96 devices can start 24 episodes and seek repeatedly without relaying any media (3420.408829ms)
+ℹ {"devices":96,"playbackStarts":2304,"seekRedirects":4608,"mediaBodyBytes":0,"upstreamMediaFetches":0,"durationMs":3416,"p50Ms":128,"p95Ms":170}
+✔ a burst of status checks shares one account check and one public status request (69.352431ms)
+✔ public catalog cache is shared between separately authenticated devices (32.287619ms)
+✔ quota-limited Drive exports cannot start in this release (3.114198ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3820.132487

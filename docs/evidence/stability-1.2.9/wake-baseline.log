@@ -1,0 +1,157 @@
+✖ 100 simultaneous playing and presentation notifications share one wake-lock request (6.189971ms)
+✖ a pending acquisition is released when playback pauses before the browser grants it (0.796181ms)
+✖ a replaced playback cannot adopt its late wake lock (0.592414ms)
+✖ disabling keep-awake before acquisition resolves releases the late sentinel (0.587627ms)
+✖ an old release completion and event cannot erase the current playback lock (0.785396ms)
+✖ a canceled pending request does not clear or duplicate a newer pending acquisition (0.664389ms)
+✖ a stopped or stale playback notification cannot release the active playback lock (0.635327ms)
+✖ turning keep-awake off releases a held sentinel on refresh (0.702285ms)
+✔ a rejected browser request can be retried on the next playback event (0.758166ms)
+✔ hidden non-PiP playback is ineligible while browser PiP policy denial stays nonfatal (0.640044ms)
+✔ browser automatic release permits later visible playback acquisition (0.563953ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 3
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 101.299845
+
+✖ failing tests:
+
+test at test/wake-lock-lifecycle.test.mjs:25:1
+✖ 100 simultaneous playing and presentation notifications share one wake-lock request (6.189971ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  100 !== 1
+  
+      at TestContext.<anonymous> (file:///workspace/scratch/6489353d736f/torbox-web/test/wake-lock-lifecycle.test.mjs:28:63)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 100,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/wake-lock-lifecycle.test.mjs:30:1
+✖ a pending acquisition is released when playback pauses before the browser grants it (0.796181ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///workspace/scratch/6489353d736f/torbox-web/test/wake-lock-lifecycle.test.mjs:33:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/wake-lock-lifecycle.test.mjs:35:1
+✖ a replaced playback cannot adopt its late wake lock (0.592414ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///workspace/scratch/6489353d736f/torbox-web/test/wake-lock-lifecycle.test.mjs:37:72)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/wake-lock-lifecycle.test.mjs:39:1
+✖ disabling keep-awake before acquisition resolves releases the late sentinel (0.587627ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///workspace/scratch/6489353d736f/torbox-web/test/wake-lock-lifecycle.test.mjs:41:72)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/wake-lock-lifecycle.test.mjs:43:1
+✖ an old release completion and event cannot erase the current playback lock (0.785396ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  3 !== 2
+  
+      at TestContext.<anonymous> (file:///workspace/scratch/6489353d736f/torbox-web/test/wake-lock-lifecycle.test.mjs:48:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 3,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/wake-lock-lifecycle.test.mjs:50:1
+✖ a canceled pending request does not clear or duplicate a newer pending acquisition (0.664389ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///workspace/scratch/6489353d736f/torbox-web/test/wake-lock-lifecycle.test.mjs:54:44)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/wake-lock-lifecycle.test.mjs:56:1
+✖ a stopped or stale playback notification cannot release the active playback lock (0.635327ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///workspace/scratch/6489353d736f/torbox-web/test/wake-lock-lifecycle.test.mjs:59:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/wake-lock-lifecycle.test.mjs:61:1
+✖ turning keep-awake off releases a held sentinel on refresh (0.702285ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///workspace/scratch/6489353d736f/torbox-web/test/wake-lock-lifecycle.test.mjs:63:104)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

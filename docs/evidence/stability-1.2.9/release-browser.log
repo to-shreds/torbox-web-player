@@ -1,0 +1,299 @@
+##[group]Run npm run test:browser:trakt
+2026-10-24T01:31:26.5709983Z [36;1mnpm run test:browser:trakt[0m
+2026-10-24T01:31:26.5765395Z shell: /usr/bin/bash -e {0}
+2026-10-24T01:31:26.5765605Z ##[endgroup]
+2026-10-24T01:31:26.6624022Z 
+2026-10-24T01:31:26.6624753Z > torbox-web-player@1.2.9 test:browser:trakt
+2026-10-24T01:31:26.6625274Z > node --test test/browser/trakt.mjs
+2026-10-24T01:31:26.6625511Z 
+2026-10-24T01:31:27.5553181Z ✔ Trakt remains optional and silent with no credentials in the actual player settings (573.298406ms)
+2026-10-24T01:31:27.8968090Z ✔ Trakt first saves from independent tabs share a durable key and preserve both viewers (342.409795ms)
+2026-10-24T01:31:28.0335432Z ✔ forty overlapping credential writes followed by removal cannot restore the removed viewer (137.324193ms)
+2026-10-24T01:31:28.3534058Z ✔ actual viewer switching keeps independent Trakt toggle choices and encrypted credentials (319.38312ms)
+2026-10-24T01:31:28.3890992Z ℹ tests 4
+2026-10-24T01:31:28.3891505Z ℹ suites 0
+2026-10-24T01:31:28.3891806Z ℹ pass 4
+2026-10-24T01:31:28.3892056Z ℹ fail 0
+2026-10-24T01:31:28.3892329Z ℹ cancelled 0
+2026-10-24T01:31:28.3892615Z ℹ skipped 0
+2026-10-24T01:31:28.3892872Z ℹ todo 0
+2026-10-24T01:31:28.3893176Z ℹ duration_ms 1695.352279
+2026-10-24T01:31:28.4015823Z ##[group]Run npm run test:browser:party
+2026-10-24T01:31:28.4016090Z [36;1mnpm run test:browser:party[0m
+2026-10-24T01:31:28.4071261Z shell: /usr/bin/bash -e {0}
+2026-10-24T01:31:28.4071470Z ##[endgroup]
+2026-10-24T01:31:28.4890813Z 
+2026-10-24T01:31:28.4891411Z > torbox-web-player@1.2.9 test:browser:party
+2026-10-24T01:31:28.4891802Z > node --test test/browser/watch-party.mjs
+2026-10-24T01:31:28.4891968Z 
+2026-10-24T01:31:29.4059134Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:31:29.8722400Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:31:32.0517281Z ✔ a fresh invitation joins the consented host connection without a guest API key and exposes credentials only in the native media handoff (3233.340036ms)
+2026-10-24T01:31:32.0518882Z ℹ Real-video drift on coordinated start: 0.139s; host-backed guest and direct CDN tickets confirmed.
+2026-10-24T01:31:32.6528709Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:31:32.9075063Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:31:43.7125669Z ✔ either participant pauses, seeks and resumes both independent video elements at the same time (11661.685027ms)
+2026-10-24T01:31:44.4185404Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:31:44.6675144Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:31:47.5936442Z ✔ joining from a signed-in browser uses a separate host-backed session instead of that viewer’s account (3881.732476ms)
+2026-10-24T01:31:48.1850372Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:31:48.4402856Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:31:52.3747407Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:31:54.5585833Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:31:55.5060723Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:31:57.7079930Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:31:57.7399807Z ✔ a no-key guest reloads the same party session and can leave and rejoin the host’s invitation (10145.966705ms)
+2026-10-24T01:31:58.3509825Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:31:58.5908237Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:03.5629572Z ✔ closing playback leaves the party and cannot reopen a stopped player (5822.848294ms)
+2026-10-24T01:32:04.1510158Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:04.4034364Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:07.9212517Z ✔ a delayed real media load holds the ready viewer until both videos can start (4357.920839ms)
+2026-10-24T01:32:08.5007516Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:08.7553339Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:13.7383498Z ✔ a player buffering report pauses the party and recovery starts both videos together (5816.224358ms)
+2026-10-24T01:32:14.3506648Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:14.6032779Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:31.6299979Z ✔ a lost control connection pauses locally and at the peer, then reconnects to the shared timeline (17892.378881ms)
+2026-10-24T01:32:32.2001399Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:32.4527137Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:36.2798920Z ✔ changing the viewer detaches its party before a stale heartbeat can affect another viewer (4649.143605ms)
+2026-10-24T01:32:36.8996773Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:37.2938534Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:37.5170356Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:39.5918830Z ✔ a no-key invitation preserves Kid Mode and requires the Parent PIN again after reload (3312.951358ms)
+2026-10-24T01:32:40.1999878Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:40.4564324Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:43.3839342Z ✔ Kid Mode enabled in another tab leaves the adult party and keeps further controls unavailable (3791.833848ms)
+2026-10-24T01:32:43.9659461Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:44.2195537Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:47.1616028Z ✔ the host leaving ends the invitation and cleanly detaches the other player (3777.534102ms)
+2026-10-24T01:32:47.7321531Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:47.9896813Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:55.8087437Z ✔ immediate native pause survives coordinated start and a drift-correction rate change (8646.977709ms)
+2026-10-24T01:32:55.8098255Z ℹ Native pause after coordinated start: 50ms; after 1.050x correction: 10ms. Both remained paused.
+2026-10-24T01:32:56.3824387Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:32:56.6376116Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:33:00.9531943Z ✔ Ready to watch unlocks a real video after an autoplay refusal and preserves coordinated startup (5145.335198ms)
+2026-10-24T01:33:01.0154961Z ℹ tests 14
+2026-10-24T01:33:01.0155306Z ℹ suites 0
+2026-10-24T01:33:01.0155575Z ℹ pass 14
+2026-10-24T01:33:01.0155830Z ℹ fail 0
+2026-10-24T01:33:01.0156084Z ℹ cancelled 0
+2026-10-24T01:33:01.0156348Z ℹ skipped 0
+2026-10-24T01:33:01.0156598Z ℹ todo 0
+2026-10-24T01:33:01.0156900Z ℹ duration_ms 92499.095321
+2026-10-24T01:33:01.0284159Z ##[group]Run npm run test:browser:audio
+2026-10-24T01:33:01.0284425Z [36;1mnpm run test:browser:audio[0m
+2026-10-24T01:33:01.0338764Z shell: /usr/bin/bash -e {0}
+2026-10-24T01:33:01.0338976Z ##[endgroup]
+2026-10-24T01:33:01.1158961Z 
+2026-10-24T01:33:01.1159823Z > torbox-web-player@1.2.9 test:browser:audio
+2026-10-24T01:33:01.1160217Z > node --test test/browser/audio-recovery.mjs
+2026-10-24T01:33:01.1160396Z 
+2026-10-24T01:33:01.9655878Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:33:07.0285574Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:33:07.0865439Z ✔ cross-origin EAC3 video automatically recovers to cached AAC decoding and keeps the current position without CORS (5651.661429ms)
+2026-10-24T01:33:07.0884504Z ℹ {"name":"cross-origin EAC3 video automatically recovers to cached AAC decoding and keeps the current position without CORS","browser":"151.0.7922.34","requests":{"playback":2,"prepare":2,"onlyCached":true,"newTorrents":0,"serverMediaFetches":0},"redirects":[{"status":307,"bodyBytes":0,"kind":"eac3","crossOrigin":true,"corsHeaders":false},{"status":307,"bodyBytes":0,"kind":"aac","crossOrigin":true,"corsHeaders":false}],"cdnRequests":[{"pathname":"/eac3","range":"bytes=0-"},{"pathname":"/aac","range":"bytes=0-"}],"observations":[{"browserConsole":"Service Worker registration blocked by Playwright"},{"silent":{"time":0.20224,"paused":false,"audioBytes":0,"videoFrames":4,"error":null,"title":"Fixture.Show.S01E01.One.720p.H264.mkv","message":"","health":"Playing","memory":{"titles":{}}}},{"recovered":{"time":5.028628,"paused":false,"audioBytes":11528,"videoFrames":7,"error":null,"title":"Fixture.Show.S01E01.One.720p.H264.AAC.mp4","message":"Resuming 0:05","health":"Ready","memory":{"titles":{}}}},{"event":"loadedmetadata","time":0},{"event":"loadedmetadata","time":0},{"finalMediaState":{"readyState":4,"networkState":1,"error":null,"paused":false,"currentTime":5.028628}}]}
+2026-10-24T01:33:07.4150158Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:33:13.1952899Z ✔ audio exhaustion pauses silent video and leaves a visible recovery action without a retry loop (6109.072353ms)
+2026-10-24T01:33:13.1958143Z ℹ {"name":"audio exhaustion pauses silent video and leaves a visible recovery action without a retry loop","browser":"151.0.7922.34","requests":{"playback":1,"prepare":1,"onlyCached":true,"newTorrents":0,"serverMediaFetches":0},"redirects":[{"status":307,"bodyBytes":0,"kind":"eac3","crossOrigin":false,"corsHeaders":true}],"cdnRequests":[],"observations":[{"failed":{"time":5.032733,"paused":true,"audioBytes":0,"videoFrames":11,"error":null,"title":"Fixture.Show.S01E01.One.720p.H264.mkv","message":"The picture plays, but this browser has not decoded any sound from this version. No cached version with compatible audio was found. Automatic recovery stopped after 1 source.","health":"Could not play","memory":{"titles":{}}}},{"event":"loadedmetadata","time":0}]}
+2026-10-24T01:33:13.5146668Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:33:22.8597344Z ✔ a real AAC track with an eight-second silent introduction is not rejected for quiet PCM (9663.818168ms)
+2026-10-24T01:33:22.8602273Z ℹ {"name":"a real AAC track with an eight-second silent introduction is not rejected for quiet PCM","browser":"151.0.7922.34","requests":{"playback":1,"prepare":1,"onlyCached":true,"newTorrents":0,"serverMediaFetches":0},"redirects":[{"status":307,"bodyBytes":0,"kind":"intro","crossOrigin":false,"corsHeaders":true}],"cdnRequests":[],"observations":[{"introPeak":0,"audiblePeak":0.22206029295921326,"current":{"time":9.333333,"paused":false,"audioBytes":9052,"videoFrames":15,"error":null,"title":"Fixture.Show.S01E01.One.720p.H264.AAC.mp4","message":"","health":"Playing","memory":{"titles":{}}}},{"event":"loadedmetadata","time":0}]}
+2026-10-24T01:33:23.1804259Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:33:39.2995310Z ✔ an unavailable browser decode counter remains unknown and never invents an audio failure or success (16440.135301ms)
+2026-10-24T01:33:39.3004410Z ℹ {"name":"an unavailable browser decode counter remains unknown and never invents an audio failure or success","browser":"151.0.7922.34","requests":{"playback":1,"prepare":1,"onlyCached":true,"newTorrents":0,"serverMediaFetches":0},"redirects":[{"status":307,"bodyBytes":0,"kind":"eac3","crossOrigin":false,"corsHeaders":true}],"cdnRequests":[],"observations":[{"current":{"time":16.102695,"paused":false,"videoFrames":14,"error":null,"title":"Fixture.Show.S01E01.One.720p.H264.mkv","message":"","health":"Playing","memory":{"titles":{}}}},{"event":"loadedmetadata","time":0}]}
+2026-10-24T01:33:39.5975597Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:33:55.8226305Z ✔ working AAC has no one-click No sound action in simple, fullscreen or full interface and keeps playing (16517.719ms)
+2026-10-24T01:33:55.8280868Z ℹ {"name":"working AAC has no one-click No sound action in simple, fullscreen or full interface and keeps playing","browser":"151.0.7922.34","requests":{"playback":1,"prepare":1,"onlyCached":true,"newTorrents":0,"serverMediaFetches":0},"redirects":[{"status":307,"bodyBytes":0,"kind":"aac","crossOrigin":false,"corsHeaders":true}],"cdnRequests":[],"observations":[{"current":{"time":16.113446,"paused":false,"audioBytes":35641,"videoFrames":21,"error":null,"title":"Fixture.Show.S01E01.One.720p.H264.AAC.mp4","message":"","health":"Playing","memory":{"titles":{"series:tt1234567":{"quality":"","sources":{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa":{"hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","id":"def347c2-292d-451b-bfb6-d9e586e3e64a","group":"","provider":"synthetic audio regression","resolution":"720p","label":"Fixture.Show.S01E01.One.720p.H264.AAC.mp4","successes":1,"bad":false,"updatedAt":1792805634608}}}}}}},{"event":"loadedmetadata","time":0}]}
+2026-10-24T01:33:56.1465444Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:34:01.8546915Z ✔ closing the player while audio recovery lookup is pending cancels the obsolete source switch (6037.495013ms)
+2026-10-24T01:34:01.8552995Z ℹ {"name":"closing the player while audio recovery lookup is pending cancels the obsolete source switch","browser":"151.0.7922.34","requests":{"playback":1,"prepare":1,"onlyCached":true,"newTorrents":0,"serverMediaFetches":0},"redirects":[{"status":307,"bodyBytes":0,"kind":"eac3","crossOrigin":false,"corsHeaders":true}],"cdnRequests":[],"observations":[{"beforeClose":{"time":5.035276,"paused":true,"audioBytes":0,"videoFrames":11,"error":null,"title":"Fixture.Show.S01E01.One.720p.H264.mkv","message":"This version has no decodable sound. Trying another version…","health":"Recovering","memory":{"titles":{}}}},{"event":"loadedmetadata","time":0}]}
+2026-10-24T01:34:02.1804386Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:34:02.4996381Z ✔ opening the update restores an AAC version rejected by the removed button and preserves other feedback (645.105943ms)
+2026-10-24T01:34:02.5006028Z ℹ {"name":"opening the update restores an AAC version rejected by the removed button and preserves other feedback","browser":"151.0.7922.34","requests":{"playback":1,"prepare":1,"onlyCached":true,"newTorrents":0,"serverMediaFetches":0},"redirects":[{"status":307,"bodyBytes":0,"kind":"aac","crossOrigin":false,"corsHeaders":true}],"cdnRequests":[],"observations":[{"current":{"time":0.214289,"paused":false,"audioBytes":1305,"videoFrames":4,"error":null,"title":"Fixture.Show.S01E01.One.720p.H264.AAC.mp4","message":"","health":"Playing","memory":{"titles":{"series:tt1234567":{"quality":"720p","sources":{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa":{"hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","audio":"unknown","bad":false,"successes":2,"updatedAt":1792113186242},"cccccccccccccccccccccccccccccccccccccccc":{"hash":"cccccccccccccccccccccccccccccccccccccccc","bad":true,"audio":"unknown","successes":0},"dddddddddddddddddddddddddddddddddddddddd":{"hash":"dddddddddddddddddddddddddddddddddddddddd","bad":false,"audio":"good","successes":4}}}},"retiredAudioFeedback":{"series:tt1234567":{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa":{"hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","audio":"bad","bad":true,"successes":2,"updatedAt":1792113186242}}},"negativeAudioReset":1}}},{"event":"loadedmetadata","time":0}]}
+2026-10-24T01:34:02.5405205Z ℹ tests 7
+2026-10-24T01:34:02.5405522Z ℹ suites 0
+2026-10-24T01:34:02.5405779Z ℹ pass 7
+2026-10-24T01:34:02.5406676Z ℹ fail 0
+2026-10-24T01:34:02.5406947Z ℹ cancelled 0
+2026-10-24T01:34:02.5407228Z ℹ skipped 0
+2026-10-24T01:34:02.5418180Z ℹ todo 0
+2026-10-24T01:34:02.5418654Z ℹ duration_ms 61396.279467
+2026-10-24T01:34:02.5536621Z ##[group]Run npm run test:browser:core
+2026-10-24T01:34:02.5536887Z [36;1mnpm run test:browser:core[0m
+2026-10-24T01:34:02.5591863Z shell: /usr/bin/bash -e {0}
+2026-10-24T01:34:02.5592076Z ##[endgroup]
+2026-10-24T01:34:02.6374603Z 
+2026-10-24T01:34:02.6375176Z > torbox-web-player@1.2.9 test:browser:core
+2026-10-24T01:34:02.6377024Z > node --test --test-concurrency=1 test/browser/reliability.mjs test/browser/sports.mjs test/browser/sports-routing.mjs test/browser/buffstreams.mjs test/browser/games.mjs test/browser/games-cheats.mjs test/browser/nes-graphics.mjs test/browser/dos-player.mjs test/browser/ski-game.mjs test/browser/extra-games.mjs test/browser/mindmaze.mjs test/browser/source-recovery.mjs test/browser/catalog-search.mjs test/browser/playback-source-metadata.mjs test/browser/matroska-playback.mjs
+2026-10-24T01:34:02.6378717Z 
+2026-10-24T01:34:03.4010614Z ✔ Buffstreams lists games and filters them locally while the private service is hung (450.510729ms)
+2026-10-24T01:34:03.6720923Z ✔ Watch opens its own waiting page and navigates only that tab to the resolved direct player (272.433115ms)
+2026-10-24T01:34:04.0309379Z ✔ a blocked popup still resolves the player and offers a protected direct-player link (358.46053ms)
+2026-10-24T01:34:04.2714217Z ✔ a failed player lookup closes its waiting tab and does not fall back to the provider website (240.066368ms)
+2026-10-24T01:34:04.8823380Z ✔ a replacement address is checked before saving and failed refreshes preserve the working catalog (611.338432ms)
+2026-10-24T01:34:05.3409381Z ✔ canceling an address check discards a late result and leaves the saved games untouched (457.448166ms)
+2026-10-24T01:34:05.8018285Z ✔ leaving Buffstreams cancels a pending player and keeps existing Sports counts unchanged (461.718517ms)
+2026-10-24T01:34:06.1685677Z ✔ a delayed bundled Sports response cannot restart Buffstreams after switching to Movies (366.488089ms)
+2026-10-24T01:34:06.5425089Z ✔ cached games and local filters survive reload without presenting stale entries as live (373.957346ms)
+2026-10-24T01:34:07.0769226Z ✔ Kid Mode guards visible Watch buttons, refresh, address changes and a resolved fallback link (533.139046ms)
+2026-10-24T01:34:08.7129588Z ✔ typing Dexte then Dexter retains the original series despite a fast incomplete backup and a same-name movie (1312.214989ms)
+2026-10-24T01:34:09.7334020Z ✔ input immediately clears old cards and pagination, while Enter runs the latest search once (1020.171034ms)
+2026-10-24T01:34:10.7888202Z ✔ a late Dexte response cannot replace the newer Dexter results (1054.929237ms)
+2026-10-24T01:34:11.5064388Z ✔ clearing a pending search restores browse and ignores its late response (717.967741ms)
+2026-10-24T01:34:12.2667580Z ✔ self-hosted DOSBox WASM executes real COM graphics and keyboard input under scoped CSP (446.47327ms)
+2026-10-24T01:34:13.0348798Z ✔ pause and restart stop input and reboot the same approved DOS program (767.181468ms)
+2026-10-24T01:34:13.2335020Z ✔ legacy key subpath uses only relative local emulator and bundle assets (199.602582ms)
+2026-10-24T01:34:13.3935887Z ✔ unknown game identifiers and Kid Mode fail before a bundle or emulator can run (159.805235ms)
+2026-10-24T01:34:13.7726762Z ✔ only the same-origin parent can send emulator commands and receives actual frame status (379.126285ms)
+2026-10-24T01:34:14.7295759Z ✔ Master Mind short-click pulse reaches the actual DOS mouse driver, while other games release normally (956.915354ms)
+2026-10-24T01:34:15.8844903Z ✔ pausing during a pending mouse pulse forces native release before resume and a new press (1153.743141ms)
+2026-10-24T01:34:16.3938420Z ✔ canceling a Master Mind pointer before delayed down cannot fire a later native click (510.076404ms)
+2026-10-24T01:34:17.0354971Z ✔ extra and NES catalogs combine alphabetically with platform filtering and literal titles (322.294208ms)
+2026-10-24T01:34:17.1813385Z ✔ an extra catalog outage preserves working NES cards and shows one finite refresh message (144.824286ms)
+2026-10-24T01:34:18.1130152Z ✔ child source and origin are enforced, pause and mute do not form message loops (931.444726ms)
+2026-10-24T01:34:18.5328858Z ✔ touch controls deliver exact child key values and restart rejects an older frame source (420.964877ms)
+2026-10-24T01:34:19.0926524Z ✔ viewer changes close child playback, and leaving Games removes the iframe source (558.41275ms)
+2026-10-24T01:34:19.4774418Z ✔ extra player fits portrait and landscape without horizontal overflow (385.515589ms)
+2026-10-24T01:34:19.9146213Z ✔ focus lost before the child listener is ready preserves pause until explicit Resume (437.247923ms)
+2026-10-24T01:34:21.1129259Z ✔ extra game fullscreen uses the supported root and preserves controls until close (1198.391831ms)
+2026-10-24T01:34:22.8742064Z ✔ a six-letter Game Genie code patches the actual ROM read, with master and individual toggles (1436.959133ms)
+2026-10-24T01:34:23.8173917Z ✔ eight-letter compare codes apply only to matching ROM bytes, and editing and removing use the new code (943.009834ms)
+2026-10-24T01:34:24.6347431Z ✔ bulk addition and portable JSON import/export preserve the list and reject bad input atomically (817.254222ms)
+2026-10-24T01:34:27.0879185Z ✔ cheats remain current across manual restore, Start fresh and reopening, and isolate viewers and ROMs (2453.179962ms)
+2026-10-24T01:34:27.7080634Z ✔ the paused cheat panel accepts text keys without sending them to NES controllers (620.131219ms)
+2026-10-24T01:34:28.8576579Z ✔ an unexpected native callback failure rolls back the engine, stored model and checkboxes (1146.32327ms)
+2026-10-24T01:34:30.3265985Z ✔ a fatal opcode cheat stays editable and recovers through Start fresh and manual Load while editing (1470.565639ms)
+2026-10-24T01:34:31.3237213Z ✔ a delayed JSON import from an old game cannot change the next game (998.044246ms)
+2026-10-24T01:34:32.0763164Z ✔ mobile portrait and landscape keep cheat editing inside the viewport (752.545491ms)
+2026-10-24T01:34:33.6664263Z ✔ light gun mouse click reaches the native NES trigger and releases across pause (1267.905213ms)
+2026-10-24T01:34:34.8109520Z ✔ light gun touch tap reaches the native NES trigger and releases across pause (1144.605121ms)
+2026-10-24T01:34:35.6985690Z ✔ anonymous Games executes the original ROM with real PPU output and keyboard input without TorBox calls (887.036583ms)
+2026-10-24T01:34:37.1662545Z ✔ NES full screen uses the supported root, keeps touch and cheats usable, and exits on close (1467.809836ms)
+2026-10-24T01:34:37.6613919Z ✔ closing NES leaves a real fullscreen session owned by another element intact (495.240571ms)
+2026-10-24T01:34:38.7227151Z ✔ manual save and restore recover emulated CPU and PPU state, and reopening offers the saved state (1061.128803ms)
+2026-10-24T01:34:39.2808710Z ✔ toolbar focus preserves game keys while Enter activates its focused Pause control (557.994038ms)
+2026-10-24T01:34:40.4324002Z ✔ a delayed manual Load cannot overwrite a newer Start fresh action (1150.918441ms)
+2026-10-24T01:34:41.0127079Z ✔ standard controller A reaches the emulator and disconnecting releases the held button (580.800944ms)
+2026-10-24T01:34:41.7493413Z ✔ automatic saves stay separate for the two viewers (736.023919ms)
+2026-10-24T01:34:42.3986724Z ✔ local ROM import renders a game and malformed files report a useful error (649.733808ms)
+2026-10-24T01:34:43.2113163Z ✔ a canceled slow ROM cannot replace a newer game or reopen its closed player (811.954139ms)
+2026-10-24T01:34:44.0350004Z ✔ closing Games releases keyboard interception and switching to Sports stops its emulator (824.211356ms)
+2026-10-24T01:34:44.8281337Z ✔ mobile portrait and landscape keep the emulator and touch controls inside the viewport (793.219457ms)
+2026-10-24T01:34:45.1477310Z ✔ unsafe catalog entries never request private APIs or external ROM hosts (318.721691ms)
+2026-10-24T01:34:45.3274859Z ✔ direct Games links respect Kid Mode and finish the normal movie startup after denial (180.136771ms)
+2026-10-24T01:34:45.5713894Z ✔ an existing movie fragment still boots Cinema and is preserved when returning from Games (243.871703ms)
+2026-10-24T01:34:46.5960883Z ✔ pending movie auto-next cannot reopen Cinema over Games while presentation exit is delayed (1024.893772ms)
+2026-10-24T01:34:48.7147675Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:34:50.0481778Z ✔ cached H264/AAC Matroska automatically plays native video and audio, seeks, and never relays video through the app (1801.777092ms)
+2026-10-24T01:34:50.0489066Z ℹ {"test":"cached H264/AAC Matroska automatically plays native video and audio, seeks, and never relays video through the app","result":"pass","duration_ms":1773.363498,"browser":"151.0.7922.34","fixture":{"file":"test/fixtures/h264-aac.mkv","size":150578,"sha256":"00a704e9b1ae955f26a7ab4b3dea7b66c3ea69af671d8ac94b6c3dfee0f25ee9"},"decoded":{"currentTime":0.824,"duration":17.021,"decodedVideoFrames":4,"decodedAudioBytes":12525,"audioPeak":0.0912800133228302,"error":null},"afterSeek":{"currentTime":6.418667,"decodedVideoFrames":14,"decodedAudioBytes":92752,"paused":false,"seeking":false},"redirects":[{"status":307,"bodyBytes":0,"hostname":"store.tb-cdn.io","pathname":"/fixture.mkv","range":"bytes=0-"}],"prepareRequests":1,"onlyCached":true,"newTorrents":0,"serverMediaFetches":0,"limitations":"Synthetic H264/AAC Matroska through real app UI/backend, with Playwright standing in for CDN media delivery. Desktop Chromium with a mobile viewport; not a physical Android decoder or live TorBox account test."}
+2026-10-24T01:34:50.8403994Z ✔ MindMaze uses the exact creator URL in an opaque sandbox and exposes honest hosted controls (499.806563ms)
+2026-10-24T01:34:52.1465913Z ✔ leaving the browser window or changing viewer unloads the hosted game instead of pretending to pause (1305.954564ms)
+2026-10-24T01:34:52.5644830Z ✔ MindMaze fullscreen preserves its iframe and mobile layouts expose close and full-page controls (417.724012ms)
+2026-10-24T01:34:55.5475689Z ✔ bundled SMB3 renders complete 8x16 sprites during the black intro and tan title stage (2675.768576ms)
+2026-10-24T01:34:57.4146962Z ✔ SMB3 manual and automatic app saves retain complete native graphics on a new emulator (1867.456982ms)
+2026-10-24T01:35:02.0712673Z ✔ all three supplied cartridges render real native frames and survive manual save restoration (4656.90811ms)
+2026-10-24T01:35:04.1950952Z ✔ saves written by the unmodified 2.1.0 engine resume with corrected sprites and unchanged progress (2123.432893ms)
+2026-10-24T01:35:05.0896961Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:35:05.1686896Z ✔ actual Dexter E2 source metadata produces choices and explicitly prepares the exact episode through the real backend (660.839455ms)
+2026-10-24T01:35:05.5799930Z ✔ playback diagnostics copy only safe counts on demand and remain visible when clipboard access is denied (388.7063ms)
+2026-10-24T01:35:05.9138199Z ✔ actual raw source metadata offers attested AAC ahead of English unknown-audio MKV and excludes risky Dolby Vision (357.914019ms)
+2026-10-24T01:35:06.5829593Z ✔ browser loads artwork at the actual redirect destination under the production image CSP (351.124604ms)
+2026-10-24T01:35:06.7763255Z ✔ browser blocks an untrusted redirect and recovers with the title-specific medium poster (192.913627ms)
+2026-10-24T01:35:07.2295431Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:35:07.3153409Z ✔ full UI login, browse, playback and seeking verify the CDN redirect with synthetic media (539.064228ms)
+2026-10-24T01:35:07.5288296Z ✔ catalog renders while a slow TorBox health check is still pending (212.41943ms)
+2026-10-24T01:35:11.4829512Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:35:11.5578718Z ✔ resume keeps the local rewind position and a visible overlay until real playback (4030.117776ms)
+2026-10-24T01:35:12.8734129Z ✔ canceling Resume during slow source lookup cannot reopen the player (1315.371394ms)
+2026-10-24T01:35:14.1032233Z ✔ closing a title during a slow Play request prevents late playback (1229.517448ms)
+2026-10-24T01:35:15.5441507Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:35:15.5951956Z ✔ details prepare the exact ready episode before Play and reuse the result without another lookup (1491.994763ms)
+2026-10-24T01:35:15.5953313Z ℹ Warmed Play to first synthetic video frame: 133ms; source lookup fixture delay: 1000ms.
+2026-10-24T01:35:16.2589014Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:35:16.3139582Z ✔ an uncached fast batch waits for later cached exact results before offering preparation (717.634715ms)
+2026-10-24T01:35:16.8364115Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:35:16.8940203Z ✔ a mismatched fast batch waits for later cached exact results before offering preparation (581.064555ms)
+2026-10-24T01:35:17.2615432Z ✔ uncached details prefetch never starts a TorBox download or opens the player (366.804084ms)
+2026-10-24T01:35:18.4666227Z ✔ closing details cancels warm work without late preparation or playback (1205.184087ms)
+2026-10-24T01:35:18.7757300Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:35:19.6020519Z ✔ next episode warms before the credits window and is reused during auto-next (1135.370509ms)
+2026-10-24T01:35:20.0253526Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:35:20.3097753Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:35:20.3640466Z ✔ slow progress saves do not block auto-next and the actual video element survives (761.941741ms)
+2026-10-24T01:35:20.6925894Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:35:21.1571196Z ✔ an expired background progress session does not stop a playing video (793.231394ms)
+2026-10-24T01:35:21.5702735Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:35:21.8541925Z ✔ hung initial media reaches a bounded failure and clears the resume overlay (697.102153ms)
+2026-10-24T01:35:22.3543212Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:35:22.3840190Z ✔ Resume offers in-app preparation, with no uncached write until explicitly selected (529.78331ms)
+2026-10-24T01:35:45.8651067Z ✔ service startup can exceed the old 22-second cutoff without forcing a reload (23480.719576ms)
+2026-10-24T01:35:46.5416795Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:35:46.5952177Z ✔ rapid episode choices play only the last selected episode (729.618989ms)
+2026-10-24T01:35:46.8616658Z ✔ a remembered encrypted key reconnects after a backend session restart (267.17739ms)
+2026-10-24T01:35:50.3445114Z ✔ startup errors show a working Try again button (3482.669522ms)
+2026-10-24T01:35:52.4319931Z ✔ the real ski simulation steers, jumps, tracks distance and restarts through parent controls (1771.425356ms)
+2026-10-24T01:35:53.3643050Z ✔ pause and close stop frames and held keys; manual pause cannot be resumed by a movement command (932.166837ms)
+2026-10-24T01:35:54.6285670Z ✔ idempotent mute commands do not create a parent status feedback loop (1263.522916ms)
+2026-10-24T01:35:55.1539625Z ✔ commands from another window or another origin cannot start the paused game (526.013711ms)
+2026-10-24T01:35:55.8006689Z ✔ Kid Mode and an adult-viewer change stop the child and reject further starts (646.740194ms)
+2026-10-24T01:35:56.0768729Z ✔ stored scores with invalid shapes cannot break the actual title screen or a new run (275.985538ms)
+2026-10-24T01:35:56.7210474Z ✔ mobile touch controls and portrait/landscape layouts fit the actual canvas and toolbar (643.610011ms)
+2026-10-24T01:36:04.3108586Z ✔ the native monster chase starts after real simulated skiing reaches 2000 meters (7589.614756ms)
+2026-10-24T01:36:05.1110988Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:36:05.1960658Z ✔ an unknown cache check still resolves an existing exact source without allowing an uncached addition (562.790266ms)
+2026-10-24T01:36:05.6001897Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:36:05.6582094Z ✔ a cached source that fails automatic preparation remains recoverable through Retry & Play (462.071249ms)
+2026-10-24T01:36:06.3377813Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:36:06.3919878Z ✔ briefly preparing cached media is polled and starts automatically when ready (733.766522ms)
+2026-10-24T01:36:06.8665372Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:36:06.9248548Z ✔ an empty incomplete fast batch waits for the complete lookup before failing (532.567231ms)
+2026-10-24T01:36:07.3067805Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:36:07.3517218Z ✔ incompatible source results expose a working Retry search in Simple mode (427.43833ms)
+2026-10-24T01:36:07.7404487Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:36:07.7911555Z ✔ empty source results expose a working Retry search in Simple mode (439.267011ms)
+2026-10-24T01:36:09.4020465Z ✔ closing the title while cached preparation is pending prevents late playback (1610.764766ms)
+2026-10-24T01:36:09.7577397Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:36:09.8087517Z ✔ a quick-actions playback failure opens a visible recovery panel even when details were closed (406.64553ms)
+2026-10-24T01:36:10.2071188Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:36:10.2746942Z ✔ a rate-limited cache check does not trigger preparation and exposes Check again (465.810597ms)
+2026-10-24T01:36:10.8881733Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:36:10.9420075Z ✔ failure of the full lookup retains a usable initial source for explicit Prepare & Play (667.085176ms)
+2026-10-24T01:36:11.4951439Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:36:11.5712181Z ✔ Resume preserves playback position after Check again recovery (629.059782ms)
+2026-10-24T01:36:11.9955471Z {"event":"media_redirect_issued","ranged":true}
+2026-10-24T01:36:12.0633602Z ✔ Start over preserves playback position after Check again recovery (492.186058ms)
+2026-10-24T01:36:12.8298140Z ✔ anonymous Sports plays directly without any private service request or provider credentials (442.72857ms)
+2026-10-24T01:36:13.0927319Z ✔ legitimate approved CDN beacon redirect still plays without private service requests or provider cookies (261.701326ms)
+2026-10-24T01:36:13.4963249Z ✔ anonymous full replay resolves metadata and media directly without result text (404.344169ms)
+2026-10-24T01:36:13.7511528Z ✔ Sports denies manifest-redirect before forbidden media transfer (255.007606ms)
+2026-10-24T01:36:17.2190446Z ✔ Sports denies variant-redirect before forbidden media transfer (3467.163736ms)
+2026-10-24T01:36:42.7803492Z ✔ Sports denies segment-redirect before forbidden media transfer (25561.651892ms)
+2026-10-24T01:36:52.2600077Z ✔ Sports denies key-redirect before forbidden media transfer (9479.497005ms)
+2026-10-24T01:37:17.8104133Z ✔ Sports denies variant-direct before forbidden media transfer (25550.457057ms)
+2026-10-24T01:37:18.0598162Z ✔ Sports denies segment-direct before forbidden media transfer (249.43014ms)
+2026-10-24T01:37:18.4116398Z ✔ Sports denies key-direct before forbidden media transfer (351.623688ms)
+2026-10-24T01:37:43.9599200Z ✔ Sports denies redirect-chain before forbidden media transfer (25547.955409ms)
+2026-10-24T01:38:09.5102369Z ✔ Sports denies credentials-redirect before forbidden media transfer (25549.407004ms)
+2026-10-24T01:38:35.0484364Z ✔ Sports denies http-redirect before forbidden media transfer (25538.977346ms)
+2026-10-24T01:39:00.6525387Z ✔ Sports denies port-redirect before forbidden media transfer (25604.352391ms)
+2026-10-24T01:39:00.9437747Z ✔ replay metadata redirects cannot reach Render (291.1672ms)
+2026-10-24T01:39:01.2043600Z ✔ native browser HLS fallback is isolated and cannot redirect media to Render (260.34749ms)
+2026-10-24T01:39:01.9994484Z ✔ sports opens and plays HLS tennis while private startup is hung, with no TorBox login or media relay (467.086427ms)
+2026-10-24T01:39:02.3900493Z ✔ padel full replay resolves anonymously, resumes and starts over without showing result text (390.154786ms)
+2026-10-24T01:39:03.3776432Z ✔ closing a resolving sports replay prevents late media and leaves the catalog usable (988.00292ms)
+2026-10-24T01:39:03.6288014Z ✔ failed sports HLS reports retry and remains bounded (250.851772ms)
+2026-10-24T01:39:03.8243292Z ✔ Sports requires an adult viewer so it cannot bypass Kid Mode allowances (194.947382ms)
+2026-10-24T01:39:04.0097708Z ✔ expanded Sports filters expose football/hockey replays without a TorBox key or availability notice (185.55011ms)
+2026-10-24T01:39:04.5265107Z ✔ a canceled old Play rejection cannot overwrite the next Sports playback (516.613061ms)
+2026-10-24T01:39:04.5657324Z ℹ tests 132
+2026-10-24T01:39:04.5657651Z ℹ suites 0
+2026-10-24T01:39:04.5657911Z ℹ pass 132
+2026-10-24T01:39:04.5658108Z ℹ fail 0
+2026-10-24T01:39:04.5658369Z ℹ cancelled 0
+2026-10-24T01:39:04.5658616Z ℹ skipped 0
+2026-10-24T01:39:04.5658912Z ℹ todo 0
+2026-10-24T01:39:04.5659218Z ℹ duration_ms 301900.804029
+2026-10-24T01:39:04.5842178Z 

@@ -1,0 +1,20 @@
+✔ 100 simultaneous playing and presentation notifications share one wake-lock request (10.298242ms)
+✔ a pending acquisition is released when playback pauses before the browser grants it (4.07625ms)
+✔ a replaced playback cannot adopt its late wake lock (2.638553ms)
+✔ disabling keep-awake before acquisition resolves releases the late sentinel (4.493861ms)
+✔ an old release completion and event cannot erase the current playback lock (1.240254ms)
+✔ a canceled pending request does not clear or duplicate a newer pending acquisition (1.06301ms)
+✔ a stopped or stale playback notification cannot release the active playback lock (2.506457ms)
+✔ turning keep-awake off releases a held sentinel on refresh (3.094481ms)
+✔ a rejected browser request can be retried on the next playback event (2.869706ms)
+✔ hidden non-PiP playback is ineligible while browser PiP policy denial stays nonfatal (1.166435ms)
+✔ browser automatic release permits later visible playback acquisition (4.452539ms)
+✔ a completed episode cannot overwrite new playback UI after its delayed wake-lock release (1.627399ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 163.046614
