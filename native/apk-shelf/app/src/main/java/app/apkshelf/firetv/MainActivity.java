@@ -153,9 +153,13 @@ public final class MainActivity extends Activity {
         refreshButton = button("Refresh", v -> refresh());
         settingsButton = button("Folder settings", v -> showSettings());
         permissionButton = button("Allow installs", v -> openPermissionHelp(false));
+        Button installedAppsButton = button("Installed apps", v -> {
+            if (!busy && !installerActive) startActivity(new Intent(this, InstalledAppsActivity.class));
+        });
         toolbar.addView(refreshButton, toolbarParams());
         toolbar.addView(settingsButton, toolbarParams());
         toolbar.addView(permissionButton, toolbarParams());
+        toolbar.addView(installedAppsButton, toolbarParams());
         root.addView(toolbar);
 
         countLabel = text("APKS", 12, MUTED);
