@@ -187,7 +187,7 @@ public final class BackendTests {
                 eq("https://api.github.com/repos/owner/repo/releases?per_page=100&page=1",
                         factory.connections.get(1).getURL().toString());
             }
-        }});
+        });
         test("draft releases, incomplete assets, and files without checksum skipped", new Task() {
             public void run() throws Exception {
                 JSONObject noDigest = releaseAsset("no-checksum.apk", 21, 123, SHA).put("digest", JSONObject.NULL);
@@ -204,7 +204,7 @@ public final class BackendTests {
                 eq(0, result.entries.size());
                 check(result.warning.contains("SHA-256"));
             }
-        }});
+        });
         test("release listing failure leaves ordinary repository APKs usable", new Task() {
             public void run() throws Exception {
                 GitHubClient.Listing listing = new GitHubClient(new MockFactory()
@@ -213,7 +213,7 @@ public final class BackendTests {
                 eq(1, listing.entries.size());
                 check(listing.warning.contains("Releases could not be loaded"));
             }
-        }});
+        });
         test("untrusted release URL never appears in listing", new Task() {
             public void run() throws Exception {
                 JSONObject malicious = releaseAsset("bad.apk", 88, 123, SHA);
@@ -225,7 +225,7 @@ public final class BackendTests {
                 eq(0, listing.entries.size());
                 check(listing.warning.contains("untrusted"));
             }
-        }});
+        });
         test("release download checks SHA-256 and only follows trusted GitHub CDN", new Task() {
             public void run() throws Exception {
                 byte[] bytes = apkZip(true);
@@ -245,7 +245,7 @@ public final class BackendTests {
                     eq(1, dir.list().length);
                 } finally { cleanup(dir); }
             }
-        }});
+        });
         test("private release asset API redirects without forwarding GitHub credentials", new Task() {
             public void run() throws Exception {
                 byte[] bytes = apkZip(true);
@@ -262,7 +262,7 @@ public final class BackendTests {
                     eq(null, factory.connections.get(1).getRequestProperty("Authorization"));
                 } finally { cleanup(dir); }
             }
-        }});
+        });
         test("corrupted release fails SHA-256 and removes partial", new Task() {
             public void run() throws Exception {
                 byte[] bytes = apkZip(true);
@@ -270,21 +270,21 @@ public final class BackendTests {
                 altered[altered.length / 2] ^= 1;
                 rejectedRelease(altered, listedRelease(bytes, sha256(bytes)), "integrity");
             }
-        }});
+        });
         test("truncated release download rejects incomplete file", new Task() {
             public void run() throws Exception {
                 byte[] bytes = apkZip(true);
                 rejectedRelease(Arrays.copyOf(bytes, bytes.length - 1),
                         listedRelease(bytes, sha256(bytes)), "incomplete");
             }
-        }});
+        });
         test("release download bigger than listed size rejected", new Task() {
             public void run() throws Exception {
                 byte[] bytes = apkZip(true);
                 rejectedRelease(Arrays.copyOf(bytes, bytes.length + 1),
                         listedRelease(bytes, sha256(bytes)), "larger");
             }
-        }});
+        });
         test("release redirect to arbitrary internet host blocked", new Task() {
             public void run() throws Exception {
                 byte[] bytes = apkZip(true);
@@ -298,7 +298,7 @@ public final class BackendTests {
                     eq(0, dir.list().length);
                 } finally { cleanup(dir); }
             }
-        }});
+        });
         test("release and repository files of same name remain separate entries", new Task() {
             public void run() throws Exception {
                 JSONObject release = new JSONObject().put("id", 4).put("assets", new JSONArray()
@@ -311,7 +311,7 @@ public final class BackendTests {
                 check(!listing.entries.get(0).release);
                 check(listing.entries.get(1).release);
             }
-        }});
+        });
         System.out.println("PASS: " + passed + " backend tests");
     }
 
