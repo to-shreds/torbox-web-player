@@ -31,6 +31,14 @@ New Node cases cover source limits, requested-quality preservation, browser capa
 
 Pages publication continues to depend on the full release verification workflow, including actual-browser audio tests. The deployment checkout is now pinned to `github.sha`, the tested commit, instead of fetching a possibly newer main after verification. The release gate cannot publish a different, untested head. Cache tokens cover every modified playback module, including imports and service-worker entries.
 
+## Published release
+
+Release reliability run [40165592385](https://github.com/to-shreds/torbox-web-player/actions/runs/40165592385) and production Pages run [40165878888](https://github.com/to-shreds/torbox-web-player/actions/runs/40165878888) both succeeded on runtime `30be9731e5d782d795e8692a9a3579a5afaadf0d`, tree `1af7bf5ba808ce8ec1147f59ce722136504c477c`. Each passed 675 registered Node checks, with **669 passing, zero failures and six optional skips**, and **161 of 161 browser cases**: four Trakt, 14 watch-party, 11 audio and 132 core cases. Pages deployment finished at `2026-10-25T05:41:03Z`.
+
+Backend mirror `6e171f13b57d6ffb83b9008ee3919514688e2151` has the identical tested tree. Its CI run 40166202127 passed, and Render deployment `dep-dbf0sitg1s2s73e3cim0` became live at `2026-10-25T14:13:04.644512Z`. After the branch update, repeated checks showed no automatic deployment, queued build or service event, matching the earlier recorded behavior, so one explicit deployment was triggered. No service settings or plan changed.
+
+At `2026-10-25T14:13:22.402466+00:00`, all **32 public root/key asset comparisons** and **15 backend version, authentication, origin and asset checks** passed. Published bytes match the tested source, health reports 1.2.10, and no application errors were returned for the deployment interval through 14:13:23Z. Verification scripts and machine-readable results are retained in `docs/evidence/audio-1.2.10/`.
+
 ## Preserved behavior and limits
 
 Direct provider media delivery, zero Render media relay, cached-only unattended selection, title/year/episode/file identity, resume position, the same video DOM element, all saved state, games, Sports, watch-party consent and exact-file restrictions remain intact. The independent native APK is unchanged. Its movie playback/source files were compared with the earlier tested native source and have not changed from 0.2.4 through 0.2.7.

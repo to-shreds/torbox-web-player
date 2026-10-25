@@ -1,0 +1,239 @@
+{
+  "run": 40165878888,
+  "url": "https://github.com/to-shreds/torbox-web-player/actions/runs/40165878888",
+  "commit": "30be9731e5d782d795e8692a9a3579a5afaadf0d",
+  "tree": "1af7bf5ba808ce8ec1147f59ce722136504c477c",
+  "conclusion": "success",
+  "verifiedAt": "2026-10-25T05:40:42Z",
+  "deployedAt": "2026-10-25T05:41:03Z",
+  "node": {
+    "tests": 675,
+    "passed": 669,
+    "failed": 0,
+    "skipped": 6
+  },
+  "browser": {
+    "trakt": 4,
+    "party": 14,
+    "audio": 11,
+    "core": 132,
+    "total": 161,
+    "failed": 0
+  },
+  "jobs": [
+    {
+      "id": 121086694935,
+      "name": "verify / verify",
+      "conclusion": "success",
+      "completedAt": "2026-10-25T05:40:42Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-25T05:32:03Z",
+          "completed_at": "2026-10-25T05:32:04Z"
+        },
+        {
+          "name": "Run actions/checkout@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-25T05:32:04Z",
+          "completed_at": "2026-10-25T05:32:06Z"
+        },
+        {
+          "name": "Run actions/setup-node@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-25T05:32:06Z",
+          "completed_at": "2026-10-25T05:32:09Z"
+        },
+        {
+          "name": "Run npm ci --ignore-scripts --no-audit --no-fund",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-25T05:32:09Z",
+          "completed_at": "2026-10-25T05:32:11Z"
+        },
+        {
+          "name": "Run npm run check",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-25T05:32:11Z",
+          "completed_at": "2026-10-25T05:32:12Z"
+        },
+        {
+          "name": "Run npm test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-25T05:32:12Z",
+          "completed_at": "2026-10-25T05:32:20Z"
+        },
+        {
+          "name": "Run npx playwright install --with-deps chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-25T05:32:20Z",
+          "completed_at": "2026-10-25T05:32:43Z"
+        },
+        {
+          "name": "Run npm run test:browser:trakt",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-25T05:32:43Z",
+          "completed_at": "2026-10-25T05:32:45Z"
+        },
+        {
+          "name": "Run npm run test:browser:party",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-25T05:32:45Z",
+          "completed_at": "2026-10-25T05:34:20Z"
+        },
+        {
+          "name": "Run npm run test:browser:audio",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-25T05:34:20Z",
+          "completed_at": "2026-10-25T05:35:25Z"
+        },
+        {
+          "name": "Run npm run test:browser:core",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-25T05:35:25Z",
+          "completed_at": "2026-10-25T05:40:40Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-25T05:40:40Z",
+          "completed_at": "2026-10-25T05:40:40Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-10-25T05:40:40Z",
+          "completed_at": "2026-10-25T05:40:41Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-25T05:40:41Z",
+          "completed_at": "2026-10-25T05:40:41Z"
+        }
+      ]
+    },
+    {
+      "id": 121088232276,
+      "name": "deploy",
+      "conclusion": "success",
+      "completedAt": "2026-10-25T05:41:03Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-25T05:40:46Z",
+          "completed_at": "2026-10-25T05:40:49Z"
+        },
+        {
+          "name": "Checkout production player",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-25T05:40:49Z",
+          "completed_at": "2026-10-25T05:40:51Z"
+        },
+        {
+          "name": "Assemble root and legacy key path from the same source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-25T05:40:51Z",
+          "completed_at": "2026-10-25T05:40:51Z"
+        },
+        {
+          "name": "Configure Pages",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-25T05:40:51Z",
+          "completed_at": "2026-10-25T05:40:52Z"
+        },
+        {
+          "name": "Upload combined frontend",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-25T05:40:52Z",
+          "completed_at": "2026-10-25T05:40:54Z"
+        },
+        {
+          "name": "Deploy",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-25T05:40:54Z",
+          "completed_at": "2026-10-25T05:41:01Z"
+        },
+        {
+          "name": "Post Checkout production player",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-25T05:41:01Z",
+          "completed_at": "2026-10-25T05:41:01Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-25T05:41:01Z",
+          "completed_at": "2026-10-25T05:41:01Z"
+        }
+      ]
+    }
+  ],
+  "summaryLines": [
+    "2026-10-25T05:32:20.5008671Z ℹ tests 675",
+    "2026-10-25T05:32:20.5009101Z ℹ pass 669",
+    "2026-10-25T05:32:20.5009301Z ℹ fail 0",
+    "2026-10-25T05:32:20.5009717Z ℹ skipped 6",
+    "2026-10-25T05:32:45.2311938Z ℹ tests 4",
+    "2026-10-25T05:32:45.2312822Z ℹ pass 4",
+    "2026-10-25T05:32:45.2313177Z ℹ fail 0",
+    "2026-10-25T05:32:45.2314274Z ℹ skipped 0",
+    "2026-10-25T05:34:20.3506847Z ℹ tests 14",
+    "2026-10-25T05:34:20.3507772Z ℹ pass 14",
+    "2026-10-25T05:34:20.3508195Z ℹ fail 0",
+    "2026-10-25T05:34:20.3509012Z ℹ skipped 0",
+    "2026-10-25T05:35:25.8187616Z ℹ tests 11",
+    "2026-10-25T05:35:25.8188877Z ℹ pass 11",
+    "2026-10-25T05:35:25.8189457Z ℹ fail 0",
+    "2026-10-25T05:35:25.8191155Z ℹ skipped 0",
+    "2026-10-25T05:40:40.7031758Z ℹ tests 132",
+    "2026-10-25T05:40:40.7032571Z ℹ pass 132",
+    "2026-10-25T05:40:40.7032921Z ℹ fail 0",
+    "2026-10-25T05:40:40.7033920Z ℹ skipped 0"
+  ]
+}

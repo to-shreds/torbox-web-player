@@ -18,5 +18,5 @@
     "failed": 0,
     "synthetic": true
   },
-  "publication": "Pending release CI, Pages and backend publication."
+  "publication": "Release CI, production Pages gate, backend deployment and live asset/API checks passed."
 }
