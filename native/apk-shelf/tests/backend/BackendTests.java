@@ -13,6 +13,7 @@ import java.util.zip.*;
 public final class BackendTests {
     private static int passed;
     private static final String SHA = "0123456789abcdef0123456789abcdef01234567";
+    private static final String HASH256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
     private static final RepoConfig CONFIG = RepoConfig.fromInput("owner/repo", "feature/a", "apks");
     private interface Task { void run() throws Exception; }
 
@@ -216,7 +217,7 @@ public final class BackendTests {
         });
         test("untrusted release URL never appears in listing", new Task() {
             public void run() throws Exception {
-                JSONObject malicious = releaseAsset("bad.apk", 88, 123, SHA);
+                JSONObject malicious = releaseAsset("bad.apk", 88, 123, HASH256);
                 malicious.put("browser_download_url", "https://attacker.example/file.apk");
                 GitHubClient.Listing listing = new GitHubClient(new MockFactory().add(200, "[]")
                         .add(200, new JSONArray().put(new JSONObject().put("draft", false)
@@ -302,7 +303,7 @@ public final class BackendTests {
         test("release and repository files of same name remain separate entries", new Task() {
             public void run() throws Exception {
                 JSONObject release = new JSONObject().put("id", 4).put("assets", new JSONArray()
-                        .put(releaseAsset("duplicate.apk", 92, 700, SHA)));
+                        .put(releaseAsset("duplicate.apk", 92, 700, HASH256)));
                 GitHubClient.Listing listing = new GitHubClient(new MockFactory()
                         .add(200, new JSONArray().put(item("duplicate.apk", "file", 123)).toString())
                         .add(200, new JSONArray().put(release).toString()))
