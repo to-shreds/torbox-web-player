@@ -4,7 +4,7 @@ A small native Android / Fire TV utility: put ordinary APK files in a GitHub fol
 
 ## Using the app
 
-1. Install **[APK Shelf 1.0.3](https://raw.githubusercontent.com/to-shreds/apks/main/APK-Shelf-1.0.3.apk)** on Fire TV. It installs over versions 1.0.0, 1.0.1, and 1.0.2 using the same signing certificate.
+1. Install **[APK Shelf 1.0.4](https://raw.githubusercontent.com/to-shreds/apks/main/APK-Shelf-1.0.4.apk)** on Fire TV. It installs over versions 1.0.0 through 1.0.3 using the same signing certificate.
 2. Open APK Shelf. It defaults to **[to-shreds/apks](https://github.com/to-shreds/apks)**, using its default branch and repository root.
 3. For smaller apps, upload a normal `.apk` to that repository's root using **Add file → Upload files** (GitHub website limit: 25 MiB).
 4. For larger apps, open **[Releases](https://github.com/to-shreds/apks/releases)**, choose an existing release such as **Apk library → Edit**, and attach the `.apk` file as a release asset. You can also publish a new release. GitHub supports release assets up to 2 GiB each.
@@ -35,6 +35,29 @@ For a private repository, use a fine-grained personal access token restricted to
 
 Version 1.0.3 removes the previous tagline and simplifies on-screen list/detail and status text. It does not change the download or installer logic.
 
+## Installed apps manager (version 1.0.4)
+
+Choose **Installed apps** on APK Shelf's main screen to browse the apps actually installed on this Fire TV, including system packages. Use the remote or search box to filter by **name or Android package ID**. The filter cycles through **All**, **User**, **System**, **Disabled**, **Favorites** and **Hidden**. The count and available internal storage are displayed.
+
+Select an app to:
+
+- **Launch** it, if it has an accessible launcher activity.
+- Open **App info / system settings**. Fire OS may offer an Uninstall or Disable control, depending on the selected package and OS restrictions.
+- **Uninstall** a non-system app through Android's standard confirmation screen, when allowed. The active APK Shelf instance cannot uninstall itself from this screen.
+- Add/remove a **Favorite**, which can be found through the Favorites filter.
+- **Hide in Shelf only** or restore through the Hidden filter. **This has no effect on Amazon's Fire TV home screen.** Amazon removed the home-screen hide control in a 2025 update.
+- For system packages, display **ADB disable and restore commands** to run from a separate authorized ADB client (for example, Termux on a phone on the same Wi-Fi). APK Shelf **does not run these commands**, and intentionally declines to generate disable commands for obvious core/persistent packages. Fire OS may refuse to disable additional protected system apps.
+
+Example commands for a non-core package you've confirmed you want to disable from a separate ADB host:
+
+```sh
+adb connect FIRE_TV_IP:5555
+adb shell pm disable-user --user 0 PACKAGE_NAME
+adb shell pm enable --user 0 PACKAGE_NAME
+```
+
+The last command restores the package. You must supply the actual Fire TV IP and actual package name displayed in the inventory. **Never bulk-disable unreviewed system packages**, particularly launcher, Settings, remote input, software update or networking components. Disabling one app can affect other features. Version 1.0.4 does not grant root/device-owner privileges or bypass Amazon's restrictions on self-ADB connections. It requests Android's `QUERY_ALL_PACKAGES` visibility permission solely to display the local installed-app inventory; no installed-app list is transmitted to a server.
+
 ## Controls and behavior
 
 - Up/down selects a file; Select downloads it and opens the installer.
@@ -57,9 +80,9 @@ This is for Android-based Fire OS devices, including the Fire TV Stick 4K Plus. 
 
 ## Build and maintenance
 
-Package: `app.apkshelf.firetv`. Version: `1.0.3` / code `4`. Minimum Android API: 22. Target/compile API: 35. Native Java with platform widgets and networking; no external application runtime dependencies.
+Package: `app.apkshelf.firetv`. Version: `1.0.4` / code `5`. Minimum Android API: 22. Target/compile API: 35. Native Java with platform widgets and networking; no external application runtime dependencies.
 
-See [tools/README.md](tools/README.md) for the direct JDK/Android SDK build, [docs/VERIFICATION-1.0.3.md](docs/VERIFICATION-1.0.3.md) for updated UI verification and physical Fire TV limits (earlier records remain in [VERIFICATION-1.0.1.md](docs/VERIFICATION-1.0.1.md) and [VERIFICATION.md](docs/VERIFICATION.md)), and [HANDOFF.md](HANDOFF.md) for continuation state. The release signing key is backed up separately in the private project records; it is deliberately excluded from this source archive. Preserve that key and package name for future updates.
+See [tools/README.md](tools/README.md) for the direct JDK/Android SDK build, [docs/VERIFICATION-1.0.4.md](docs/VERIFICATION-1.0.4.md) for installed-app inventory verification and Fire TV limitations (earlier records remain in [VERIFICATION-1.0.1.md](docs/VERIFICATION-1.0.1.md) and [VERIFICATION.md](docs/VERIFICATION.md)), and [HANDOFF.md](HANDOFF.md) for continuation state. The release signing key is backed up separately in the private project records; it is deliberately excluded from this source archive. Preserve that key and package name for future updates.
 
 ## Official references
 
