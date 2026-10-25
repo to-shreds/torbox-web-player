@@ -2,6 +2,16 @@
 
 Read this first. The code repository controls implementation; `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md` controls readiness and the next action.
 
+## Audio reliability repair, 2026-10-25
+
+Candidate backend **1.2.10** and frontend **release-1.2.10-audio.1** repair demonstrated gaps in the earlier audio fix. Production baseline `52303d8b33ef30fc37bc8f748cd322865f8ce982` was preserved. An isolated baseline failed four actual-browser cases: explicit 720p chose unknown EAC3 over 1080p AAC, a partial lookup opened unknown audio before full results, and missing native counters allowed silent playback with or without an AAC alternative.
+
+Automatic Play/Resume/prewarming/auto-next and recovery now prioritize sound confidence across qualities. Incomplete lookups require compatible prepared audio before starting early. Browsers without a usable native decoded-byte counter require compatible prepared metadata for unattended playback. Torrent-wide Sound works feedback cannot bypass that check or consume candidate limits ahead of compatible audio; ranking uses copies and preserves saved feedback. Moderately throttled decoder observations now accumulate bounded progress. The No sound controls remain removed.
+
+Local syntax/vendor checks passed. The final Node gate registered **675 tests: 669 passed, zero failed, six optional skips**. All **11 native Chromium audio cases passed**, including no-CORS recovery with position preserved, quiet AAC and cancellation. No personal account, actual episode or physical audio output was tested. Evidence: `docs/evidence/audio-1.2.10/`; report: `docs/RELEASE-1.2.10.md`.
+
+Pages now checks out the exact verified `github.sha` instead of a potentially newer main. All modified playback imports and service-worker entries use the current cache token. Full release CI and publication remain pending at this checkpoint; do not yet describe 1.2.10 as live. Rollback branches are `archive/web-before-audio-2026-10-25` and `archive/backend-before-audio-2026-10-25`. Preserve direct media delivery, cached-only automatic behavior, exact identity, saved state, games, Sports, watch-party consent/file boundaries and the independent native APK. Physical PiP timeout and real Trakt acceptance remain separate.
+
 ## Error and stress-test repair · 2026-10-23
 
 Published backend **1.2.9** and frontend **release-1.2.9-stability.1** from main `2df34c7a1868679a855b5c1de3c682ddff453953`. The Trakt candidate actually failed its Node gate, so it was never published. Three stale expectations were repaired, and HTTP tests reproduced a genuine startup failure: the backend did not serve the two new Trakt modules or stylesheet. Static routes are now present.

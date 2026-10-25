@@ -1,0 +1,203 @@
+{
+  "browser": "151.0.7922.34",
+  "cases": [
+    {
+      "name": "auto selection starts known 1080p AAC before unknown-audio 720p video",
+      "browser": "151.0.7922.34",
+      "requests": {
+        "playback": 1,
+        "prepare": 1,
+        "onlyCached": true,
+        "newTorrents": 0,
+        "serverMediaFetches": 0
+      },
+      "lookups": [
+        {
+          "fast": true,
+          "complete": false
+        }
+      ],
+      "redirects": [
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "aac",
+          "crossOrigin": false,
+          "corsHeaders": true
+        }
+      ],
+      "cdnRequests": [],
+      "observations": [
+        {
+          "resolution": "auto",
+          "current": {
+            "time": 0.211539,
+            "paused": false,
+            "audioBytes": 1253,
+            "videoFrames": 4,
+            "error": null,
+            "title": "Fixture.Show.S01E01.One.1080p.H264.AAC.mp4",
+            "message": "",
+            "health": "Playing",
+            "memory": {
+              "titles": {}
+            }
+          }
+        },
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        }
+      ]
+    },
+    {
+      "name": "720p selection starts known 1080p AAC before unknown-audio 720p video",
+      "browser": "151.0.7922.34",
+      "requests": {
+        "playback": 1,
+        "prepare": 1,
+        "onlyCached": true,
+        "newTorrents": 0,
+        "serverMediaFetches": 0
+      },
+      "lookups": [
+        {
+          "fast": true,
+          "complete": false
+        }
+      ],
+      "redirects": [
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "eac3",
+          "crossOrigin": false,
+          "corsHeaders": true
+        }
+      ],
+      "cdnRequests": [],
+      "observations": [
+        {
+          "resolution": "720p",
+          "current": {
+            "time": 0.214841,
+            "paused": false,
+            "audioBytes": 0,
+            "videoFrames": 4,
+            "error": null,
+            "title": "Fixture.Show.S01E01.One.720p.H264.mkv",
+            "message": "",
+            "health": "Playing",
+            "memory": {
+              "titles": {}
+            }
+          }
+        },
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        }
+      ]
+    },
+    {
+      "name": "an incomplete fast unknown-audio batch waits for the completed AAC result before any media request",
+      "browser": "151.0.7922.34",
+      "requests": {
+        "playback": 1,
+        "prepare": 1,
+        "onlyCached": true,
+        "newTorrents": 0,
+        "serverMediaFetches": 0
+      },
+      "lookups": [
+        {
+          "fast": true,
+          "complete": false
+        }
+      ],
+      "redirects": [
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "eac3",
+          "crossOrigin": false,
+          "corsHeaders": true
+        }
+      ],
+      "cdnRequests": [],
+      "observations": [
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        }
+      ]
+    },
+    {
+      "name": "a browser without a decode counter selects available AAC and does not invent learned audio success",
+      "browser": "151.0.7922.34",
+      "requests": {
+        "playback": 1,
+        "prepare": 1,
+        "onlyCached": true,
+        "newTorrents": 0,
+        "serverMediaFetches": 0
+      },
+      "lookups": [
+        {
+          "fast": true,
+          "complete": false
+        }
+      ],
+      "redirects": [
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "eac3",
+          "crossOrigin": false,
+          "corsHeaders": true
+        }
+      ],
+      "cdnRequests": [],
+      "observations": [
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        }
+      ]
+    },
+    {
+      "name": "a browser without a decode counter does not automatically start an unknown-audio-only result",
+      "browser": "151.0.7922.34",
+      "requests": {
+        "playback": 1,
+        "prepare": 1,
+        "onlyCached": true,
+        "newTorrents": 0,
+        "serverMediaFetches": 0
+      },
+      "lookups": [
+        {
+          "fast": true,
+          "complete": false
+        }
+      ],
+      "redirects": [
+        {
+          "status": 307,
+          "bodyBytes": 0,
+          "kind": "eac3",
+          "crossOrigin": false,
+          "corsHeaders": true
+        }
+      ],
+      "cdnRequests": [],
+      "observations": [
+        {
+          "event": "loadedmetadata",
+          "time": 0
+        }
+      ]
+    }
+  ],
+  "limitations": "Synthetic original media through the real application and backend with a browser CDN route. No real account, episode media, physical Android decoder or speaker-output acceptance."
+}

@@ -40,7 +40,13 @@ after(async () => {
   }
 });
 
-async function setup(t, { main = 'eac3', alternative = true, missingCounter = false, holdRecovery = false, crossOrigin = false, sourceMemory = null } = {}) {
+async function setup(t, {
+  main = 'eac3', alternative = true, initialAlternative = false,
+  mainResolution = '720p', alternativeResolution = '720p', resolution = 'auto',
+  incompleteFirstBatch = false, holdComplete = false, waitForPlayback = true,
+  requirePreparation = true, missingCounter = false, holdRecovery = false,
+  crossOrigin = false, sourceMemory = null,
+} = {}) {
   const fixture = await startFixture(Number(process.env.AUDIO_TEST_PORT) || 4215);
   const context = await browser.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, serviceWorkers: 'block' });
   const page = await context.newPage(), errors = [], prepares = [], redirects = [], observations = [];
@@ -62,18 +68,24 @@ async function setup(t, { main = 'eac3', alternative = true, missingCounter = fa
       for (const property of event.properties) if (['kAudioTracks', 'kAudioDecoderName'].includes(property.name)) observations.push({ mediaDiagnostic: property });
     });
   }
-  const controls = { started: false, recoveryRequested: false, releaseRecovery: null };
+  const controls = { started: false, recoveryRequested: false, releaseRecovery: null, completeRequested: false, releaseComplete: null, lookups: [] };
   const recoveryGate = holdRecovery ? new Promise(resolve => { controls.releaseRecovery = resolve; }) : Promise.resolve();
+  const completeGate = holdComplete ? new Promise(resolve => { controls.releaseComplete = resolve; }) : Promise.resolve();
   const items = [main, 'aac'].map((kind, index) => {
     const hash = String.fromCharCode(97 + index).repeat(40), selected = media[kind];
-    const filename = `Fixture.Show.S01E01.One.720p.${selected.suffix}`;
-    return { id: index + 1, hash, kind, name: 'Fixture Show', download_finished: true, download_present: true, files: [{ id: 0, short_name: filename, mimetype: selected.mime, size: selected.bytes.length }] };
+    const itemResolution = index ? alternativeResolution : mainResolution;
+    const filename = `Fixture.Show.S01E01.One.${itemResolution}.${selected.suffix}`;
+    return { id: index + 1, hash, kind, resolution: itemResolution, name: 'Fixture Show', download_finished: true, download_present: true, files: [{ id: 0, short_name: filename, mimetype: selected.mime, size: selected.bytes.length }] };
   });
-  fixture.sourceLookup.lookup = async () => {
+  fixture.sourceLookup.lookup = async (_target, options = {}) => {
     fixture.control.lookupCalls++;
+    controls.lookups.push({ fast: options.fast === true, complete: options.complete === true });
     if (controls.started) { controls.recoveryRequested = true; await recoveryGate; }
-    const rows = controls.started && alternative ? items : items.slice(0, 1);
-    return { complete: true, sources: rows.map(item => ({ hash: item.hash, title: item.files[0].short_name, filename: item.files[0].short_name, resolution: '720p', videoCodec: 'H264', audioCodecs: item.kind === 'eac3' ? [] : ['AAC'], size: item.files[0].size, provider: 'Synthetic audio regression' })) };
+    if (incompleteFirstBatch && options.complete) { controls.completeRequested = true; await completeGate; }
+    const complete = !incompleteFirstBatch || options.complete === true;
+    const includeAlternative = alternative && (incompleteFirstBatch ? complete : initialAlternative || controls.started);
+    const rows = includeAlternative ? items : items.slice(0, 1);
+    return { complete, sources: rows.map(item => ({ hash: item.hash, title: item.files[0].short_name, filename: item.files[0].short_name, resolution: item.resolution, videoCodec: 'H264', audioCodecs: item.kind === 'eac3' ? [] : ['AAC'], size: item.files[0].size, provider: 'Synthetic audio regression' })) };
   };
   fixture.discovery.gateway.cached = async hashes => Object.fromEntries(hashes.map(hash => {
     const item = items.find(row => row.hash === hash);
@@ -87,10 +99,10 @@ async function setup(t, { main = 'eac3', alternative = true, missingCounter = fa
   page.setDefaultTimeout(16000);
   page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => { if (new URL(request.url()).pathname === '/api/discover/prepare') prepares.push(request.postDataJSON()); });
-  await page.addInitScript(({ token, missingCounter, sourceMemory }) => {
+  await page.addInitScript(({ token, missingCounter, sourceMemory, resolution }) => {
     sessionStorage.setItem('torbox-web-session', token);
     if (sourceMemory) localStorage.setItem('torbox-source-memory-v1', JSON.stringify(sourceMemory));
-    localStorage.setItem('torbox-settings-v1', JSON.stringify({ autoNext: false, showPlaybackHealth: false, interfaceMode: 'simple' }));
+    localStorage.setItem('torbox-settings-v1', JSON.stringify({ autoNext: false, showPlaybackHealth: false, interfaceMode: 'simple', resolution }));
     if (missingCounter) Object.defineProperty(HTMLMediaElement.prototype, 'webkitAudioDecodedByteCount', { configurable: true, get: () => undefined });
     window.__audioObservations = [];
     document.addEventListener('loadedmetadata', event => {
@@ -99,7 +111,7 @@ async function setup(t, { main = 'eac3', alternative = true, missingCounter = fa
     document.addEventListener('seeked', event => {
       if (event.target instanceof HTMLVideoElement) window.__audioObservations.push({ event: 'seeked', time: event.target.currentTime });
     }, true);
-  }, { token: fixture.session(), missingCounter, sourceMemory });
+  }, { token: fixture.session(), missingCounter, sourceMemory, resolution });
   await context.route('https://**/*', route => route.abort());
   if (crossOrigin) await context.route(fixture.origin + '/', async route => {
     const response = await route.fetch();
@@ -128,23 +140,28 @@ async function setup(t, { main = 'eac3', alternative = true, missingCounter = fa
   });
   t.after(async () => {
     controls.releaseRecovery?.();
+    controls.releaseComplete?.();
     if (!page.isClosed()) {
       observations.push(...await page.evaluate(() => window.__audioObservations));
       if (crossOrigin) observations.push({ finalMediaState: await page.locator('#video-slot video').evaluate(video => ({ readyState: video.readyState, networkState: video.networkState, error: video.error && { code: video.error.code, message: video.error.message }, paused: video.paused, currentTime: video.currentTime })).catch(() => null) });
     }
-    const row = { name: t.name, browser: await browser.version(), requests: { playback: fixture.control.playbackCalls, prepare: prepares.length, onlyCached: prepares.every(body => body.onlyCached === true), newTorrents: fixture.control.creates, serverMediaFetches: fixture.control.mediaFetches }, redirects, cdnRequests: mediaRequests.slice(firstMediaRequest), observations };
+    const row = { name: t.name, browser: await browser.version(), requests: { playback: fixture.control.playbackCalls, prepare: prepares.length, onlyCached: prepares.every(body => body.onlyCached === true), newTorrents: fixture.control.creates, serverMediaFetches: fixture.control.mediaFetches }, lookups: controls.lookups, redirects, cdnRequests: mediaRequests.slice(firstMediaRequest), observations };
     results.push(row); t.diagnostic(JSON.stringify(row));
     await context.close(); await fixture.close();
     assert.deepEqual(errors, []); assert.equal(fixture.control.mediaFetches, 0); assert.equal(fixture.control.creates, 0);
-    assert.ok(prepares.length); assert.ok(prepares.every(body => body.onlyCached === true));
+    if (requirePreparation) assert.ok(prepares.length);
+    assert.ok(prepares.every(body => body.onlyCached === true));
   });
   await page.goto(fixture.origin); await page.waitForSelector('#workspace:not([hidden])');
   await page.locator('#catalog-type').selectOption('series');
   await page.locator('#catalog-grid button').first().click();
   await page.locator('#episode-area button').filter({ hasText: /^Play$/ }).first().click();
+  if (waitForPlayback) { await playing(page); controls.started = true; }
+  return { page, fixture, controls, observations, redirects, prepares };
+}
+
+async function playing(page) {
   await page.waitForFunction(() => { const video = document.querySelector('#video-slot video'); return video && video.currentTime > 0.2 && video.webkitDecodedFrameCount > 0 && !video.paused; });
-  controls.started = true;
-  return { page, fixture, controls, observations, redirects };
 }
 
 async function state(page) {
@@ -197,11 +214,58 @@ test('a real AAC track with an eight-second silent introduction is not rejected 
   assert.ok(audiblePeak > 0.0001); assert.equal(fixture.control.playbackCalls, 1); assert.equal(current.paused, false);
 });
 
-test('an unavailable browser decode counter remains unknown and never invents an audio failure or success', async t => {
-  const { page, fixture, observations } = await setup(t, { missingCounter: true });
-  await page.waitForFunction(() => document.querySelector('#video-slot video')?.currentTime > 16.1, undefined, { timeout: 20000 });
+for (const resolution of ['auto', '720p']) test(`${resolution} selection starts known 1080p AAC before unknown-audio 720p video`, async t => {
+  const { page, fixture, observations, redirects } = await setup(t, { initialAlternative: true, alternativeResolution: '1080p', resolution });
+  const current = await state(page); observations.push({ resolution, current });
+  assert.match(current.title, /1080p\.H264\.AAC/, 'the requested quality must not put unconfirmed sound before compatible audio');
+  assert.ok(current.audioBytes > 0, 'the selected AAC fixture must actually decode audio');
+  assert.equal(current.paused, false);
+  assert.equal(fixture.control.playbackCalls, 1, 'selection must start the compatible source directly');
+  assert.ok(redirects.length > 0);
+  assert.ok(redirects.every(row => row.kind === 'aac'), 'unknown-audio EAC3 must not receive a media request before the available AAC version');
+});
+
+test('an incomplete fast unknown-audio batch waits for the completed AAC result before any media request', async t => {
+  const { page, fixture, controls, observations, redirects } = await setup(t, { incompleteFirstBatch: true, holdComplete: true, waitForPlayback: false });
+  const deadline = Date.now() + 3000;
+  while (!controls.completeRequested && Date.now() < deadline) await page.waitForTimeout(40);
+  assert.equal(controls.completeRequested, true, 'a playable picture in an incomplete batch must not stop the full audio-compatible search');
+  assert.ok(controls.lookups.some(row => row.fast));
+  assert.equal(fixture.control.playbackCalls, 0);
+  assert.deepEqual(redirects, []);
+  await page.waitForTimeout(400);
+  assert.equal(fixture.control.playbackCalls, 0, 'playback must stay pending while the complete result is held');
+  controls.releaseComplete();
+  await playing(page); controls.started = true;
   const current = await state(page); observations.push({ current });
+  assert.match(current.title, /H264\.AAC/); assert.ok(current.audioBytes > 0);
+  assert.equal(fixture.control.playbackCalls, 1);
+  assert.ok(redirects.length > 0);
+  assert.ok(redirects.every(row => row.kind === 'aac'), 'the earlier unknown-audio source must never be opened');
+});
+
+test('a browser without a decode counter selects available AAC and does not invent learned audio success', async t => {
+  const { page, fixture, observations, redirects } = await setup(t, { missingCounter: true, initialAlternative: true, alternativeResolution: '1080p', resolution: '720p' });
+  const audiblePeak = await audioPeak(page);
+  assert.ok(audiblePeak > 0.0001, 'the counterless browser must play the real audible AAC fixture');
+  await page.waitForFunction(() => document.querySelector('#video-slot video')?.currentTime > 16.1, undefined, { timeout: 20000 });
+  const current = await state(page); observations.push({ audiblePeak, current });
   assert.equal(current.audioBytes, undefined); assert.equal(current.paused, false); assert.equal(fixture.control.playbackCalls, 1);
+  assert.match(current.title, /1080p\.H264\.AAC/);
+  assert.ok(redirects.length > 0); assert.ok(redirects.every(row => row.kind === 'aac'));
+  assert.equal(current.memory.titles['series:tt1234567']?.sources['a'.repeat(40)]?.successes || 0, 0);
+  assert.equal(current.memory.titles['series:tt1234567']?.sources['b'.repeat(40)]?.successes || 0, 0, 'metadata confidence alone must not become observed sound confirmation');
+});
+
+test('a browser without a decode counter does not automatically start an unknown-audio-only result', async t => {
+  const { page, fixture, observations, redirects } = await setup(t, { missingCounter: true, alternative: false, waitForPlayback: false, requirePreparation: false });
+  await page.locator('#play-fallback .play-fallback-panel').waitFor();
+  await page.waitForTimeout(700);
+  const current = await state(page); observations.push({ current });
+  assert.equal(fixture.control.playbackCalls, 0, 'there is no runtime decoder safeguard to justify silently opening this unknown source');
+  assert.deepEqual(redirects, [], 'no movie bytes may be requested automatically');
+  assert.equal(await page.locator('#video-slot video').count(), 0);
+  assert.equal(await page.getByRole('button', { name: /^No sound$/, includeHidden: true }).count(), 0);
   assert.equal(current.memory.titles['series:tt1234567']?.sources['a'.repeat(40)]?.successes || 0, 0);
 });
 

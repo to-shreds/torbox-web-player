@@ -28,7 +28,7 @@ jobs:
       - name: Checkout production player
         uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.sha }}
           path: main-src
       - name: Assemble root and legacy key path from the same source
         shell: bash

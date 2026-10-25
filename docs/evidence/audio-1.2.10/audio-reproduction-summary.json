@@ -1,0 +1,17 @@
+{
+  "baselineCommit": "52303d8b33ef30fc37bc8f748cd322865f8ce982",
+  "browser": "Chrome 151.0.7922.34",
+  "baselineTargetedCases": 5,
+  "baselinePassed": 1,
+  "baselineFailed": 4,
+  "fixedAudioCases": 11,
+  "fixedAudioPassed": 11,
+  "fixedAudioFailed": 0,
+  "reproducedFailures": [
+    "720p unknown EAC3 selected ahead of available 1080p AAC",
+    "Incomplete source batch starts unknown EAC3 before full lookup",
+    "Browser without native counter selects EAC3 despite AAC alternative",
+    "Browser without native counter starts unknown-only audio automatically"
+  ],
+  "scope": "Actual native browser decoding of original synthetic media via the real app and fixture API. No personal TorBox account, actual episode, physical Android or speaker output was tested."
+}
