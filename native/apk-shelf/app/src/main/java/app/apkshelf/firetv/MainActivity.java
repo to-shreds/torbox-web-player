@@ -93,7 +93,7 @@ public final class MainActivity extends Activity {
         migrateOriginalDefault();
         tokenStore = new TokenStore(this);
         try { token = tokenStore.read(); }
-        catch (Exception e) { credentialsError = "Your saved GitHub token could not be opened. Re-enter it in Folder settings."; }
+        catch (Exception e) { credentialsError = "Saved GitHub token unavailable. Re-enter it in Folder settings."; }
         try {
             config = RepoConfig.fromInput(preferences.getString("repository", DEFAULT_REPO),
                     preferences.getString("ref", DEFAULT_REF), preferences.getString("folder", DEFAULT_FOLDER));
@@ -138,7 +138,6 @@ public final class MainActivity extends Activity {
         TextView title = text("APK Shelf", 29, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         root.addView(title);
-        root.addView(text("Your GitHub folder, on your TV.", 14, MUTED));
 
         sourceLabel = text("", 13, ACCENT);
         sourceLabel.setMaxLines(2);
@@ -186,7 +185,7 @@ public final class MainActivity extends Activity {
             if (!busy && !installerActive && position < entries.size()) download(entries.get(position));
         });
         content.addView(list, new android.widget.FrameLayout.LayoutParams(-1, -1));
-        emptyLabel = text("Loading your folder...", 17, MUTED);
+        emptyLabel = text("Loading APKs...", 17, MUTED);
         emptyLabel.setGravity(Gravity.CENTER);
         emptyLabel.setPadding(dp(24), dp(12), dp(24), dp(12));
         content.addView(emptyLabel, new android.widget.FrameLayout.LayoutParams(-1, -1));
@@ -205,14 +204,14 @@ public final class MainActivity extends Activity {
         progress.setVisibility(View.GONE);
         statusArea.addView(progress, new LinearLayout.LayoutParams(-1, dp(7)));
         LinearLayout transferActions = new LinearLayout(this);
-        cancelButton = button("Cancel", v -> cancelOperation("Cancelled. Choose an APK to try again."));
+        cancelButton = button("Cancel", v -> cancelOperation("Cancelled."));
         cancelButton.setVisibility(View.GONE);
         installButton = button("Install downloaded APK", v -> installPending());
         installButton.setVisibility(pendingFile == null ? View.GONE : View.VISIBLE);
         transferActions.addView(cancelButton, toolbarParams());
         transferActions.addView(installButton, toolbarParams());
         statusArea.addView(transferActions);
-        TextView hint = text("SELECT  Download and install       MENU  Refresh       BACK  Cancel or exit", 11, MUTED);
+        TextView hint = text("SELECT  Install       MENU  Refresh       BACK  Cancel / Exit", 11, MUTED);
         LinearLayout.LayoutParams hintParams = matchWrap();
         hintParams.topMargin = dp(9);
         root.addView(hint, hintParams);
@@ -228,11 +227,11 @@ public final class MainActivity extends Activity {
 
     private void refresh() {
         if (busy || installerActive) return;
-        final int operation = beginOperation("Loading APKs and GitHub Releases...");
+        final int operation = beginOperation("Loading APKs...");
         final GitHubClient.Cancellation cancellation = active;
         final RepoConfig source = config;
         final String auth = token;
-        emptyLabel.setText("Loading your APKs and Releases...");
+        emptyLabel.setText("Loading APKs...");
         worker.execute(() -> {
             try {
                 final GitHubClient.Listing result = client.listAll(source, auth, cancellation);
@@ -243,9 +242,9 @@ public final class MainActivity extends Activity {
                     entries.addAll(result.entries);
                     adapter.notifyDataSetChanged();
                     countLabel.setText(entries.size() + (entries.size() == 1 ? " APK" : " APKS"));
-                    emptyLabel.setText("No APKs found yet.\nUpload an .apk to this GitHub folder or attach it to a published Release, then select Refresh.");
-                    String message = entries.isEmpty() ? "GitHub connected. Ready for your first APK or Release asset."
-                            : "Select an APK to download it and open the installer.";
+                    emptyLabel.setText("No APKs found.\nAdd APKs to the repository or a published Release, then Refresh.");
+                    String message = entries.isEmpty() ? "No APKs found."
+                            : "Select an APK to install.";
                     if (result.warning != null && !result.warning.isEmpty()) message = result.warning;
                     if (credentialsError != null) message = credentialsError;
                     statusLabel.setText(message);
@@ -311,7 +310,7 @@ public final class MainActivity extends Activity {
                     preferences.edit().putString("pending_file", file.getName())
                             .putString("pending_name", pendingName).putString("pending_description", description).commit();
                     installButton.setVisibility(View.VISIBLE);
-                    statusLabel.setText("Download verified. " + description);
+                    statusLabel.setText("Verified: " + description);
                     if (foreground) installPending();
                 });
             } catch (Exception e) { reportFailure(operation, e, true); }
@@ -326,7 +325,7 @@ public final class MainActivity extends Activity {
             if (!current(operation)) return;
             endOperation();
             statusLabel.setText(safeMessage);
-            if (entries.isEmpty()) emptyLabel.setText("Could not load this folder.\nCheck Folder settings, then select Refresh.");
+            if (entries.isEmpty()) emptyLabel.setText("Could not load APKs.\nCheck Folder settings, then Refresh.");
             if (foreground) {
                 new AlertDialog.Builder(this).setTitle(download ? "Download stopped" : "Could not load APKs")
                         .setMessage(safeMessage).setPositiveButton("OK", null).show();
@@ -369,7 +368,7 @@ public final class MainActivity extends Activity {
         generation++;
         endOperation();
         statusLabel.setText(message);
-        if (entries.isEmpty()) emptyLabel.setText("Select Refresh to load your APKs and Releases.");
+        if (entries.isEmpty()) emptyLabel.setText("Select Refresh to load APKs.");
         refreshButton.requestFocus();
     }
 
@@ -390,7 +389,7 @@ public final class MainActivity extends Activity {
         try {
             installerActive = true;
             startActivityForResult(intent, INSTALL_REQUEST);
-            statusLabel.setText("Installer opened for " + pendingName + ". Confirm installation on the next screen.");
+            statusLabel.setText("Installer opened: " + pendingName + ". Confirm installation.");
         } catch (ActivityNotFoundException e) {
             intent.setAction(Intent.ACTION_VIEW);
             try { startActivityForResult(intent, INSTALL_REQUEST); }
@@ -434,7 +433,7 @@ public final class MainActivity extends Activity {
         form.setOrientation(LinearLayout.VERTICAL);
         form.setPadding(dp(24), dp(10), dp(24), dp(14));
         scroll.addView(form);
-        TextView explanation = text("APKs from this GitHub folder and all published Releases in the repository appear together. Public sources need no token. Files in subfolders are not listed.", 14, MUTED);
+        TextView explanation = text("Lists APKs from the selected folder and published Releases. Subfolders excluded. Public repositories require no token.", 14, MUTED);
         form.addView(explanation);
         EditText repository = field(form, "Repository (owner/name)", config.owner + "/" + config.repo, false);
         EditText ref = field(form, "Branch or tag (blank uses the default branch)", config.ref, false);
@@ -446,7 +445,7 @@ public final class MainActivity extends Activity {
         form.addView(error);
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle("GitHub folder")
                 .setView(scroll).setPositiveButton("Save and load", null)
-                .setNeutralButton("Use my default folder", null).setNegativeButton("Cancel", null).create();
+                .setNeutralButton("Fill defaults", null).setNegativeButton("Cancel", null).create();
         dialog.setOnShowListener(ignored -> {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
                 try {
@@ -541,15 +540,15 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onPause() { foreground = false; super.onPause(); }
     @Override protected void onStop() {
-        if (busy) cancelOperation("Stopped when APK Shelf left the screen. Refresh or choose the APK again.");
+        if (busy) cancelOperation("Download stopped when app left screen.");
         super.onStop();
     }
     @Override protected void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
         if (request == INSTALL_REQUEST) {
             installerActive = false;
-            statusLabel.setText(result == RESULT_OK ? "Installation completed. Choose another APK, or press Home to open your app."
-                    : "Installer closed. You can retry using Install downloaded APK, or choose another file.");
+            statusLabel.setText(result == RESULT_OK ? "Installation completed."
+                    : "Installer closed. Select Install downloaded APK to retry.");
             installButton.requestFocus();
         }
         if (request == SETTINGS_REQUEST && pendingFile != null) {
@@ -558,7 +557,7 @@ public final class MainActivity extends Activity {
         }
     }
     @Override public void onBackPressed() {
-        if (busy) cancelOperation("Cancelled. Choose an APK to try again.");
+        if (busy) cancelOperation("Cancelled.");
         else super.onBackPressed();
     }
     @Override public boolean onKeyUp(int code, KeyEvent event) {
@@ -655,7 +654,7 @@ public final class MainActivity extends Activity {
             filename.setText(entry.name);
             detail.setText(size(entry.size) + (entry.release
                     ? "    Release: " + entry.releaseTitle
-                    : "    Repository file") + "    Select to download and install");
+                    : "    Repository file"));
             return row;
         }
     }
