@@ -2,6 +2,12 @@
 // without a media error. Decoder bytes are positive evidence even during a
 // silent scene. Do not route CDN audio through Web Audio: absent CORS permission
 // would itself silence otherwise working playback.
+export function supportsAudioDecodeCounter(video) {
+  try {
+    const bytes = video?.webkitAudioDecodedByteCount;
+    return typeof bytes === 'number' && Number.isFinite(bytes) && bytes >= 0;
+  } catch { return false; }
+}
 export class PlaybackAudioCheck {
   constructor({ graceSeconds = 5 } = {}) {
     this.graceSeconds = graceSeconds; this.elapsed = 0; this.previous = null; this.state = 'unknown';
@@ -17,8 +23,10 @@ export class PlaybackAudioCheck {
     this.previous = { now, current, advancing };
     if (!advancing || !previous?.advancing || !Number.isFinite(current)) return this.state;
     const wall = (now - previous.now) / 1000, media = (current - previous.current) / rate;
-    // A seek or a throttled background callback is not time spent checking sound.
-    if (wall > 0 && wall <= 1.5 && media > 0 && media <= wall * 2 + .5) this.elapsed += Math.min(wall, media);
+    // Visible playback and PiP can receive moderately throttled callbacks.
+    // Count bounded, clock-consistent progress across them, but never treat a
+    // seek jump or a long suspension as an entire completed audio check.
+    if (wall > 0 && wall <= 5 && media > 0 && media <= wall + .5) this.elapsed += Math.min(1.5, wall, media);
     if (this.elapsed >= this.graceSeconds) this.state = 'missing';
     return this.state;
   }

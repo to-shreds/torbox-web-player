@@ -1,13 +1,13 @@
 const CACHE_PREFIX='torbox-player:'+self.registration.scope+':';
-const CACHE=CACHE_PREFIX+'release-1.2.9-stability.1';
-const BUILD='release-1.2.9-stability.1';
+const CACHE=CACHE_PREFIX+'release-1.2.10-audio.1';
+const BUILD='release-1.2.10-audio.1';
 const STATIC_BUILD='release-1.2.8-party.1';
 const SHELL=[
   './','./index.html',
   `./style.css?v=${STATIC_BUILD}`,`./discover.css?v=${STATIC_BUILD}`,`./boot.js?v=${BUILD}`,`./app.js?v=${BUILD}`,`./trakt.js?v=${BUILD}`,`./trakt-vault.js?v=${BUILD}`,`./trakt.css?v=${BUILD}`,
-  `./playback-lifecycle.js?v=${STATIC_BUILD}`,`./runtime.js?v=${STATIC_BUILD}`,`./history.js?v=${STATIC_BUILD}`,`./settings.js?v=${STATIC_BUILD}`,`./vault.js?v=${STATIC_BUILD}`,
+  `./playback-lifecycle.js?v=${BUILD}`,`./runtime.js?v=${STATIC_BUILD}`,`./history.js?v=${STATIC_BUILD}`,`./settings.js?v=${STATIC_BUILD}`,`./vault.js?v=${STATIC_BUILD}`,
   `./watchlist.js?v=${STATIC_BUILD}`,`./search-history.js?v=${STATIC_BUILD}`,`./source-memory.js?v=${STATIC_BUILD}`,`./parental-controls.js?v=${STATIC_BUILD}`,
-  `./device-transfer.js?v=${STATIC_BUILD}`,`./playback-errors.js?v=${STATIC_BUILD}`,`./discover.js?v=${STATIC_BUILD}`,`./source-client.js?v=${STATIC_BUILD}`,
+  `./device-transfer.js?v=${STATIC_BUILD}`,`./playback-errors.js?v=${STATIC_BUILD}`,`./discover.js?v=${BUILD}`,`./source-client.js?v=${STATIC_BUILD}`,
   `./sports-player.html?v=${STATIC_BUILD}`,`./sports-player.js?v=${STATIC_BUILD}`,`./sports-player.css?v=${STATIC_BUILD}`,`./sports.js?v=${STATIC_BUILD}`,`./sports-core.js?v=${STATIC_BUILD}`,`./sports.css?v=${STATIC_BUILD}`,`./sports-catalog.json?v=${STATIC_BUILD}`,`./hls.min.js?v=${STATIC_BUILD}`,
   `./buffstreams.js?v=${STATIC_BUILD}`,`./buffstreams-ui.js?v=${STATIC_BUILD}`,`./buffstreams-opening.html?v=${STATIC_BUILD}`,`./buffstreams-opening.css?v=${STATIC_BUILD}`,
   `./games-nav.js?v=${STATIC_BUILD}`,`./games.js?v=${STATIC_BUILD}`,`./games-core.js?v=${STATIC_BUILD}`,`./games.css?v=${STATIC_BUILD}`,`./games-catalog.json?v=${STATIC_BUILD}`,

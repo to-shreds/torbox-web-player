@@ -41,13 +41,13 @@ test('text search spans movies and shows instead of inheriting hidden browse fil
   assert.ok(discover.includes("feed:query?'popular':$('catalog-feed').value"));
 });
 
-test('stable release metadata is 1.2.9',async()=>{
+test('stable release metadata is 1.2.10',async()=>{
   const [pkg,entry,server,sw,readme]=await Promise.all([
     read('../package.json'),read('../entry.mjs'),read('../server.mjs'),read('../public/sw.js'),read('../README.md')
   ]);
-  assert.equal(JSON.parse(pkg).version,'1.2.9');
-  assert.match(entry,/version: '1\.2\.9'/);
-  assert.match(server,/version: '1\.2\.9'/);
+  assert.equal(JSON.parse(pkg).version,'1.2.10');
+  assert.match(entry,/version: '1\.2\.10'/);
+  assert.match(server,/version: '1\.2\.10'/);
   assert.match(sw,/torbox-player:/);
-  assert.match(readme,/Current backend version: \*\*1\.2\.9\*\*/);
+  assert.match(readme,/Current backend version: \*\*1\.2\.10\*\*/);
 });

@@ -1,4 +1,4 @@
-import { LatestPlaybackAction, PlaybackPreparationCache } from './playback-lifecycle.js?v=release-1.2.8-party.1';
+import { LatestPlaybackAction, PlaybackPreparationCache, supportsAudioDecodeCounter } from './playback-lifecycle.js?v=release-1.2.10-audio.1';
 import { loadPublicSources, browserContainerHints, sourceHints, preparedSourceCompatibility } from './source-client.js?v=release-1.2.8-party.1';
 import { getSettings, updateSettings } from './settings.js?v=release-1.2.8-party.1';
 import { listRecent, formatResumeTime } from './history.js?v=release-1.2.8-party.1';
@@ -91,9 +91,12 @@ export const preferredSource = list => recommendSource(list, 'movie', 'auto');
 export function automaticSourceOrder(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
   let remaining=(Array.isArray(list)?list:[]).filter(source=>source.memoryBad!==true&&source.memoryAudio!=='bad'&&source.browserUnsupported!==true&&source.cachedBrowserPlayable!==false&&source.audioRisk!==true&&source.videoRisk!==true&&sourceAudioConfidence(source)>0&&sourceLanguagePreference(source)>0),ordered=[];
   const passes=resolution&&resolution!=='auto'?[resolution,'auto']:['auto'];
-  for(const pass of passes){
+  // A quality preference must not fill the bounded candidate list with unknown
+  // audio while compatible or confirmed sound is available at another quality.
+  for(const confidence of [3,2,1])for(const pass of passes){
     while(true){
-      const best=recommendSource(remaining,type,pass,sizeProfile);if(!best)break;
+      const pool=remaining.filter(source=>sourceAudioConfidence(source)===confidence);
+      const best=recommendSource(pool,type,pass,sizeProfile);if(!best)break;
       ordered.push(best);const key=sourceRecoveryKey(best);remaining=remaining.filter(source=>source!==best&&sourceRecoveryKey(source)!==key);
     }
   }
@@ -113,9 +116,19 @@ export function validatePreparedSource(source,result,{unattended=false,requireCo
   if(unattended&&compatibility.browserUnsupported&&!allowBrowserUnsupported){code='BROWSER_CONTAINER_UNSUPPORTED';message='This file uses a format that cannot play in this browser. Trying another version.';}
   else if(unattended&&compatibility.audioRisk){code='BROWSER_AUDIO_UNSUPPORTED';message='This file has Dolby/DTS audio that may be silent in this browser. Trying another version.';}
   else if(unattended&&compatibility.videoRisk){code='BROWSER_VIDEO_UNSUPPORTED';message='This file uses a video codec that may not play in this browser. Trying another version.';}
-  else if(requireCompatibleAudio&&sourceAudioConfidence({...source,...compatibility})<2){code='AUDIO_COMPATIBILITY_UNCONFIRMED';message='This alternative has no compatible audio information. Trying another version.';}
+  // Saved sound feedback can cover a whole season torrent. It cannot certify
+  // the actual selected file when native audio verification is unavailable.
+  else if(requireCompatibleAudio&&!compatibility.audioCompatible){code='AUDIO_COMPATIBILITY_UNCONFIRMED';message='This alternative has no compatible audio information. Trying another version.';}
   if(code){const error=new Error(message);error.code=code;throw error;}
   return compatibility;
+}
+export function sourcesForAudioRequirement(list, requireCompatibleAudio=false) {
+  const sources=Array.isArray(list)?list:[];
+  if(!requireCompatibleAudio)return sources;
+  // A strict check cannot accept memory alone. Do not let those rows consume
+  // the candidate budget ahead of compatible audio; leave saved feedback intact.
+  return sources.map(source=>source.memoryAudio==='good'&&!sourceHints(source).audioCompatible
+    ?{...source,memoryAudio:'unknown'}:source);
 }
 export function automaticCachedSourceOrder(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
   // An unavailable cache lookup is not proof that a source is uncached. The
@@ -131,9 +144,10 @@ export function browserPreparationOptions(list, type = 'movie', resolution = 'au
   const regular=eligible.filter(source=>!/\b(?:superfan|extended(?:[ ._-]+cut)?)\b/i.test([source.filename,source.title].filter(Boolean).join(' ')));
   let remaining=regular.length?regular:eligible,ordered=[];
   const passes=resolution&&resolution!=='auto'?[resolution,'auto']:['auto'];
-  for(const pass of passes){
+  for(const confidence of [3,2,1])for(const pass of passes){
     while(ordered.length<Math.max(0,limit)){
-      const best=recommendSource(remaining,type,pass,sizeProfile);if(!best)break;
+      const pool=remaining.filter(source=>sourceAudioConfidence(source)===confidence);
+      const best=recommendSource(pool,type,pass,sizeProfile);if(!best)break;
       ordered.push(best);const key=sourceRecoveryKey(best);
       remaining=remaining.filter(source=>source!==best&&sourceRecoveryKey(source)!==key);
     }
@@ -221,10 +235,10 @@ export function recoverySourceOrder(list, context = {}, type = context?.current?
   const requested=context?.resolution&&context.resolution!=='auto'?context.resolution:currentTier||'auto';
   const tiers=[...new Set([requested,...lowerResolutionOrder(currentTier||context?.sourceResolution,context?.resolution||'auto'),'auto'])];
   const ordered=[];
-  // After a sound failure, known sound outranks resolution. Unknown metadata
+  // On every automatic retry, known sound outranks resolution. Unknown metadata
   // may still be checked after those options, but readyFile must obtain
   // positive audio evidence from the actual prepared file before playing it.
-  for(const confidence of context.audioRecovery?[3,2,1]:[null])for(const resolution of tiers){
+  for(const confidence of [3,2,1])for(const resolution of tiers){
     while(true){
       const pool=confidence===null?remaining:remaining.filter(source=>sourceAudioConfidence(source)===confidence);
       const best=recommendSource(pool,type,resolution,sizeProfile);if(!best)break;
@@ -252,6 +266,7 @@ function createResolutionSelect(value = getResolution()) {
 export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity }) {
   const playbackActions=new LatestPlaybackAction();
   const preparations=new PlaybackPreparationCache();
+  const audioDecodeObservable=supportsAudioDecodeCounter(document.createElement('video'));
   let closingTitleForPlayback=false;
   const cancelPlayback=()=>{playbackActions.cancel();resumeActivity?.hide?.();};
   let active=false, guestMode=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0, nextUpGeneration=0;
@@ -413,7 +428,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     if(!result.sources?.length){const error=new Error('No supported source found.');error.code='NO_CACHED_BROWSER_SOURCE';error.complete=lookup.complete;throw error;}return {...result,complete:lookup.complete,sources:applySourceMemory(target,result.sources)};
   }
 
-  async function readyFile(source, { signal, unattended=false, allowBrowserUnsupported=false, requireCompatibleAudio=false, waitForPreparation=true, onlyCached=source.cached===true, preparationTimeoutMs=300000, initialTimeoutMs=waitForPreparation?60000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } = {}){
+  async function readyFile(source, { signal, unattended=false, allowBrowserUnsupported=false, requireCompatibleAudio=unattended&&!audioDecodeObservable, waitForPreparation=true, onlyCached=source.cached===true, preparationTimeoutMs=300000, initialTimeoutMs=waitForPreparation?60000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } = {}){
     const deadline=Date.now()+(waitForPreparation?preparationTimeoutMs:initialTimeoutMs);
     const preparationSignal=AbortSignal.timeout(waitForPreparation?preparationTimeoutMs:initialTimeoutMs);
     const boundedSignal=signal?AbortSignal.any([signal,preparationSignal]):preparationSignal;
@@ -447,11 +462,11 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     throw new Error('TorBox is still preparing this source. Try again shortly.');
   }
 
-  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,cacheErrorCode}={}){
+  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,cacheErrorCode,requireCompatibleAudio=!audioDecodeObservable}={}){
     if(blockedCacheChecks.has(cacheErrorCode)){const error=new Error(cacheErrorCode==='TORBOX_RATE_LIMITED'?'TorBox is temporarily limiting requests. Wait a moment, then check again.':cacheErrorCode==='TORBOX_ACCESS_DENIED'?'TorBox could not authorize the availability check. Check your account sign-in, then retry.':cacheErrorCode==='TORBOX_NOT_CONFIGURED'?'The TorBox connection is not configured. Check your account connection.':cacheErrorCode==='TORBOX_PLAN_RESTRICTED'?'TorBox reported an account restriction while checking availability.':'TorBox returned an unreadable availability response. Check again shortly.');error.code=cacheErrorCode;throw error;}
     // A policy rejection belongs to this bounded attempt, not permanent user
     // feedback. Browser support can change independently of the source itself.
-    return resolveAutomaticCachedSource(sources,target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false,onlyCached:true})});
+    return resolveAutomaticCachedSource(sourcesForAudioRequirement(sources,requireCompatibleAudio),target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false,onlyCached:true,requireCompatibleAudio})});
   }
 
   async function preparedPlayback(target,resolution,{signal,onCandidate,refresh=false}={}){
@@ -463,11 +478,12 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       let registered;
       try{
         registered=await registeredSources(target,bounded,{fast:true,refresh});
-        try{return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify,cacheErrorCode:registered.cacheErrorCode}),registered};}
+        try{return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify,cacheErrorCode:registered.cacheErrorCode,requireCompatibleAudio:registered.complete===false||!audioDecodeObservable}),registered};}
         catch(error){if(error?.code!=='NO_CACHED_BROWSER_SOURCE'||registered.complete)throw error;}
       }catch(error){if(error?.code!=='NO_CACHED_BROWSER_SOURCE'||error.complete!==false){error.registered=registered||error.registered;throw error;}registered=registered||error.registered;}
-      // The first index may have only uncached or incompatible results. Wait
-      // for the existing search rather than hiding a slower correct source.
+      // The first index may have only uncached, incompatible or unknown-audio
+      // results. Give the existing search time to return a compatible version
+      // before falling back to audio the browser must check during playback.
       try{
         registered=await registeredSources(target,bounded,{complete:true});
         return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify,cacheErrorCode:registered.cacheErrorCode}),registered};
@@ -522,7 +538,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   function renderPlaybackFallback(meta,target,episodeName,resolution,sources,overrides={},failure={}){
     const area=$('play-fallback');if(!area)return false;
     const blocked=blockedCacheChecks.has(failure?.code)||blockedCacheChecks.has(failure?.registered?.cacheErrorCode);
-    const options=blocked?[]:browserPreparationOptions(applySourceMemory(target,sources),target.type,resolution,getSettings().sourceSizeProfile,3);
+    const options=blocked?[]:browserPreparationOptions(sourcesForAudioRequirement(applySourceMemory(target,sources),!audioDecodeObservable),target.type,resolution,getSettings().sourceSizeProfile,3);
     area.replaceChildren();
     const panel=element('section','','play-fallback-panel');
     const cacheUnknown=failure?.registered?.cacheAvailability==='unknown';
@@ -752,11 +768,12 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       const bounded=AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(25000)]);
       const registered=await registeredSources(context.current,bounded,{complete:true});
       const failedKey=sourceRecoveryKey(context.sourceInfo),attempted=new Set(Array.isArray(context.recoveryTried)?context.recoveryTried:[]);if(failedKey)attempted.add(failedKey);context.recoveryTried=[...attempted];
-      const candidates=boundedRecoverySourceOrder(registered.sources.filter(source=>source.cached===true),context,context.current.type,getSettings().sourceSizeProfile).slice(0,3),budgetSignal=AbortSignal.any([bounded,AbortSignal.timeout(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS)]);
+      const requireCompatibleAudio=context.audioRecovery===true||!audioDecodeObservable;
+      const candidates=boundedRecoverySourceOrder(sourcesForAudioRequirement(registered.sources.filter(source=>source.cached===true),requireCompatibleAudio),context,context.current.type,getSettings().sourceSizeProfile).slice(0,3),budgetSignal=AbortSignal.any([bounded,AbortSignal.timeout(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS)]);
       for(const best of candidates){
         if(budgetSignal.aborted)break;
         try{
-          const result=await readyFile(best,{signal:budgetSignal,unattended:true,requireCompatibleAudio:context.audioRecovery===true,waitForPreparation:false});
+          const result=await readyFile(best,{signal:budgetSignal,unattended:true,requireCompatibleAudio,waitForPreparation:false});
           if(signal?.aborted||!active)return false;
           const candidateKey=sourceRecoveryKey(best);if(candidateKey)attempted.add(candidateKey);context.recoveryTried=[...attempted];
           const nextContext={...context,...buildContext({name:context.title,poster:context.poster,episodes:[]},context.current,context.episodeName||'',context.resolution||'auto',best),forceStartOver:false,rewindOnResumeSeconds:0,queue:context.queue||[],recoveryTried:[...attempted]};

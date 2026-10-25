@@ -1,0 +1,24 @@
+{
+  "node": [
+    "\u2139 {\"devices\":24,\"playbackStarts\":288,\"seekRedirects\":576,\"mediaBodyBytes\":0,\"upstreamMediaFetches\":0,\"durationMs\":587,\"p50Ms\":38,\"p95Ms\":65}",
+    "\u2139 tests 649",
+    "\u2139 suites 0",
+    "\u2139 pass 643",
+    "\u2139 fail 0",
+    "\u2139 cancelled 0",
+    "\u2139 skipped 6",
+    "\u2139 todo 0",
+    "\u2139 duration_ms 4285.616798"
+  ],
+  "stress": [
+    "\u2139 {\"devices\":96,\"playbackStarts\":2304,\"seekRedirects\":4608,\"mediaBodyBytes\":0,\"upstreamMediaFetches\":0,\"durationMs\":3416,\"p50Ms\":128,\"p95Ms\":170}",
+    "\u2139 tests 11",
+    "\u2139 suites 0",
+    "\u2139 pass 11",
+    "\u2139 fail 0",
+    "\u2139 cancelled 0",
+    "\u2139 skipped 0",
+    "\u2139 todo 0",
+    "\u2139 duration_ms 3820.132487"
+  ]
+}

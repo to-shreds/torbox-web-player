@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-25T05:27:07.017773+00:00",
+  "baseline": "52303d8b33ef30fc37bc8f748cd322865f8ce982",
+  "version": "1.2.10",
+  "frontendBuild": "release-1.2.10-audio.1",
+  "syntaxAndPinnedVendorCheck": "passed",
+  "node": {
+    "registered": 675,
+    "passed": 669,
+    "failed": 0,
+    "skipped": 6,
+    "optionalSkips": "Live provider/account integration checks remain opt-in."
+  },
+  "audioBrowser": {
+    "browser": "Chrome 151.0.7922.34",
+    "cases": 11,
+    "passed": 11,
+    "failed": 0,
+    "synthetic": true
+  },
+  "publication": "Pending release CI, Pages and backend publication."
+}

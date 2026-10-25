@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-24T01:42:12.907097+00:00",
+  "deploy": "dep-dbe0panb9u1s73bpssa0",
+  "commit": "07632e4a7e49422d8c131250a565e37d5435b4bb",
+  "checks": [
+    {
+      "path": "/healthz",
+      "status": 200,
+      "payload": {
+        "ok": true,
+        "version": "1.2.9",
+        "stage": "catalog-first-preview"
+      },
+      "ok": true
+    },
+    {
+      "path": "/trakt.js",
+      "status": 200,
+      "sha256": "4da0bf12fbf48293f1251d84acd15ae29180ab7f64733ec379373c6dafb8e14b",
+      "ok": true
+    },
+    {
+      "path": "/trakt-vault.js",
+      "status": 200,
+      "sha256": "665e3af4d6474ca7851ea3d71789977868fd1722d6db24d0afe2b2699142d039",
+      "ok": true
+    },
+    {
+      "path": "/trakt.css",
+      "status": 200,
+      "sha256": "00357bbc100e971fc94fa545a91b10e88cf9e5eb9348ba68c1fa388920a9a21c",
+      "ok": true
+    }
+  ],
+  "success": true
+}
