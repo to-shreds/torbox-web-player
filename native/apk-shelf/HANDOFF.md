@@ -1,39 +1,41 @@
 # APK Shelf handoff
 
-## Goal, controlling sources and current version
+## Project goal and controlling sources
 
-APK Shelf is a small standalone native Fire TV utility for installing ordinary APKs uploaded either as normal repository files or as GitHub Release assets. The user controls uploads from a browser and selects files with the TV remote. The default repository is **`to-shreds/apks`**, branch `main` (empty configured ref), repository root (empty configured folder), plus all published Releases in that repository.
+APK Shelf is a lightweight, native Fire TV app for viewing/downloading ordinary APKs from a GitHub repository's selected folder **and** its published Releases in one list and handing the APK to Android's regular installer. Newly uploaded APKs appear after Refresh, without rebuilding Shelf.
 
-The app source is [`to-shreds/torbox-web-player/native/apk-shelf`](https://github.com/to-shreds/torbox-web-player/tree/native-updates/native/apk-shelf) on `native-updates`. The reviewed 1.0.2 Java/manifest/test sources are at commit **`af53b2d4e14e0b64fbcb556ab02a66ae28345b84`**; subsequent commits update docs and publish binaries without changing the tested app Java or Android manifest. Read the private `to-shreds/ProjectStatus/projects/apk-shelf/STATUS.md` before doing more work. That record controls readiness.
+The source lives in [`to-shreds/torbox-web-player/native/apk-shelf`](https://github.com/to-shreds/torbox-web-player/tree/native-updates/native/apk-shelf) on the `native-updates` branch. **Current 1.0.3 implementation commit: `7e3822dd038b3186775363e35742921bf27cd76e`**. Later branch commits add docs/source snapshots and signed APK releases without changing the tested Android Java/manifest. Read the private [ProjectStatus record](https://github.com/to-shreds/ProjectStatus/blob/main/projects/apk-shelf/STATUS.md) first whenever continuing this project; it controls readiness.
 
-**Current signed version: 1.0.2 / versionCode 3**, Android package `app.apkshelf.firetv`. APK SHA256 `225073fed499eec8fb8ba7a7d4f9243b2c24068fe9d86157841814c6ae6803e6`; signing certificate SHA256 `fac7d2295ccb67ad1b9c0a8748c271d5eccd829ac0d17bf4ee10e63fb556cb14`, **the same key used by 1.0.0 and 1.0.1**. Release binaries are preserved in the private ProjectStatus artifacts and published at `native/updates/releases/APK-Shelf-1.0.2.apk` on `native-updates`; a copy is also uploaded directly into `to-shreds/apks` root to enable self-update from 1.0.1. The public source archive `native/apk-shelf/APK-Shelf-1.0.2-source.zip` is the CI-tested code snapshot, packaged before these refreshed public instructions.
+## Current signed release (1.0.3)
 
-## Functionality
+- Android package **`app.apkshelf.firetv`**, `versionName=1.0.3`, `versionCode=4`, original certificate SHA-256 **`fac7d2295ccb67ad1b9c0a8748c271d5eccd829ac0d17bf4ee10e63fb556cb14`**. Compatible with install-over updates of 1.0.0, 1.0.1 and 1.0.2.
+- **Signed APK:** `native/updates/releases/APK-Shelf-1.0.3.apk` and `to-shreds/apks` repository root `APK-Shelf-1.0.3.apk`. SHA-256: **`b01efaab1e21485b0237c32593880ddd9825680e4319437f662c8ebf87f7d63e`**, 53,803 bytes. The root copy replaces the obsolete 1.0.2 root installer, which remains preserved in the original TorBox releases location and private artifacts.
+- Source archive: `native/apk-shelf/APK-Shelf-1.0.3-source.zip`, SHA-256 **`1c7fba247660a62bc255f8ba6b8f3f1829e224f43d129f3062d6ac0d97f66432`**, produced from the pinned tested implementation before post-test documentation was updated.
+- Default source remains **`to-shreds/apks`**, default branch (currently `main`), repository root, and all the same repository's published Releases. A saved custom source remains untouched.
+- APK Shelf 1.0.3 removes the formerly visible tagline **"Your GitHub folder, on your TV."** and simplifies verbose row, navigation hint, empty-list and status copy. **Keep UI wording plain, compact, direct and functional. Do not reintroduce marketing copy, slogans or cutesy text.**
+- Only UI wording/Android version changed from 1.0.2. The GitHub APIs, download integrity, installer, security and remote controls did not change.
 
-- GitHub folder listing, direct child `.apk` files only, with Git Tree fallback at GitHub's 1,000-entry Contents limit.
-- GitHub Releases listing for the same repository regardless of configured branch/folder. Includes APK assets in published releases, skips drafts, missing/unusable SHA-256 digest, non-APK and incomplete assets. Paginates up to 500 releases/1,000 assets per release with a warning at cutoff. User's release is **Apk library**, tag `Apk`, currently containing `baba-is-you617.apk` (100,240,046 bytes) and `TorBox-TV-0.2.5-test-separate.apk` (7,329,790 bytes).
-- A combined, alphabetically sorted TV list with file size and source label, including duplicate filenames when a file exists both as a normal repository file and a Release asset.
-- Immutable Git blob downloads verified with exact size and Git SHA-1, GitHub Release asset HTTPS downloads verified with exact size and GitHub SHA-256. Release file size cap 2 GiB; normal blob cap 100 MiB. Transient files cleaned on cancellation/failure; one completed file held for installer retry.
-- Release downloads follow strict trusted HTTPS GitHub/CDN redirects, never forward GitHub tokens off `api.github.com`. Optional encrypted token and API endpoint for private release assets exist but **private live release access was not tested**.
-- Native Android APK ZIP preflight, platform package preflight, unknown-app permission prompt and Android installer confirmation. No silent/background install, polling, external dependencies, WebView, analytics, broad storage access or Vega OS support.
-- Upgrades from version 1.0.0 migrate only the original default source triple to `to-shreds/apks`; custom folder settings persist. Version 1.0.2 installs over 1.0.1 without uninstall because identity and signing key are unchanged.
+## Existing behavior to preserve
 
-## Verified, not conjectured
+- GitHub Contents/tree listing for direct-child .apk files and alphabetically combined list of published Release APK assets, retaining duplicates with their source labels.
+- Large Release assets up to 2 GiB, SHA-256 asset digest and exact length validation; normal Git blobs up to about 100 MiB with Git SHA-1 validation. APK ZIP/Android manifest/platform package checks before installer. Keep strict TLS GitHub/CDN host validation and no forwarding the optional GitHub token to redirects.
+- No extra permissions for broad storage access. One verified completed download may be retained through unknown-app install permission or installer cancellation; temporary files cleaned on failure/cancellation.
+- TV-focused remote navigation, Refresh/Menu, Folder settings, Allow installs, custom repo/branch/folder and Android Keystore-encrypted optional read-only private GitHub token.
+- No silent installs, browser/WebView, background polling, Vega OS, APK split bundles, Git LFS pointers or GitHub Release assets without published SHA-256 digests. Live private Release downloads remain unverified even though authenticated API routing passed mocked backend tests.
+- Keep APK Shelf **separate** from TorBox TV and the web player; do not change TorBox `native/updates/latest.json` or the site's `main` branch when maintaining Shelf.
 
-- [Successful CI run 40145494609](https://github.com/to-shreds/ProjectStatus/actions/runs/40145494609) compiled and signed release using the **private original signing key** and verified signatures and version 1.0.2/code 3.
-- **48 backend tests passed**, including redirects, SHA mismatches, truncation/cancellation, source merging, duplicate filenames, content size and the 2 GiB Release boundary.
-- Live integration downloaded both real user Release assets from GitHub, including all **100,240,046 bytes** of Baba Is You, and verified SHA-256, exact byte counts and APK ZIP/manifest.
-- Hardware-accelerated Android 11/API 30 TV emulator installed **v1.0.1 then upgraded to v1.0.2**, preserved settings, listed both current repository files and both release assets in a combined four-item list, refreshed using Menu, downloaded the smaller Release APK, opened the real permission/settings and system installer screens, cancelled and retried, then downloaded all 100 MB of Baba and opened the Android installer again. All acceptance steps passed. Afterwards adding APK Shelf 1.0.2 to the repository root will make five visible files. See `docs/VERIFICATION-1.0.2.md`.
-- No test has yet been done on the user's physical Firestick. Amazon-specific settings and installer screens still need confirmation.
+## Testing and evidence
 
-## Non-negotiable continuation constraints
+- [Successful 1.0.3 CI test run 40146682322](https://github.com/to-shreds/ProjectStatus/actions/runs/40146682322): 48 backend tests, live GitHub release metadata, pinned 1.0.3 signed with original key, and accelerated Android 11 TV emulator tests. Emulator displayed old version 1.0.2 tagline before installing 1.0.3 over it; verified new tagline-free header, concise row labels/status, combined root+Release listing, Menu refresh, saved settings, actual APK download, unknown-app permission and real Android installer with cancel/retained file.
+- Previous [1.0.2 run 40145494609](https://github.com/to-shreds/ProjectStatus/actions/runs/40145494609) downloaded the **full 100,240,046-byte** `baba-is-you617.apk` from the user's real GitHub Release, passed SHA-256 and APK checks, and opened Android's system installer. 1.0.3 does not alter this tested implementation.
+- The user confirmed the prior APK Shelf version **works on their physical Firestick**. They have not yet specifically tested the 1.0.3 update. See `docs/VERIFICATION-1.0.3.md`, `docs/VERIFICATION-1.0.2.md` and older records.
 
-- Keep `app.apkshelf.firetv` and the **original APK Shelf private signing key**. Backup is `to-shreds/ProjectStatus/projects/apk-shelf/private/APK-Shelf-Signing-Backup.zip`. Never expose its contents in public source, artifacts, logs or chat.
-- Increment versionCode for updates. Keep personal user-configured GitHub settings, all download integrity validation and provider file restrictions. Do not loosen credential sending or URL host validation.
-- Keep APK Shelf separate from TorBox TV and the TorBox web player. Do not change `native/updates/latest.json` or the web player's `main` branch for this tool.
-- Files directly in the root of `to-shreds/apks` and Release APK assets must coexist, including duplicates with provenance labels. Do not copy 100 MB game binaries into ordinary repository Git history.
-- Only claim exactly observed testing; physical Fire TV remote/device not yet tested. Private Release download support only backend-mock-tested.
+## Signing and continuation safety
 
-## Next concrete action
+- **Original private signing key backup:** `to-shreds/ProjectStatus/projects/apk-shelf/private/APK-Shelf-Signing-Backup.zip`. Never publish the key, password, or backup, nor expose them to chat/logs. Private CI accesses it only during signing.
+- Keep the package and signing identity; for any future release increase `versionCode`. Update the exact APK and source outputs in private ProjectStatus artifacts, public releases and `to-shreds/apks` root, and finalize ProjectStatus STATUS.md **last**.
+- Removing the prior Shelf installer from the user-facing root avoids presenting obsolete Shelf versions. Historical versions remain available privately and in the original release directory.
 
-Install 1.0.2 from the root APK in `to-shreds/apks` using the current 1.0.1 APK Shelf or via its public direct download link. Refresh and select Baba Is You under **Release: Apk library** on the Firestick; confirm Android system installation. Upload new smaller APKs to repository root and larger APKs under the existing **Apk library** GitHub Release without updating the utility.
+## Next action
+
+On the physical Firestick with a prior APK Shelf version installed, select Refresh, choose **APK-Shelf-1.0.3.apk** in `to-shreds/apks`, and approve the install-over update. Confirm the unwanted tagline is gone. No further code work is required unless the user reports another issue.
