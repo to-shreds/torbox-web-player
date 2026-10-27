@@ -1,4 +1,4 @@
-import { saveTraktCredentials, loadTraktCredentials, removeTraktCredentials } from './trakt-vault.js?v=release-1.2.10-audio.1';
+import { saveTraktCredentials, loadTraktCredentials, removeTraktCredentials } from './trakt-vault.js?v=release-1.2.11-playback.1';
 
 const API='https://api.trakt.tv';
 const AUTHORIZE='https://auth.trakt.tv/oauth/authorize';

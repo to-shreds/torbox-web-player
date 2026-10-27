@@ -1,4 +1,4 @@
-import { LatestPlaybackAction, PlaybackPreparationCache, supportsAudioDecodeCounter } from './playback-lifecycle.js?v=release-1.2.10-audio.1';
+import { LatestPlaybackAction, PlaybackPreparationCache, supportsAudioDecodeCounter } from './playback-lifecycle.js?v=release-1.2.11-playback.1';
 import { loadPublicSources, browserContainerHints, sourceHints, preparedSourceCompatibility } from './source-client.js?v=release-1.2.8-party.1';
 import { getSettings, updateSettings } from './settings.js?v=release-1.2.8-party.1';
 import { listRecent, formatResumeTime } from './history.js?v=release-1.2.8-party.1';
@@ -130,6 +130,19 @@ export function sourcesForAudioRequirement(list, requireCompatibleAudio=false) {
   return sources.map(source=>source.memoryAudio==='good'&&!sourceHints(source).audioCompatible
     ?{...source,memoryAudio:'unknown'}:source);
 }
+// Each candidate costs one server preparation (8 per minute per session). A
+// strict audio check rejects untagged releases after preparing them, so most
+// real release names (which rarely state the audio codec) would spend the whole
+// budget and leave the next request rate-limited. Keep every candidate whose
+// listing already shows compatible audio, and at most one unknown probe whose
+// actual prepared file may still establish it (e.g. a season pack).
+export const STRICT_AUDIO_UNKNOWN_PROBES = 1;
+export function strictAudioCandidates(ordered, requireCompatibleAudio=false, maxUnknown=STRICT_AUDIO_UNKNOWN_PROBES) {
+  const rows=Array.isArray(ordered)?ordered:[];
+  if(!requireCompatibleAudio)return rows;
+  let unknown=0;
+  return rows.filter(source=>sourceAudioConfidence(source)>=2||(sourceAudioConfidence(source)===1&&unknown++<maxUnknown));
+}
 export function automaticCachedSourceOrder(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
   // An unavailable cache lookup is not proof that a source is uncached. The
   // preparation request independently enforces cached-only behavior.
@@ -192,9 +205,9 @@ async function withinAutomaticBudget(action,signal){
     Promise.resolve().then(action).then(value=>{if(settled)return;settled=true;signal.removeEventListener('abort',stop);resolve(value);},error=>{if(settled)return;settled=true;signal.removeEventListener('abort',stop);reject(error);});
   });
 }
-export async function resolveAutomaticCachedSource(list,target,resolution,{prepare,onCandidate,onRejected,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,sizeProfile='balanced',totalTimeoutMs=AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS}={}){
+export async function resolveAutomaticCachedSource(list,target,resolution,{prepare,onCandidate,onRejected,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,sizeProfile='balanced',totalTimeoutMs=AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS,requireCompatibleAudio=false,unknownProbes=STRICT_AUDIO_UNKNOWN_PROBES}={}){
   if(typeof prepare!=='function')throw new TypeError('Automatic source preparation is not configured.');
-  const candidates=automaticCachedSourceOrder(list,target?.type||'movie',resolution,sizeProfile).slice(0,Math.max(0,maxCandidates));
+  const candidates=strictAudioCandidates(automaticCachedSourceOrder(list,target?.type||'movie',resolution,sizeProfile),requireCompatibleAudio,unknownProbes).slice(0,Math.max(0,maxCandidates));
   if(!candidates.length){const error=new Error(NO_CACHED_BROWSER_SOURCE_MESSAGE);error.code='NO_CACHED_BROWSER_SOURCE';throw error;}
   const budgetSignal=Number.isFinite(totalTimeoutMs)&&totalTimeoutMs>0?AbortSignal.timeout(totalTimeoutMs):null;
   for(const source of candidates){
@@ -462,11 +475,11 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     throw new Error('TorBox is still preparing this source. Try again shortly.');
   }
 
-  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,cacheErrorCode,requireCompatibleAudio=!audioDecodeObservable}={}){
+  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,cacheErrorCode,requireCompatibleAudio=!audioDecodeObservable,unknownProbes=STRICT_AUDIO_UNKNOWN_PROBES}={}){
     if(blockedCacheChecks.has(cacheErrorCode)){const error=new Error(cacheErrorCode==='TORBOX_RATE_LIMITED'?'TorBox is temporarily limiting requests. Wait a moment, then check again.':cacheErrorCode==='TORBOX_ACCESS_DENIED'?'TorBox could not authorize the availability check. Check your account sign-in, then retry.':cacheErrorCode==='TORBOX_NOT_CONFIGURED'?'The TorBox connection is not configured. Check your account connection.':cacheErrorCode==='TORBOX_PLAN_RESTRICTED'?'TorBox reported an account restriction while checking availability.':'TorBox returned an unreadable availability response. Check again shortly.');error.code=cacheErrorCode;throw error;}
     // A policy rejection belongs to this bounded attempt, not permanent user
     // feedback. Browser support can change independently of the source itself.
-    return resolveAutomaticCachedSource(sourcesForAudioRequirement(sources,requireCompatibleAudio),target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false,onlyCached:true,requireCompatibleAudio})});
+    return resolveAutomaticCachedSource(sourcesForAudioRequirement(sources,requireCompatibleAudio),target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,requireCompatibleAudio,unknownProbes,prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false,onlyCached:true,requireCompatibleAudio})});
   }
 
   async function preparedPlayback(target,resolution,{signal,onCandidate,refresh=false}={}){
@@ -478,7 +491,10 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       let registered;
       try{
         registered=await registeredSources(target,bounded,{fast:true,refresh});
-        try{return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify,cacheErrorCode:registered.cacheErrorCode,requireCompatibleAudio:registered.complete===false||!audioDecodeObservable}),registered};}
+        try{return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify,cacheErrorCode:registered.cacheErrorCode,requireCompatibleAudio:registered.complete===false||!audioDecodeObservable,
+          // An incomplete first batch is followed by the complete search, which
+          // performs any unknown-audio probe; do not prepare the same probe twice.
+          unknownProbes:registered.complete===false?0:STRICT_AUDIO_UNKNOWN_PROBES}),registered};}
         catch(error){if(error?.code!=='NO_CACHED_BROWSER_SOURCE'||registered.complete)throw error;}
       }catch(error){if(error?.code!=='NO_CACHED_BROWSER_SOURCE'||error.complete!==false){error.registered=registered||error.registered;throw error;}registered=registered||error.registered;}
       // The first index may have only uncached, incompatible or unknown-audio
@@ -769,7 +785,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       const registered=await registeredSources(context.current,bounded,{complete:true});
       const failedKey=sourceRecoveryKey(context.sourceInfo),attempted=new Set(Array.isArray(context.recoveryTried)?context.recoveryTried:[]);if(failedKey)attempted.add(failedKey);context.recoveryTried=[...attempted];
       const requireCompatibleAudio=context.audioRecovery===true||!audioDecodeObservable;
-      const candidates=boundedRecoverySourceOrder(sourcesForAudioRequirement(registered.sources.filter(source=>source.cached===true),requireCompatibleAudio),context,context.current.type,getSettings().sourceSizeProfile).slice(0,3),budgetSignal=AbortSignal.any([bounded,AbortSignal.timeout(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS)]);
+      const candidates=strictAudioCandidates(boundedRecoverySourceOrder(sourcesForAudioRequirement(registered.sources.filter(source=>source.cached===true),requireCompatibleAudio),context,context.current.type,getSettings().sourceSizeProfile),requireCompatibleAudio).slice(0,3),budgetSignal=AbortSignal.any([bounded,AbortSignal.timeout(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS)]);
       for(const best of candidates){
         if(budgetSignal.aborted)break;
         try{

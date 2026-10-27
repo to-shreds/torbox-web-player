@@ -2,6 +2,12 @@
 
 Read this first. The code repository controls implementation; `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md` controls readiness and the next action.
 
+## Playback regression repair · 2026-10-27
+
+Frontend **release-1.2.11-playback.1** fixes a 1.2.10 regression where almost nothing played. Strict audio checks (incomplete first lookup, or a browser without a decoded-audio counter) prepared each candidate and only then rejected it for lacking an AAC/MP3/Opus tag. Real release names rarely state the audio codec, so one Play spent all 8 per-minute server preparations (`preparationRate`), the complete-search attempt then received HTTP 429 `SLOW_DOWN`, and playback never started. Every existing fixture labels sources AAC, which hid this.
+
+Reproduced with `test/browser/real-release-names.mjs` (ten untagged cached releases): 1.2.9 used 1 preparation and played; 1.2.10 used 10 preparations, two 429s, no playback; this fix uses 1 per Play (3 for three episodes) with no 429s. Strict checks now keep every candidate whose listing shows compatible audio plus at most one unknown probe (`strictAudioCandidates`), and an incomplete first batch defers that probe to the complete search. All 1.2.10 audio protections are unchanged: the 11 native audio-recovery cases still pass. Local gate: syntax checks passed; Node 677 registered, 656 passed, zero failed, six optional skips, 15 cancelled only because this sandbox runs Node 22 (same 15 cancel at 1.2.9 here; CI uses Node 24); all 164 browser cases passed. Backend unchanged (still 1.2.10); no Render deploy needed. Pages publication goes through the existing release-checks gate.
+
 ## Audio reliability repair, 2026-10-25
 
 Published backend **1.2.10** and frontend **release-1.2.10-audio.1** repair demonstrated gaps in the earlier audio fix. Production baseline `52303d8b33ef30fc37bc8f748cd322865f8ce982` was preserved. An isolated baseline failed four actual-browser cases: explicit 720p chose unknown EAC3 over 1080p AAC, a partial lookup opened unknown audio before full results, and missing native counters allowed silent playback with or without an AAC alternative.

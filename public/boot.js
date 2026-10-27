@@ -1,4 +1,4 @@
-const BUILD='release-1.2.10-audio.1';
+const BUILD='release-1.2.11-playback.1';
 const STATIC_BUILD='release-1.2.8-party.1';
 const startedAt=Date.now();
 let startupTimer=null;
