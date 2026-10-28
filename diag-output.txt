@@ -1,254 +1,344 @@
 
-=== S3E5: 40 sources, complete=true, automatic=30, strictAudio=13
- 1 conf=2 mkv  1080p audio=[AAC] lang=[en] Torrentio + Zilean + Torrentio + Zilean + StremThru Torz ElfHosted | Family Guy S03E05 And the Weiner Is 1080p DSNP WEB-DL AAC2 0 H 264-playWEB.mkv
- 2 conf=2 mkv  1080p audio=[AAC] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S03E05.And.the.Weiner.Is.1080p.DSNP.WEB-DL.AAC2.0.H.264-PHOENiX.mkv
- 3 conf=2 mkv  1080p audio=[AAC] lang=[en] Zilean + StremThru Torz ElfHosted | Family.Guy.S03E05.And.the.Weiner.Is.1080p.DSNP.WEB-DL.AAC2.0.H.264-PHOENiX.mkv
- 4 conf=2 mkv  1080p audio=[AAC] lang=[en,it] StremThru Torz Main + StremThru Torz ElfHosted | I.Griffin.S03E05.Pene.d'amor.perduto.WEBMux.1080p.x264.iTA.ENG.AAC.Subs-Maleno85.Sylar.T7ST.mkv
- 5 conf=2 mkv  720p  audio=[AAC] lang=[] Torrentio + Zilean + Torrentio + Zilean + StremThru Torz ElfHosted | Family Guy S03E05 And the Weiner Is 720p DSNP WEB-DL AAC2 0 H 264-playWEB.mkv
- 6 conf=2 mkv  1080p audio=[AAC] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S03E05.And.the.Weiner.Is.1080p.DSNP.WEB-DL.AAC2.0.H.264-PHOENiX.mkv
- 7 conf=2 mkv  1080p audio=[AAC] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S03E05.And.the.Weiner.Is.1080p.DSNP.WEB-DL.AAC2.0.H.264-PHOENiX.mkv
- 8 conf=2 mkv  1080p audio=[AAC] lang=[] StremThru Torz ElfHosted | Family Guy - S03E05 1080p WEB-DL AAC H.264 DUAL-Kriffx.mkv
- 9 conf=2 mkv  1080p audio=[AAC] lang=[] Zilean + StremThru Torz ElfHosted | Family.Guy.S03E05.And.the.Weiner.Is.1080p.DSNP.WEB-DL.AAC2.0.H.264-SLDSNK.mkv
-11 conf=2 mkv  1080p audio=[AAC] lang=[] Torrentio | Family Guy (1999) - S03E05 - And the Wiener is [DSNP WEBDL-1080p][AAC 2.0][h264]-PHOENiX.mkv
-12 conf=2 mkv        audio=[AAC] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | FAMILY GUY - SEASON 3 EPISODE 5 - AND THE WIENER IS... STAR - [iRG].mkv
-10 conf=2 mkv  unknown audio=[AAC] lang=[] Torrentio + Zilean + Torrentio + Zilean + StremThru Torz ElfHosted | Family Guy S03E05 And the Weiner Is DSNP WEB-DL AAC2 0 H 264-playWEB.mkv
-13 conf=1 mkv  1080p audio=[] lang=[en] Zilean + StremThru Torz ElfHosted | Family.Guy.S03E05.NORDiC.1080p.WEB-DL.H.264-RAPiDCOWS.mkv
-14 conf=1 mkv  720p  audio=[] lang=[en,de] StremThru Torz ElfHosted | Family.Guy.S03E05.Und.den.Groessten.hat..GERMAN.DL.720p.WEB.H264-TSCC.mkv
-15 conf=1 mkv  1080p audio=[] lang=[en,fr] StremThru Torz ElfHosted | Family.Guy.S03E05.MULTi.1080p.WEB.H264-FW.mkv
- - conf=0 mkv  1080p audio=[EAC3,AAC] lang=[en] StremThru Torz Main | Family.Guy.S03E05.1080p.DSNP.WEB-DL.AAC2.0.x264-POWER.mkv
- - conf=2 mkv  1080p audio=[AAC] lang=[en] StremThru Torz Main + StremThru Torz ElfHosted | Family Guy (1999) S03E05 And the Wiener is... (1080p DSNP WEB-DL x265 SDR AAC 2.0 English - DarQ).mkv
- - conf=1 mkv  1080p audio=[] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy - S03E05 - And The Wiener Is [1080p] [x265].mkv
- - conf=1 mkv  unknown audio=[] lang=[en] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy - S03E05 - And The Wiener Is.mkv
-16 conf=1 mp4  unknown audio=[] lang=[] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy S03E05 And the Wiener Is... - fiveofseven.mp4
-23 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S03E05.FRENCH.720p.WEB.H264-AVON.mkv
-25 conf=1 mkv  1080p audio=[] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S03E05.And.the.Wiener.is....1080p.WEB-DL.Rus.Eng_TeamHD.mkv
-26 conf=1 mkv  1080p audio=[] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S03E05.1080p.DSNP.WEB-DL.H.264.HUN-CL.mkv
-30 conf=1 mkv  1080p audio=[] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S03E05.Und.den.Groessten.hat..Ger.Eng.DL.1080p.WEB.H264-TSCC.mkv
-24 conf=1 mkv  720p  audio=[] lang=[] Torrentio | Family Guy.S03E05 [720p.WEB-DL.H264-FT] [ENG-Lektor PL][Alusia].mkv
- - conf=2 mp4  unknown audio=[AAC,MP3] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy - S03E05 - And The Wiener Is.mp4
- - conf=2 mp4        audio=[AAC,MP3] lang=[] StremThru Torz ElfHosted | Family Guy - S03E05 - And The Wiener Is.mp4
-27 conf=1 mkv  480p  audio=[] lang=[] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S03E05.480p.DVDRip.x264-Sticky83.mkv
-29 conf=1 mkv        audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S03E05.DVDRip.x264-Sticky83.mkv
-28 conf=1 mkv        audio=[] lang=[] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | 305 And the Wiener is.mkv
-22 conf=1 mp4  1080p audio=[] lang=[] Torrentio | Family Guy - S03e05 - And The Wiener Is.mp4
-18 conf=1 mp4        audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Family Guy S03E05 And The Wiener Is....mp4
-17 conf=1 mp4        audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | 恶搞之家.Family.Guy.S03E05.And.the.Wiener.is.SDTV.mp4
-21 conf=1 mp4        audio=[] lang=[] StremThru Torz ElfHosted | 恶搞之家.Family.Guy.S03E05.And.the.Wiener.is.SDTV.mp4
-19 conf=1 mp4        audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Padre de Familia - 03x05 El complejo de Peter.mp4
-20 conf=1 mp4        audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Family Guy -s03e05. And the Wiener is....mp4
- - conf=2 mp4  1080p audio=[AAC] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Family Guy - S03E05 - And the Wiener is....mp4
- - conf=2 mp4  1080p audio=[AAC] lang=[] StremThru Torz Main | Family Guy - S03E05 - And the Wiener is....mp4
- - conf=2 mp4  1080p audio=[AAC] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy - S03E05 - And the Wiener is....mp4
- - conf=2 mp4  1080p audio=[AAC] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy - S03E05 - And the Wiener is....mp4
+=== S3E5: 40 sources, automatic=30
+ 1 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=585 hash=8650a98e lang=[en] | Family Guy S03E05 And the Weiner Is 1080p DSNP WEB-DL AAC2 0 H 264-playWEB.mkv
+ 2 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=1039 hash=dcbd42f7 lang=[en] | Family.Guy.S03E05.And.the.Weiner.Is.1080p.DSNP.WEB-DL.AAC2.0.H.264-PHOENiX.mkv
+ 3 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=1039 hash=7a7e6963 lang=[en] | Family.Guy.S03E05.And.the.Weiner.Is.1080p.DSNP.WEB-DL.AAC2.0.H.264-PHOENiX.mkv
+ 4 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=1061 hash=e50a3492 lang=[en,it] | I.Griffin.S03E05.Pene.d'amor.perduto.WEBMux.1080p.x264.iTA.ENG.AAC.Subs-Maleno85.Sylar.T7ST.mkv
+ 5 conf=2 ranked        mkv  720p  v=H264 a=[AAC] MB=342 hash=3b4fa8c3 lang=[] | Family Guy S03E05 And the Weiner Is 720p DSNP WEB-DL AAC2 0 H 264-playWEB.mkv
+ 6 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=1039 hash=11170009 lang=[] | Family.Guy.S03E05.And.the.Weiner.Is.1080p.DSNP.WEB-DL.AAC2.0.H.264-PHOENiX.mkv
+ 7 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=1039 hash=fd2394bb lang=[] | Family.Guy.S03E05.And.the.Weiner.Is.1080p.DSNP.WEB-DL.AAC2.0.H.264-PHOENiX.mkv
+ 8 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=1060 hash=d18a285d lang=[] | Family Guy - S03E05 1080p WEB-DL AAC H.264 DUAL-Kriffx.mkv
+ 9 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=1060 hash=4d7f8188 lang=[] | Family.Guy.S03E05.And.the.Weiner.Is.1080p.DSNP.WEB-DL.AAC2.0.H.264-SLDSNK.mkv
+11 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=0 hash=acd1443b lang=[] | Family Guy (1999) - S03E05 - And the Wiener is [DSNP WEBDL-1080p][AAC 2.0][h264]-PHOENiX.mkv
+12 conf=2 ranked        mkv        v=H264 a=[AAC] MB=98 hash=8f84ee22 lang=[] | FAMILY GUY - SEASON 3 EPISODE 5 - AND THE WIENER IS... STAR - [iRG].mkv
+10 conf=2 ranked        mkv  unknown v=H264 a=[AAC] MB=313 hash=77ab9e21 lang=[] | Family Guy S03E05 And the Weiner Is DSNP WEB-DL AAC2 0 H 264-playWEB.mkv
+13 conf=1 ranked        mkv  1080p v=H264 a=[] MB=1039 hash=28108231 lang=[en] | Family.Guy.S03E05.NORDiC.1080p.WEB-DL.H.264-RAPiDCOWS.mkv
+14 conf=1 ranked        mkv  720p  v=H264 a=[] MB=405 hash=ff6575dd lang=[en,de] | Family.Guy.S03E05.Und.den.Groessten.hat..GERMAN.DL.720p.WEB.H264-TSCC.mkv
+15 conf=1 ranked        mkv  1080p v=H264 a=[] MB=660 hash=c792fb04 lang=[en,fr] | Family.Guy.S03E05.MULTi.1080p.WEB.H264-FW.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3,AAC] MB=239 hash=dbc4e6c8 lang=[en] | Family.Guy.S03E05.1080p.DSNP.WEB-DL.AAC2.0.x264-POWER.mkv
+ - conf=2 videoRisk     mkv  1080p v=HEVC a=[AAC] MB=252 hash=19d1dc2a lang=[en] | Family Guy (1999) S03E05 And the Wiener is... (1080p DSNP WEB-DL x265 SDR AAC 2.0 English - DarQ).mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=136 hash=554ac33e lang=[en] | Family Guy - S03E05 - And The Wiener Is [1080p] [x265].mkv
+ - conf=1 videoRisk     mkv  unknown v=HEVC a=[] MB=214 hash=db590f00 lang=[en] | Family Guy - S03E05 - And The Wiener Is.mkv
+16 conf=1 ranked        mp4  unknown v=H264 a=[] MB=79 hash=fe70037a lang=[] | Family Guy S03E05 And the Wiener Is... - fiveofseven.mp4
+23 conf=1 ranked        mkv  720p  v=H264 a=[] MB=619 hash=1e7250dc lang=[] | Family.Guy.S03E05.FRENCH.720p.WEB.H264-AVON.mkv
+25 conf=1 ranked        mkv  1080p v=H264 a=[] MB=886 hash=24a8cbe2 lang=[] | Family.Guy.S03E05.And.the.Wiener.is....1080p.WEB-DL.Rus.Eng_TeamHD.mkv
+26 conf=1 ranked        mkv  1080p v=H264 a=[] MB=1071 hash=b9dac86a lang=[] | Family.Guy.S03E05.1080p.DSNP.WEB-DL.H.264.HUN-CL.mkv
+30 conf=1 ranked        mkv  1080p v=H264 a=[] MB=1241 hash=3e1e18ae lang=[] | Family.Guy.S03E05.Und.den.Groessten.hat..Ger.Eng.DL.1080p.WEB.H264-TSCC.mkv
+24 conf=1 ranked        mkv  720p  v=H264 a=[] MB=0 hash=3332788e lang=[] | Family Guy.S03E05 [720p.WEB-DL.H264-FT] [ENG-Lektor PL][Alusia].mkv
+ - conf=2 videoRisk     mp4  unknown v=HEVC a=[AAC,MP3] MB=97 hash=61cc51d5 lang=[] | Family Guy - S03E05 - And The Wiener Is.mp4
+ - conf=2 videoRisk     mp4        v=HEVC a=[AAC,MP3] MB=97 hash=066fab3a lang=[] | Family Guy - S03E05 - And The Wiener Is.mp4
+27 conf=1 ranked        mkv  480p  v=H264 a=[] MB=142 hash=e3c9f19c lang=[] | Family.Guy.S03E05.480p.DVDRip.x264-Sticky83.mkv
+29 conf=1 ranked        mkv        v=H264 a=[] MB=142 hash=e9ad3edd lang=[] | Family.Guy.S03E05.DVDRip.x264-Sticky83.mkv
+28 conf=1 ranked        mkv        v=H264 a=[] MB=186 hash=8d3cc8b1 lang=[] | 305 And the Wiener is.mkv
+22 conf=1 ranked        mp4  1080p v= a=[] MB=0 hash=ac6c1a7f lang=[] | Family Guy - S03e05 - And The Wiener Is.mp4
+18 conf=1 ranked        mp4        v= a=[] MB=41 hash=b8b04b6e lang=[] | Family Guy S03E05 And The Wiener Is....mp4
+17 conf=1 ranked        mp4        v= a=[] MB=57 hash=0d7f93ec lang=[] | 恶搞之家.Family.Guy.S03E05.And.the.Wiener.is.SDTV.mp4
+21 conf=1 ranked        mp4        v= a=[] MB=57 hash=a6e57cce lang=[] | 恶搞之家.Family.Guy.S03E05.And.the.Wiener.is.SDTV.mp4
+19 conf=1 ranked        mp4        v= a=[] MB=73 hash=dbc3df4a lang=[] | Padre de Familia - 03x05 El complejo de Peter.mp4
+20 conf=1 ranked        mp4        v= a=[] MB=94 hash=729091d6 lang=[] | Family Guy -s03e05. And the Wiener is....mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=148 hash=027036b1 lang=[] | Family Guy - S03E05 - And the Wiener is....mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=148 hash=3d45a491 lang=[] | Family Guy - S03E05 - And the Wiener is....mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=162 hash=681e5f40 lang=[] | Family Guy - S03E05 - And the Wiener is....mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=170 hash=8258a445 lang=[] | Family Guy - S03E05 - And the Wiener is....mp4
 
-=== S8E1: 40 sources, complete=true, automatic=20, strictAudio=4
- 2 conf=2 mp4  1080p audio=[AAC] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy S08E01 1080p WEB-DL AAC2.0 AVC-TrollHD.mp4
- 1 conf=2 mp4        audio=[AAC] lang=[] StremThru Torz ElfHosted | [DONKEY]Family_Guy_S08E01_Road_To_The_Multiverse_(h264-aac).mp4
- 4 conf=1 mkv  720p  audio=[] lang=[en,ru] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S08E01.Road.to.the.Multiverse.720p.WEB-DL.2xRus.Eng-v.serij2013.mkv
- 5 conf=1 mkv  1080p audio=[] lang=[en,ru] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S08E01.Road.to.the.Multiverse.1080p.WEB-DL.2xRus.Eng-v.serij2013.mkv
- - conf=2 mp4  1080p audio=[AAC] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | Family Guy - S08E01 - Road to the Multiverse.mp4
- - conf=2 mkv  1080p audio=[AAC] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy - S08E01 - Road To The Multiverse [1080p Web x265][AAC 5.1][Sub][Ch].mkv
- - conf=0 mkv  1080p audio=[EAC3,AAC] lang=[en] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S08E01.1080p.DSNP.WEB-DL.DDP5.1.x264-POWER.mkv
- 3 conf=2 ?    1080p audio=[AAC] lang=[] Zilean | Family Guy S08 1080p DSNP WEB-DL AAC2 0 H 264-SLDSNK
- - conf=0 mkv  1080p audio=[AC3,AAC] lang=[en,it] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | I.Griffin.S08E01.Viaggio.nel.multiuniverso.WEBMux.1080p.x264.iTA.AAC.ENG.AC3.Sub.ITA.ENG-Maleno85.Sylar.T7ST.mkv
- - conf=1 mkv  1080p audio=[] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy - S08E01 - Road to the Multiverse [Uncensored] [1080p] [x265].mkv
- - conf=1 mkv  1080p audio=[] lang=[en] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S08E01.Road.to.the.Multiverse.1080p.WEB-DL.10bit.x265.HEVC-PHOCiS.mkv
- - conf=1 mkv  1080p audio=[] lang=[en] Zilean + StremThru Torz ElfHosted | Family.Guy.S08E01.Road.to.the.Multiverse.1080p.WEB-DL.10bit.x265.HEVC-PHOCiS.mkv
- - conf=0 mkv  720p  audio=[AC3] lang=[en] Torrentio + Zilean + Torrentio + Zilean + StremThru Torz ElfHosted | Family Guy S08E01 Road to Multi-Verse 720p DSNP WEB-DL DD 5 1 H 264-playWEB.mkv
- - conf=0 mkv  1080p audio=[AC3] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S08E01.Road.to.the.Multiverse.1080p.WEB-DL.DD5.1.H.264-CtrlHD.mkv
- - conf=0 mkv  1080p audio=[AC3] lang=[en] Torrentio + Zilean + Torrentio + Zilean + StremThru Torz ElfHosted | Family Guy S08E01 Road to Multi-Verse 1080p DSNP WEB-DL DD 5 1 H 264-playWEB.mkv
- - conf=1 mkv        audio=[] lang=[en] Torrentio + StremThru Torz ElfHosted | Family Guy S08E01 Road to the Multiverse.mkv
- - conf=1 mkv  unknown audio=[] lang=[en] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy - S08E01 - Road to the Multiverse (Uncensored).mkv
- - conf=1 mkv        audio=[] lang=[en] StremThru Torz ElfHosted | Family Guy - S08E01 - Road to the Multiverse (Uncensored).mkv
- 7 conf=1 mp4  unknown audio=[] lang=[] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy S08E01 Road to the Multiverse - fiveofseven.mp4
-17 conf=1 mkv  1080p audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S08E01.MULTi.1080p.WEB.H264-FW.mkv
-18 conf=1 mkv  1080p audio=[] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S08E01.Ger.Eng.DL.1080p.WEB.h264-TVNATiON.mkv
-16 conf=1 mkv  720p  audio=[] lang=[] Torrentio | Family Guy.S08E01 [720p.WEB-DL.H264-FT] [ENG-Lektor PL][Alusia].mkv
- - conf=2 mp4  unknown audio=[AAC,MP3] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy - S08E01 - Road To The Multiverse.mp4
- - conf=2 mp4        audio=[AAC,MP3] lang=[] StremThru Torz ElfHosted | Family Guy - S08E01 - Road To The Multiverse.mp4
-20 conf=1 mkv  480p  audio=[] lang=[] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S08E01.480p.WEB-DL.x264-Sticky83.mkv
- 6 conf=1 mp4  720p  audio=[] lang=[] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy S08E01 Road to the Multiverse.mp4
-14 conf=1 mp4  1080p audio=[] lang=[] Torrentio | Family Guy - S08e01 - Road To The Multiverse (Uncensored).mp4
- 8 conf=1 mp4  360p  audio=[] lang=[] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | Family Guy S08E01 Road to the Multiverse.mp4
-10 conf=1 mp4        audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Padre de Familia - 8x01 Rumbo al Multiverso.mp4
- 9 conf=1 mp4        audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | 恶搞之家.Family.Guy.S08E01.Road.to.the.Multiverse.SDTV.mp4
-12 conf=1 mp4        audio=[] lang=[] StremThru Torz ElfHosted | 恶搞之家.Family.Guy.S08E01.Road.to.the.Multiverse.SDTV.mp4
-11 conf=1 mp4        audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Family Guy -s08e01. Road To Multiverse.mp4
-13 conf=1 mp4        audio=[] lang=[] StremThru Torz ElfHosted | FG S08E01 - Road To The Multiverse.mp4
- - conf=2 mp4  1080p audio=[AAC] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy - S08E01 - Road to the Multiverse.mp4
- - conf=2 mp4  1080p audio=[AAC] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Family Guy - S08E01 - Road to the Multiverse.mp4
- - conf=2 mp4  1080p audio=[AAC] lang=[] StremThru Torz Main | Family Guy - S08E01 - Road to the Multiverse.mp4
- - conf=2 mp4  1080p audio=[AAC] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Family Guy - S08E01 - Road to the Multiverse.mp4
- - conf=2 mp4  1080p audio=[AAC] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy - S08E01 - Road to the Multiverse.mp4
-15 conf=1 mp4        audio=[] lang=[] Torrentio | Padre De Familia 8x01.mp4
-19 conf=1 mkv  1080p audio=[] lang=[] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | UFDP.S08E01.1080p.Estrada para Meta Universo.mkv
+=== S8E1: 40 sources, automatic=20
+ 2 conf=2 ranked        mp4  1080p v=H264 a=[AAC] MB=1662 hash=f53a792b lang=[] | Family Guy S08E01 1080p WEB-DL AAC2.0 AVC-TrollHD.mp4
+ 1 conf=2 ranked        mp4        v=H264 a=[AAC] MB=183 hash=01f45b8a lang=[] | [DONKEY]Family_Guy_S08E01_Road_To_The_Multiverse_(h264-aac).mp4
+ 4 conf=1 ranked        mkv  720p  v=H264 a=[] MB=570 hash=5df75287 lang=[en,ru] | Family.Guy.S08E01.Road.to.the.Multiverse.720p.WEB-DL.2xRus.Eng-v.serij2013.mkv
+ 5 conf=1 ranked        mkv  1080p v=H264 a=[] MB=787 hash=b16a543b lang=[en,ru] | Family.Guy.S08E01.Road.to.the.Multiverse.1080p.WEB-DL.2xRus.Eng-v.serij2013.mkv
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=272 hash=2001889a lang=[en] | Family Guy - S08E01 - Road to the Multiverse.mp4
+ - conf=2 videoRisk     mkv  1080p v=HEVC a=[AAC] MB=150 hash=a6a40eaf lang=[en] | Family Guy - S08E01 - Road To The Multiverse [1080p Web x265][AAC 5.1][Sub][Ch].mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3,AAC] MB=242 hash=dbc4e6c8 lang=[en] | Family.Guy.S08E01.1080p.DSNP.WEB-DL.DDP5.1.x264-POWER.mkv
+ 3 conf=2 ranked        ?    1080p v=avc a=[AAC] MB=17510 hash=acd04cfd lang=[] | Family Guy S08 1080p DSNP WEB-DL AAC2 0 H 264-SLDSNK
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[AC3,AAC] MB=713 hash=6f5d89f5 lang=[en,it] | I.Griffin.S08E01.Viaggio.nel.multiuniverso.WEBMux.1080p.x264.iTA.AAC.ENG.AC3.Sub.ITA.ENG-Maleno85.Sylar.T7ST.mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=149 hash=b2593379 lang=[en] | Family Guy - S08E01 - Road to the Multiverse [Uncensored] [1080p] [x265].mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=267 hash=c73939c6 lang=[en] | Family.Guy.S08E01.Road.to.the.Multiverse.1080p.WEB-DL.10bit.x265.HEVC-PHOCiS.mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=267 hash=7f19e8d1 lang=[en] | Family.Guy.S08E01.Road.to.the.Multiverse.1080p.WEB-DL.10bit.x265.HEVC-PHOCiS.mkv
+ - conf=0 audioRisk     mkv  720p  v=H264 a=[AC3] MB=324 hash=eb4fa041 lang=[en] | Family Guy S08E01 Road to Multi-Verse 720p DSNP WEB-DL DD 5 1 H 264-playWEB.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[AC3] MB=692 hash=a95b61f5 lang=[en] | Family.Guy.S08E01.Road.to.the.Multiverse.1080p.WEB-DL.DD5.1.H.264-CtrlHD.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[AC3] MB=864 hash=bb2e651a lang=[en] | Family Guy S08E01 Road to Multi-Verse 1080p DSNP WEB-DL DD 5 1 H 264-playWEB.mkv
+ - conf=1 videoRisk     mkv        v=HEVC a=[] MB=197 hash=f735535e lang=[en] | Family Guy S08E01 Road to the Multiverse.mkv
+ - conf=1 videoRisk     mkv  unknown v=HEVC a=[] MB=277 hash=db590f00 lang=[en] | Family Guy - S08E01 - Road to the Multiverse (Uncensored).mkv
+ - conf=1 videoRisk     mkv        v=HEVC a=[] MB=277 hash=94cda7d5 lang=[en] | Family Guy - S08E01 - Road to the Multiverse (Uncensored).mkv
+ 7 conf=1 ranked        mp4  unknown v=H264 a=[] MB=77 hash=fe70037a lang=[] | Family Guy S08E01 Road to the Multiverse - fiveofseven.mp4
+17 conf=1 ranked        mkv  1080p v=H264 a=[] MB=672 hash=399f4942 lang=[] | Family.Guy.S08E01.MULTi.1080p.WEB.H264-FW.mkv
+18 conf=1 ranked        mkv  1080p v=H264 a=[] MB=672 hash=02f85aec lang=[] | Family.Guy.S08E01.Ger.Eng.DL.1080p.WEB.h264-TVNATiON.mkv
+16 conf=1 ranked        mkv  720p  v=H264 a=[] MB=0 hash=3332788e lang=[] | Family Guy.S08E01 [720p.WEB-DL.H264-FT] [ENG-Lektor PL][Alusia].mkv
+ - conf=2 videoRisk     mp4  unknown v=HEVC a=[AAC,MP3] MB=105 hash=61cc51d5 lang=[] | Family Guy - S08E01 - Road To The Multiverse.mp4
+ - conf=2 videoRisk     mp4        v=HEVC a=[AAC,MP3] MB=105 hash=066fab3a lang=[] | Family Guy - S08E01 - Road To The Multiverse.mp4
+20 conf=1 ranked        mkv  480p  v=H264 a=[] MB=142 hash=e3c9f19c lang=[] | Family.Guy.S08E01.480p.WEB-DL.x264-Sticky83.mkv
+ 6 conf=1 ranked        mp4  720p  v= a=[] MB=65 hash=fe7c49d1 lang=[] | Family Guy S08E01 Road to the Multiverse.mp4
+14 conf=1 ranked        mp4  1080p v= a=[] MB=0 hash=ac6c1a7f lang=[] | Family Guy - S08e01 - Road To The Multiverse (Uncensored).mp4
+ 8 conf=1 ranked        mp4  360p  v= a=[] MB=30 hash=42e35acb lang=[] | Family Guy S08E01 Road to the Multiverse.mp4
+10 conf=1 ranked        mp4        v= a=[] MB=53 hash=dbc3df4a lang=[] | Padre de Familia - 8x01 Rumbo al Multiverso.mp4
+ 9 conf=1 ranked        mp4        v= a=[] MB=54 hash=0d7f93ec lang=[] | 恶搞之家.Family.Guy.S08E01.Road.to.the.Multiverse.SDTV.mp4
+12 conf=1 ranked        mp4        v= a=[] MB=54 hash=a6e57cce lang=[] | 恶搞之家.Family.Guy.S08E01.Road.to.the.Multiverse.SDTV.mp4
+11 conf=1 ranked        mp4        v= a=[] MB=64 hash=729091d6 lang=[] | Family Guy -s08e01. Road To Multiverse.mp4
+13 conf=1 ranked        mp4        v= a=[] MB=93 hash=bce65f1d lang=[] | FG S08E01 - Road To The Multiverse.mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=136 hash=681e5f40 lang=[] | Family Guy - S08E01 - Road to the Multiverse.mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=200 hash=027036b1 lang=[] | Family Guy - S08E01 - Road to the Multiverse.mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=200 hash=3d45a491 lang=[] | Family Guy - S08E01 - Road to the Multiverse.mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=272 hash=25e845a8 lang=[] | Family Guy - S08E01 - Road to the Multiverse.mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=369 hash=8258a445 lang=[] | Family Guy - S08E01 - Road to the Multiverse.mp4
+15 conf=1 ranked        mp4        v= a=[] MB=0 hash=85fd705d lang=[] | Padre De Familia 8x01.mp4
+19 conf=1 ranked        mkv  1080p v= a=[] MB=398 hash=a6dc9a0a lang=[] | UFDP.S08E01.1080p.Estrada para Meta Universo.mkv
 
-=== S12E1: 40 sources, complete=true, automatic=28, strictAudio=5
- 1 conf=2 mp4  720p  audio=[AAC] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + Torrentio | Family.Guy.S12E01.Finders.Keepers.720p.WEB-DL.x264.AAC.mp4
- 2 conf=2 mp4  720p  audio=[AAC] lang=[] StremThru Torz ElfHosted | Family.Guy.S12E01.Finders.Keepers.720p.WEB-DL.x264.AAC.mp4
- 3 conf=2 mp4  720p  audio=[AAC] lang=[] StremThru Torz ElfHosted | Family.Guy.S12E01.Finders.Keepers.720p.WEB-DL.x264.AAC.mp4
- 4 conf=2 mp4  unknown audio=[AAC] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S12E01.Finders.Keepers.WEB-DL.x264.AAC.mp4
- 6 conf=1 mkv  1080p audio=[] lang=[en,de] Zilean | Family Guy S12E01 Die Schatzsuche Ger Eng DL DUBBED 1080p WebHD x264-TVP mkv
- 5 conf=1 mkv  1080p audio=[] lang=[en,ru] StremThru Torz ElfHosted + Torrentio | Family Guy S12E01. Finders Keepers. SifeR.mkv
- 7 conf=1 mkv  1080p audio=[] lang=[en,ru] Zilean + StremThru Torz ElfHosted | Family.Guy.S12E01.Finders.Keepers.1080p.WEB-DL.by.AKTEP.mkv
- 8 conf=1 mkv  1080p audio=[] lang=[en,fr] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S12E01.MULTi.1080p.WEB.H264-FW.mkv
- - conf=2 mkv  1080p audio=[AAC] lang=[en] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + Torrentio | Family Guy - S12E01 - Finders Keepers [1080p Web x265][AAC 5.1][Sub][Ch].mkv
- - conf=0 mkv  720p  audio=[EAC3,AAC] lang=[en] StremThru Torz Main | Family.Guy.S12E01.720p.DSNP.WEB-DL.DDP5.1.x264-POWER.mkv
- - conf=0 mkv  1080p audio=[AC3,AAC] lang=[en,it] StremThru Torz Main + StremThru Torz ElfHosted + StremThru Torz Main + StremThru Torz ElfHosted + Torrentio | I.Griffin.S12E01.Chi.cerca.trova.WEBMux.1080p.x264.iTA.AAC.ENG.AC3.Sub.ITA.ENG-Maleno85.Sylar.T7ST.mkv
- - conf=0 mkv  1080p audio=[EAC3,AAC] lang=[en,es] Zilean + StremThru Torz ElfHosted | Family.Guy.S12E01.Finders.Keepers.1080p.DSNP.WEB-DL.DDP5.1.H.264-SLDSNK.mkv
- - conf=1 mkv  1080p audio=[] lang=[en] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + Torrentio | Family Guy - S12E01 - Finders Keepers [Uncensored] [1080p] [x265].mkv
- - conf=1 mkv  1080p audio=[] lang=[en] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S12E01.Finders.Keepers.1080p.WEB-DL.10bit.x265.HEVC-PHOCiS.mkv
- - conf=1 mkv  1080p audio=[] lang=[en] StremThru Torz Main + StremThru Torz ElfHosted + StremThru Torz Main + StremThru Torz ElfHosted + Torrentio | Family Guy - S12E01 - Finders Keepers Uncensored 1080p NF WEB-DL x265.mkv
- - conf=0 mkv  1080p audio=[AC3] lang=[en] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S12E01.Finders.Keepers.1080p.WEB-DL.DD5.1.H.264-CtrlHD.mkv
- - conf=0 mkv  1080p audio=[AC3] lang=[en] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + Torrentio | Family.Guy.S12E01.Finders.Keepers.1080p.WEB-DL.DD5.1.H.264-CtrlHD.mkv
- - conf=0 mkv  1080p audio=[AC3] lang=[en] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S12E01.Finders.Keepers.1080p.WEB-DL.DD5.1.H.264-CtrlHD.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + Torrentio | Family Guy S12E01 Finders Keepers 1080p DSNP WEB-DL DDP5 1 H 264-FLUX.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S12E01.Finders.Keepers.1080p.DSNP.WEB-DL.DDP5.1.H.264-FLUX.mkv
- 9 conf=1 mp4  720p  audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | 恶搞之家.Family.Guy.S12E01.Finders.Keepers.HDTV-720p.mp4
-11 conf=1 mp4  480p  audio=[] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy s12e01 480p WEB-DL x264 mp4 NIT158.mp4
-12 conf=1 mp4  480p  audio=[] lang=[] StremThru Torz ElfHosted | Family Guy s12e01 480p WEB-DL x264 mp4 NIT158.mp4
-13 conf=1 mp4  480p  audio=[] lang=[] StremThru Torz ElfHosted | Family Guy s12e01 480p WEB-DL x264 mp4 NIT158.mp4
-14 conf=1 mp4  unknown audio=[] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S12E01.HDTV.x264-LOL.mp4
-10 conf=1 mp4  unknown audio=[] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S12E01.HDTV.x264-LOL.mp4
-15 conf=1 mp4        audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S12E01.HDTV.x264-LOL.mp4
-16 conf=1 mp4        audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S12E01.WEB-DL.x264.Hun-Krissz.mp4
-17 conf=1 mp4        audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S12E01.S12.|.E01.HDTV.x264-EVOLVE.mp4
-22 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S12E01.Die.Schatzsuche.GERMAN.720p.WEB.h264-TSCC.mkv
-20 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + Torrentio | Family.Guy.S12E01.720p.HDTV.X264-DIMENSION.mkv
-23 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S12E01.720p.HDTV.X264-DIMENSION.mkv
-21 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + Torrentio | Family.Guy.S12E01.720p.HDTV.X264-DIMENSION.mkv
-24 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S12E01.720p.HDTV.X264-DIMENSION.mkv
-25 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S12E01.720p.HDTV.X264-DIMENSION.mkv
-26 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S12E01.720p.HDTV.X264-DIMENSION.mkv
-18 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted + Torrentio | Family.Guy.S12E01.720p.WEB.x264-MRSK.mkv
-19 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted + StremThru Torz Main + StremThru Torz ElfHosted + Torrentio | Family.Guy.S12E01.Finders.Keepers.720p.WEB-DL.H.264.Filiza Studio.mkv
-27 conf=1 mkv  1080p audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | family.guy.s12e01.1080p.web.x264-memento.mkv
-28 conf=1 mkv  1080p audio=[] lang=[] StremThru Torz Main | Family.Guy.S12E01.Multi.VF2.WEB.1080p.AVC-D5T0.mkv
+=== S12E1: 40 sources, automatic=28
+ 1 conf=2 ranked        mp4  720p  v=H264 a=[AAC] MB=134 hash=ced6229b lang=[] | Family.Guy.S12E01.Finders.Keepers.720p.WEB-DL.x264.AAC.mp4
+ 2 conf=2 ranked        mp4  720p  v=H264 a=[AAC] MB=134 hash=938e702a lang=[] | Family.Guy.S12E01.Finders.Keepers.720p.WEB-DL.x264.AAC.mp4
+ 3 conf=2 ranked        mp4  720p  v=H264 a=[AAC] MB=134 hash=a1743849 lang=[] | Family.Guy.S12E01.Finders.Keepers.720p.WEB-DL.x264.AAC.mp4
+ 4 conf=2 ranked        mp4  unknown v=H264 a=[AAC] MB=83 hash=fb864738 lang=[] | Family.Guy.S12E01.Finders.Keepers.WEB-DL.x264.AAC.mp4
+ 6 conf=1 ranked        mkv  1080p v=avc a=[] MB=660 hash=d44ce6fe lang=[en,de] | Family Guy S12E01 Die Schatzsuche Ger Eng DL DUBBED 1080p WebHD x264-TVP mkv
+ 5 conf=1 ranked        mkv  1080p v=H264 a=[] MB=695 hash=d307dad2 lang=[en,ru] | Family Guy S12E01. Finders Keepers. SifeR.mkv
+ 7 conf=1 ranked        mkv  1080p v=H264 a=[] MB=695 hash=30b4199f lang=[en,ru] | Family.Guy.S12E01.Finders.Keepers.1080p.WEB-DL.by.AKTEP.mkv
+ 8 conf=1 ranked        mkv  1080p v=H264 a=[] MB=763 hash=aa0fd0aa lang=[en,fr] | Family.Guy.S12E01.MULTi.1080p.WEB.H264-FW.mkv
+ - conf=2 videoRisk     mkv  1080p v=HEVC a=[AAC] MB=153 hash=d1781364 lang=[en] | Family Guy - S12E01 - Finders Keepers [1080p Web x265][AAC 5.1][Sub][Ch].mkv
+ - conf=0 audioRisk     mkv  720p  v=H264 a=[EAC3,AAC] MB=156 hash=dbc4e6c8 lang=[en] | Family.Guy.S12E01.720p.DSNP.WEB-DL.DDP5.1.x264-POWER.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[AC3,AAC] MB=653 hash=7f0462bd lang=[en,it] | I.Griffin.S12E01.Chi.cerca.trova.WEBMux.1080p.x264.iTA.AAC.ENG.AC3.Sub.ITA.ENG-Maleno85.Sylar.T7ST.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3,AAC] MB=916 hash=1b0d1bef lang=[en,es] | Family.Guy.S12E01.Finders.Keepers.1080p.DSNP.WEB-DL.DDP5.1.H.264-SLDSNK.mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=150 hash=208bbc3d lang=[en] | Family Guy - S12E01 - Finders Keepers [Uncensored] [1080p] [x265].mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=240 hash=c73939c6 lang=[en] | Family.Guy.S12E01.Finders.Keepers.1080p.WEB-DL.10bit.x265.HEVC-PHOCiS.mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=263 hash=d1d7b22d lang=[en] | Family Guy - S12E01 - Finders Keepers Uncensored 1080p NF WEB-DL x265.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[AC3] MB=633 hash=eb062c16 lang=[en] | Family.Guy.S12E01.Finders.Keepers.1080p.WEB-DL.DD5.1.H.264-CtrlHD.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[AC3] MB=633 hash=4ff4321c lang=[en] | Family.Guy.S12E01.Finders.Keepers.1080p.WEB-DL.DD5.1.H.264-CtrlHD.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[AC3] MB=633 hash=ec3e88e0 lang=[en] | Family.Guy.S12E01.Finders.Keepers.1080p.WEB-DL.DD5.1.H.264-CtrlHD.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=896 hash=1a020e13 lang=[en] | Family Guy S12E01 Finders Keepers 1080p DSNP WEB-DL DDP5 1 H 264-FLUX.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=896 hash=1c096235 lang=[en] | Family.Guy.S12E01.Finders.Keepers.1080p.DSNP.WEB-DL.DDP5.1.H.264-FLUX.mkv
+ 9 conf=1 ranked        mp4  720p  v=H264 a=[] MB=99 hash=0d7f93ec lang=[] | 恶搞之家.Family.Guy.S12E01.Finders.Keepers.HDTV-720p.mp4
+11 conf=1 ranked        mp4  480p  v=H264 a=[] MB=42 hash=fadb9c3b lang=[] | Family Guy s12e01 480p WEB-DL x264 mp4 NIT158.mp4
+12 conf=1 ranked        mp4  480p  v=H264 a=[] MB=42 hash=04e8b793 lang=[] | Family Guy s12e01 480p WEB-DL x264 mp4 NIT158.mp4
+13 conf=1 ranked        mp4  480p  v=H264 a=[] MB=42 hash=14122df1 lang=[] | Family Guy s12e01 480p WEB-DL x264 mp4 NIT158.mp4
+14 conf=1 ranked        mp4  unknown v=H264 a=[] MB=80 hash=120f18d1 lang=[] | Family.Guy.S12E01.HDTV.x264-LOL.mp4
+10 conf=1 ranked        mp4  unknown v=H264 a=[] MB=80 hash=d59270a3 lang=[] | Family.Guy.S12E01.HDTV.x264-LOL.mp4
+15 conf=1 ranked        mp4        v=H264 a=[] MB=80 hash=1d392e68 lang=[] | Family.Guy.S12E01.HDTV.x264-LOL.mp4
+16 conf=1 ranked        mp4        v=H264 a=[] MB=85 hash=f0c86a80 lang=[] | Family.Guy.S12E01.WEB-DL.x264.Hun-Krissz.mp4
+17 conf=1 ranked        mp4        v=H264 a=[] MB=359 hash=4da12095 lang=[] | Family.Guy.S12E01.S12.|.E01.HDTV.x264-EVOLVE.mp4
+22 conf=1 ranked        mkv  720p  v=H264 a=[] MB=244 hash=1a4cbad5 lang=[] | Family.Guy.S12E01.Die.Schatzsuche.GERMAN.720p.WEB.h264-TSCC.mkv
+20 conf=1 ranked        mkv  720p  v=H264 a=[] MB=301 hash=0822ddc2 lang=[] | Family.Guy.S12E01.720p.HDTV.X264-DIMENSION.mkv
+21 conf=1 ranked        mkv  720p  v=H264 a=[] MB=301 hash=b037989c lang=[] | Family.Guy.S12E01.720p.HDTV.X264-DIMENSION.mkv
+23 conf=1 ranked        mkv  720p  v=H264 a=[] MB=301 hash=46c29766 lang=[] | Family.Guy.S12E01.720p.HDTV.X264-DIMENSION.mkv
+24 conf=1 ranked        mkv  720p  v=H264 a=[] MB=301 hash=32bd8947 lang=[] | Family.Guy.S12E01.720p.HDTV.X264-DIMENSION.mkv
+25 conf=1 ranked        mkv  720p  v=H264 a=[] MB=301 hash=b4e849e6 lang=[] | Family.Guy.S12E01.720p.HDTV.X264-DIMENSION.mkv
+26 conf=1 ranked        mkv  720p  v=H264 a=[] MB=301 hash=d650f9c5 lang=[] | Family.Guy.S12E01.720p.HDTV.X264-DIMENSION.mkv
+18 conf=1 ranked        mkv  720p  v=H264 a=[] MB=435 hash=3d6c5784 lang=[] | Family.Guy.S12E01.720p.WEB.x264-MRSK.mkv
+19 conf=1 ranked        mkv  720p  v=H264 a=[] MB=530 hash=8ee99df0 lang=[] | Family.Guy.S12E01.Finders.Keepers.720p.WEB-DL.H.264.Filiza Studio.mkv
+27 conf=1 ranked        mkv  1080p v=H264 a=[] MB=575 hash=12a213b2 lang=[] | family.guy.s12e01.1080p.web.x264-memento.mkv
+28 conf=1 ranked        mkv  1080p v=H264 a=[] MB=700 hash=3fced44a lang=[] | Family.Guy.S12E01.Multi.VF2.WEB.1080p.AVC-D5T0.mkv
 
-=== S16E1: 40 sources, complete=true, automatic=30, strictAudio=4
- 1 conf=2 mkv  1080p audio=[AAC] lang=[en,fr,es,de,it,pt,pl,tr,cs,hu] Zilean + StremThru Torz Main + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S16E01.Emmy-Winning.Episode.1080p.DSNP.WEB-DL.AAC2.0.H.264-OldT.mkv
- 2 conf=2 mp4  720p  audio=[AAC] lang=[] StremThru Torz ElfHosted | Family.Guy.S16E01.Emmy-Winning.Episode.720p.AMZN.WEB-DL.x264.AAC.mp4
- 4 conf=1 mkv  720p  audio=[] lang=[en,ru] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S16E01.Emmy-Winning.Episode.720p.AMZN.WEB-DL.Rus.Eng-v.serij2013.mkv
- 5 conf=1 mkv  1080p audio=[] lang=[en,ru] Torrentio + Zilean + Torrentio + Zilean + StremThru Torz Main + Torrentio + Zilean + Torrentio + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S16E01.Emmy-Winning.Episode.1080p.AMZN.WEB-DL.Rus.Eng-v.serij2013.mkv
- 6 conf=1 mkv  1080p audio=[] lang=[en,es,pt] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S16E01.Episodio.ganador.de.un.Emmy.1080p.WEB-DL.Lat.Eng.Por.Spa.mkv
- 7 conf=1 mkv  1080p audio=[] lang=[en,es] StremThru Torz Main + StremThru Torz ElfHosted | Padre De Familia S16E01 WEB-DL 1080p Latino WWW.GDRIVELatinoHD.NET.mkv
- 3 conf=2 ?    1080p audio=[AAC] lang=[] Zilean | Family Guy S16 1080p DSNP WEB-DL AAC2 0 H 264-SLDSNK
- - conf=0 mkv  1080p audio=[AC3,AAC] lang=[en,it] StremThru Torz Main + StremThru Torz ElfHosted | I.Griffin.S16E01.Come.ti.vinco.un.Emmy.WEBMux.1080p.x264.iTA.AAC.ENG.AC3.Sub.ITA.ENG-Maleno85.Sylar.T7ST.mkv
- - conf=0 mkv  720p  audio=[AC3] lang=[en] Torrentio + Zilean + Torrentio + Zilean + StremThru Torz ElfHosted | Family Guy S16E01 Emmy-Winning Episode 720p DSNP WEB-DL DD 5 1 H 264-playWEB.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en] Torrentio + Zilean + Torrentio + Zilean + StremThru Torz Main + Torrentio + Zilean + Torrentio + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | Family Guy S16E01 Emmy-Winning Episode Uncensored 1080p NF WEB-DL DDP5 1 x264-PHOENiX.mkv
- - conf=0 mkv  720p  audio=[EAC3] lang=[en] Torrentio + Zilean + Torrentio + Zilean + StremThru Torz Main + Torrentio + Zilean + Torrentio + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S16E01.Emmy-Winning.Episode.720p.AMZN.WEBRip.DDP5.1.x264-CtrlHD[rarbg].mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en] Torrentio + Zilean + Torrentio + Zilean + StremThru Torz Main + Torrentio + Zilean + Torrentio + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S16E01.Emmy-Winning.Episode.1080p.AMZN.WEB-DL.DD+5.1.H.264-CtrlHD.mkv
- - conf=1 mkv  unknown audio=[] lang=[en] Zilean + StremThru Torz ElfHosted | Family Guy - S16E01 - Emmy-Winning Episode (Uncensored).mkv
- 8 conf=1 ?    1080p audio=[] lang=[en,hu] Zilean | Family Guy S16 1080p WEB-DL h264 HUN ENG-Drew
- - conf=0 mkv  720p  audio=[AC3] lang=[en,de] StremThru Torz ElfHosted | Family.Guy.S16E01.Die.Emmy-Gewinner-Folge.GERMAN.5.1.DL.AC3.720p.WEB-DL.x264-TvR.mkv
- - conf=0 mkv  1080p audio=[Dolby Digital] lang=[en,de] Zilean | Family Guy S16E01 Die Emmy-Gewinner-Folge Ger Eng 5 1 DUBBED DL AC3 1080p WEB-DL h264-TvR mkv
- 9 conf=1 mp4  720p  audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | 恶搞之家.Family.Guy.S16E01.Emmy-Winning.Episode.HDTV-720p.mp4
-10 conf=1 mp4  360p  audio=[] lang=[] Zilean + StremThru Torz Main + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | Family Guy S16E01 Emmy-Winning Episode.mp4
-11 conf=1 mp4        audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S16E01.WEBRip.x264-RARBG.mp4
-21 conf=1 mkv  1080p audio=[] lang=[] Torrentio + Zilean + Torrentio + Zilean + StremThru Torz Main + Torrentio + Zilean + Torrentio + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | S16E01 Emmy-Winning Episode.mkv
-12 conf=1 mkv  720p  audio=[] lang=[] Zilean + StremThru Torz Main + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S16E01.720p.WEB.x264-TBS[eztv].mkv
-13 conf=1 mkv  720p  audio=[] lang=[] Zilean + StremThru Torz Main + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S16E01.720p.HDTV.x264-AVS[eztv].mkv
-14 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S16E01.720p.HDTV.x264-AVS.mkv
-15 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S16E01.720p.HDTV.x264-AVS.mkv
-16 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S16E01.720p.HDTV.x264-AVS.mkv
-17 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S16E01.720p.HDTV.x264-AVS[ettv].mkv
-18 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S16E01.720p.HDTV.x264-AVS.[VTV].mkv
-24 conf=1 mkv  1080p audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S16E01.1080p.WEB-DL.h264.HUN.ENG-Drew.mkv
-19 conf=1 mkv  720p  audio=[] lang=[] Zilean + StremThru Torz Main + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | Family Guy S16E01 WEBRip 720p (OMSKBIRD).mkv
-25 conf=1 mkv  1080p audio=[] lang=[] Zilean + StremThru Torz Main + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | family.guy.s16e01.1080p.web.x264-tbs.mkv
-20 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S16E01.720p.HDTV.x264-NTb.mkv
-22 conf=1 mkv  1080p audio=[] lang=[] Zilean + StremThru Torz Main + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | Family Guy S16E01 WEBRip 1080p (OMSKBIRD).mkv
-26 conf=1 mkv  1080p audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Family Guy S16E01 - L’épisode gagnant d’un Emmy (Emmy-Winning Episode).mkv
-23 conf=1 mkv  720p  audio=[] lang=[] Torrentio | Family Guy.S16E01 [720p.WEB-DL.H264-FT] [ENG-Lektor PL][Alusia].mkv
-28 conf=1 mkv        audio=[] lang=[] StremThru Torz ElfHosted | pfa-family.guy.s16e01.mkv
-29 conf=1 mkv  unknown audio=[] lang=[] Zilean + StremThru Torz Main + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S16E01.HDTV.x264-SVA[eztv].mkv
-30 conf=1 mkv        audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S16E01.HDTV.x264-SVA.mkv
-27 conf=1 mkv  unknown audio=[] lang=[] Torrentio + Zilean + Torrentio + Zilean + StremThru Torz Main + Torrentio + Zilean + Torrentio + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S16E01.HDTV.x264-SVA.mkv
- - conf=2 mp4  unknown audio=[AAC,MP3] lang=[] Zilean + StremThru Torz Main + Zilean + StremThru Torz Main + StremThru Torz ElfHosted | Family Guy - S16E01 - Emmy-Winning Episode.mp4
- - conf=2 mp4        audio=[AAC,MP3] lang=[] StremThru Torz ElfHosted | Family Guy - S16E01 - Emmy-Winning Episode.mp4
+=== S16E1: 40 sources, automatic=30
+ 1 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=917 hash=5361c9fb lang=[en,fr,es,de,it,pt,pl,tr,cs,hu] | Family.Guy.S16E01.Emmy-Winning.Episode.1080p.DSNP.WEB-DL.AAC2.0.H.264-OldT.mkv
+ 2 conf=2 ranked        mp4  720p  v=H264 a=[AAC] MB=154 hash=47dd10ba lang=[] | Family.Guy.S16E01.Emmy-Winning.Episode.720p.AMZN.WEB-DL.x264.AAC.mp4
+ 4 conf=1 ranked        mkv  720p  v=H264 a=[] MB=287 hash=5ef37734 lang=[en,ru] | Family.Guy.S16E01.Emmy-Winning.Episode.720p.AMZN.WEB-DL.Rus.Eng-v.serij2013.mkv
+ 5 conf=1 ranked        mkv  1080p v=H264 a=[] MB=464 hash=51b74d1f lang=[en,ru] | Family.Guy.S16E01.Emmy-Winning.Episode.1080p.AMZN.WEB-DL.Rus.Eng-v.serij2013.mkv
+ 6 conf=1 ranked        mkv  1080p v=H264 a=[] MB=835 hash=a4fc493c lang=[en,es,pt] | Family.Guy.S16E01.Episodio.ganador.de.un.Emmy.1080p.WEB-DL.Lat.Eng.Por.Spa.mkv
+ 7 conf=1 ranked        mkv  1080p v=H264 a=[] MB=875 hash=e51645bf lang=[en,es] | Padre De Familia S16E01 WEB-DL 1080p Latino WWW.GDRIVELatinoHD.NET.mkv
+ 3 conf=2 ranked        ?    1080p v=avc a=[AAC] MB=17977 hash=8d5a9094 lang=[] | Family Guy S16 1080p DSNP WEB-DL AAC2 0 H 264-SLDSNK
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[AC3,AAC] MB=453 hash=db46c62b lang=[en,it] | I.Griffin.S16E01.Come.ti.vinco.un.Emmy.WEBMux.1080p.x264.iTA.AAC.ENG.AC3.Sub.ITA.ENG-Maleno85.Sylar.T7ST.mkv
+ - conf=0 audioRisk     mkv  720p  v=H264 a=[EAC3] MB=256 hash=3b8503c1 lang=[en] | Family.Guy.S16E01.Emmy-Winning.Episode.720p.AMZN.WEBRip.DDP5.1.x264-CtrlHD[rarbg].mkv
+ - conf=0 audioRisk     mkv  720p  v=H264 a=[AC3] MB=347 hash=f8879ef5 lang=[en] | Family Guy S16E01 Emmy-Winning Episode 720p DSNP WEB-DL DD 5 1 H 264-playWEB.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=433 hash=0fe0ae03 lang=[en] | Family.Guy.S16E01.Emmy-Winning.Episode.1080p.AMZN.WEB-DL.DD+5.1.H.264-CtrlHD.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=609 hash=2d8663d8 lang=[en] | Family Guy S16E01 Emmy-Winning Episode Uncensored 1080p NF WEB-DL DDP5 1 x264-PHOENiX.mkv
+ - conf=1 videoRisk     mkv  unknown v=HEVC a=[] MB=200 hash=db590f00 lang=[en] | Family Guy - S16E01 - Emmy-Winning Episode (Uncensored).mkv
+ 8 conf=1 ranked        ?    1080p v=avc a=[] MB=9249 hash=671b56b2 lang=[en,hu] | Family Guy S16 1080p WEB-DL h264 HUN ENG-Drew
+ - conf=0 audioRisk     mkv  720p  v=H264 a=[AC3] MB=500 hash=955a314d lang=[en,de] | Family.Guy.S16E01.Die.Emmy-Gewinner-Folge.GERMAN.5.1.DL.AC3.720p.WEB-DL.x264-TvR.mkv
+ - conf=0 audioRisk     mkv  1080p v=avc a=[Dolby Digital] MB=528 hash=b1387088 lang=[en,de] | Family Guy S16E01 Die Emmy-Gewinner-Folge Ger Eng 5 1 DUBBED DL AC3 1080p WEB-DL h264-TvR mkv
+ 9 conf=1 ranked        mp4  720p  v=H264 a=[] MB=134 hash=0d7f93ec lang=[] | 恶搞之家.Family.Guy.S16E01.Emmy-Winning.Episode.HDTV-720p.mp4
+10 conf=1 ranked        mp4  360p  v=H264 a=[] MB=35 hash=f8b4cbe7 lang=[] | Family Guy S16E01 Emmy-Winning Episode.mp4
+11 conf=1 ranked        mp4        v=H264 a=[] MB=202 hash=591198ec lang=[] | Family.Guy.S16E01.WEBRip.x264-RARBG.mp4
+21 conf=1 ranked        mkv  1080p v=H264 a=[] MB=290 hash=23247fde lang=[] | S16E01 Emmy-Winning Episode.mkv
+12 conf=1 ranked        mkv  720p  v=H264 a=[] MB=336 hash=9de58cc0 lang=[] | Family.Guy.S16E01.720p.WEB.x264-TBS[eztv].mkv
+13 conf=1 ranked        mkv  720p  v=H264 a=[] MB=373 hash=7a24c84a lang=[] | Family.Guy.S16E01.720p.HDTV.x264-AVS[eztv].mkv
+14 conf=1 ranked        mkv  720p  v=H264 a=[] MB=373 hash=a73d95db lang=[] | Family.Guy.S16E01.720p.HDTV.x264-AVS.mkv
+15 conf=1 ranked        mkv  720p  v=H264 a=[] MB=373 hash=e0d601d0 lang=[] | Family.Guy.S16E01.720p.HDTV.x264-AVS.mkv
+16 conf=1 ranked        mkv  720p  v=H264 a=[] MB=373 hash=4e6665ff lang=[] | Family.Guy.S16E01.720p.HDTV.x264-AVS.mkv
+17 conf=1 ranked        mkv  720p  v=H264 a=[] MB=373 hash=4e54fde4 lang=[] | Family.Guy.S16E01.720p.HDTV.x264-AVS[ettv].mkv
+18 conf=1 ranked        mkv  720p  v=H264 a=[] MB=373 hash=44dedfda lang=[] | Family.Guy.S16E01.720p.HDTV.x264-AVS.[VTV].mkv
+24 conf=1 ranked        mkv  1080p v=H264 a=[] MB=464 hash=06652b0f lang=[] | Family.Guy.S16E01.1080p.WEB-DL.h264.HUN.ENG-Drew.mkv
+19 conf=1 ranked        mkv  720p  v=H264 a=[] MB=487 hash=7a4b7dde lang=[] | Family Guy S16E01 WEBRip 720p (OMSKBIRD).mkv
+25 conf=1 ranked        mkv  1080p v=H264 a=[] MB=536 hash=9c12aa45 lang=[] | family.guy.s16e01.1080p.web.x264-tbs.mkv
+20 conf=1 ranked        mkv  720p  v=H264 a=[] MB=577 hash=9da08d9d lang=[] | Family.Guy.S16E01.720p.HDTV.x264-NTb.mkv
+22 conf=1 ranked        mkv  1080p v=H264 a=[] MB=578 hash=52e9c247 lang=[] | Family Guy S16E01 WEBRip 1080p (OMSKBIRD).mkv
+26 conf=1 ranked        mkv  1080p v=H264 a=[] MB=1031 hash=f664640d lang=[] | Family Guy S16E01 - L’épisode gagnant d’un Emmy (Emmy-Winning Episode).mkv
+23 conf=1 ranked        mkv  720p  v=H264 a=[] MB=0 hash=3332788e lang=[] | Family Guy.S16E01 [720p.WEB-DL.H264-FT] [ENG-Lektor PL][Alusia].mkv
+28 conf=1 ranked        mkv        v=H264 a=[] MB=80 hash=d6843e46 lang=[] | pfa-family.guy.s16e01.mkv
+27 conf=1 ranked        mkv  unknown v=H264 a=[] MB=94 hash=5205a9e3 lang=[] | Family.Guy.S16E01.HDTV.x264-SVA.mkv
+29 conf=1 ranked        mkv  unknown v=H264 a=[] MB=94 hash=d9046393 lang=[] | Family.Guy.S16E01.HDTV.x264-SVA[eztv].mkv
+30 conf=1 ranked        mkv        v=H264 a=[] MB=94 hash=ae43c1b6 lang=[] | Family.Guy.S16E01.HDTV.x264-SVA.mkv
+ - conf=2 videoRisk     mp4  unknown v=HEVC a=[AAC,MP3] MB=121 hash=61cc51d5 lang=[] | Family Guy - S16E01 - Emmy-Winning Episode.mp4
+ - conf=2 videoRisk     mp4        v=HEVC a=[AAC,MP3] MB=121 hash=066fab3a lang=[] | Family Guy - S16E01 - Emmy-Winning Episode.mp4
 
-=== S20E1: 40 sources, complete=true, automatic=25, strictAudio=1
- 1 conf=1 mkv  720p  audio=[] lang=[en] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + StremThru Torz Main | family.guy.s20e01.720p.web.h264-cakes[eztv.re].mkv
- 2 conf=1 mkv  1080p audio=[] lang=[en] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + StremThru Torz Main | family.guy.s20e01.1080p.web.h264-cakes[eztv.re].mkv
- 3 conf=1 mkv  1080p audio=[] lang=[en] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + Torrentio + Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + Torrentio + StremThru Torz Main | family.guy.s20e01.1080p.web.h264-cakes.mkv
- 4 conf=1 mkv  1080p audio=[] lang=[en,ru] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + Torrentio + Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + Torrentio + StremThru Torz Main | Family Guy (S20E01) LASIK Instinct.mkv
- 5 conf=1 mkv  1080p audio=[] lang=[en,fr] Zilean + StremThru Torz ElfHosted | Family Guy S20E01 - Je vous vois (LASIK Instinct).mkv
- 6 conf=1 mkv  1080p audio=[] lang=[en,de] StremThru Torz ElfHosted + StremThru Torz Main | family.guy.s20e01.german.dl.1080p.web.h264-wayne.mkv
- - conf=0 mkv  720p  audio=[EAC3,AAC] lang=[en] StremThru Torz ElfHosted + StremThru Torz Main | Family.Guy.S20E01.720p.DSNP.WEB-DL.DDP5.1.x264-POWER.mkv
- - conf=0 mkv  1080p audio=[EAC3,AAC] lang=[en,es] Zilean + StremThru Torz ElfHosted | Family.Guy.S20E01.LASIK.Instinct.1080p.DSNP.WEB-DL.DD+5.1.H.264-SLDSNK.mkv
- - conf=1 mkv  720p  audio=[] lang=[en] StremThru Torz ElfHosted + Torrentio | Family.Guy.S20E01.LASIK.Instinct.720p.HEVC.x265-MeGusta.mkv
- - conf=1 mkv  1080p audio=[] lang=[en] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + StremThru Torz Main | Family.Guy.S20E01.1080p.HEVC.x265-MeGusta[eztv.re].mkv
- - conf=1 mkv  1080p audio=[] lang=[en] StremThru Torz ElfHosted + Torrentio | Family.Guy.S20E01.LASIK.Instinct.1080p.HEVC.x265-MeGusta.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + StremThru Torz Main | Family.Guy.S20E01.LASIK.Instinct.1080p.HULU.WEB-DL.DD+5.1.H.264-NTb[eztv.re].mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + Torrentio + Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + Torrentio + StremThru Torz Main | Family.Guy.S20E01.LASIK.Instinct.1080p.HULU.WEB-DL.DD+5.1.H.264-NTb.mkv
- - conf=0 mkv  720p  audio=[AC3] lang=[en] StremThru Torz ElfHosted | Family Guy S20E01 Lasik Instinct 720p DSNP WEB-DL DD 5 1 H 264-playWEB.mkv
- - conf=0 mkv  1080p audio=[AC3] lang=[en] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + Torrentio | Family Guy S20E01 Lasik Instinct 1080p DSNP WEB-DL DD 5 1 H 264-playWEB.mkv
- - conf=0 mkv  1080p audio=[AC3] lang=[en] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + Torrentio | Family Guy S20E01 LASIK Instinct 1080p DSNP WEB-DL DD 5 1 H 264-NTb.mkv
- - conf=1 mkv  unknown audio=[] lang=[en] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + StremThru Torz Main | Family Guy - S20E01 - LASIK Instinct.mkv
- - conf=1 mkv        audio=[] lang=[en] StremThru Torz ElfHosted | Family Guy - S20E01 - LASIK Instinct.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en,hu] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + StremThru Torz Main | family.guy.s20e01.1080p.h264-bnr.mkv
- - conf=0 mkv  1080p audio=[Dolby Digital] lang=[en,de] Zilean | Family Guy S20E01 Ger Eng 5 1 DL AC3 1080p WEB-DL h264 REPACK-TvR mkv
- 8 conf=1 mp4  1080p audio=[] lang=[] StremThru Torz ElfHosted + StremThru Torz Main | 恶搞之家.Family.Guy.S20E01.LASIK.Instinct.1080p-漫迪字幕组.mp4
- 9 conf=1 mp4        audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.s20e01.WEBRip.x264.Rus.BaibaKo.tv.mp4
-10 conf=1 mp4        audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.s20e01.WEBRip.x264.Rus.BaibaKo.tv.mp4
-11 conf=1 mp4        audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.s20e01.WEBRip.x264.Rus.BaibaKo.tv.mp4
-12 conf=1 mp4  unknown audio=[] lang=[] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + StremThru Torz Main | Family.Guy.S20E01.WEBRip.x264-ION10.mp4
-13 conf=1 mp4        audio=[] lang=[] StremThru Torz ElfHosted + StremThru Torz Main | Family.Guy.S20E01.WEBRip.x264-ION10.mp4
-16 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz ElfHosted | family.guy.s20e01.720p.web.h264-cakes-sample.mkv
-17 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz ElfHosted | family.guy.s20e01.720p.web.h264-cakes-sample.mkv
-20 conf=1 mkv  1080p audio=[] lang=[] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + StremThru Torz Main | family.guy.s20e01.1080p.web.h264-cakes-sample.mkv
-18 conf=1 mkv  720p  audio=[] lang=[] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + StremThru Torz Main | family.guy.s20e01.720p.web.h264-cakes.mkv
-21 conf=1 mkv  1080p audio=[] lang=[] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + StremThru Torz Main | family.guy.s20e01.1080p.web.h264-cakes.mkv
-25 conf=1 mkv  1080p audio=[] lang=[] StremThru Torz ElfHosted + StremThru Torz Main | Family.Guy.s20e01.HD1080p.WEBRip.Rus.BaibaKo.tv.mkv
-19 conf=1 mkv  720p  audio=[] lang=[] Torrentio | Family Guy.S20E01 [720p.WEB-DL.H264-FT] [ENG-Lektor PL][Alusia].mkv
-22 conf=1 mkv  480p  audio=[] lang=[] StremThru Torz ElfHosted + StremThru Torz Main | Family.Guy.S20E01.480p.x264-mSD[eztv.re].mkv
-23 conf=1 mkv        audio=[] lang=[] StremThru Torz ElfHosted | Family.Guy.S20E01.WEB.x264-TORRENTGALAXY.mkv
-24 conf=1 mkv        audio=[] lang=[] StremThru Torz ElfHosted | family.guy.s20e01.webrip.x264-bnr.mkv
- 7 conf=1 mp4  720p  audio=[] lang=[] Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + Torrentio + Zilean + StremThru Torz ElfHosted + Zilean + StremThru Torz ElfHosted + Torrentio + StremThru Torz Main | Family Guy S20E01 LASIK Instinct.mp4
-15 conf=1 mp4  1080p audio=[] lang=[] Torrentio | Family Guy - S20e01 - Lasik Instinct.mp4
-14 conf=1 mp4  360p  audio=[] lang=[] StremThru Torz ElfHosted | Family Guy S20E01 LASIK Instinct.mp4
- - conf=2 mp4  1080p audio=[AAC] lang=[] StremThru Torz ElfHosted + StremThru Torz Main | Family Guy - S20E01 - LASIK Instinct.mp4
+=== S20E1: 40 sources, automatic=25
+ 1 conf=1 ranked        mkv  720p  v=H264 a=[] MB=304 hash=d1cd7eea lang=[en] | family.guy.s20e01.720p.web.h264-cakes[eztv.re].mkv
+ 2 conf=1 ranked        mkv  1080p v=H264 a=[] MB=605 hash=08097684 lang=[en] | family.guy.s20e01.1080p.web.h264-cakes[eztv.re].mkv
+ 3 conf=1 ranked        mkv  1080p v=H264 a=[] MB=605 hash=d3815d51 lang=[en] | family.guy.s20e01.1080p.web.h264-cakes.mkv
+ 4 conf=1 ranked        mkv  1080p v=H264 a=[] MB=337 hash=2167ba51 lang=[en,ru] | Family Guy (S20E01) LASIK Instinct.mkv
+ 5 conf=1 ranked        mkv  1080p v=H264 a=[] MB=730 hash=5ecbb755 lang=[en,fr] | Family Guy S20E01 - Je vous vois (LASIK Instinct).mkv
+ 6 conf=1 ranked        mkv  1080p v=H264 a=[] MB=884 hash=d6fd2f92 lang=[en,de] | family.guy.s20e01.german.dl.1080p.web.h264-wayne.mkv
+ - conf=0 audioRisk     mkv  720p  v=H264 a=[EAC3,AAC] MB=240 hash=dbc4e6c8 lang=[en] | Family.Guy.S20E01.720p.DSNP.WEB-DL.DDP5.1.x264-POWER.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3,AAC] MB=886 hash=9244b967 lang=[en,es] | Family.Guy.S20E01.LASIK.Instinct.1080p.DSNP.WEB-DL.DD+5.1.H.264-SLDSNK.mkv
+ - conf=1 videoRisk     mkv  720p  v=HEVC a=[] MB=130 hash=719c0ecd lang=[en] | Family.Guy.S20E01.LASIK.Instinct.720p.HEVC.x265-MeGusta.mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=150 hash=c0bed6bc lang=[en] | Family.Guy.S20E01.1080p.HEVC.x265-MeGusta[eztv.re].mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=169 hash=3e5cbcf6 lang=[en] | Family.Guy.S20E01.LASIK.Instinct.1080p.HEVC.x265-MeGusta.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=306 hash=70cf907c lang=[en] | Family.Guy.S20E01.LASIK.Instinct.1080p.HULU.WEB-DL.DD+5.1.H.264-NTb[eztv.re].mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=306 hash=a0db6bcc lang=[en] | Family.Guy.S20E01.LASIK.Instinct.1080p.HULU.WEB-DL.DD+5.1.H.264-NTb.mkv
+ - conf=0 audioRisk     mkv  720p  v=H264 a=[AC3] MB=310 hash=69cc37c6 lang=[en] | Family Guy S20E01 Lasik Instinct 720p DSNP WEB-DL DD 5 1 H 264-playWEB.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[AC3] MB=529 hash=8e243a4d lang=[en] | Family Guy S20E01 Lasik Instinct 1080p DSNP WEB-DL DD 5 1 H 264-playWEB.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[AC3] MB=866 hash=4cf56005 lang=[en] | Family Guy S20E01 LASIK Instinct 1080p DSNP WEB-DL DD 5 1 H 264-NTb.mkv
+ - conf=1 videoRisk     mkv  unknown v=HEVC a=[] MB=211 hash=db590f00 lang=[en] | Family Guy - S20E01 - LASIK Instinct.mkv
+ - conf=1 videoRisk     mkv        v=HEVC a=[] MB=211 hash=94cda7d5 lang=[en] | Family Guy - S20E01 - LASIK Instinct.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=897 hash=e73113ef lang=[en,hu] | family.guy.s20e01.1080p.h264-bnr.mkv
+ - conf=0 audioRisk     mkv  1080p v=avc a=[Dolby Digital] MB=991 hash=7c382423 lang=[en,de] | Family Guy S20E01 Ger Eng 5 1 DL AC3 1080p WEB-DL h264 REPACK-TvR mkv
+ 7 conf=1 ranked        mp4  1080p v=H264 a=[] MB=163 hash=0d7f93ec lang=[] | 恶搞之家.Family.Guy.S20E01.LASIK.Instinct.1080p-漫迪字幕组.mp4
+ 8 conf=1 ranked        mp4        v=H264 a=[] MB=155 hash=3dd600a9 lang=[] | Family.Guy.s20e01.WEBRip.x264.Rus.BaibaKo.tv.mp4
+ 9 conf=1 ranked        mp4        v=H264 a=[] MB=155 hash=3ea0fc19 lang=[] | Family.Guy.s20e01.WEBRip.x264.Rus.BaibaKo.tv.mp4
+10 conf=1 ranked        mp4        v=H264 a=[] MB=155 hash=b6884bcc lang=[] | Family.Guy.s20e01.WEBRip.x264.Rus.BaibaKo.tv.mp4
+11 conf=1 ranked        mp4  unknown v=H264 a=[] MB=220 hash=6c697425 lang=[] | Family.Guy.S20E01.WEBRip.x264-ION10.mp4
+12 conf=1 ranked        mp4        v=H264 a=[] MB=220 hash=8e23f089 lang=[] | Family.Guy.S20E01.WEBRip.x264-ION10.mp4
+16 conf=1 ranked        mkv  720p  v=H264 a=[] MB=13 hash=93127463 lang=[] | family.guy.s20e01.720p.web.h264-cakes-sample.mkv
+17 conf=1 ranked        mkv  720p  v=H264 a=[] MB=13 hash=ca181797 lang=[] | family.guy.s20e01.720p.web.h264-cakes-sample.mkv
+20 conf=1 ranked        mkv  1080p v=H264 a=[] MB=25 hash=9b08184f lang=[] | family.guy.s20e01.1080p.web.h264-cakes-sample.mkv
+18 conf=1 ranked        mkv  720p  v=H264 a=[] MB=304 hash=8aeba8b6 lang=[] | family.guy.s20e01.720p.web.h264-cakes.mkv
+21 conf=1 ranked        mkv  1080p v=H264 a=[] MB=605 hash=ea30556e lang=[] | family.guy.s20e01.1080p.web.h264-cakes.mkv
+25 conf=1 ranked        mkv  1080p v=H264 a=[] MB=1092 hash=58feb2fb lang=[] | Family.Guy.s20e01.HD1080p.WEBRip.Rus.BaibaKo.tv.mkv
+19 conf=1 ranked        mkv  720p  v=H264 a=[] MB=0 hash=3332788e lang=[] | Family Guy.S20E01 [720p.WEB-DL.H264-FT] [ENG-Lektor PL][Alusia].mkv
+22 conf=1 ranked        mkv  480p  v=H264 a=[] MB=54 hash=c4dc5963 lang=[] | Family.Guy.S20E01.480p.x264-mSD[eztv.re].mkv
+23 conf=1 ranked        mkv        v=H264 a=[] MB=77 hash=4cc2405a lang=[] | Family.Guy.S20E01.WEB.x264-TORRENTGALAXY.mkv
+24 conf=1 ranked        mkv        v=H264 a=[] MB=137 hash=8be401ce lang=[] | family.guy.s20e01.webrip.x264-bnr.mkv
+15 conf=1 ranked        mp4  720p  v= a=[] MB=28444 hash=fe7c49d1 lang=[] | Family Guy S20E01 LASIK Instinct.mp4
+14 conf=1 ranked        mp4  1080p v= a=[] MB=0 hash=ac6c1a7f lang=[] | Family Guy - S20e01 - Lasik Instinct.mp4
+13 conf=1 ranked        mp4  360p  v= a=[] MB=33 hash=ee6a53a0 lang=[] | Family Guy S20E01 LASIK Instinct.mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=190 hash=2001889a lang=[] | Family Guy - S20E01 - LASIK Instinct.mp4
 
-=== S22E1: 40 sources, complete=true, automatic=20, strictAudio=2
- 1 conf=2 mkv  1080p audio=[AAC] lang=[] StremThru Torz ElfHosted | Family.Guy.S22E01.Fertilized.Megg.1080p.DSNP.WEB-DL.AAC2.0.H.264-OldT.mkv
- 2 conf=1 mp4  1080p audio=[] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy S22E01 Fertilized Megg.mp4
- 3 conf=1 mkv  720p  audio=[] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.720p.x264-FENiX.mkv
- 4 conf=1 mkv  720p  audio=[] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.720p.x264-FENiX.mkv
- 6 conf=1 mkv  1080p audio=[] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.1080p.WEB.h264-BAE[eztv.re].mkv
- 5 conf=1 mkv  1080p audio=[] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.1080p.WEB.h264-BAE.mkv
- 7 conf=1 mkv  unknown audio=[] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.WEB.x264-TORRENTGALAXY.mkv
- 8 conf=1 mkv  480p  audio=[] lang=[en] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.480p.x264-RUBiK.mkv
- 9 conf=1 mkv  720p  audio=[] lang=[en,ru] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.720p.WEBRip.OmskBird.mkv
-12 conf=1 mkv  1080p audio=[] lang=[en,uk] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.1080p.WEB-DL.UkrEng [Hurtom].mkv
-10 conf=1 mkv  720p  audio=[] lang=[en,de] StremThru Torz ElfHosted | Family.Guy.S22E01.German.DL.720p.WEB.h264-WvF.mkv
-13 conf=1 mkv  1080p audio=[] lang=[en,ru] Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.Fertilized.Megg.mkv
-14 conf=1 mkv  1080p audio=[] lang=[en,ru] StremThru Torz ElfHosted | Family.Guy.S22E01.Fertilized.Megg.mkv
-11 conf=1 mkv  1080p audio=[] lang=[en,ru] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.WEBDL.1080p.RGzsRutracker.mkv
-15 conf=1 mkv  1080p audio=[] lang=[en,ru] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.WEBDL.1080p.RGzsRutracker.mkv
- - conf=1 mkv  720p  audio=[] lang=[en] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.720p.WEB.x265-MiNX.mkv
- - conf=1 mkv  720p  audio=[] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.720p.x265-T0PAZ.mkv
- - conf=1 mkv  1080p audio=[] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.1080p.HEVC.x265-MeGusta.mkv
- - conf=1 mkv  1080p audio=[] lang=[en] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.iNTERNAL.1080p.HEVC.x265-MeGusta[eztv.re].mkv
- - conf=1 mkv  1080p audio=[] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.1080p.x265-ELiTE[EZTVx.to].mkv
- - conf=1 mkv  1080p audio=[] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.1080p.x265-ELiTE.mkv
- - conf=1 mkv  1080p audio=[] lang=[en] Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.1080p.x265-ELiTE.mkv
- - conf=1 mkv  1080p audio=[] lang=[en] StremThru Torz ElfHosted | Family.Guy.S22E01.1080p.x265-ELiTE.mkv
- - conf=1 mkv  1080p audio=[] lang=[en] StremThru Torz Main + StremThru Torz ElfHosted | family.guy.s22e01.fertilized.megg.1080p.web.dl.hevc.x265.rmteam.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.Fertilized.Megg.1080p.HULU.WEB-DL.DDP5.1.H.264-NTb.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en] Torrentio + Zilean + Torrentio + Zilean + StremThru Torz ElfHosted | Family Guy S22E01 Fertilized Megg 1080p HULU WEB-DL DDP5 1 H 264-NTb.mkv
- - conf=0 mkv  720p  audio=[EAC3] lang=[en] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.Fertilized.Megg.720p.DSNP.WEB-DL.DDP5.1.H.264-NTb.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family Guy S22E01 Fertilized Megg 1080p DSNP WEB-DL DDP5 1 H 264-NTb.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.Fertilized.Megg.1080p.DSNP.WEB-DL.DDP5.1.H.264-NTb.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + StremThru Torz ElfHosted | cab9965fc3a3402dbdf04642d6b708f9[eztv.re].mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.Fertilized.Megg.1080p.DSNP.WEB-DL.DDP5.1.H.264-NTb.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en,pt] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.A.Gravidez.de.Meg.1080p.DSNP.WEB-DL.DDP5.1.H.264.DUAL-OLYMPUS.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en,fr] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.MULTi.VF2.1080p.WEB.DDP5.1.H264-SFQC.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en,fr] StremThru Torz ElfHosted | Family.Guy.S22E01.MULTi.VF2.1080p.WEB.DDP5.1.H264-SFQC.mkv
- - conf=0 mkv  1080p audio=[EAC3] lang=[en,es,pt] StremThru Torz ElfHosted | Family.Guy.S22E01.Meg.fertilizada.1080p.DSNP.WEB-DL.DDP5.1.H.264-SLDSNK.mkv
-17 conf=1 mkv  720p  audio=[] lang=[] Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + Torrentio + StremThru Torz Main + Torrentio + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.720p.x264-FENiX[EZTVx.to].mkv
-18 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.720p.x264-FENiX[eztv.re].mkv
-20 conf=1 mkv  1080p audio=[] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.iNTERNAL.1080p.WEB.h264-EDITH[eztv.re].mkv
-16 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz Main + StremThru Torz ElfHosted | Family.Guy.S22E01.720p.WEB.h264-BAE[eztv.re].mkv
-19 conf=1 mkv  720p  audio=[] lang=[] StremThru Torz Main + Zilean + StremThru Torz Main + Zilean + StremThru Torz ElfHosted | Family.Guy.S22E01.720p.WEB.h264-BAE.mkv
+=== S22E1: 40 sources, automatic=20
+ 1 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=710 hash=a17fd62a lang=[] | Family.Guy.S22E01.Fertilized.Megg.1080p.DSNP.WEB-DL.AAC2.0.H.264-OldT.mkv
+ 2 conf=1 ranked        mp4  1080p v=H264 a=[] MB=182 hash=1b618bc4 lang=[en] | Family Guy S22E01 Fertilized Megg.mp4
+ 3 conf=1 ranked        mkv  720p  v=H264 a=[] MB=96 hash=ad533a50 lang=[en] | Family.Guy.S22E01.720p.x264-FENiX.mkv
+ 4 conf=1 ranked        mkv  720p  v=H264 a=[] MB=96 hash=99e4763b lang=[en] | Family.Guy.S22E01.720p.x264-FENiX.mkv
+ 6 conf=1 ranked        mkv  1080p v=H264 a=[] MB=448 hash=7af654d9 lang=[en] | Family.Guy.S22E01.1080p.WEB.h264-BAE[eztv.re].mkv
+ 5 conf=1 ranked        mkv  1080p v=H264 a=[] MB=448 hash=5c90da3f lang=[en] | Family.Guy.S22E01.1080p.WEB.h264-BAE.mkv
+ 7 conf=1 ranked        mkv  unknown v=H264 a=[] MB=69 hash=cf2f2fcf lang=[en] | Family.Guy.S22E01.WEB.x264-TORRENTGALAXY.mkv
+ 8 conf=1 ranked        mkv  480p  v=H264 a=[] MB=73 hash=22255a74 lang=[en] | Family.Guy.S22E01.480p.x264-RUBiK.mkv
+ 9 conf=1 ranked        mkv  720p  v=H264 a=[] MB=334 hash=db7be5c1 lang=[en,ru] | Family.Guy.S22E01.720p.WEBRip.OmskBird.mkv
+12 conf=1 ranked        mkv  1080p v=H264 a=[] MB=370 hash=317988c8 lang=[en,uk] | Family.Guy.S22E01.1080p.WEB-DL.UkrEng [Hurtom].mkv
+10 conf=1 ranked        mkv  720p  v=H264 a=[] MB=391 hash=297e2330 lang=[en,de] | Family.Guy.S22E01.German.DL.720p.WEB.h264-WvF.mkv
+13 conf=1 ranked        mkv  1080p v=H264 a=[] MB=872 hash=e6dea0e5 lang=[en,ru] | Family.Guy.S22E01.Fertilized.Megg.mkv
+14 conf=1 ranked        mkv  1080p v=H264 a=[] MB=872 hash=919eb33d lang=[en,ru] | Family.Guy.S22E01.Fertilized.Megg.mkv
+11 conf=1 ranked        mkv  1080p v=H264 a=[] MB=903 hash=477be406 lang=[en,ru] | Family.Guy.S22E01.WEBDL.1080p.RGzsRutracker.mkv
+15 conf=1 ranked        mkv  1080p v=H264 a=[] MB=903 hash=bdd15012 lang=[en,ru] | Family.Guy.S22E01.WEBDL.1080p.RGzsRutracker.mkv
+ - conf=1 videoRisk     mkv  720p  v=HEVC a=[] MB=72 hash=2f5ef284 lang=[en] | Family.Guy.S22E01.720p.WEB.x265-MiNX.mkv
+ - conf=1 videoRisk     mkv  720p  v=HEVC a=[] MB=97 hash=8ee75214 lang=[en] | Family.Guy.S22E01.720p.x265-T0PAZ.mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=122 hash=70256254 lang=[en] | Family.Guy.S22E01.1080p.HEVC.x265-MeGusta.mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=143 hash=3fc2cf41 lang=[en] | Family.Guy.S22E01.iNTERNAL.1080p.HEVC.x265-MeGusta[eztv.re].mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=144 hash=5ddad4a1 lang=[en] | Family.Guy.S22E01.1080p.x265-ELiTE[EZTVx.to].mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=144 hash=59d0583e lang=[en] | Family.Guy.S22E01.1080p.x265-ELiTE.mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=144 hash=e8c92570 lang=[en] | Family.Guy.S22E01.1080p.x265-ELiTE.mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=144 hash=63c9ae3d lang=[en] | Family.Guy.S22E01.1080p.x265-ELiTE.mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=147 hash=c06b9845 lang=[en] | family.guy.s22e01.fertilized.megg.1080p.web.dl.hevc.x265.rmteam.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=252 hash=ee189330 lang=[en] | Family.Guy.S22E01.Fertilized.Megg.1080p.HULU.WEB-DL.DDP5.1.H.264-NTb.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=252 hash=10ba88a9 lang=[en] | Family Guy S22E01 Fertilized Megg 1080p HULU WEB-DL DDP5 1 H 264-NTb.mkv
+ - conf=0 audioRisk     mkv  720p  v=H264 a=[EAC3] MB=350 hash=50c4dbf1 lang=[en] | Family.Guy.S22E01.Fertilized.Megg.720p.DSNP.WEB-DL.DDP5.1.H.264-NTb.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=810 hash=a943da97 lang=[en] | Family Guy S22E01 Fertilized Megg 1080p DSNP WEB-DL DDP5 1 H 264-NTb.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=810 hash=43c1e922 lang=[en] | Family.Guy.S22E01.Fertilized.Megg.1080p.DSNP.WEB-DL.DDP5.1.H.264-NTb.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=810 hash=8b56cbb7 lang=[en] | cab9965fc3a3402dbdf04642d6b708f9[eztv.re].mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=810 hash=72a5ceac lang=[en] | Family.Guy.S22E01.Fertilized.Megg.1080p.DSNP.WEB-DL.DDP5.1.H.264-NTb.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=851 hash=ce17846a lang=[en,pt] | Family.Guy.S22E01.A.Gravidez.de.Meg.1080p.DSNP.WEB-DL.DDP5.1.H.264.DUAL-OLYMPUS.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=872 hash=14f042e7 lang=[en,fr] | Family.Guy.S22E01.MULTi.VF2.1080p.WEB.DDP5.1.H264-SFQC.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=872 hash=c72fdd7d lang=[en,fr] | Family.Guy.S22E01.MULTi.VF2.1080p.WEB.DDP5.1.H264-SFQC.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=892 hash=1bc8cdb8 lang=[en,es,pt] | Family.Guy.S22E01.Meg.fertilizada.1080p.DSNP.WEB-DL.DDP5.1.H.264-SLDSNK.mkv
+17 conf=1 ranked        mkv  720p  v=H264 a=[] MB=96 hash=444561c1 lang=[] | Family.Guy.S22E01.720p.x264-FENiX[EZTVx.to].mkv
+18 conf=1 ranked        mkv  720p  v=H264 a=[] MB=96 hash=11265f19 lang=[] | Family.Guy.S22E01.720p.x264-FENiX[eztv.re].mkv
+20 conf=1 ranked        mkv  1080p v=H264 a=[] MB=252 hash=276e2125 lang=[] | Family.Guy.S22E01.iNTERNAL.1080p.WEB.h264-EDITH[eztv.re].mkv
+16 conf=1 ranked        mkv  720p  v=H264 a=[] MB=303 hash=3a7dcc8d lang=[] | Family.Guy.S22E01.720p.WEB.h264-BAE[eztv.re].mkv
+19 conf=1 ranked        mkv  720p  v=H264 a=[] MB=303 hash=c4303885 lang=[] | Family.Guy.S22E01.720p.WEB.h264-BAE.mkv
 
-TOTALS {"sources":240,"aac":43,"unknown":156,"risky":41,"unsupported":0}
+=== S5E10: 40 sources, automatic=28
+ 1 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=1049 hash=08b22c80 lang=[en] | Family.Guy.S05E10.Peters.Two.Dads.1080p.DSNP.WEB-DL.AAC2.0.H.264-PHOENiX.mkv
+ 3 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=16900 hash=4e0cacd4 lang=[en] | Family.Guy.S05E10.Peters.Two.Dads.1080p.DSNP.WEB-DL.AAC2.0.H.264-PHOENiX.mkv
+ 2 conf=2 ranked        mkv  unknown v=H264 a=[AAC] MB=311 hash=a0f2c8a2 lang=[en] | Family Guy S05E10 Peters Two Dads DSNP WEB-DL AAC2 0 H 264-playWEB.mkv
+ 4 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=1069 hash=58af9320 lang=[en,it] | I.Griffin.S05E10.I.due.papà.di.Peter.WEBMux.1080p.x264.iTA.ENG.AAC.Subs-Maleno85.Sylar.T7ST.mkv
+ 5 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=1049 hash=5b7ad01a lang=[] | Family.Guy.S05E10.Peters.Two.Dads.1080p.DSNP.WEB-DL.AAC2.0.H.264-PHOENiX.mkv
+ 6 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=1049 hash=e592f786 lang=[] | Family.Guy.S05E10.Peters.Two.Dads.1080p.DSNP.WEB-DL.AAC2.0.H.264-PHOENiX.mkv
+ 7 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=1069 hash=c5a4738e lang=[] | Family.Guy.S05E10.Peters.Two.Dads.1080p.DSNP.WEB-DL.AAC2.0.H.264-SLDSNK.mkv
+ 8 conf=2 ranked        mkv  1080p v=H264 a=[AAC] MB=0 hash=acd1443b lang=[] | Family Guy (1999) - S05E10 - Peters Two Dads [DSNP WEBDL-1080p][AAC 2.0][h264]-PHOENiX.mkv
+ 9 conf=2 ranked        mkv        v=H264 a=[AAC] MB=74 hash=8f84ee22 lang=[] | FAMILY GUY - SEASON 5 EPISODE 10 - PETER'S TWO DADS - STAR - [iRG].mkv
+11 conf=1 ranked        mkv  1080p v=H264 a=[] MB=648 hash=8133a6d4 lang=[en,fr] | Family.Guy.S05E10.MULTi.1080p.WEB.H264-FW.mkv
+12 conf=1 ranked        mkv  1080p v=H264 a=[] MB=880 hash=40cc9e4f lang=[en,ru] | Family.Guy.S05E10.Peter's.Two.Dads.1080p.WEB-DL.Rus.Eng_TeamHD.mkv
+13 conf=1 ranked        mkv  1080p v=H264 a=[] MB=1069 hash=a1ba575b lang=[en,pl] | Family.Guy.S05E10.MULTi.1080p.DSNP.WEB-DL.x264-DSiTE.mkv
+14 conf=1 ranked        mkv  1080p v=H264 a=[] MB=1210 hash=166a534f lang=[en,de] | Family.Guy.S05E10.Peters.zwei.Vaeter.Ger.Eng.DL.1080p.WEB.H264-TSCC.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3,AAC] MB=218 hash=dbc4e6c8 lang=[en] | Family.Guy.S05E10.1080p.DSNP.WEB-DL.AAC2.0.x264-POWER.mkv
+ - conf=2 videoRisk     mkv  480p  v=HEVC a=[AAC] MB=118 hash=f0813544 lang=[en] | Family Guy - S05E10 - Peter's Two Dads [480p DVD x265][AAC 5.1][Sub][Ch].mkv
+10 conf=2 ranked        ?    1080p v=avc a=[AAC] MB=16900 hash=68356f14 lang=[] | Family Guy S05 1080p DSNP WEB-DL AAC2 0 H 264-PHOENiX
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=150 hash=de21aaf8 lang=[en] | Family Guy - S05E10 - Peter's Two Dads [Uncensored] [1080p] [x265].mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=2700 hash=d29a2ec0 lang=[en] | Family Guy - S05E10 - Peter's Two Dads [Uncensored] [1080p] [x265].mkv
+ - conf=1 videoRisk     mkv  unknown v=HEVC a=[] MB=247 hash=db590f00 lang=[en] | Family Guy - S05E10 - Peter's Two Dads (Uncensored).mkv
+22 conf=1 ranked        mp4  unknown v=H264 a=[] MB=14237 hash=fe70037a lang=[] | Family Guy S05E10 Peter's Two Dads - fiveofseven.mp4
+23 conf=1 ranked        mkv  720p  v=H264 a=[] MB=333 hash=4312fb72 lang=[] | Family.Guy.S05E10.Peters.zwei.Vaeter.GERMAN.DL.720p.WEB.H264-TSCC.mkv
+24 conf=1 ranked        mkv  720p  v=H264 a=[] MB=0 hash=3332788e lang=[] | Family Guy.S05E10 [720p.WEB-DL.H264-FT] [ENG-Lektor PL][Alusia].mkv
+ - conf=2 videoRisk     mp4  unknown v=HEVC a=[AAC,MP3] MB=90 hash=61cc51d5 lang=[] | Family Guy - S05E10 - Peter's Two Dads.mp4
+ - conf=2 videoRisk     mp4        v=HEVC a=[AAC,MP3] MB=90 hash=066fab3a lang=[] | Family Guy - S05E10 - Peter's Two Dads.mp4
+26 conf=1 ranked        mkv  480p  v=H264 a=[] MB=142 hash=e3c9f19c lang=[] | Family.Guy.S05E10.480p.DVDRip.x264-Sticky83.mkv
+28 conf=1 ranked        mkv  unknown v=H264 a=[] MB=142 hash=e1b3cc3f lang=[] | Family.Guy.S05E10.DVDRip.x264-Sticky83.mkv
+27 conf=1 ranked        mkv        v=H264 a=[] MB=210 hash=8d3cc8b1 lang=[] | 510 Peter's Two Dads.mkv
+25 conf=1 ranked        mkv        v=H264 a=[] MB=255 hash=7e254c9d lang=[] | Family.Guy.5x10.Peters.Two.Dads.DVDRip.x264.MIF.mkv
+21 conf=1 ranked        mp4  720p  v= a=[] MB=28444 hash=fe7c49d1 lang=[] | Family Guy S05E10 Peter`s Two Dads.mp4
+20 conf=1 ranked        mp4  1080p v= a=[] MB=0 hash=ac6c1a7f lang=[] | Family Guy - S05e10 - Peter's Two Dads (Uncensored).mp4
+15 conf=1 ranked        mp4  360p  v= a=[] MB=31 hash=42e35acb lang=[] | Family Guy S05E10 Peter's Two Dads.mp4
+16 conf=1 ranked        mp4        v= a=[] MB=51 hash=0d7f93ec lang=[] | 恶搞之家.Family.Guy.S05E10.Peter's.Two.Dads.SDTV.mp4
+19 conf=1 ranked        mp4        v= a=[] MB=51 hash=a6e57cce lang=[] | 恶搞之家.Family.Guy.S05E10.Peter's.Two.Dads.SDTV.mp4
+17 conf=1 ranked        mp4        v= a=[] MB=52 hash=dbc3df4a lang=[] | Padre de Familia - 05x10 los dos padre de peter.mp4
+18 conf=1 ranked        mp4        v= a=[] MB=59 hash=729091d6 lang=[] | Family Guy -s05e10. Peter's Two Dads.mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=103 hash=027036b1 lang=[] | Family Guy - S05E10 - Peter's Two Dads.mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=103 hash=3d45a491 lang=[] | Family Guy - S05E10 - Peter's Two Dads.mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=133 hash=681e5f40 lang=[] | Family Guy - S05E10 - Peter's Two Dads.mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=179 hash=2001889a lang=[] | Family Guy - S05E10 - Peter's Two Dads.mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=179 hash=25e845a8 lang=[] | Family Guy - S05E10 - Peter's Two Dads.mp4
+
+=== S10E8: 40 sources, automatic=27
+ 1 conf=2 ranked        mp4  720p  v=H264 a=[AAC] MB=220 hash=dbf7fe6a lang=[] | Family.Guy.S10E08.Cool.Hand.Peter.720p.WEB-DL.AAC2.0.H.264.mp4
+ 4 conf=1 ranked        mkv  1080p v=H264 a=[] MB=416 hash=44559257 lang=[en,hu] | Family.Guy.S10E08.Cool.Hand.Peter.1080p.mkv
+ 5 conf=1 ranked        mkv  1080p v=H264 a=[] MB=732 hash=b39ae7a1 lang=[en,fr] | Family.Guy.S10E08.MULTi.1080p.WEB.H264-FW.mkv
+ 3 conf=1 ranked        mkv  1080p v=H264 a=[] MB=951 hash=e228a8b2 lang=[en,ru] | Family.Guy.S10E08.Cool.Hand.Peter.1080p.WEB-DL.mkv
+ - conf=2 videoRisk     mkv  1080p v=HEVC a=[AAC] MB=193 hash=56743d31 lang=[en] | Family.Guy.S10E08.Cool.Hand.Peter.1080p.WEB-DL.x265.10bit.AAC.5.1-ImE[UTR].mkv
+ - conf=2 videoRisk     mkv  1080p v=HEVC a=[AAC] MB=195 hash=c3a5ff3c lang=[en] | Family Guy - S10E08 - Cool Hand Peter [1080p Web x265][AAC 5.1][Sub][Ch].mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3,AAC] MB=342 hash=dbc4e6c8 lang=[en] | Family.Guy.S10E08.1080p.DSNP.WEB-DL.DDP5.1.x264-POWER.mkv
+ 2 conf=2 ranked        ?    1080p v=avc a=[AAC] MB=19869 hash=b5fa740a lang=[] | Family Guy S10 1080p DSNP WEB-DL AAC2 0 H 264-SLDSNK
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[AC3,AAC] MB=704 hash=f72198bb lang=[en,it] | I.Griffin.S10E08.La.grande.avventura.WEBMux.1080p.x264.iTA.AAC.ENG.AC3.Sub.ITA.ENG-Maleno85.Sylar.T7ST.mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=350 hash=7f19e8d1 lang=[en] | Family.Guy.S10E08.Cool.Hand.Peter.1080p.WEB-DL.10bit.x265.HEVC-PHOCiS.mkv
+ - conf=1 videoRisk     mkv  1080p v=HEVC a=[] MB=350 hash=c73939c6 lang=[en] | Family.Guy.S10E08.Cool.Hand.Peter.1080p.WEB-DL.10bit.x265.HEVC-PHOCiS.mkv
+ - conf=0 audioRisk     mkv  720p  v=H264 a=[AC3] MB=361 hash=119dd667 lang=[en] | Family Guy S10E08 Cool Hand Peter 720p DSNP WEB-DL DD 5 1 H 264-playWEB.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[AC3] MB=684 hash=37a7ba64 lang=[en] | Family.Guy.S10E08.Cool.Hand.Peter.1080p.WEB-DL.DD5.1.H.264-CtrlHD.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=903 hash=02ed2c5e lang=[en] | Family Guy S10E08 Cool Hand Peter 1080p DSNP WEB-DL DDP5 1 H 264-FLUX.mkv
+ - conf=0 audioRisk     mkv  1080p v=H264 a=[EAC3] MB=903 hash=ad9c4958 lang=[en] | Family.Guy.S10E08.Cool.Hand.Peter.1080p.DSNP.WEB-DL.DDP5.1.H.264-FLUX.mkv
+16 conf=1 ranked        mkv  720p  v=H264 a=[] MB=54 hash=f8c258f3 lang=[] | Family.Guy.S10E08.720p.HDTV.X264-DIMENSION.mkv
+14 conf=1 ranked        mkv  720p  v=H264 a=[] MB=177 hash=8fafac13 lang=[] | Family.Guy.S10E08.720p.HDTV.ReEnc-Max.mkv
+15 conf=1 ranked        mkv  720p  v=H264 a=[] MB=276 hash=d1099e4f lang=[] | Family.Guy.S10E08.720p.HDTV.X264-DIMENSION.mkv
+17 conf=1 ranked        mkv  720p  v=H264 a=[] MB=276 hash=89543263 lang=[] | Family.Guy.S10E08.720p.HDTV.X264-DIMENSION.mkv
+18 conf=1 ranked        mkv  720p  v=H264 a=[] MB=276 hash=da79d12d lang=[] | Family.Guy.S10E08.720p.HDTV.X264-DIMENSION.mkv
+20 conf=1 ranked        mkv  1080p v=H264 a=[] MB=840 hash=679ef8de lang=[] | Family.Guy.S10E08.Multi.VF2.WEB.1080p.AVC-D5T0.mkv
+19 conf=1 ranked        mkv  720p  v=H264 a=[] MB=0 hash=3332788e lang=[] | Family Guy.S10E08 [720p.WEB-DL.H264-FT] [ENG-Lektor PL][Alusia].mkv
+24 conf=1 ranked        mkv  480p  v=H264 a=[] MB=76 hash=04fa2b83 lang=[] | Family.Guy.S10E08.480p.HDTV.x264-mSD.mkv
+25 conf=1 ranked        mkv  480p  v=H264 a=[] MB=76 hash=f05eb11f lang=[] | Family.Guy.S10E08.480p.HDTV.x264-mSD.mkv
+21 conf=1 ranked        mkv  unknown v=H264 a=[] MB=114 hash=69128310 lang=[] | Family.Guy.S10E08.WEB.x264-TORRENTGALAXY.mkv
+26 conf=1 ranked        mkv        v=H264 a=[] MB=136 hash=d3ff5f8c lang=[] | Family.Guy.S10E08.DVDRip.X264-DEMAND.mkv
+27 conf=1 ranked        mkv        v=H264 a=[] MB=136 hash=8412a99c lang=[] | family.guy.s10e08.cool.hand.peter.dvdrip.x264-demand.mkv
+22 conf=1 ranked        mkv  480p  v=H264 a=[] MB=141 hash=e3c9f19c lang=[] | Family.Guy.S10E08.480p.WEB-DL.x264-Sticky83.mkv
+ - conf=2 videoRisk     mp4  unknown v=HEVC a=[AAC,MP3] MB=159 hash=61cc51d5 lang=[] | Family Guy - S10E08 - Cool Hand Peter.mp4
+ - conf=2 videoRisk     mp4        v=HEVC a=[AAC,MP3] MB=159 hash=066fab3a lang=[] | Family Guy - S10E08 - Cool Hand Peter.mp4
+23 conf=1 ranked        mkv        v=H264 a=[] MB=335 hash=c4ca34ed lang=[] | 1008 - Cool Hand Peter.mkv
+13 conf=1 ranked        mp4  1080p v= a=[] MB=0 hash=ac6c1a7f lang=[] | Family Guy - S10e08 - Cool Hand Peter (Uncensored).mp4
+ 6 conf=1 ranked        mp4  360p  v= a=[] MB=42 hash=42e35acb lang=[] | Family Guy S10E08 Cool Hand Peter.mp4
+ 7 conf=1 ranked        mp4        v= a=[] MB=61 hash=0d7f93ec lang=[] | 恶搞之家.Family.Guy.S10E08.Cool.Hand.Peter.SDTV.mp4
+ 9 conf=1 ranked        mp4        v= a=[] MB=61 hash=a6e57cce lang=[] | 恶搞之家.Family.Guy.S10E08.Cool.Hand.Peter.SDTV.mp4
+ 8 conf=1 ranked        mp4        v= a=[] MB=69 hash=958be2f1 lang=[] | S10E08 - Cool Hand Peter.mp4
+10 conf=1 ranked        mp4        v= a=[] MB=69 hash=92bdb09a lang=[] | S10E08 - Cool Hand Peter.mp4
+11 conf=1 ranked        mp4        v= a=[] MB=77 hash=d01691ab lang=[] | Family.Guy.S10E08.HDTV.mp4
+12 conf=1 ranked        mp4        v= a=[] MB=94 hash=bce65f1d lang=[] | FG S10E08 - Cool Hand Peter.mp4
+ - conf=2 videoRisk     mp4  1080p v=HEVC a=[AAC] MB=169 hash=681e5f40 lang=[] | Family Guy - S10E08 - Cool Hand Peter.mp4
+
+REASONS {
+ "conf2:ranked": 35,
+ "conf1:ranked": 173,
+ "conf0:audioRisk": 48,
+ "conf2:videoRisk": 33,
+ "conf1:videoRisk": 31
+}
