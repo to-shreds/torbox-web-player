@@ -1,0 +1,40 @@
+name: Diagnostic Family Guy source classification
+on:
+  push:
+    branches: [diag/family-guy-sources]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with: { node-version: '24' }
+      - name: Classify real sources with the app's own code
+        run: |
+          cat > diag.mjs <<'NODE'
+          import { MultiSourceLookup } from './lib/source-lookup.mjs';
+          import { sourceHints, browserContainerHints } from './public/source-client.js';
+          import { sourceAudioConfidence, automaticSourceOrder, strictAudioCandidates, recoverySourceOrder } from './public/discover.js';
+          const lookup = new MultiSourceLookup({ timeoutMs: 20000 });
+          const episodes = [[3,5],[8,1],[12,1],[16,1],[20,1],[22,1]];
+          const totals = { sources:0, aac:0, unknown:0, risky:0, unsupported:0 };
+          for (const [season, episode] of episodes) {
+            let result;
+            try { result = await lookup.lookup({ type:'series', id:'tt0182576', season, episode }, { complete:true }); }
+            catch (e) { console.log(JSON.stringify({ season, episode, error: e.code || e.message })); continue; }
+            const rows = result.sources.map((s, i) => ({ ...s, id: String(i), cached: true, ...sourceHints(s) }));
+            const order = automaticSourceOrder(rows, 'series', 'auto', 'balanced');
+            const strict = strictAudioCandidates(order, true);
+            console.log(`\n=== S${season}E${episode}: ${rows.length} sources, complete=${result.complete}, automatic=${order.length}, strictAudio=${strict.length}`);
+            for (const s of rows) {
+              const c = sourceAudioConfidence(s), h = browserContainerHints(s);
+              totals.sources++; if (c >= 2) totals.aac++; else if (c === 1) totals.unknown++; else totals.risky++; if (h.browserUnsupported) totals.unsupported++;
+              const rank = order.indexOf(s);
+              console.log([rank >= 0 ? String(rank + 1).padStart(2) : ' -', `conf=${c}`, (h.container||'?').padEnd(4), (s.resolution||'').padEnd(5), `audio=[${(s.audioCodecs||[]).join(',')}]`, `lang=[${(s.languages||[]).join(',')}]`, s.provider, '|', s.filename || s.title].join(' '));
+            }
+          }
+          console.log('\nTOTALS', JSON.stringify(totals));
+          NODE
+          node diag.mjs
