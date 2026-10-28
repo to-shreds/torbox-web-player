@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const BUILD='release-1.2.11-playback.1';
+const BUILD='release-1.2.12-sound.1';
 const STATIC_BUILD='release-1.2.8-party.1';
 
 test('published page boots through a versioned recovery loader instead of directly importing app.js',async()=>{

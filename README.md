@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current backend version: **1.2.10**. Frontend **release-1.2.11-playback.1** prioritizes compatible sound across qualities, waits for complete source results before unknown-audio fallback, handles unavailable or throttled browser audio diagnostics, and keeps strict audio checks from spending the per-minute preparation budget on untagged releases. Verification and publication are recorded in HANDOFF.md.
+Current backend version: **1.2.10**. Frontend **release-1.2.12-sound.1** verifies sound with Chrome's decoded-audio counter instead of trusting release names: after a silent version it checks up to five cached versions (then offers more), ranks likely-AAC MP4 releases ahead of untouched Dolby WEB-DL MKVs, skips tagged dubs, and allows HEVC MP4 when the device reports HEVC decoding. Verification and publication are recorded in HANDOFF.md.
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 

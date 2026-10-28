@@ -14,5 +14,5 @@ test('production publication depends on native audio regression checks of the ex
   assert.doesNotMatch(pages, /ref: main\s*$/m, 'a newer untested main must never replace the verified commit during publication');
   assert.match(release, /run: npm run test:browser:audio\s*$/m);
   assert.doesNotMatch(release, /continue-on-error:\s*true/);
-  assert.equal(JSON.parse(packageText).scripts['test:browser:audio'], 'node --test test/browser/audio-recovery.mjs');
+  assert.equal(JSON.parse(packageText).scripts['test:browser:audio'], 'node --test --test-concurrency=1 test/browser/audio-recovery.mjs test/browser/sound-recovery.mjs');
 });

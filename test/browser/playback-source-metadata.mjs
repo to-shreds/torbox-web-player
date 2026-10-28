@@ -67,7 +67,7 @@ test('playback diagnostics copy only safe counts on demand and remain visible wh
   const text=await page.evaluate(()=>window.__copiedPlaybackDetails[0]),details=JSON.parse(text);
   assert.deepEqual(details.target,snapshot.target);assert.equal(details.sourceCount,40);assert.ok(details.eligibleCount>0);assert.match(details.appBuild,/^release-/);
   assert.equal(details.cacheAvailability,'checked');assert.equal(details.failureCode,'NO_CACHED_BROWSER_SOURCE');
-  assert.equal(details.languageCounts.unconfirmed,40);assert.doesNotMatch(text,/filename|https?:|token|api.?key|session|authorization|fixture-master-key/i);
+  assert.equal(details.languageCounts.foreignOnly,3,'FRENCH and rus.LostFilm release tags identify dubs');assert.equal(details.languageCounts.unconfirmed,37);assert.doesNotMatch(text,/filename|https?:|token|api.?key|session|authorization|fixture-master-key/i);
   for(const source of snapshot.sources){assert.ok(!text.includes(source.hash));if(source.filename)assert.ok(!text.includes(source.filename));}
   await page.evaluate(()=>{window.__denyClipboard=true;});await copy.click();
   const visible=page.locator('#play-fallback details');assert.equal(await visible.isVisible(),true);assert.equal(await visible.evaluate(node=>node.open),true);assert.deepEqual(JSON.parse(await visible.locator('pre').textContent()),details);
