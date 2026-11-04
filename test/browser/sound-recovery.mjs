@@ -98,3 +98,57 @@ test('when every cached version is silent, the player reports what it checked an
   assert.equal(done.more, false);
   assert.equal(fixture.control.playbackCalls, 7);
 });
+
+
+test('Options switches rejected cached versions repeatedly, keeps position, and remembers avoided copies', async t => {
+  const releases=['AAA','BBB','CCC','DDD','EEE'].map(group => [`Fixture.Show.S01E01.One.720p.H264.AAC-${group}.mkv`, 'aac']);
+  const { page, fixture, played, prepares } = await setup(t, releases);
+  await page.waitForFunction(() => document.querySelector('#video-slot video')?.currentTime > 0.5);
+  const position = await page.evaluate(() => document.querySelector('#video-slot video').currentTime);
+  assert.equal(await page.locator('#player-version-menu').isHidden(),true);
+  for(let index=1;index<releases.length;index++){
+    const expected=releases[index][0];
+    await page.locator('#player-version-toggle').click();
+    assert.equal(await page.locator('#player-version-menu').isVisible(),true);
+    assert.equal(await page.locator('#player-version-avoid').isChecked(),true);
+    await page.locator('#player-new-version').click();
+    await page.waitForFunction(name => document.querySelector('#playing-title')?.textContent.includes(name) && document.querySelector('#video-slot video')?.currentTime > 0,expected,{timeout:45000});
+    assert.equal(await page.locator('#player-version-menu').isHidden(),true);
+  }
+  const state=await page.evaluate(() => ({
+    time:document.querySelector('#video-slot video').currentTime,
+    sources:Object.values(JSON.parse(localStorage.getItem('torbox-source-memory-v1')||'{}').titles?.['series:tt1234567']?.sources||{})
+  }));
+  assert.equal(fixture.control.playbackCalls,5,'explicit taps can check beyond the three-source automatic cap');
+  assert.equal(played.length,5,'each tap changes to a distinct source');
+  assert.equal(new Set(played).size,5);
+  assert.ok(state.time>=position-.5,'the new copy should not restart from zero');
+  assert.ok(state.time<position+12,'source changes do not lose significant playback progress');
+  assert.equal(state.sources.filter(row=>row.bad===true).length,4,'only rejected versions were avoided');
+  assert.ok(prepares.every(body=>body.onlyCached===true));
+  assert.equal(fixture.control.creates,0);
+});
+
+test('failed New version search keeps the current cached copy and does not block it', async t => {
+  const { page, fixture } = await setup(t, [['Fixture.Show.S01E01.One.720p.H264.AAC-ONLY.mkv','aac']]);
+  await page.waitForFunction(() => document.querySelector('#video-slot video')?.currentTime > 0.5);
+  await page.locator('#video-slot video').evaluate(video=>video.pause());
+  await page.locator('#player-version-toggle').click();
+  await page.locator('#player-new-version').click();
+  await page.waitForFunction(() => /No other cached version could be opened/.test(document.querySelector('#player-message')?.textContent||''),null,{timeout:35000});
+  assert.equal(fixture.control.playbackCalls,1);
+  assert.equal(await page.locator('#video-slot video').evaluate(video=>video.paused),true);
+  const blocked=await page.evaluate(()=>Object.values(JSON.parse(localStorage.getItem('torbox-source-memory-v1')||'{}').titles?.['series:tt1234567']?.sources||{}).some(row=>row.bad===true));
+  assert.equal(blocked,false,'the original stream remains eligible for future playback');
+  assert.equal(await page.locator('#player-version-toggle').isEnabled(),true);
+});
+
+test('opening and dismissing Options never interrupts a working video', async t => {
+  const { page, fixture } = await setup(t, [['Fixture.Show.S01E01.One.720p.H264.AAC-GOOD.mkv','aac']]);
+  await page.waitForFunction(() => document.querySelector('#video-slot video')?.currentTime > 0.5);
+  await page.locator('#player-version-toggle').click();
+  await page.locator('#player-version-toggle').click();
+  assert.equal(await page.locator('#player-version-menu').isHidden(),true);
+  assert.equal(fixture.control.playbackCalls,1,'no source change without New version');
+  assert.equal(await page.locator('#video-slot video').evaluate(video=>video.paused),false);
+});
