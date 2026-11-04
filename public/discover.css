@@ -164,6 +164,8 @@ main{max-width:1160px;padding:1rem clamp(.8rem,3vw,2rem) 3rem}.workspace-bar{dis
 /* Deliberate version-switch action: never a one-tap rejection over the video. */
 .player-version-toggle{position:absolute;z-index:18;top:max(.5rem,env(safe-area-inset-top));left:max(.5rem,env(safe-area-inset-left));min-height:38px;padding:.38rem .62rem;border:1px solid rgba(255,255,255,.38);border-radius:9px;background:rgba(7,14,24,.79);color:#f3f7fc;font-size:.72rem;font-weight:650;backdrop-filter:blur(7px)}
 .player-version-toggle:hover,.player-version-toggle:focus-visible{background:rgba(28,46,63,.96)}
+/* A watch party owns its own in-player Ready to watch control and the source must remain fixed. */
+#player:has(#party-player-status:not([hidden])) #player-version-toggle,#player:has(#party-player-status:not([hidden])) #player-version-menu{display:none!important}
 .player-version-menu{position:absolute;z-index:19;top:calc(max(.5rem,env(safe-area-inset-top)) + 44px);left:max(.5rem,env(safe-area-inset-left));width:min(325px,calc(100vw - 1.1rem));max-height:calc(100dvh - 5rem);overflow:auto;display:grid;gap:.55rem;padding:.85rem;border:1px solid #42556b;border-radius:12px;background:rgba(13,23,36,.97);box-shadow:0 8px 32px rgba(0,0,0,.55);color:#eef4fd}
 .player-version-menu[hidden]{display:none!important}
 .player-version-menu>strong{font-size:.92rem}
