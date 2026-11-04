@@ -2,6 +2,16 @@
 
 Read this first. The code repository controls implementation; `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md` controls readiness and the next action.
 
+## Manual New version control · 2026-11-04
+
+Frontend **release-1.2.13-version.1** is merged into main at `e9afe41e7bb453bb8e123dfaf5212645b3af5fbd` (PR [#21](https://github.com/to-shreds/torbox-web-player/pull/21)); backend/package remains 1.2.10, and the separate Fire Stick APK is unchanged. Main publication uses the existing GitHub Pages verification gate, [run 41878298187](https://github.com/to-shreds/torbox-web-player/actions/runs/41878298187). **Last observed production publication state: queued, not yet independently verified.** Confirm the Pages job succeeds before calling this live.
+
+Player UI: while watching, both Simple and Full modes show a small **⋯ Options → New version** menu. A deliberate second tap searches other cached, compatible copies for the exact same movie or episode, pauses current playback, retains the seek position, and skips versions already tried in the same session. A checked **Avoid this copy next time** box persists a bad-source flag only after a replacement has opened; if none opens, the current version remains playable and is not blocked. Unchecking the box allows comparison without a persistent blacklist. Existing TorBox rate limits, 5-second candidate budget, browser audio/codec checks, direct-to-CDN media, and source identity guards remain. No uncached torrent is started. The menu is hidden whenever a watch-party session is active; the existing Ready to watch button must remain clickable. Stream language or embedded subtitles cannot always be inferred from source metadata, so subsequent manual choices are not guaranteed English.
+
+Quality gate: initial CI found stale release-token expectations; these were repaired. Full release preflight [41876773471](https://github.com/to-shreds/torbox-web-player/actions/runs/41876773471) completed every job step successfully: Node, Trakt, party, audio (including three new real Chromium manual-switch tests), and core browser tests. In the first full run, the new button overlapped the watch-party Ready to watch control; this was detected and fixed by hiding the menu during active parties. All party and audio steps passed on the corrected release. PR CI [41876859254](https://github.com/to-shreds/torbox-web-player/actions/runs/41876859254) passed. No account keys or real TorBox file were used in tests; exact personal-device behavior remains unverified.
+
+Rollback: `archive/web-before-manual-version-2026-11-04` at `83434c781e781f17f4535e76955e90e0c3929d0d`. Do not overwrite the previous production source, media path, audio fixes, games, Sports/Buffstreams, Trakt state, watch-party rules, stored browser credentials or separate native APK. Next action: check the production Pages run and compare live root and `/key/` versions; if failed, fix the test or restore the archive rather than bypassing the release gate.
+
 ## Sound recovery repair · 2026-10-28
 
 Frontend **release-1.2.12-sound.1** fixes silent playback that stopped with "No cached version with compatible audio was found. Automatic recovery stopped after 1 source" (Family Guy, Chrome Android). Backend unchanged (1.2.10); no Render deploy.
