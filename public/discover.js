@@ -1,4 +1,4 @@
-import { LatestPlaybackAction, PlaybackPreparationCache, supportsAudioDecodeCounter } from './playback-lifecycle.js?v=release-1.2.12-sound.1';
+import { LatestPlaybackAction, PlaybackPreparationCache, supportsAudioDecodeCounter } from './playback-lifecycle.js?v=release-1.2.13-version.1';
 import { loadPublicSources, browserContainerHints, sourceHints, preparedSourceCompatibility } from './source-client.js?v=release-1.2.8-party.1';
 import { getSettings, updateSettings } from './settings.js?v=release-1.2.8-party.1';
 import { listRecent, formatResumeTime } from './history.js?v=release-1.2.8-party.1';
