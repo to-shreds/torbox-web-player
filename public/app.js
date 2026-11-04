@@ -1,13 +1,13 @@
 import {createWatchParty} from './watch-party.js?v=release-1.2.8-party.1';
-import { createDiscoveryUI, bindArtworkImage, MORE_AUDIO_RECOVERY_ATTEMPTS } from './discover.js?v=release-1.2.12-sound.1';
+import { createDiscoveryUI, bindArtworkImage, MORE_AUDIO_RECOVERY_ATTEMPTS } from './discover.js?v=release-1.2.13-version.1';
 import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.8-party.1';
-import { PlaybackAudioCheck } from './playback-lifecycle.js?v=release-1.2.12-sound.1';
+import { PlaybackAudioCheck } from './playback-lifecycle.js?v=release-1.2.13-version.1';
 import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.8-party.1';
 import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.8-party.1';
 import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.8-party.1';
 import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.8-party.1';
 import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.8-party.1';
-import { TraktIntegration, mergeContinueWatching } from './trakt.js?v=release-1.2.12-sound.1';
+import { TraktIntegration, mergeContinueWatching } from './trakt.js?v=release-1.2.13-version.1';
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory, noteAudioDecodeFailure, resetNegativeAudioFeedback } from './source-memory.js?v=release-1.2.8-party.1';
 import { clearSearchHistory } from './search-history.js?v=release-1.2.8-party.1';
 import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.8-party.1';
@@ -81,6 +81,17 @@ function showFullscreenExitControl(){
   fullscreenExitControlTimer=setTimeout(()=>{fullscreenExitControlTimer=null;if(control)control.hidden=true;},3200);
 }
 function hideFullscreenExitControl(){clearTimeout(fullscreenExitControlTimer);fullscreenExitControlTimer=null;const control=$('fullscreen-exit-overlay');if(control)control.hidden=true;}
+function closePlayerVersionMenu(){
+  const menu=$('player-version-menu'),toggle=$('player-version-toggle');
+  if(menu)menu.hidden=true;
+  if(toggle)toggle.setAttribute('aria-expanded','false');
+}
+function updatePlayerVersionActions(){
+  const toggle=$('player-version-toggle');
+  if(!toggle)return;
+  toggle.disabled=!active?.playbackContext?.sourceInfo||active.recovering===true||!['movie','series'].includes(active?.playbackContext?.current?.type);
+  if(toggle.disabled)closePlayerVersionMenu();
+}
 function updatePlayerModeActions(){
   const fs=$('toggle-fullscreen'),pip=$('toggle-pip'),shell=playerMediaShell(),video=active?.video;
   const playerFullscreen=document.fullscreenElement===shell||document.fullscreenElement===video;
@@ -89,6 +100,7 @@ function updatePlayerModeActions(){
     const supported=playerPiPSupported(video);pip.hidden=false;pip.disabled=!supported||!video||video.readyState===0;
     pip.textContent=supported?(document.pictureInPictureElement===video?'Exit picture in picture':'Picture in picture'):'PiP unavailable';
   }
+  updatePlayerVersionActions();
 }
 async function requestPlayerFullscreen({restoring=false}={}){
   const shell=playerMediaShell();if(!shell||!playerFullscreenSupported())return false;
@@ -793,6 +805,7 @@ async function startPlayback(file, playbackContext = null) {
   const requestSignal=AbortSignal.any([playbackRequestAbort.signal,AbortSignal.timeout(22000)]);
   const generation = ++playGeneration, selectedViewer = viewer;
   const reusableVideo=await detachPlayback({preserveVideo:true}); if (generation !== playGeneration) return false;
+  closePlayerVersionMenu();updatePlayerVersionActions();
   $('playing-title').textContent = file.title; text('player-message', 'Opening…'); $('player-more-versions').hidden = true; setPlaybackHealth('Opening','Requesting a fresh TorBox link…');
   if (!$('player').open) $('player').showModal();
   if(playbackContext?.resumeIntent)updateResumeOverlay('Resuming '+(playbackContext.title||'your video')+'…','Opening the player and loading your saved position.');
@@ -935,6 +948,53 @@ async function rejectCurrentSource(){
 }
 $('health-sound-good').addEventListener('click',()=>{const p=active?.playbackContext;if(!p?.sourceInfo||active.recovering)return;active.audioConfirmed=true;if(!active.partyGuest){setAudioFeedback(p.current,p.sourceInfo,'good');rememberSourceSuccess(p.current,p.sourceInfo);active.sourceLearned=true;}setPlaybackHealth('Playing','Sound confirmed on this device.');});
 $('health-source-bad').addEventListener('click',()=>rejectCurrentSource());
+
+// This deliberate menu replaces the risky one-tap rejection controls. Manual
+// changes reuse cached-only preparation, exact episode checks and the same
+// video element/position. A failed search does not poison source memory.
+$('player-version-toggle').addEventListener('click',()=>{
+  const context=active,menu=$('player-version-menu'),toggle=$('player-version-toggle');
+  if(!context?.playbackContext?.sourceInfo||context.recovering)return;
+  if(watchParty?.isActive()){text('player-message','Leave the watch party before choosing another version.',true);return;}
+  menu.hidden=!menu.hidden;toggle.setAttribute('aria-expanded',String(!menu.hidden));
+});
+document.addEventListener('pointerdown',event=>{
+  const menu=$('player-version-menu');
+  if(!menu.hidden&&!menu.contains(event.target)&&!$('player-version-toggle').contains(event.target))closePlayerVersionMenu();
+});
+$('player').addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&!$('player-version-menu').hidden){
+    event.preventDefault();event.stopPropagation();closePlayerVersionMenu();
+  }
+},true);
+async function changePlayerVersion(){
+  closePlayerVersionMenu();
+  const context=active,playback=context?.playbackContext,source=playback?.sourceInfo;
+  if(!context||!playback?.current||!source||context.recovering)return;
+  if(watchParty?.isActive()){text('player-message','Leave the watch party before choosing another version.',true);return;}
+  const avoid=$('player-version-avoid').checked;
+  const wasPlaying=!context.video.paused&&!context.video.ended;
+  context.recovering=true;
+  playback.recoveryPosition=Number.isFinite(context.video.currentTime)?Math.max(0,context.video.currentTime):0;
+  playback.forceStartOver=false;playback.rewindOnResumeSeconds=0;
+  clearTimeout(context.healthyTimer);hidePauseCard();
+  void saveProgress(context);
+  context.video.pause();
+  updatePlayerVersionActions();
+  setPlaybackHealth('Changing version','Checking a different cached source…');
+  text('player-message','Finding another cached version. Your playback position is saved.');
+  const moved=await discoveryUI.recoverPlayback(playback,{signal:context.eventAbort.signal,manual:true});
+  if(moved){if(avoid)setSourceBad(playback.current,source,true);return;}
+  if(active!==context)return;
+  context.recovering=false;updatePlayerVersionActions();
+  const remaining=Math.max(0,Number(playback.recoveryRemaining)||0);
+  const limited=playback.recoveryError==='SLOW_DOWN';
+  const notice=limited?'TorBox is limiting version checks. Try again shortly.':remaining>0?'Other cached versions may still be available. Tap New version again to keep checking.':'No other cached version could be opened.';
+  setPlaybackHealth('Current version retained',notice);
+  text('player-message',notice+' The original version was not blocked.',true);
+  if(wasPlaying)context.video.play().catch(()=>text('player-message',notice+' Tap play to continue.',true));
+}
+$('player-new-version').addEventListener('click',()=>{void changePlayerVersion();});
 $('keep-watching').addEventListener('click',()=>{
   if(!active)return;
   const block=canStartKidPlayback(viewer,active.playbackContext);if(!block.allowed){hideStillWatchingPrompt();showKidLimit(block);return;}
@@ -1011,7 +1071,7 @@ playerMediaShell().addEventListener('pointerdown',event=>{
 if(screen.orientation?.addEventListener)screen.orientation.addEventListener('change',noteOrientationChange);
 window.addEventListener('orientationchange',noteOrientationChange);
 $('close-player').addEventListener('click', () => $('player').close());
-$('player').addEventListener('close', () => stopPlayback());
+$('player').addEventListener('close', () => {closePlayerVersionMenu();void stopPlayback();});
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { tickKidUsage(active,true);saveProgress(active, true); if(!playerIsPiP(active))releaseWakeLock();else void refreshWakeLockForPlayback(active); } else if(active&&!active.video.paused){active.kidLastAt=Date.now();active.kidLastPosition=Number.isFinite(active.video.currentTime)?active.video.currentTime:0;void refreshWakeLockForPlayback(active);} });
 document.addEventListener('keydown',event=>{
   if(!$('player').open||!active||!getSettings().keyboardShortcuts||event.altKey||event.ctrlKey||event.metaKey)return;

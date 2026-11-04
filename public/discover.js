@@ -1,4 +1,4 @@
-import { LatestPlaybackAction, PlaybackPreparationCache, supportsAudioDecodeCounter } from './playback-lifecycle.js?v=release-1.2.12-sound.1';
+import { LatestPlaybackAction, PlaybackPreparationCache, supportsAudioDecodeCounter } from './playback-lifecycle.js?v=release-1.2.13-version.1';
 import { loadPublicSources, browserContainerHints, sourceHints, preparedSourceCompatibility } from './source-client.js?v=release-1.2.8-party.1';
 import { getSettings, updateSettings } from './settings.js?v=release-1.2.8-party.1';
 import { listRecent, formatResumeTime } from './history.js?v=release-1.2.8-party.1';
@@ -845,7 +845,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     return playPreparedNext(prepared);
   }
 
-  async function recoverPlayback(context,{signal}={}){
+  async function recoverPlayback(context,{signal,manual=false}={}){
     if(!active||!context?.current)return false;
     try{
       const bounded=AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(25000)]);
@@ -856,7 +856,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       // its sound, so unknown audio is a real candidate, not a rejection.
       const requireCompatibleAudio=!audioDecodeObservable;
       const cached=sourcesForAudioRequirement(registered.sources.filter(source=>source.cached===true),requireCompatibleAudio);
-      const profile=getSettings().sourceSizeProfile,maxAttempts=recoveryAttemptLimit(context,audioDecodeObservable);
+      const profile=getSettings().sourceSizeProfile,maxAttempts=manual?attempted.size+MAX_AUTOMATIC_SOURCE_ATTEMPTS:recoveryAttemptLimit(context,audioDecodeObservable);
       const eligible=strictAudioCandidates(recoverySourceOrder(cached,context,context.current.type,profile),requireCompatibleAudio,Infinity);
       const candidates=strictAudioCandidates(boundedRecoverySourceOrder(cached,context,context.current.type,profile,maxAttempts),requireCompatibleAudio).slice(0,3),budgetSignal=AbortSignal.any([bounded,AbortSignal.timeout(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS)]);
       context.recoveryRemaining=eligible.length;

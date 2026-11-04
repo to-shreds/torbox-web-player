@@ -1,10 +1,10 @@
 const CACHE_PREFIX='torbox-player:'+self.registration.scope+':';
-const CACHE=CACHE_PREFIX+'release-1.2.12-sound.1';
-const BUILD='release-1.2.12-sound.1';
+const CACHE=CACHE_PREFIX+'release-1.2.13-version.1';
+const BUILD='release-1.2.13-version.1';
 const STATIC_BUILD='release-1.2.8-party.1';
 const SHELL=[
   './','./index.html',
-  `./style.css?v=${STATIC_BUILD}`,`./discover.css?v=${STATIC_BUILD}`,`./boot.js?v=${BUILD}`,`./app.js?v=${BUILD}`,`./trakt.js?v=${BUILD}`,`./trakt-vault.js?v=${BUILD}`,`./trakt.css?v=${BUILD}`,
+  `./style.css?v=${STATIC_BUILD}`,`./discover.css?v=${BUILD}`,`./boot.js?v=${BUILD}`,`./app.js?v=${BUILD}`,`./trakt.js?v=${BUILD}`,`./trakt-vault.js?v=${BUILD}`,`./trakt.css?v=${BUILD}`,
   `./playback-lifecycle.js?v=${BUILD}`,`./runtime.js?v=${STATIC_BUILD}`,`./history.js?v=${STATIC_BUILD}`,`./settings.js?v=${STATIC_BUILD}`,`./vault.js?v=${STATIC_BUILD}`,
   `./watchlist.js?v=${STATIC_BUILD}`,`./search-history.js?v=${STATIC_BUILD}`,`./source-memory.js?v=${STATIC_BUILD}`,`./parental-controls.js?v=${STATIC_BUILD}`,
   `./device-transfer.js?v=${STATIC_BUILD}`,`./playback-errors.js?v=${STATIC_BUILD}`,`./discover.js?v=${BUILD}`,`./source-client.js?v=${STATIC_BUILD}`,
