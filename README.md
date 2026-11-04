@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current backend version: **1.2.10**. Frontend **release-1.2.12-sound.1** verifies sound with Chrome's decoded-audio counter instead of trusting release names: after a silent version it checks up to five cached versions (then offers more), ranks likely-AAC MP4 releases ahead of untouched Dolby WEB-DL MKVs, skips tagged dubs, and allows HEVC MP4 when the device reports HEVC decoding. Verification and publication are recorded in HANDOFF.md.
+Current backend version: **1.2.10**. Frontend **release-1.2.13-version.1** adds an in-player **Options → New version** control for wrong-language audio, unwanted embedded subtitles or overlays, and poor-quality copies. The prior Chrome audio-verification and recovery behavior from **release-1.2.12-sound.1** remains intact. Verification and publication are recorded in HANDOFF.md.
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
@@ -139,6 +139,8 @@ When the next episode starts, earlier completed episodes from the same show can 
 Long-pressing a poster opens quick actions. Play, My list, and Details remain useful in Simple mode. Video sharing that needs a relay or a separate storage quota is disabled.
 
 ## Playback behavior
+
+While watching a movie or episode, open **⋯ Options → New version** to try a different cached copy without leaving playback or losing the current position. This is available in both Simple and Full interface modes. **Avoid this copy next time** is selected by default, but a rejected release is only saved as bad if another source successfully opens. You can turn the checkbox off if you only want to compare. Additional taps can test further cached versions. If no alternative opens, the original remains playable and unblocked. The control is hidden during an active watch party so that all viewers remain on the same file. A different version may still have unwanted subtitles or language if the source metadata does not disclose that; the viewer can try again. These checks never start uncached torrents and remain subject to TorBox preparation rate limits.
 
 Automatic next episode uses a cancellable countdown. The countdown can be immediate or 5, 8, 10, or 15 seconds.
 
