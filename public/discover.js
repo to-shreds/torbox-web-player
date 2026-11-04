@@ -845,7 +845,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     return playPreparedNext(prepared);
   }
 
-  async function recoverPlayback(context,{signal}={}){
+  async function recoverPlayback(context,{signal,manual=false}={}){
     if(!active||!context?.current)return false;
     try{
       const bounded=AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(25000)]);
@@ -856,7 +856,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       // its sound, so unknown audio is a real candidate, not a rejection.
       const requireCompatibleAudio=!audioDecodeObservable;
       const cached=sourcesForAudioRequirement(registered.sources.filter(source=>source.cached===true),requireCompatibleAudio);
-      const profile=getSettings().sourceSizeProfile,maxAttempts=recoveryAttemptLimit(context,audioDecodeObservable);
+      const profile=getSettings().sourceSizeProfile,maxAttempts=manual?attempted.size+MAX_AUTOMATIC_SOURCE_ATTEMPTS:recoveryAttemptLimit(context,audioDecodeObservable);
       const eligible=strictAudioCandidates(recoverySourceOrder(cached,context,context.current.type,profile),requireCompatibleAudio,Infinity);
       const candidates=strictAudioCandidates(boundedRecoverySourceOrder(cached,context,context.current.type,profile,maxAttempts),requireCompatibleAudio).slice(0,3),budgetSignal=AbortSignal.any([bounded,AbortSignal.timeout(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS)]);
       context.recoveryRemaining=eligible.length;
