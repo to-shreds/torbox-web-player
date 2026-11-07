@@ -89,7 +89,12 @@ function closePlayerVersionMenu(){
 function updatePlayerVersionActions(){
   const toggle=$('player-version-toggle');
   if(!toggle)return;
-  toggle.disabled=!active?.playbackContext?.sourceInfo||active.recovering===true||!['movie','series'].includes(active?.playbackContext?.current?.type);
+  const context=active,video=context?.video;
+  // Opening a replacement file returns before its metadata and resume seek
+  // settle. Do not let a rapid second switch read that transient zero position.
+  toggle.disabled=!context?.playbackContext?.sourceInfo||!context.ready||context.recovering===true
+    ||!video||video.readyState<1||video.seeking
+    ||!['movie','series'].includes(context?.playbackContext?.current?.type);
   if(toggle.disabled)closePlayerVersionMenu();
 }
 function updatePlayerModeActions(){
@@ -904,7 +909,12 @@ async function startPlayback(file, playbackContext = null) {
     for(const name of ['seeking','seeked','pause','volumechange'])listen(name,checkAudio);
     listen('waiting', armBuffer); listen('stalled',()=>{setPlaybackHealth('Stalled','The browser reports that data stopped arriving.');armBuffer();});
     listen('pause', () => { if(active===context){tickKidUsage(context,true);trakt.paused(context);} if (active === context && !context.recovering) { clearTimeout(context.healthyTimer);releaseWakeLock(); if(!stillWatchingPromptActive&&!video.ended)clearStillWatchingTimer(); saveProgress(context); if(stillWatchingPromptActive){hidePauseCard();setPlaybackHealth('Still watching?','Tap Keep watching to continue.');}else if(!$('kid-limit-dialog').open){setPlaybackHealth('Paused','Playback is paused.');updatePauseCard(context);} } });
-    listen('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });
+    listen('seeking', () => { if(active===context)updatePlayerVersionActions(); });
+    listen('seeked', () => {
+      if(active!==context)return;
+      updatePlayerVersionActions();
+      if(context.ready&&context.started)saveProgress(context);
+    });
     listen('ended', async () => {
       if (active !== context) return; tickKidUsage(context,true);trakt.stopped(context,true); clearBuffer(); hidePauseCard(); void saveProgress(context);
       context.nextEnded=true;markPlaybackCompleted(context);
@@ -972,6 +982,11 @@ async function changePlayerVersion(){
   const context=active,playback=context?.playbackContext,source=playback?.sourceInfo;
   if(!context||!playback?.current||!source||context.recovering)return;
   if(watchParty?.isActive()){text('player-message','Leave the watch party before choosing another version.',true);return;}
+  if(!context.ready||context.video.readyState<1||context.video.seeking){
+    text('player-message','Finishing the current seek. Try New version once the video is ready.');
+    updatePlayerVersionActions();
+    return;
+  }
   const avoid=$('player-version-avoid').checked;
   const wasPlaying=!context.video.paused&&!context.video.ended;
   context.recovering=true;
