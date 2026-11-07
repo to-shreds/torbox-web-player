@@ -2,6 +2,39 @@
 
 Read this first. The code repository controls implementation; `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md` controls readiness and the next action.
 
+## Backend torrent identity repair, November 7
+
+Backend/package **1.2.11** fixes a misleading failure class used by Arcade TV.
+The old discovery check reported both a genuinely different hash and an omitted
+optional detail hash as TORRENT_IDENTITY_MISMATCH. The user's actual provider
+response was not available, so the screenshot alone does not establish which
+case occurred. The fix preserves strict title, episode, file and content checks.
+
+An omitted detail hash requires independent exact hash-and-ID proof from a fresh
+account lookup or a recent validated creation acknowledgement. Creation proofs
+are account-local, expire after 30 seconds and are capped at 128 entries. They
+cannot override an explicitly conflicting hash. Unknown or malformed identity
+reports TORRENT_IDENTITY_UNVERIFIED. A stale account ID can be rebound only after
+a fresh exact-hash lookup and an independently verified replacement detail read.
+Identity repair is read-only and cannot enter the missing-ID creation path.
+Conflicting creation acknowledgements retain the uncertain-write guard.
+
+Coalesced repair shares only independent proof and replacement reads; each caller
+still validates its own observed same-ID conflict. Revoked/expired tickets and
+obsolete operation revisions are checked after deferred reads. No credential,
+media URL, content name or account-local ID alone establishes identity.
+
+Verification: npm run check passed; full Node suite registered 704 tests,
+698 passed, zero failed/cancelled, six optional live/account checks skipped.
+All 79 focused discovery/identity/recovery cases pass, including 17 new identity
+cases, concurrency in both missing/conflicting orders, exact episode matching,
+late/revoked/account-change races, proof expiry/cap and no duplicate writes.
+Independent adversarial review found no remaining blocking source issue.
+The main full-player frontend, audio, Options layout and independent APK are
+unchanged. Publication details and exact commits are in ProjectStatus.
+See docs/RELEASE-1.2.11-backend-identity.md. Keep browser-key-clone as the deploy
+mirror of tested main; preserve the existing Render service and plan.
+
 ## Options moved beside PiP, published · 2026-11-07
 
 **READY.** Frontend **release-1.2.14-ui.1** was published in [GitHub Pages production run 42346313881](https://github.com/to-shreds/torbox-web-player/actions/runs/42346313881) from code commit `301c1ff74b660d1f1b31e342743f5e88739cee31` (PR [#23](https://github.com/to-shreds/torbox-web-player/pull/23)). Both production `verify / verify` and `deploy` completed successfully at 2026-11-07 06:27 UTC, and the deploy job reported `https://to-shreds.github.io/torbox-web-player/` as its environment URL. Deployment assembled both main site and `/key/` from the exact tested `public/` source and successfully uploaded/deployed the Pages artifact. Independent HTTP fetching of the live Pages host was unavailable in this tool environment, so actual served bytes were not separately compared. No Render deployment or independent native Fire Stick APK change occurred.
