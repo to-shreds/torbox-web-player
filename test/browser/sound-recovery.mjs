@@ -108,21 +108,39 @@ test('Options switches rejected cached versions repeatedly, keeps position, and 
   assert.equal(await page.locator('#player-version-menu').isHidden(),true);
   for(let index=1;index<releases.length;index++){
     const expected=releases[index][0];
+    // Switching is deliberately unavailable while the previous source's
+    // metadata/seek is still settling. Capture its actual settled position.
+    await page.locator('#player-version-toggle').waitFor({state:'visible'});
+    await page.waitForFunction(() => {
+      const video=document.querySelector('#video-slot video');
+      return video?.readyState>=1 && !video.seeking && !document.querySelector('#player-version-toggle').disabled;
+    });
+    const before=await page.locator('#video-slot video').evaluate(video=>video.currentTime);
     await page.locator('#player-version-toggle').click();
     assert.equal(await page.locator('#player-version-menu').isVisible(),true);
     assert.equal(await page.locator('#player-version-avoid').isChecked(),true);
     await page.locator('#player-new-version').click();
-    await page.waitForFunction(name => document.querySelector('#playing-title')?.textContent.includes(name) && document.querySelector('#video-slot video')?.currentTime > 0,expected,{timeout:45000});
+    await page.waitForFunction(name => {
+      const video=document.querySelector('#video-slot video');
+      const toggle=document.querySelector('#player-version-toggle');
+      return document.querySelector('#playing-title')?.textContent.includes(name)
+        && video?.readyState>=1 && !video.seeking && !toggle.disabled && video.currentTime>0;
+    },expected,{timeout:45000});
+    const after=await page.locator('#video-slot video').evaluate(video=>({time:video.currentTime,duration:video.duration}));
+    const expectedResume=Math.min(before,Math.max(0,after.duration-.25));
+    assert.ok(after.time>=expectedResume-.35,
+      `version ${index+1}: resumed at ${after.time.toFixed(2)}s, expected approximately ${expectedResume.toFixed(2)}s`);
     assert.equal(await page.locator('#player-version-menu').isHidden(),true);
   }
   const state=await page.evaluate(() => ({
     time:document.querySelector('#video-slot video').currentTime,
+    duration:document.querySelector('#video-slot video').duration,
     sources:Object.values(JSON.parse(localStorage.getItem('torbox-source-memory-v1')||'{}').titles?.['series:tt1234567']?.sources||{})
   }));
   assert.equal(fixture.control.playbackCalls,5,'explicit taps can check beyond the three-source automatic cap');
   assert.equal(played.length,5,'each tap changes to a distinct source');
   assert.equal(new Set(played).size,5);
-  assert.ok(state.time>=position-.5,'the new copy should not restart from zero');
+  assert.ok(state.time>=Math.min(position,Math.max(0,state.duration-.25))-.5,'the new copy should not restart from zero');
   assert.ok(state.time<position+12,'source changes do not lose significant playback progress');
   assert.equal(state.sources.filter(row=>row.bad===true).length,4,'only rejected versions were avoided');
   assert.ok(prepares.every(body=>body.onlyCached===true));
