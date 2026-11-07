@@ -1,0 +1,326 @@
+{
+  "checkedAt": "2026-10-25T14:13:22.402466+00:00",
+  "build": "release-1.2.10-audio.1",
+  "assets": [
+    {
+      "path": "index.html",
+      "status": 200,
+      "sha256": "8a6fa9a2bb43b5b7efe577835a5bccd9dd6b5e20eba50b3aae13ee5cbee4a619",
+      "expected": "8a6fa9a2bb43b5b7efe577835a5bccd9dd6b5e20eba50b3aae13ee5cbee4a619",
+      "ok": true
+    },
+    {
+      "path": "boot.js",
+      "status": 200,
+      "sha256": "eaec4e9b62afbb2e046af07c4052a767f6a74b1012682a90a06fb900a8413f84",
+      "expected": "eaec4e9b62afbb2e046af07c4052a767f6a74b1012682a90a06fb900a8413f84",
+      "ok": true
+    },
+    {
+      "path": "app.js",
+      "status": 200,
+      "sha256": "06ee5b9b18073a9b79613570471d998320c43bf1e6f84ec5caf4b2ab02ae3539",
+      "expected": "06ee5b9b18073a9b79613570471d998320c43bf1e6f84ec5caf4b2ab02ae3539",
+      "ok": true
+    },
+    {
+      "path": "discover.js",
+      "status": 200,
+      "sha256": "ab68bda9678d647fda4be943b79ebffe1db31897e059b1c8af3403302998d05f",
+      "expected": "ab68bda9678d647fda4be943b79ebffe1db31897e059b1c8af3403302998d05f",
+      "ok": true
+    },
+    {
+      "path": "sw.js",
+      "status": 200,
+      "sha256": "9350a4674e84ba5e270d2f1cb89020bb61c103def9bfd5162ab9ba0b98e7f448",
+      "expected": "9350a4674e84ba5e270d2f1cb89020bb61c103def9bfd5162ab9ba0b98e7f448",
+      "ok": true
+    },
+    {
+      "path": "trakt.js",
+      "status": 200,
+      "sha256": "2299e04a8f495fa7d13a6925dd0d905e15060f7d3d318006cc8bfea3e24af98a",
+      "expected": "2299e04a8f495fa7d13a6925dd0d905e15060f7d3d318006cc8bfea3e24af98a",
+      "ok": true
+    },
+    {
+      "path": "trakt-vault.js",
+      "status": 200,
+      "sha256": "665e3af4d6474ca7851ea3d71789977868fd1722d6db24d0afe2b2699142d039",
+      "expected": "665e3af4d6474ca7851ea3d71789977868fd1722d6db24d0afe2b2699142d039",
+      "ok": true
+    },
+    {
+      "path": "trakt.css",
+      "status": 200,
+      "sha256": "00357bbc100e971fc94fa545a91b10e88cf9e5eb9348ba68c1fa388920a9a21c",
+      "expected": "00357bbc100e971fc94fa545a91b10e88cf9e5eb9348ba68c1fa388920a9a21c",
+      "ok": true
+    },
+    {
+      "path": "watch-party.js",
+      "status": 200,
+      "sha256": "e6cdff5a49685368a1d927c9690a594e16692b937e3beb07250ddeaaaf4b1f41",
+      "expected": "e6cdff5a49685368a1d927c9690a594e16692b937e3beb07250ddeaaaf4b1f41",
+      "ok": true
+    },
+    {
+      "path": "source-client.js",
+      "status": 200,
+      "sha256": "c15d7dfb3616abdeb459914f3b0856bcf44e710e8dc5f143e2ba904466e1d53e",
+      "expected": "c15d7dfb3616abdeb459914f3b0856bcf44e710e8dc5f143e2ba904466e1d53e",
+      "ok": true
+    },
+    {
+      "path": "playback-lifecycle.js",
+      "status": 200,
+      "sha256": "31172ecd888d4bc37890d53d1e8a2793fa7b42e5383326222fdc20b7a8810c54",
+      "expected": "31172ecd888d4bc37890d53d1e8a2793fa7b42e5383326222fdc20b7a8810c54",
+      "ok": true
+    },
+    {
+      "path": "history.js",
+      "status": 200,
+      "sha256": "35d382989573d9abd09d4c6cd9a846ac77a0ab41dd8ba2f69d6d6611b596fb0f",
+      "expected": "35d382989573d9abd09d4c6cd9a846ac77a0ab41dd8ba2f69d6d6611b596fb0f",
+      "ok": true
+    },
+    {
+      "path": "settings.js",
+      "status": 200,
+      "sha256": "6d83cbe96e1523bf3ab7aeeb4504129381cf7e045be503896d305c42c39b2df1",
+      "expected": "6d83cbe96e1523bf3ab7aeeb4504129381cf7e045be503896d305c42c39b2df1",
+      "ok": true
+    },
+    {
+      "path": "sports-player.html",
+      "status": 200,
+      "sha256": "d3da038a032f9742d7382be1c4ce796b08194a7c8a4cf5fafcc0986e6907c25b",
+      "expected": "d3da038a032f9742d7382be1c4ce796b08194a7c8a4cf5fafcc0986e6907c25b",
+      "ok": true
+    },
+    {
+      "path": "sports-catalog.json",
+      "status": 200,
+      "sha256": "62138495be241725e3e39d3f34a92bde30f95c8d6d5eef02c3c832fed392ecc7",
+      "expected": "62138495be241725e3e39d3f34a92bde30f95c8d6d5eef02c3c832fed392ecc7",
+      "ok": true
+    },
+    {
+      "path": "games-catalog.json",
+      "status": 200,
+      "sha256": "e3ee6a1c2edebdb94e83f23a20b2b0b508cfacbae714e4e9812d57c84c589f96",
+      "expected": "e3ee6a1c2edebdb94e83f23a20b2b0b508cfacbae714e4e9812d57c84c589f96",
+      "ok": true
+    },
+    {
+      "path": "key/index.html",
+      "status": 200,
+      "sha256": "8a6fa9a2bb43b5b7efe577835a5bccd9dd6b5e20eba50b3aae13ee5cbee4a619",
+      "expected": "8a6fa9a2bb43b5b7efe577835a5bccd9dd6b5e20eba50b3aae13ee5cbee4a619",
+      "ok": true
+    },
+    {
+      "path": "key/boot.js",
+      "status": 200,
+      "sha256": "eaec4e9b62afbb2e046af07c4052a767f6a74b1012682a90a06fb900a8413f84",
+      "expected": "eaec4e9b62afbb2e046af07c4052a767f6a74b1012682a90a06fb900a8413f84",
+      "ok": true
+    },
+    {
+      "path": "key/app.js",
+      "status": 200,
+      "sha256": "06ee5b9b18073a9b79613570471d998320c43bf1e6f84ec5caf4b2ab02ae3539",
+      "expected": "06ee5b9b18073a9b79613570471d998320c43bf1e6f84ec5caf4b2ab02ae3539",
+      "ok": true
+    },
+    {
+      "path": "key/discover.js",
+      "status": 200,
+      "sha256": "ab68bda9678d647fda4be943b79ebffe1db31897e059b1c8af3403302998d05f",
+      "expected": "ab68bda9678d647fda4be943b79ebffe1db31897e059b1c8af3403302998d05f",
+      "ok": true
+    },
+    {
+      "path": "key/sw.js",
+      "status": 200,
+      "sha256": "9350a4674e84ba5e270d2f1cb89020bb61c103def9bfd5162ab9ba0b98e7f448",
+      "expected": "9350a4674e84ba5e270d2f1cb89020bb61c103def9bfd5162ab9ba0b98e7f448",
+      "ok": true
+    },
+    {
+      "path": "key/trakt.js",
+      "status": 200,
+      "sha256": "2299e04a8f495fa7d13a6925dd0d905e15060f7d3d318006cc8bfea3e24af98a",
+      "expected": "2299e04a8f495fa7d13a6925dd0d905e15060f7d3d318006cc8bfea3e24af98a",
+      "ok": true
+    },
+    {
+      "path": "key/trakt-vault.js",
+      "status": 200,
+      "sha256": "665e3af4d6474ca7851ea3d71789977868fd1722d6db24d0afe2b2699142d039",
+      "expected": "665e3af4d6474ca7851ea3d71789977868fd1722d6db24d0afe2b2699142d039",
+      "ok": true
+    },
+    {
+      "path": "key/trakt.css",
+      "status": 200,
+      "sha256": "00357bbc100e971fc94fa545a91b10e88cf9e5eb9348ba68c1fa388920a9a21c",
+      "expected": "00357bbc100e971fc94fa545a91b10e88cf9e5eb9348ba68c1fa388920a9a21c",
+      "ok": true
+    },
+    {
+      "path": "key/watch-party.js",
+      "status": 200,
+      "sha256": "e6cdff5a49685368a1d927c9690a594e16692b937e3beb07250ddeaaaf4b1f41",
+      "expected": "e6cdff5a49685368a1d927c9690a594e16692b937e3beb07250ddeaaaf4b1f41",
+      "ok": true
+    },
+    {
+      "path": "key/source-client.js",
+      "status": 200,
+      "sha256": "c15d7dfb3616abdeb459914f3b0856bcf44e710e8dc5f143e2ba904466e1d53e",
+      "expected": "c15d7dfb3616abdeb459914f3b0856bcf44e710e8dc5f143e2ba904466e1d53e",
+      "ok": true
+    },
+    {
+      "path": "key/playback-lifecycle.js",
+      "status": 200,
+      "sha256": "31172ecd888d4bc37890d53d1e8a2793fa7b42e5383326222fdc20b7a8810c54",
+      "expected": "31172ecd888d4bc37890d53d1e8a2793fa7b42e5383326222fdc20b7a8810c54",
+      "ok": true
+    },
+    {
+      "path": "key/history.js",
+      "status": 200,
+      "sha256": "35d382989573d9abd09d4c6cd9a846ac77a0ab41dd8ba2f69d6d6611b596fb0f",
+      "expected": "35d382989573d9abd09d4c6cd9a846ac77a0ab41dd8ba2f69d6d6611b596fb0f",
+      "ok": true
+    },
+    {
+      "path": "key/settings.js",
+      "status": 200,
+      "sha256": "6d83cbe96e1523bf3ab7aeeb4504129381cf7e045be503896d305c42c39b2df1",
+      "expected": "6d83cbe96e1523bf3ab7aeeb4504129381cf7e045be503896d305c42c39b2df1",
+      "ok": true
+    },
+    {
+      "path": "key/sports-player.html",
+      "status": 200,
+      "sha256": "d3da038a032f9742d7382be1c4ce796b08194a7c8a4cf5fafcc0986e6907c25b",
+      "expected": "d3da038a032f9742d7382be1c4ce796b08194a7c8a4cf5fafcc0986e6907c25b",
+      "ok": true
+    },
+    {
+      "path": "key/sports-catalog.json",
+      "status": 200,
+      "sha256": "62138495be241725e3e39d3f34a92bde30f95c8d6d5eef02c3c832fed392ecc7",
+      "expected": "62138495be241725e3e39d3f34a92bde30f95c8d6d5eef02c3c832fed392ecc7",
+      "ok": true
+    },
+    {
+      "path": "key/games-catalog.json",
+      "status": 200,
+      "sha256": "e3ee6a1c2edebdb94e83f23a20b2b0b508cfacbae714e4e9812d57c84c589f96",
+      "expected": "e3ee6a1c2edebdb94e83f23a20b2b0b508cfacbae714e4e9812d57c84c589f96",
+      "ok": true
+    }
+  ],
+  "apiChecks": [
+    {
+      "path": "/healthz",
+      "status": 200,
+      "result": {
+        "ok": true,
+        "version": "1.2.10",
+        "stage": "catalog-first-preview"
+      },
+      "ok": true
+    },
+    {
+      "path": "/api/session",
+      "status": 200,
+      "result": {
+        "authenticated": false,
+        "setupRequired": false,
+        "authMode": "api-key"
+      },
+      "ok": true
+    },
+    {
+      "path": "/api/library",
+      "status": 401,
+      "result": {
+        "error": "LOGIN_REQUIRED",
+        "message": "Enter your TorBox API key to sign in."
+      },
+      "ok": true
+    },
+    {
+      "path": "/api/watch-party/create",
+      "origin": "https://to-shreds.github.io",
+      "status": 401,
+      "ok": true
+    },
+    {
+      "path": "/api/watch-party/join",
+      "origin": "https://to-shreds.github.io",
+      "status": 404,
+      "ok": true
+    },
+    {
+      "path": "/api/watch-party/join",
+      "origin": "https://untrusted.invalid",
+      "status": 403,
+      "ok": true
+    },
+    {
+      "path": "/watch-party.js",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "/app.js",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "/discover.js",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "/playback-lifecycle.js",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "/boot.js",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "/sw.js",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "/trakt.js",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "/trakt-vault.js",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "/trakt.css",
+      "status": 200,
+      "ok": true
+    }
+  ],
+  "success": true,
+  "scope": "Public root/key asset identity and backend version/origin/authentication boundaries. No real account, key, media or physical-device outcome was used."
+}

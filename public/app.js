@@ -1,13 +1,13 @@
 import {createWatchParty} from './watch-party.js?v=release-1.2.8-party.1';
-import { createDiscoveryUI, bindArtworkImage } from './discover.js?v=release-1.2.10-audio.1';
+import { createDiscoveryUI, bindArtworkImage, MORE_AUDIO_RECOVERY_ATTEMPTS } from './discover.js?v=release-1.2.14-ui.1';
 import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.8-party.1';
-import { PlaybackAudioCheck } from './playback-lifecycle.js?v=release-1.2.10-audio.1';
+import { PlaybackAudioCheck } from './playback-lifecycle.js?v=release-1.2.14-ui.1';
 import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.8-party.1';
 import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.8-party.1';
 import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.8-party.1';
 import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.8-party.1';
 import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.8-party.1';
-import { TraktIntegration, mergeContinueWatching } from './trakt.js?v=release-1.2.10-audio.1';
+import { TraktIntegration, mergeContinueWatching } from './trakt.js?v=release-1.2.14-ui.1';
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory, noteAudioDecodeFailure, resetNegativeAudioFeedback } from './source-memory.js?v=release-1.2.8-party.1';
 import { clearSearchHistory } from './search-history.js?v=release-1.2.8-party.1';
 import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.8-party.1';
@@ -81,6 +81,22 @@ function showFullscreenExitControl(){
   fullscreenExitControlTimer=setTimeout(()=>{fullscreenExitControlTimer=null;if(control)control.hidden=true;},3200);
 }
 function hideFullscreenExitControl(){clearTimeout(fullscreenExitControlTimer);fullscreenExitControlTimer=null;const control=$('fullscreen-exit-overlay');if(control)control.hidden=true;}
+function closePlayerVersionMenu(){
+  const menu=$('player-version-menu'),toggle=$('player-version-toggle');
+  if(menu)menu.hidden=true;
+  if(toggle)toggle.setAttribute('aria-expanded','false');
+}
+function updatePlayerVersionActions(){
+  const toggle=$('player-version-toggle');
+  if(!toggle)return;
+  const context=active,video=context?.video;
+  // Opening a replacement file returns before its metadata and resume seek
+  // settle. Do not let a rapid second switch read that transient zero position.
+  toggle.disabled=!context?.playbackContext?.sourceInfo||!context.ready||context.recovering===true
+    ||!video||video.readyState<1||video.seeking
+    ||!['movie','series'].includes(context?.playbackContext?.current?.type);
+  if(toggle.disabled)closePlayerVersionMenu();
+}
 function updatePlayerModeActions(){
   const fs=$('toggle-fullscreen'),pip=$('toggle-pip'),shell=playerMediaShell(),video=active?.video;
   const playerFullscreen=document.fullscreenElement===shell||document.fullscreenElement===video;
@@ -89,6 +105,7 @@ function updatePlayerModeActions(){
     const supported=playerPiPSupported(video);pip.hidden=false;pip.disabled=!supported||!video||video.readyState===0;
     pip.textContent=supported?(document.pictureInPictureElement===video?'Exit picture in picture':'Picture in picture'):'PiP unavailable';
   }
+  updatePlayerVersionActions();
 }
 async function requestPlayerFullscreen({restoring=false}={}){
   const shell=playerMediaShell();if(!shell||!playerFullscreenSupported())return false;
@@ -491,6 +508,7 @@ async function bootstrap() {
   }
 }
 $('startup-retry').addEventListener('click',()=>{show('loading');void bootstrap();});
+{const more=$('player-more-versions');more.style.display='flex';more.style.margin='0 auto 1rem';more.addEventListener('click',()=>active?.checkMoreVersions?.());}
 $('cancel-resume').addEventListener('click',()=>{discoveryUI?.cancelPlayback();void stopPlayback();if($('player').open)$('player').close();});
 $('login-form').addEventListener('submit', async event => {
   event.preventDefault(); const button = event.submitter; button.disabled = true; text('login-message', 'Checking TorBox…');
@@ -792,7 +810,8 @@ async function startPlayback(file, playbackContext = null) {
   const requestSignal=AbortSignal.any([playbackRequestAbort.signal,AbortSignal.timeout(22000)]);
   const generation = ++playGeneration, selectedViewer = viewer;
   const reusableVideo=await detachPlayback({preserveVideo:true}); if (generation !== playGeneration) return false;
-  $('playing-title').textContent = file.title; text('player-message', 'Opening…'); setPlaybackHealth('Opening','Requesting a fresh TorBox link…');
+  closePlayerVersionMenu();updatePlayerVersionActions();
+  $('playing-title').textContent = file.title; text('player-message', 'Opening…'); $('player-more-versions').hidden = true; setPlaybackHealth('Opening','Requesting a fresh TorBox link…');
   if (!$('player').open) $('player').showModal();
   if(playbackContext?.resumeIntent)updateResumeOverlay('Resuming '+(playbackContext.title||'your video')+'…','Opening the player and loading your saved position.');
   else if(playbackContext?.startOverIntent)updateResumeOverlay('Starting '+(playbackContext.title||'your video')+' over…','Opening the player from the beginning.');
@@ -817,19 +836,46 @@ async function startPlayback(file, playbackContext = null) {
       if (!getSettings().autoRecovery) { hideResumeOverlay(); setPlaybackHealth(reason==='buffer'?'Buffering':'Playback problem','Automatic recovery is off.'); text('player-message', reason === 'buffer' ? 'Playback is buffering. Automatic recovery is off in Settings.' : (diagnosis?.message||'Playback failed. Automatic recovery is off in Settings.'), true); return; }
       if(watchParty?.isActive()){video.pause();clearBuffer();hideResumeOverlay();text('player-message','Watch party paused. Leave the party before choosing a different source.',true);return;}
       context.recovering = true; clearBuffer();clearTimeout(context.startupTimer);clearTimeout(context.healthyTimer); hidePauseCard(); void saveProgress(context); video.pause();
-      if(playbackContext)playbackContext.recoveryPosition=Number.isFinite(video.currentTime)?video.currentTime:0;
-      setPlaybackHealth('Recovering',reason==='audio'?'No audio decoded. Finding a version with compatible sound…':reason==='buffer'?'Switching to a lower-resolution source…':'Finding another source…');
-      text('player-message', reason==='audio'?'This version has no decodable sound. Trying another version…':reason === 'buffer' ? 'Buffering · trying another source (maximum 3 total)…' : 'Stream failed · trying another source (maximum 3 total)…');
+      if(playbackContext){
+        const current=Number.isFinite(video.currentTime)?video.currentTime:0;
+        // Each silent version plays a few seconds while its sound is checked.
+        // Resume every later version from where sound first failed.
+        if(reason==='audio'&&!Number.isFinite(playbackContext.audioRecoveryOrigin))playbackContext.audioRecoveryOrigin=current;
+        playbackContext.recoveryPosition=reason==='audio'?playbackContext.audioRecoveryOrigin:current;
+      }
+      $('player-more-versions').hidden=true;
+      const checking=Math.max(1,new Set(playbackContext?.recoveryTried||[]).size)+1;
+      setPlaybackHealth('Recovering',reason==='audio'?'No audio decoded. Checking another version for sound…':reason==='buffer'?'Switching to a lower-resolution source…':'Finding another source…');
+      text('player-message', reason==='audio'?`No sound from this version in this browser. Checking version ${checking} for sound…`:reason === 'buffer' ? 'Buffering · trying another source (maximum 3 total)…' : 'Stream failed · trying another source (maximum 3 total)…');
+      if(playbackContext)playbackContext.recoveryError='';
       const moved = playbackContext ? await discoveryUI.recoverPlayback(playbackContext,{signal:context.eventAbort.signal}) : false;
       if (moved) return;
       if (active !== context) return;
       const attempts=Math.max(1,new Set(playbackContext?.recoveryTried||[]).size);
-      context.recovering = false; hideResumeOverlay(); setPlaybackHealth('Could not play',diagnosis?.message||'Automatic recovery could not find a working alternative.'); text('player-message', `${diagnosis?.message||'Playback failed.'} Automatic recovery stopped after ${attempts} source${attempts===1?'':'s'}.`, true);
+      const remaining=Math.max(0,Number(playbackContext?.recoveryRemaining)||0);
+      context.recovering = false; hideResumeOverlay();
+      if(reason==='audio'){
+        // Report what was actually checked; never claim nothing exists while
+        // untried cached versions remain.
+        let summary=attempts===1?'This version plays without sound in this browser.':`Checked ${attempts} versions; none had sound this browser can play.`;
+        if(playbackContext?.recoveryError==='SLOW_DOWN')summary+=' TorBox preparation is limited to a few versions per minute. Wait a moment, then check more.';
+        summary+=remaining>0?` ${remaining} more cached version${remaining===1?' is':'s are'} available to check.`:' No other cached version is available to check.';
+        setPlaybackHealth('No sound',summary);text('player-message',summary,true);
+        const more=$('player-more-versions');more.textContent=remaining>0?`Check more versions (${remaining})`:'Check more versions';more.hidden=remaining<=0;
+        return;
+      }
+      setPlaybackHealth('Could not play',diagnosis?.message||'Automatic recovery could not find a working alternative.'); text('player-message', `${diagnosis?.message||'Playback failed.'} Automatic recovery stopped after ${attempts} source${attempts===1?'':'s'}.`, true);
+    };
+    context.checkMoreVersions = () => {
+      if(active!==context||context.recovering||!playbackContext)return;
+      playbackContext.recoveryAllowance=Math.max(1,new Set(playbackContext.recoveryTried||[]).size)+MORE_AUDIO_RECOVERY_ATTEMPTS;
+      void recover('audio');
     };
     const checkAudio = () => {
       if(active!==context||!context.ready||context.recovering||context.audioConfirmed||!playbackContext?.sourceInfo||!['movie','series'].includes(playbackContext?.current?.type))return;
       const state=context.audioCheck.sample(video,performance.now(),document.visibilityState==='visible'||playerIsPiP(context));
-      if(state==='missing'&&!context.audioFailureHandled)void recover('audio',{message:'The picture plays, but this browser has not decoded any sound from this version. No cached version with compatible audio was found.'});
+      if(state==='missing'&&!context.audioFailureHandled)void recover('audio');
+      else if(state==='decoded'&&playbackContext&&Number.isFinite(playbackContext.audioRecoveryOrigin)){playbackContext.audioRecoveryOrigin=undefined;playbackContext.recoveryAllowance=undefined;}
     };
     const armBuffer = () => {
       if (!context.started || video.paused || video.ended || context.recovering) return;
@@ -863,7 +909,12 @@ async function startPlayback(file, playbackContext = null) {
     for(const name of ['seeking','seeked','pause','volumechange'])listen(name,checkAudio);
     listen('waiting', armBuffer); listen('stalled',()=>{setPlaybackHealth('Stalled','The browser reports that data stopped arriving.');armBuffer();});
     listen('pause', () => { if(active===context){tickKidUsage(context,true);trakt.paused(context);} if (active === context && !context.recovering) { clearTimeout(context.healthyTimer);releaseWakeLock(); if(!stillWatchingPromptActive&&!video.ended)clearStillWatchingTimer(); saveProgress(context); if(stillWatchingPromptActive){hidePauseCard();setPlaybackHealth('Still watching?','Tap Keep watching to continue.');}else if(!$('kid-limit-dialog').open){setPlaybackHealth('Paused','Playback is paused.');updatePauseCard(context);} } });
-    listen('seeked', () => { if (active === context && context.ready && context.started) saveProgress(context); });
+    listen('seeking', () => { if(active===context)updatePlayerVersionActions(); });
+    listen('seeked', () => {
+      if(active!==context)return;
+      updatePlayerVersionActions();
+      if(context.ready&&context.started)saveProgress(context);
+    });
     listen('ended', async () => {
       if (active !== context) return; tickKidUsage(context,true);trakt.stopped(context,true); clearBuffer(); hidePauseCard(); void saveProgress(context);
       context.nextEnded=true;markPlaybackCompleted(context);
@@ -907,6 +958,58 @@ async function rejectCurrentSource(){
 }
 $('health-sound-good').addEventListener('click',()=>{const p=active?.playbackContext;if(!p?.sourceInfo||active.recovering)return;active.audioConfirmed=true;if(!active.partyGuest){setAudioFeedback(p.current,p.sourceInfo,'good');rememberSourceSuccess(p.current,p.sourceInfo);active.sourceLearned=true;}setPlaybackHealth('Playing','Sound confirmed on this device.');});
 $('health-source-bad').addEventListener('click',()=>rejectCurrentSource());
+
+// This deliberate menu replaces the risky one-tap rejection controls. Manual
+// changes reuse cached-only preparation, exact episode checks and the same
+// video element/position. A failed search does not poison source memory.
+$('player-version-toggle').addEventListener('click',()=>{
+  const context=active,menu=$('player-version-menu'),toggle=$('player-version-toggle');
+  if(!context?.playbackContext?.sourceInfo||context.recovering)return;
+  if(watchParty?.isActive()){text('player-message','Leave the watch party before choosing another version.',true);return;}
+  menu.hidden=!menu.hidden;toggle.setAttribute('aria-expanded',String(!menu.hidden));
+});
+document.addEventListener('pointerdown',event=>{
+  const menu=$('player-version-menu');
+  if(!menu.hidden&&!menu.contains(event.target)&&!$('player-version-toggle').contains(event.target))closePlayerVersionMenu();
+});
+$('player').addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&!$('player-version-menu').hidden){
+    event.preventDefault();event.stopPropagation();closePlayerVersionMenu();
+  }
+},true);
+async function changePlayerVersion(){
+  closePlayerVersionMenu();
+  const context=active,playback=context?.playbackContext,source=playback?.sourceInfo;
+  if(!context||!playback?.current||!source||context.recovering)return;
+  if(watchParty?.isActive()){text('player-message','Leave the watch party before choosing another version.',true);return;}
+  if(!context.ready||context.video.readyState<1||context.video.seeking){
+    text('player-message','Finishing the current seek. Try New version once the video is ready.');
+    updatePlayerVersionActions();
+    return;
+  }
+  const avoid=$('player-version-avoid').checked;
+  const wasPlaying=!context.video.paused&&!context.video.ended;
+  context.recovering=true;
+  playback.recoveryPosition=Number.isFinite(context.video.currentTime)?Math.max(0,context.video.currentTime):0;
+  playback.forceStartOver=false;playback.rewindOnResumeSeconds=0;
+  clearTimeout(context.healthyTimer);hidePauseCard();
+  void saveProgress(context);
+  context.video.pause();
+  updatePlayerVersionActions();
+  setPlaybackHealth('Changing version','Checking a different cached source…');
+  text('player-message','Finding another cached version. Your playback position is saved.');
+  const moved=await discoveryUI.recoverPlayback(playback,{signal:context.eventAbort.signal,manual:true});
+  if(moved){if(avoid)setSourceBad(playback.current,source,true);return;}
+  if(active!==context)return;
+  context.recovering=false;updatePlayerVersionActions();
+  const remaining=Math.max(0,Number(playback.recoveryRemaining)||0);
+  const limited=playback.recoveryError==='SLOW_DOWN';
+  const notice=limited?'TorBox is limiting version checks. Try again shortly.':remaining>0?'Other cached versions may still be available. Tap New version again to keep checking.':'No other cached version could be opened.';
+  setPlaybackHealth('Current version retained',notice);
+  text('player-message',notice+' The original version was not blocked.',true);
+  if(wasPlaying)context.video.play().catch(()=>text('player-message',notice+' Tap play to continue.',true));
+}
+$('player-new-version').addEventListener('click',()=>{void changePlayerVersion();});
 $('keep-watching').addEventListener('click',()=>{
   if(!active)return;
   const block=canStartKidPlayback(viewer,active.playbackContext);if(!block.allowed){hideStillWatchingPrompt();showKidLimit(block);return;}
@@ -983,7 +1086,7 @@ playerMediaShell().addEventListener('pointerdown',event=>{
 if(screen.orientation?.addEventListener)screen.orientation.addEventListener('change',noteOrientationChange);
 window.addEventListener('orientationchange',noteOrientationChange);
 $('close-player').addEventListener('click', () => $('player').close());
-$('player').addEventListener('close', () => stopPlayback());
+$('player').addEventListener('close', () => {closePlayerVersionMenu();void stopPlayback();});
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { tickKidUsage(active,true);saveProgress(active, true); if(!playerIsPiP(active))releaseWakeLock();else void refreshWakeLockForPlayback(active); } else if(active&&!active.video.paused){active.kidLastAt=Date.now();active.kidLastPosition=Number.isFinite(active.video.currentTime)?active.video.currentTime:0;void refreshWakeLockForPlayback(active);} });
 document.addEventListener('keydown',event=>{
   if(!$('player').open||!active||!getSettings().keyboardShortcuts||event.altKey||event.ctrlKey||event.metaKey)return;

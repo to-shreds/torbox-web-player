@@ -1,4 +1,4 @@
-import { LatestPlaybackAction, PlaybackPreparationCache, supportsAudioDecodeCounter } from './playback-lifecycle.js?v=release-1.2.10-audio.1';
+import { LatestPlaybackAction, PlaybackPreparationCache, supportsAudioDecodeCounter } from './playback-lifecycle.js?v=release-1.2.14-ui.1';
 import { loadPublicSources, browserContainerHints, sourceHints, preparedSourceCompatibility } from './source-client.js?v=release-1.2.8-party.1';
 import { getSettings, updateSettings } from './settings.js?v=release-1.2.8-party.1';
 import { listRecent, formatResumeTime } from './history.js?v=release-1.2.8-party.1';
@@ -44,11 +44,28 @@ export function sourceMatchesResolution(source, resolution = 'auto') {
   return value.includes(resolution.replace('p', ''));
 }
 export const filterSourcesByResolution = (list, resolution = 'auto') => list.filter(s => sourceMatchesResolution(s, resolution));
+// Release tags follow the episode or year marker, so title words such as
+// "The Italian Job" are never read as a language tag. Episode titles also
+// follow the marker ("German Guy"), so a full language word only counts when a
+// release tag directly follows it ("german.dl", "russian.dub", "french.1080p").
+const RELEASE_LANGUAGE_CODE=/(?:^|[^a-z])(?:rus|ukr|ger|fre|truefrench|vff|vfq|vf2|ita|latino|castellano|dublado|baibako|lostfilm|newstudio|jaskier)(?:[^a-z]|$)/i;
+const RELEASE_LANGUAGE_WORD=/(?:^|[^a-z])(?:german|french|italian|spanish|russian|portuguese|hindi|polish|turkish|ukrainian|czech|hungarian|arabic)[ ._-]+(?:dl|dub(?:bed)?|audio|ac3|dd|aac|web|webrip|web-dl|hdtv|bluray|\d{3,4}p)(?:[^a-z0-9]|$)/i;
+const RELEASE_ENGLISH_TAG=/(?:^|[^a-z])(?:eng|english)(?:[^a-z]|$)/i;
+export function releaseLanguageTags(name){
+  const text=String(name||''),marker=/s\d{1,2}[ ._-]?e\d{1,4}|(?:^|[^0-9])(?:19|20)\d{2}(?:[^0-9]|$)/i.exec(text);
+  const tail=marker?text.slice(marker.index+marker[0].length):'';
+  return{foreign:RELEASE_LANGUAGE_CODE.test(tail)||RELEASE_LANGUAGE_WORD.test(tail),english:RELEASE_ENGLISH_TAG.test(tail)};
+}
 export function sourceLanguagePreference(source){
   const languages=Array.isArray(source?.languages)?source.languages:[];
   if(languages.includes('en'))return languages.length===1?4:3;
   if(languages.length)return 0;
-  return /(?:^|[^a-z])dub(?:bed)?(?:[^a-z]|$)/i.test([source?.filename,source?.title].filter(Boolean).join(' '))?1:2;
+  const name=[source?.filename,source?.title].filter(Boolean).join(' '),tags=releaseLanguageTags(name);
+  if(tags.foreign&&!tags.english)return 0;
+  // Cyrillic or CJK release names are usually dubs or fansubs with burned-in
+  // subtitles. Keep them as a last resort rather than a first choice.
+  if(/[\u0400-\u04ff\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(name)&&!tags.english)return 1;
+  return /(?:^|[^a-z])dub(?:bed)?(?:[^a-z]|$)/i.test(name)?1:2;
 }
 export function sourceLanguageLabel(source){
   const languages=Array.isArray(source?.languages)?source.languages:[];
@@ -59,6 +76,44 @@ export function sourceAudioConfidence(source){
   if(source?.memoryAudio==='bad'||source?.audioRisk===true||sourceHints(source||{}).audioRisk)return 0;
   if(source?.memoryAudio==='good')return 3;
   return sourceHints(source||{}).audioCompatible?2:1;
+}
+// Most real releases never name their audio codec. Among those, MP4 files are
+// nearly always AAC re-encodes, while untouched streaming-service WEB-DLs in
+// MKV (".web.h264-GROUP.mkv") keep Dolby Digital Plus, which Chrome decodes as
+// silence. This only orders unknown audio; the live decoder check still decides.
+export function unknownAudioLikelihood(source){
+  const name=[source?.filename,source?.playbackFilename,source?.title].filter(Boolean).join(' ');
+  const container=browserContainerHints(source||{}).container;
+  if(container==='mp4'||container==='m4v')return 2;
+  const untouchedWeb=/(?:^|[^a-z0-9])web(?:[ ._-]?dl)?(?:[^a-z0-9]|$)/i.test(name)&&/(?:^|[^a-z0-9])h[ ._-]?264(?:[^a-z0-9]|$)/i.test(name)&&!/x[ ._-]?264/i.test(name);
+  return untouchedWeb?0:1;
+}
+export function sourceAudioRank(source){
+  const confidence=sourceAudioConfidence(source);
+  return confidence===1?10+unknownAudioLikelihood(source):confidence*10;
+}
+export const AUDIO_RANKS=Object.freeze([30,20,12,11,10]);
+// Many AAC releases are HEVC. Chrome plays HEVC through the phone's hardware
+// decoder when one exists, so ask this browser instead of excluding them all.
+// MKV, HDR and Dolby Vision HEVC stay excluded; failures still use recovery.
+export function deviceHevcSupport(video=globalThis.document?.createElement?.('video')){
+  const can=type=>{try{return video?.canPlayType?.(type)==='probably'||globalThis.MediaSource?.isTypeSupported?.(type)===true;}catch{return false;}};
+  return Object.freeze({main:can('video/mp4; codecs="hvc1.1.6.L120.90"')||can('video/mp4; codecs="hev1.1.6.L120.90"'),main10:can('video/mp4; codecs="hvc1.2.4.L120.90"')||can('video/mp4; codecs="hev1.2.4.L120.90"')});
+}
+export function hevcPlayableOnDevice(source,support){
+  if(!support?.main)return false;
+  const name=[source?.filename,source?.playbackFilename,source?.title,source?.videoCodec].filter(Boolean).join(' ');
+  const token=pattern=>new RegExp('(?:^|[^a-z0-9])(?:'+pattern+')(?:[^a-z0-9]|$)','i').test(name);
+  if(!token('hevc|h[ ._-]?265|x265')||token('av1|xvid|divx'))return false;
+  if(token('hdr(?:10)?(?:\\+|plus)?|dv|dovi|dolby[ ._-]?vision'))return false;
+  const container=browserContainerHints(source||{}).container;
+  if(container!=='mp4'&&container!=='m4v')return false;
+  return !token('10[ ._-]?bit|main[ ._-]?10|hi10p?')||support.main10===true;
+}
+export function applyDeviceVideoSupport(list,support){
+  const rows=Array.isArray(list)?list:[];
+  if(!support?.main)return rows;
+  return rows.map(source=>source?.videoRisk===true&&hevcPlayableOnDevice(source,support)?{...source,videoRisk:false,deviceVideoSupport:support}:source);
 }
 export function recommendSource(list, type = 'movie', resolution = 'auto', sizeProfile = getSettings().sourceSizeProfile, allowBrowserUnsupported = false) {
   let visible = filterSourcesByResolution(list, resolution).filter(source=>source.memoryBad!==true&&source.memoryAudio!=='bad'&&(allowBrowserUnsupported||source.browserUnsupported!==true)); if (!visible.length) return null;
@@ -93,9 +148,9 @@ export function automaticSourceOrder(list, type = 'movie', resolution = 'auto', 
   const passes=resolution&&resolution!=='auto'?[resolution,'auto']:['auto'];
   // A quality preference must not fill the bounded candidate list with unknown
   // audio while compatible or confirmed sound is available at another quality.
-  for(const confidence of [3,2,1])for(const pass of passes){
+  for(const audioRank of AUDIO_RANKS)for(const pass of passes){
     while(true){
-      const pool=remaining.filter(source=>sourceAudioConfidence(source)===confidence);
+      const pool=remaining.filter(source=>sourceAudioRank(source)===audioRank);
       const best=recommendSource(pool,type,pass,sizeProfile);if(!best)break;
       ordered.push(best);const key=sourceRecoveryKey(best);remaining=remaining.filter(source=>source!==best&&sourceRecoveryKey(source)!==key);
     }
@@ -112,6 +167,7 @@ export function isAutomaticCandidateFailure(error) {
 }
 export function validatePreparedSource(source,result,{unattended=false,requireCompatibleAudio=false,allowBrowserUnsupported=false}={}){
   const compatibility=preparedSourceCompatibility(source,result?.file,result?.compatibility);
+  if(compatibility.videoRisk&&source?.deviceVideoSupport&&hevcPlayableOnDevice({...source,...compatibility,filename:result?.file?.filename||result?.file?.title||source.filename},source.deviceVideoSupport))compatibility.videoRisk=false;
   let code='',message='';
   if(unattended&&compatibility.browserUnsupported&&!allowBrowserUnsupported){code='BROWSER_CONTAINER_UNSUPPORTED';message='This file uses a format that cannot play in this browser. Trying another version.';}
   else if(unattended&&compatibility.audioRisk){code='BROWSER_AUDIO_UNSUPPORTED';message='This file has Dolby/DTS audio that may be silent in this browser. Trying another version.';}
@@ -130,6 +186,19 @@ export function sourcesForAudioRequirement(list, requireCompatibleAudio=false) {
   return sources.map(source=>source.memoryAudio==='good'&&!sourceHints(source).audioCompatible
     ?{...source,memoryAudio:'unknown'}:source);
 }
+// Each candidate costs one server preparation (8 per minute per session). A
+// strict audio check rejects untagged releases after preparing them, so most
+// real release names (which rarely state the audio codec) would spend the whole
+// budget and leave the next request rate-limited. Keep every candidate whose
+// listing already shows compatible audio, and at most one unknown probe whose
+// actual prepared file may still establish it (e.g. a season pack).
+export const STRICT_AUDIO_UNKNOWN_PROBES = 1;
+export function strictAudioCandidates(ordered, requireCompatibleAudio=false, maxUnknown=STRICT_AUDIO_UNKNOWN_PROBES) {
+  const rows=Array.isArray(ordered)?ordered:[];
+  if(!requireCompatibleAudio)return rows;
+  let unknown=0;
+  return rows.filter(source=>sourceAudioConfidence(source)>=2||(sourceAudioConfidence(source)===1&&unknown++<maxUnknown));
+}
 export function automaticCachedSourceOrder(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
   // An unavailable cache lookup is not proof that a source is uncached. The
   // preparation request independently enforces cached-only behavior.
@@ -144,9 +213,9 @@ export function browserPreparationOptions(list, type = 'movie', resolution = 'au
   const regular=eligible.filter(source=>!/\b(?:superfan|extended(?:[ ._-]+cut)?)\b/i.test([source.filename,source.title].filter(Boolean).join(' ')));
   let remaining=regular.length?regular:eligible,ordered=[];
   const passes=resolution&&resolution!=='auto'?[resolution,'auto']:['auto'];
-  for(const confidence of [3,2,1])for(const pass of passes){
+  for(const audioRank of AUDIO_RANKS)for(const pass of passes){
     while(ordered.length<Math.max(0,limit)){
-      const pool=remaining.filter(source=>sourceAudioConfidence(source)===confidence);
+      const pool=remaining.filter(source=>sourceAudioRank(source)===audioRank);
       const best=recommendSource(pool,type,pass,sizeProfile);if(!best)break;
       ordered.push(best);const key=sourceRecoveryKey(best);
       remaining=remaining.filter(source=>source!==best&&sourceRecoveryKey(source)!==key);
@@ -157,8 +226,8 @@ export function browserPreparationOptions(list, type = 'movie', resolution = 'au
 export function browserPreparationCandidate(list, type = 'movie', resolution = 'auto', sizeProfile = 'balanced') {
   return browserPreparationOptions(list,type,resolution,sizeProfile,1)[0]||null;
 }
-export function selectAutomaticVideoFile(files = []) {
-  let rows=(Array.isArray(files)?files:[]).filter(file=>{if(!file?.id)return false;const hints=sourceHints({...file,filename:file.filename||file.title});return !hints.browserUnsupported&&!hints.audioRisk&&!hints.videoRisk;});
+export function selectAutomaticVideoFile(files = [], videoSupport = null) {
+  let rows=(Array.isArray(files)?files:[]).filter(file=>{if(!file?.id)return false;const named={...file,filename:file.filename||file.title},hints=sourceHints(named);return !hints.browserUnsupported&&!hints.audioRisk&&(!hints.videoRisk||hevcPlayableOnDevice(named,videoSupport));});
   const compatible=rows.filter(file=>sourceHints({...file,filename:file.filename||file.title}).audioCompatible);
   if(compatible.length)rows=compatible;
   const supported=rows.find(file=>{const hints=browserContainerHints(file);return hints.browserContainer&&hints.containerStatus!=='conditional';});
@@ -192,9 +261,9 @@ async function withinAutomaticBudget(action,signal){
     Promise.resolve().then(action).then(value=>{if(settled)return;settled=true;signal.removeEventListener('abort',stop);resolve(value);},error=>{if(settled)return;settled=true;signal.removeEventListener('abort',stop);reject(error);});
   });
 }
-export async function resolveAutomaticCachedSource(list,target,resolution,{prepare,onCandidate,onRejected,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,sizeProfile='balanced',totalTimeoutMs=AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS}={}){
+export async function resolveAutomaticCachedSource(list,target,resolution,{prepare,onCandidate,onRejected,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,sizeProfile='balanced',totalTimeoutMs=AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS,requireCompatibleAudio=false,unknownProbes=STRICT_AUDIO_UNKNOWN_PROBES}={}){
   if(typeof prepare!=='function')throw new TypeError('Automatic source preparation is not configured.');
-  const candidates=automaticCachedSourceOrder(list,target?.type||'movie',resolution,sizeProfile).slice(0,Math.max(0,maxCandidates));
+  const candidates=strictAudioCandidates(automaticCachedSourceOrder(list,target?.type||'movie',resolution,sizeProfile),requireCompatibleAudio,unknownProbes).slice(0,Math.max(0,maxCandidates));
   if(!candidates.length){const error=new Error(NO_CACHED_BROWSER_SOURCE_MESSAGE);error.code='NO_CACHED_BROWSER_SOURCE';throw error;}
   const budgetSignal=Number.isFinite(totalTimeoutMs)&&totalTimeoutMs>0?AbortSignal.timeout(totalTimeoutMs):null;
   for(const source of candidates){
@@ -227,8 +296,14 @@ export function sourceRecoveryKey(source) {
   return fallback?`source:${fallback}`:'';
 }
 export const MAX_AUTOMATIC_SOURCE_ATTEMPTS = 3;
+// When this browser can observe decoded audio, each switched version is
+// verified by sound, not by its name. Allow enough versions to get past the
+// common silent Dolby WEB-DLs while staying inside the server's eight
+// preparations per minute; the viewer can ask for more after that.
+export const MAX_AUDIO_RECOVERY_ATTEMPTS = 5;
+export const MORE_AUDIO_RECOVERY_ATTEMPTS = 4;
 export function recoverySourceOrder(list, context = {}, type = context?.current?.type || 'movie', sizeProfile = 'balanced') {
-  const attempted=new Set(Array.isArray(context?.recoveryTried)?context.recoveryTried:[]),currentKey=sourceRecoveryKey(context?.sourceInfo);if(currentKey)attempted.add(currentKey);
+  const attempted=new Set([...(Array.isArray(context?.recoveryTried)?context.recoveryTried:[]),...(Array.isArray(context?.recoverySkipped)?context.recoverySkipped:[])]),currentKey=sourceRecoveryKey(context?.sourceInfo);if(currentKey)attempted.add(currentKey);
   let remaining=(Array.isArray(list)?list:[]).filter(source=>{const key=sourceRecoveryKey(source);return key&&!attempted.has(key)&&source.audioRisk!==true&&source.videoRisk!==true&&source.browserUnsupported!==true&&sourceAudioConfidence(source)>0&&sourceLanguagePreference(source)>0;});
   const current=String(context?.sourceResolution||context?.sourceInfo?.resolution||'').toLowerCase();
   const currentTier=current.includes('2160')||current.includes('4k')?'2160p':current.includes('1080')?'1080p':current.includes('720')?'720p':current.includes('480')?'480p':'';
@@ -238,19 +313,23 @@ export function recoverySourceOrder(list, context = {}, type = context?.current?
   // On every automatic retry, known sound outranks resolution. Unknown metadata
   // may still be checked after those options, but readyFile must obtain
   // positive audio evidence from the actual prepared file before playing it.
-  for(const confidence of [3,2,1])for(const resolution of tiers){
+  for(const audioRank of AUDIO_RANKS)for(const resolution of tiers){
     while(true){
-      const pool=confidence===null?remaining:remaining.filter(source=>sourceAudioConfidence(source)===confidence);
+      const pool=remaining.filter(source=>sourceAudioRank(source)===audioRank);
       const best=recommendSource(pool,type,resolution,sizeProfile);if(!best)break;
       ordered.push(best);const key=sourceRecoveryKey(best);remaining=remaining.filter(source=>source!==best&&sourceRecoveryKey(source)!==key);
     }
   }
   return ordered;
 }
-export function boundedRecoverySourceOrder(list, context = {}, type = context?.current?.type || 'movie', sizeProfile = 'balanced') {
+export function boundedRecoverySourceOrder(list, context = {}, type = context?.current?.type || 'movie', sizeProfile = 'balanced', maxAttempts = MAX_AUTOMATIC_SOURCE_ATTEMPTS) {
   const attempted=new Set(Array.isArray(context?.recoveryTried)?context.recoveryTried:[]),currentKey=sourceRecoveryKey(context?.sourceInfo);if(currentKey)attempted.add(currentKey);
-  if(attempted.size>=MAX_AUTOMATIC_SOURCE_ATTEMPTS)return [];
-  return recoverySourceOrder(list,context,type,sizeProfile).slice(0,MAX_AUTOMATIC_SOURCE_ATTEMPTS-attempted.size);
+  if(attempted.size>=maxAttempts)return [];
+  return recoverySourceOrder(list,context,type,sizeProfile).slice(0,maxAttempts-attempted.size);
+}
+export function recoveryAttemptLimit(context = {}, audioObservable = true) {
+  if(context?.audioRecovery!==true||!audioObservable)return MAX_AUTOMATIC_SOURCE_ATTEMPTS;
+  return Math.max(MAX_AUDIO_RECOVERY_ATTEMPTS,Number.isSafeInteger(context?.recoveryAllowance)?context.recoveryAllowance:0);
 }
 const formatBytes = value => Number.isFinite(value) && value > 0 ? (value >= GB ? `${(value / GB).toFixed(value >= 10*GB ? 1 : 2)} GB` : `${Math.max(1,Math.round(value/1024**2))} MB`) : '—';
 const qualityText = s => [s.resolution || s.quality, s.releaseQuality, s.videoCodec, ...(s.audioCodecs || []).slice(0,2), s.container].filter(Boolean).join(' · ') || 'Unknown';
@@ -267,6 +346,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   const playbackActions=new LatestPlaybackAction();
   const preparations=new PlaybackPreparationCache();
   const audioDecodeObservable=supportsAudioDecodeCounter(document.createElement('video'));
+  const hevcSupport=deviceHevcSupport(document.createElement('video'));
   let closingTitleForPlayback=false;
   const cancelPlayback=()=>{playbackActions.cancel();resumeActivity?.hide?.();};
   let active=false, guestMode=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0, nextUpGeneration=0;
@@ -425,7 +505,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     const lookup=await loadPublicSources(target,{signal,api,fast,complete,refresh,withMetadata:true}),sources=lookup.sources;
     if(!sources.length){const error=new Error('No playable source was found for this title or episode.');error.code='NO_CACHED_BROWSER_SOURCE';error.complete=lookup.complete;error.registered={sources:[],complete:lookup.complete};throw error;}
     const result=await api('/api/discover/sources',{method:'POST',data:{target,sources},signal:signal?AbortSignal.any([signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000)});
-    if(!result.sources?.length){const error=new Error('No supported source found.');error.code='NO_CACHED_BROWSER_SOURCE';error.complete=lookup.complete;throw error;}return {...result,complete:lookup.complete,sources:applySourceMemory(target,result.sources)};
+    if(!result.sources?.length){const error=new Error('No supported source found.');error.code='NO_CACHED_BROWSER_SOURCE';error.complete=lookup.complete;throw error;}return {...result,complete:lookup.complete,sources:applyDeviceVideoSupport(applySourceMemory(target,result.sources),hevcSupport)};
   }
 
   async function readyFile(source, { signal, unattended=false, allowBrowserUnsupported=false, requireCompatibleAudio=unattended&&!audioDecodeObservable, waitForPreparation=true, onlyCached=source.cached===true, preparationTimeoutMs=300000, initialTimeoutMs=waitForPreparation?60000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } = {}){
@@ -447,7 +527,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       }
       if(result.state==='choose_file'){
         if(!result.files?.length)throw new Error('No matching video file was found.');
-        const selected=unattended?selectAutomaticVideoFile(result.files):result.files[0];
+        const selected=unattended?selectAutomaticVideoFile(result.files,source.deviceVideoSupport):result.files[0];
         if(!selected){const error=new Error('This cached source contains only file formats Android Chrome cannot play.');error.code='BROWSER_CONTAINER_UNSUPPORTED';throw error;}
         result=await request('/api/discover/status?'+new URLSearchParams({source:source.id,file:selected.id}),{},waitForPreparation?30000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS);continue;
       }
@@ -462,11 +542,11 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     throw new Error('TorBox is still preparing this source. Try again shortly.');
   }
 
-  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,cacheErrorCode,requireCompatibleAudio=!audioDecodeObservable}={}){
+  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,cacheErrorCode,requireCompatibleAudio=!audioDecodeObservable,unknownProbes=STRICT_AUDIO_UNKNOWN_PROBES}={}){
     if(blockedCacheChecks.has(cacheErrorCode)){const error=new Error(cacheErrorCode==='TORBOX_RATE_LIMITED'?'TorBox is temporarily limiting requests. Wait a moment, then check again.':cacheErrorCode==='TORBOX_ACCESS_DENIED'?'TorBox could not authorize the availability check. Check your account sign-in, then retry.':cacheErrorCode==='TORBOX_NOT_CONFIGURED'?'The TorBox connection is not configured. Check your account connection.':cacheErrorCode==='TORBOX_PLAN_RESTRICTED'?'TorBox reported an account restriction while checking availability.':'TorBox returned an unreadable availability response. Check again shortly.');error.code=cacheErrorCode;throw error;}
     // A policy rejection belongs to this bounded attempt, not permanent user
     // feedback. Browser support can change independently of the source itself.
-    return resolveAutomaticCachedSource(sourcesForAudioRequirement(sources,requireCompatibleAudio),target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false,onlyCached:true,requireCompatibleAudio})});
+    return resolveAutomaticCachedSource(sourcesForAudioRequirement(sources,requireCompatibleAudio),target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,requireCompatibleAudio,unknownProbes,prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false,onlyCached:true,requireCompatibleAudio})});
   }
 
   async function preparedPlayback(target,resolution,{signal,onCandidate,refresh=false}={}){
@@ -478,7 +558,10 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       let registered;
       try{
         registered=await registeredSources(target,bounded,{fast:true,refresh});
-        try{return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify,cacheErrorCode:registered.cacheErrorCode,requireCompatibleAudio:registered.complete===false||!audioDecodeObservable}),registered};}
+        try{return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify,cacheErrorCode:registered.cacheErrorCode,requireCompatibleAudio:registered.complete===false||!audioDecodeObservable,
+          // An incomplete first batch is followed by the complete search, which
+          // performs any unknown-audio probe; do not prepare the same probe twice.
+          unknownProbes:registered.complete===false?0:STRICT_AUDIO_UNKNOWN_PROBES}),registered};}
         catch(error){if(error?.code!=='NO_CACHED_BROWSER_SOURCE'||registered.complete)throw error;}
       }catch(error){if(error?.code!=='NO_CACHED_BROWSER_SOURCE'||error.complete!==false){error.registered=registered||error.registered;throw error;}registered=registered||error.registered;}
       // The first index may have only uncached, incompatible or unknown-audio
@@ -762,23 +845,34 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     return playPreparedNext(prepared);
   }
 
-  async function recoverPlayback(context,{signal}={}){
+  async function recoverPlayback(context,{signal,manual=false}={}){
     if(!active||!context?.current)return false;
     try{
       const bounded=AbortSignal.any([...(signal?[signal]:[]),AbortSignal.timeout(25000)]);
       const registered=await registeredSources(context.current,bounded,{complete:true});
       const failedKey=sourceRecoveryKey(context.sourceInfo),attempted=new Set(Array.isArray(context.recoveryTried)?context.recoveryTried:[]);if(failedKey)attempted.add(failedKey);context.recoveryTried=[...attempted];
-      const requireCompatibleAudio=context.audioRecovery===true||!audioDecodeObservable;
-      const candidates=boundedRecoverySourceOrder(sourcesForAudioRequirement(registered.sources.filter(source=>source.cached===true),requireCompatibleAudio),context,context.current.type,getSettings().sourceSizeProfile).slice(0,3),budgetSignal=AbortSignal.any([bounded,AbortSignal.timeout(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS)]);
+      const skipped=new Set(Array.isArray(context.recoverySkipped)?context.recoverySkipped:[]);
+      // With a native decoded-audio counter the next version is verified by
+      // its sound, so unknown audio is a real candidate, not a rejection.
+      const requireCompatibleAudio=!audioDecodeObservable;
+      const cached=sourcesForAudioRequirement(registered.sources.filter(source=>source.cached===true),requireCompatibleAudio);
+      const profile=getSettings().sourceSizeProfile,maxAttempts=manual?attempted.size+MAX_AUTOMATIC_SOURCE_ATTEMPTS:recoveryAttemptLimit(context,audioDecodeObservable);
+      const eligible=strictAudioCandidates(recoverySourceOrder(cached,context,context.current.type,profile),requireCompatibleAudio,Infinity);
+      const candidates=strictAudioCandidates(boundedRecoverySourceOrder(cached,context,context.current.type,profile,maxAttempts),requireCompatibleAudio).slice(0,3),budgetSignal=AbortSignal.any([bounded,AbortSignal.timeout(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS)]);
+      context.recoveryRemaining=eligible.length;
       for(const best of candidates){
         if(budgetSignal.aborted)break;
+        const candidateKey=sourceRecoveryKey(best);
         try{
           const result=await readyFile(best,{signal:budgetSignal,unattended:true,requireCompatibleAudio,waitForPreparation:false});
           if(signal?.aborted||!active)return false;
-          const candidateKey=sourceRecoveryKey(best);if(candidateKey)attempted.add(candidateKey);context.recoveryTried=[...attempted];
-          const nextContext={...context,...buildContext({name:context.title,poster:context.poster,episodes:[]},context.current,context.episodeName||'',context.resolution||'auto',best),forceStartOver:false,rewindOnResumeSeconds:0,queue:context.queue||[],recoveryTried:[...attempted]};
+          if(candidateKey)attempted.add(candidateKey);context.recoveryTried=[...attempted];context.recoveryRemaining=Math.max(0,eligible.length-1);
+          const nextContext={...context,...buildContext({name:context.title,poster:context.poster,episodes:[]},context.current,context.episodeName||'',context.resolution||'auto',best),forceStartOver:false,rewindOnResumeSeconds:0,queue:context.queue||[],recoveryTried:[...attempted],recoverySkipped:[...skipped]};
           const moved=await play(result.file,nextContext);if(moved)return true;
-        }catch(error){if(budgetSignal.aborted)break;if(!isAutomaticCandidateFailure(error))break;}
+        }catch(error){
+          if(candidateKey){skipped.add(candidateKey);context.recoverySkipped=[...skipped];context.recoveryRemaining=Math.max(0,context.recoveryRemaining-1);}
+          if(budgetSignal.aborted)break;if(!isAutomaticCandidateFailure(error)){context.recoveryError=String(error?.code||'');break;}
+        }
       }
     }catch{}
     return false;

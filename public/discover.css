@@ -160,3 +160,18 @@ main{max-width:1160px;padding:1rem clamp(.8rem,3vw,2rem) 3rem}.workspace-bar{dis
 .play-fallback-row button{flex-shrink:0;min-height:36px;padding:.36rem .55rem;font-size:.7rem}
 .play-fallback-note{font-size:.61rem;color:#6f8194;margin:.45rem .1rem 0}
 @media(max-width:620px){.play-fallback-panel{padding:.55rem}.play-fallback-row{padding:.4rem}.play-fallback-source small{max-width:45vw}.play-fallback-row button{min-height:34px;padding:.32rem .45rem;font-size:.66rem}}
+
+/* Keep Options with the existing PiP/full-screen controls, not on top of video. */
+.player-presentation-bar{flex-wrap:wrap}
+.player-presentation-bar>span{white-space:nowrap}
+.player-presentation-bar #player-version-toggle{flex:none}
+@media(max-width:620px){.player-presentation-bar>span{display:none}}
+/* A watch party owns its Ready to watch control and requires a fixed source. */
+#player:has(#party-player-status:not([hidden])) #player-version-toggle,#player:has(#party-player-status:not([hidden])) #player-version-menu{display:none!important}
+.player-version-menu{position:relative;width:min(380px,100%);max-height:min(45dvh,290px);overflow:auto;display:grid;gap:.55rem;padding:.85rem;margin:0 0 .5rem auto;border:1px solid #42556b;border-radius:12px;background:#0d1724;box-shadow:0 4px 16px rgba(0,0,0,.35);color:#eef4fd}
+.player-version-menu[hidden]{display:none!important}
+.player-version-menu>strong{font-size:.92rem}
+.player-version-menu>p{font-size:.76rem;color:#b9c9da;line-height:1.45;margin:0}
+.player-version-menu .player-version-remember{display:flex;align-items:center;gap:.5rem;font-size:.75rem;font-weight:450;cursor:pointer}
+.player-version-remember input{width:17px;height:17px;min-height:17px;flex:none;margin:0;accent-color:#a7e5df}
+.player-version-menu #player-new-version{min-height:41px;padding:.45rem .75rem;font-size:.8rem}

@@ -237,7 +237,7 @@ test('an uncertain stale-ID recreation retains the duplicate guard across retry 
   assert.equal(creates, 1);
 });
 
-test('transport failures and a different torrent hash never trigger stale-ID recreation', async () => {
+test('transport failures do not reconcile and a conflicting hash only rechecks identity without recreation', async () => {
   for (const mode of ['network', 'identity']) {
     const f = fixture(); const id = await f.register();
     await f.discovery.prepare(id, 'session', true);
@@ -246,7 +246,7 @@ test('transport failures and a different torrent hash never trigger stale-ID rec
       return { ...item(42), hash: 'b'.repeat(40) };
     };
     await assert.rejects(f.discovery.prepare(id, 'session', true), error => error.code === (mode === 'network' ? 'TORBOX_TIMEOUT' : 'TORRENT_IDENTITY_MISMATCH'));
-    assert.equal(f.calls.find, 1); assert.deepEqual(f.calls.create, []);
+    assert.equal(f.calls.find, mode === 'network' ? 1 : 2); assert.deepEqual(f.calls.create, []);
   }
 });
 

@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-10-25T05:28:52.232702+00:00",
+  "baseline": "52303d8b33ef30fc37bc8f748cd322865f8ce982",
+  "assets": [
+    {
+      "path": "boot.js",
+      "status": 200,
+      "matchesProductionBaseline": true,
+      "sha256": "78f4e6243943eb895d8926761a4205a00aaf7084bbbade894f97d4a9d061b2ff"
+    },
+    {
+      "path": "app.js",
+      "status": 200,
+      "matchesProductionBaseline": true,
+      "sha256": "fb7817a987545e7b8ffa7a8746fc83da0f786fccae5920f27efb603c54fe297a"
+    },
+    {
+      "path": "discover.js",
+      "status": 200,
+      "matchesProductionBaseline": true,
+      "sha256": "cb0c36be1bae6aa7f51254c5fd8b508d09506442d8292bfeebe5da8e5c83d8ce"
+    },
+    {
+      "path": "playback-lifecycle.js",
+      "status": 200,
+      "matchesProductionBaseline": true,
+      "sha256": "850b372459ad649bcb8d5335e8ab9b8a0055cfca9a7cb6f286f2ac820efc1039"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-25T14:13:22.402466+00:00",
+  "serviceId": "srv-damu91142hec73chb7qg",
+  "workspaceId": "tea-dakujgmk1f9s73d2v8ng",
+  "deployId": "dep-dbf0sitg1s2s73e3cim0",
+  "status": "live",
+  "startedAt": "2026-10-25T14:12:27.644257Z",
+  "finishedAt": "2026-10-25T14:13:04.644512Z",
+  "mirrorCommit": "6e171f13b57d6ffb83b9008ee3919514688e2151",
+  "tree": "1af7bf5ba808ce8ec1147f59ce722136504c477c",
+  "treeMatchesTestedRelease": true,
+  "backendCiRun": 40166202127,
+  "backendCiConclusion": "success",
+  "newErrors": 0,
+  "errorLogStart": "2026-10-25T14:12:27Z",
+  "errorLogEnd": "2026-10-25T14:13:23.006047342Z",
+  "deploymentNote": "No automatic deployment, queued build or service event appeared after the mirror update. After repeated read-only checks and the previously recorded same-service behavior, one explicit deployment was triggered. No service setting or plan was changed."
+}

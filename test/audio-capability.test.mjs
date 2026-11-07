@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { supportsAudioDecodeCounter } from '../public/playback-lifecycle.js';
-import { validatePreparedSource, recoverySourceOrder, sourcesForAudioRequirement, automaticCachedSourceOrder, resolveAutomaticCachedSource, boundedRecoverySourceOrder, browserPreparationOptions, AUTOMATIC_SOURCE_CANDIDATES } from '../public/discover.js';
+import { validatePreparedSource, recoverySourceOrder, sourcesForAudioRequirement, automaticCachedSourceOrder, resolveAutomaticCachedSource, boundedRecoverySourceOrder, browserPreparationOptions, AUTOMATIC_SOURCE_CANDIDATES, strictAudioCandidates, STRICT_AUDIO_UNKNOWN_PROBES } from '../public/discover.js';
 import { sourceHints } from '../public/source-client.js';
 import { applySourceMemory } from '../public/source-memory.js';
 
@@ -116,4 +116,32 @@ test('strict fallback offers uncached AAC within three choices while preserving 
   const unattended = automaticCachedSourceOrder(sourcesForAudioRequirement(remembered, true), 'series', '720p');
   assert.ok(unattended.every(source => source.id !== aac.id && source.id !== foreign.id),
     'uncached and foreign-only choices must still be excluded from unattended playback');
+});
+
+test('strict audio checks prepare at most one untagged release instead of the whole candidate budget', async () => {
+  const untagged = Array.from({ length: 10 }, (_, index) => candidate(index + 1));
+  const tried = [];
+  await assert.rejects(resolveAutomaticCachedSource(sourcesForAudioRequirement(untagged, true), { type: 'series' }, 'auto', {
+    requireCompatibleAudio: true,
+    prepare: async source => {
+      tried.push(source.id);
+      const prepared = { state: 'ready', file: { id: source.id, title: source.filename } };
+      validatePreparedSource(source, prepared, { unattended: true, requireCompatibleAudio: true });
+      return prepared;
+    }
+  }), error => error.code === 'NO_CACHED_BROWSER_SOURCE');
+  assert.equal(tried.length, STRICT_AUDIO_UNKNOWN_PROBES, 'each rejected candidate consumes one of eight per-minute server preparations');
+  tried.length = 0;
+  await assert.rejects(resolveAutomaticCachedSource(untagged, { type: 'series' }, 'auto', {
+    requireCompatibleAudio: true, unknownProbes: 0, prepare: async source => { tried.push(source.id); return {}; }
+  }), error => error.code === 'NO_CACHED_BROWSER_SOURCE');
+  assert.deepEqual(tried, [], 'an incomplete first batch defers the probe to the complete search');
+});
+
+test('strict audio filtering keeps every tagged candidate and leaves ordinary ranking untouched', () => {
+  const rows = [candidate(1), candidate(2, { audio: true }), candidate(3), candidate(4, { audio: true }), candidate(5, { memoryAudio: 'good' })];
+  assert.equal(strictAudioCandidates(rows), rows);
+  assert.deepEqual(strictAudioCandidates(rows, true).map(source => source.id), ['1', '2', '4', '5']);
+  assert.deepEqual(strictAudioCandidates(rows, true, 0).map(source => source.id), ['2', '4', '5']);
+  assert.deepEqual(strictAudioCandidates(null, true), []);
 });
