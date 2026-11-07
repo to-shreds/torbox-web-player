@@ -161,12 +161,14 @@ main{max-width:1160px;padding:1rem clamp(.8rem,3vw,2rem) 3rem}.workspace-bar{dis
 .play-fallback-note{font-size:.61rem;color:#6f8194;margin:.45rem .1rem 0}
 @media(max-width:620px){.play-fallback-panel{padding:.55rem}.play-fallback-row{padding:.4rem}.play-fallback-source small{max-width:45vw}.play-fallback-row button{min-height:34px;padding:.32rem .45rem;font-size:.66rem}}
 
-/* Deliberate version-switch action: never a one-tap rejection over the video. */
-.player-version-toggle{position:absolute;z-index:18;top:max(.5rem,env(safe-area-inset-top));left:max(.5rem,env(safe-area-inset-left));min-height:38px;padding:.38rem .62rem;border:1px solid rgba(255,255,255,.38);border-radius:9px;background:rgba(7,14,24,.79);color:#f3f7fc;font-size:.72rem;font-weight:650;backdrop-filter:blur(7px)}
-.player-version-toggle:hover,.player-version-toggle:focus-visible{background:rgba(28,46,63,.96)}
-/* A watch party owns its own in-player Ready to watch control and the source must remain fixed. */
+/* Keep Options with the existing PiP/full-screen controls, not on top of video. */
+.player-presentation-bar{flex-wrap:wrap}
+.player-presentation-bar>span{white-space:nowrap}
+.player-presentation-bar #player-version-toggle{flex:none}
+@media(max-width:620px){.player-presentation-bar>span{display:none}}
+/* A watch party owns its Ready to watch control and requires a fixed source. */
 #player:has(#party-player-status:not([hidden])) #player-version-toggle,#player:has(#party-player-status:not([hidden])) #player-version-menu{display:none!important}
-.player-version-menu{position:absolute;z-index:19;top:calc(max(.5rem,env(safe-area-inset-top)) + 44px);left:max(.5rem,env(safe-area-inset-left));width:min(325px,calc(100vw - 1.1rem));max-height:calc(100dvh - 5rem);overflow:auto;display:grid;gap:.55rem;padding:.85rem;border:1px solid #42556b;border-radius:12px;background:rgba(13,23,36,.97);box-shadow:0 8px 32px rgba(0,0,0,.55);color:#eef4fd}
+.player-version-menu{position:relative;width:min(380px,100%);max-height:min(45dvh,290px);overflow:auto;display:grid;gap:.55rem;padding:.85rem;margin:0 0 .5rem auto;border:1px solid #42556b;border-radius:12px;background:#0d1724;box-shadow:0 4px 16px rgba(0,0,0,.35);color:#eef4fd}
 .player-version-menu[hidden]{display:none!important}
 .player-version-menu>strong{font-size:.92rem}
 .player-version-menu>p{font-size:.76rem;color:#b9c9da;line-height:1.45;margin:0}

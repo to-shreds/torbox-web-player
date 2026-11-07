@@ -161,12 +161,35 @@ test('failed New version search keeps the current cached copy and does not block
   assert.equal(await page.locator('#player-version-toggle').isEnabled(),true);
 });
 
-test('opening and dismissing Options never interrupts a working video', async t => {
+test('Options sits beside PiP, never covers the picture, and opening the menu does not interrupt playback', async t => {
   const { page, fixture } = await setup(t, [['Fixture.Show.S01E01.One.720p.H264.AAC-GOOD.mkv','aac']]);
   await page.waitForFunction(() => document.querySelector('#video-slot video')?.currentTime > 0.5);
+  const position=await page.locator('#video-slot video').evaluate(video=>video.currentTime);
+  const layout=await page.evaluate(() => {
+    const toggle=document.querySelector('#player-version-toggle'),pip=document.querySelector('#toggle-pip');
+    const shell=document.querySelector('#player-media-shell'),menu=document.querySelector('#player-version-menu');
+    return {
+      inToolbar:toggle.parentElement.classList.contains('player-presentation-bar'),
+      inMedia:shell.contains(toggle)||shell.contains(menu),
+      sameRow:Math.abs(toggle.getBoundingClientRect().top-pip.getBoundingClientRect().top)<2
+    };
+  });
+  assert.equal(layout.inToolbar,true,'Options belongs with the display/PiP controls');
+  assert.equal(layout.inMedia,false,'neither the button nor its menu belongs over the video');
+  assert.equal(layout.sameRow,true,'Options should share a row with PiP on phone-sized screens');
   await page.locator('#player-version-toggle').click();
+  assert.equal(await page.locator('#player-version-menu').isVisible(),true);
+  const belowToolbar=await page.evaluate(()=>{
+    const menu=document.querySelector('#player-version-menu').getBoundingClientRect();
+    const shell=document.querySelector('#player-media-shell').getBoundingClientRect();
+    return {menuBottom:menu.bottom,videoTop:shell.top,menuPosition:getComputedStyle(document.querySelector('#player-version-menu')).position};
+  });
+  assert.ok(belowToolbar.menuBottom<=belowToolbar.videoTop+1,
+    'expanded menu must stay above the video, not overlay it');
+  assert.notEqual(belowToolbar.menuPosition,'absolute','menu should be in normal page flow');
   await page.locator('#player-version-toggle').click();
   assert.equal(await page.locator('#player-version-menu').isHidden(),true);
-  assert.equal(fixture.control.playbackCalls,1,'no source change without New version');
+  assert.equal(fixture.control.playbackCalls,1,'opening options never changes source');
   assert.equal(await page.locator('#video-slot video').evaluate(video=>video.paused),false);
+  assert.ok(await page.locator('#video-slot video').evaluate(video=>video.currentTime)>=position-.35);
 });
