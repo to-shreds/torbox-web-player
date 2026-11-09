@@ -14,3 +14,7 @@ Service worker: advance cache version and cache new game assets; offline navigat
 - `test/retro-vault.test.mjs` checks catalog list, strict path/mode validation, no third-party assets and no network requests.
 - `test/browser/retro-vault.mjs` exercises the real browser shell, all game cards and four viewports, parent pause/resume/restart/exit, local saves and controller UI.
 - Real Bluetooth hardware, physical phone playback and authenticated TorBox media are not exercised by the tests. Check the GitHub CI and release deployment before claiming publication.
+
+## Release-contract compatibility
+
+The new top-level boot and service-worker build is `release-1.2.15-retro.1`; existing cinema application module imports retain `release-1.2.14-ui.1`. Existing DOS and SkiFree launch URLs retain `release-1.2.8-party.1` so their saved behavior and cache keys are not changed merely to add Retro Vault. Only Retro Vault uses `release-1.2.15-retro.1` as its game URL version. The corresponding tests explicitly check the separate build identities.
