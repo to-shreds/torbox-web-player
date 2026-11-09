@@ -1,7 +1,8 @@
 const CACHE_PREFIX='torbox-player:'+self.registration.scope+':';
-const CACHE=CACHE_PREFIX+'release-1.2.14-ui.1';
-const BUILD='release-1.2.14-ui.1';
+const CACHE=CACHE_PREFIX+'release-1.2.15-retro.1';
+const BUILD='release-1.2.15-retro.1';
 const STATIC_BUILD='release-1.2.8-party.1';
+const RETRO_BUILD='release-1.2.15-retro.1';
 const SHELL=[
   './','./index.html',
   `./style.css?v=${STATIC_BUILD}`,`./discover.css?v=${BUILD}`,`./boot.js?v=${BUILD}`,`./app.js?v=${BUILD}`,`./trakt.js?v=${BUILD}`,`./trakt-vault.js?v=${BUILD}`,`./trakt.css?v=${BUILD}`,
@@ -10,13 +11,14 @@ const SHELL=[
   `./device-transfer.js?v=${STATIC_BUILD}`,`./playback-errors.js?v=${STATIC_BUILD}`,`./discover.js?v=${BUILD}`,`./source-client.js?v=${STATIC_BUILD}`,
   `./sports-player.html?v=${STATIC_BUILD}`,`./sports-player.js?v=${STATIC_BUILD}`,`./sports-player.css?v=${STATIC_BUILD}`,`./sports.js?v=${STATIC_BUILD}`,`./sports-core.js?v=${STATIC_BUILD}`,`./sports.css?v=${STATIC_BUILD}`,`./sports-catalog.json?v=${STATIC_BUILD}`,`./hls.min.js?v=${STATIC_BUILD}`,
   `./buffstreams.js?v=${STATIC_BUILD}`,`./buffstreams-ui.js?v=${STATIC_BUILD}`,`./buffstreams-opening.html?v=${STATIC_BUILD}`,`./buffstreams-opening.css?v=${STATIC_BUILD}`,
-  `./games-nav.js?v=${STATIC_BUILD}`,`./games.js?v=${STATIC_BUILD}`,`./games-core.js?v=${STATIC_BUILD}`,`./games.css?v=${STATIC_BUILD}`,`./games-catalog.json?v=${STATIC_BUILD}`,
+  `./games-nav.js?v=${RETRO_BUILD}`,`./games.js?v=${RETRO_BUILD}`,`./games-core.js?v=${STATIC_BUILD}`,`./games.css?v=${STATIC_BUILD}`,`./games-catalog.json?v=${STATIC_BUILD}`,
   `./games-pointer.js?v=${STATIC_BUILD}`,
   `./games-cheats.js?v=${STATIC_BUILD}`,
   `./watch-party.js?v=${STATIC_BUILD}`,`./watch-party-core.js?v=${STATIC_BUILD}`,`./watch-party.css?v=${STATIC_BUILD}`,
-  `./extra-games.js?v=${STATIC_BUILD}`,`./extra-games-core.js?v=${STATIC_BUILD}`,`./extra-games-catalog.json?v=${STATIC_BUILD}`,
+  `./extra-games.js?v=${RETRO_BUILD}`,`./extra-games-core.js?v=${RETRO_BUILD}`,`./extra-games-catalog.json?v=${RETRO_BUILD}`,
   `./dos-player.html?v=${STATIC_BUILD}`,`./dos-player.js?v=${STATIC_BUILD}`,`./dos-player.css?v=${STATIC_BUILD}`,
   `./games-web/skifree/index.html?v=${STATIC_BUILD}`,`./games-web/skifree/game.js?v=${STATIC_BUILD}`,`./games-web/skifree/style.css?v=${STATIC_BUILD}`,
+  './games-web/retro-vault/index.html?v=1.0.0','./games-web/retro-vault/game.js?v=1.0.0','./games-web/retro-vault/style.css?v=1.0.0',
   './vendor/jsnes-2.1.0-torbox.1.min.js?v=2.1.0-torbox.1',`./vendor/nes-audio-worklet.js?v=${STATIC_BUILD}`,
   `./manifest.webmanifest?v=${STATIC_BUILD}`,'./icon.svg'
 ];
@@ -33,5 +35,5 @@ self.addEventListener('fetch',event=>{
   event.respondWith(fresh(event.request).then(response=>{
     if(response.ok&&shellUrls.has(event.request.url)){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put(event.request,copy)));}
     return response;
-  }).catch(()=>caches.open(CACHE).then(async cache=>{if(url.pathname.endsWith('/sports-player.html')||url.pathname.endsWith('/buffstreams-opening.html'))return (await cache.match(event.request))||new Response('Sports player unavailable offline.',{status:503});if(url.pathname.endsWith('/dos-player.html')||url.pathname.includes('/games-web/'))return (await cache.match(event.request))||new Response('Game unavailable offline. Reconnect and open it again.',{status:503});return event.request.mode==='navigate'?cache.match('./'):cache.match(event.request);})));
+  }).catch(()=>caches.open(CACHE).then(async cache=>{if(url.pathname.endsWith('/sports-player.html')||url.pathname.endsWith('/buffstreams-opening.html'))return (await cache.match(event.request))||new Response('Sports player unavailable offline.',{status:503});if(url.pathname.endsWith('/games-web/retro-vault/index.html'))return (await cache.match(new URL('./games-web/retro-vault/index.html?v=1.0.0',self.registration.scope)))||new Response('Retro game unavailable offline.',{status:503});if(url.pathname.endsWith('/dos-player.html')||url.pathname.includes('/games-web/'))return (await cache.match(event.request))||new Response('Game unavailable offline. Reconnect and open it again.',{status:503});return event.request.mode==='navigate'?cache.match('./'):cache.match(event.request);})));
 });

@@ -215,3 +215,7 @@ Physical-device acceptance is still required for touch feel, long-press behavior
 - The first real Drive export/deletion acceptance test is still outstanding.
 
 Implementation source on `main` is authoritative. Current readiness and next steps are tracked in `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md`.
+
+### Retro Vault (November 2026)
+
+The GAMES tab now lists 26 independently launchable original browser games plus a Retro Vault collection entry. These are classic-inspired JavaScript implementations, not redistributed DOS/Windows executables or ROMs. Every game runs on desktop or mobile with keyboard and on-screen controls; compatible Bluetooth/USB controllers work through the Gamepad API with remappable action/menu buttons. Progress and scores are saved locally by viewer. The existing NES, DOS, SkiFree and MindMaze entries remain. The new pages contain no network fetches or provider API calls; TV playback and TorBox credentials are untouched. Details and test results: `docs/RETRO-VAULT-2026-11-09.md`.

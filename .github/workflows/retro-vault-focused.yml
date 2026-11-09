@@ -1,0 +1,27 @@
+name: Retro Vault focused browser
+on:
+  pull_request:
+    paths:
+      - 'public/games-web/retro-vault/**'
+      - 'public/extra-games*'
+      - 'test/browser/retro-vault.mjs'
+      - '.github/workflows/retro-vault-focused.yml'
+  push:
+    branches: ['feature/stremio-retro-games-26-20261109']
+    paths:
+      - 'public/games-web/retro-vault/**'
+      - 'public/extra-games*'
+      - 'test/browser/retro-vault.mjs'
+      - '.github/workflows/retro-vault-focused.yml'
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: node --test --test-concurrency=1 test/browser/retro-vault.mjs

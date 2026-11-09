@@ -59,6 +59,9 @@ const publicFiles = new Map([
   ['/games-data/sources/dosdefender-source-40e98d2.zip', ['games-data/sources/dosdefender-source-40e98d2.zip', 'application/zip']],
   ['/games-data/sources/zmiy-freedos-source-and-binary-0.85.2a.zip', ['games-data/sources/zmiy-freedos-source-and-binary-0.85.2a.zip', 'application/zip']],
   ['/games-web/skifree/index.html', ['games-web/skifree/index.html', 'text/html; charset=utf-8']],
+  ['/games-web/retro-vault/index.html', ['games-web/retro-vault/index.html', 'text/html; charset=utf-8']],
+  ['/games-web/retro-vault/game.js', ['games-web/retro-vault/game.js', 'text/javascript; charset=utf-8']],
+  ['/games-web/retro-vault/style.css', ['games-web/retro-vault/style.css', 'text/css; charset=utf-8']],
   ['/games-web/skifree/game.js', ['games-web/skifree/game.js', 'text/javascript; charset=utf-8']],
   ['/games-web/skifree/style.css', ['games-web/skifree/style.css', 'text/css; charset=utf-8']],
   ['/games-web/skifree/LICENSE', ['games-web/skifree/LICENSE', 'text/plain; charset=utf-8']],
@@ -304,7 +307,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
         if(filename==='index.html'){const html=await readFile(join(root,'public',filename),'utf8');const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];if(csp)response.setHeader('Content-Security-Policy',csp+"; frame-ancestors 'none'");response.setHeader('Content-Type',type);return response.end(html);}
-        if(filename==='sports-player.html'||filename==='dos-player.html'||filename==='games-web/skifree/index.html'){
+        if(filename==='sports-player.html'||filename==='dos-player.html'||filename==='games-web/skifree/index.html'||filename==='games-web/retro-vault/index.html'){
           const html=await readFile(join(root,'public',filename),'utf8');
           const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];
           if(csp)response.setHeader('Content-Security-Policy',csp+"; frame-ancestors 'self'");
