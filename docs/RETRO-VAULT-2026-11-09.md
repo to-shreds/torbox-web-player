@@ -18,3 +18,7 @@ Service worker: advance cache version and cache new game assets; offline navigat
 ## Release-contract compatibility
 
 The new top-level boot and service-worker build is `release-1.2.15-retro.1`; existing cinema application module imports retain `release-1.2.14-ui.1`. Existing DOS and SkiFree launch URLs retain `release-1.2.8-party.1` so their saved behavior and cache keys are not changed merely to add Retro Vault. Only Retro Vault uses `release-1.2.15-retro.1` as its game URL version. The corresponding tests explicitly check the separate build identities.
+
+## Hosted iframe startup correction
+
+Focused Chromium tests caught a startup-order error: URL-selected games attempted `setup()` before the `init` registry existed, so the parent iframe never received a playing status. The game-selection and animation startup block now runs after all engine registry assignments, keeping the game UI and host state synchronized. This was a real hosted-origin integration defect that isolated markup rendering did not catch. Focused Chromium and final release checks must pass against the corrected commit.

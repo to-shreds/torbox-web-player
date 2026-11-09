@@ -107,10 +107,6 @@ window.addEventListener('message',event=>{
 });
 window.addEventListener('pagehide',()=>{saveGame();endSession()});
 window.addEventListener('storage',event=>{if(['tw-viewer','torbox-parental-controls-v1'].includes(event.key)&&!mayPlay()){setExternalPause(true);notifyFrame('error','Switch to the same adult viewer to continue.')}});
-const requested=new URL(location.href).searchParams.get('game');
-if(!mayPlay()){setExternalPause(true);notifyFrame('error','Switch to an adult viewer to play these games.')}
-else{if(games.some(g=>g.id===requested))openGame(requested);notifyFrame('playing',current?'Playing '+current.title+'.':'Choose a retro game.');}
-requestAnimationFrame(frame);
 function setup(id){if(init[id])init[id]();else s.d={};}
 function actionGame(cmd){if(actions[current.id])actions[current.id](cmd)}
 function clickGame(x,y){if(clicks[current.id])clicks[current.id](x,y)}
@@ -340,3 +336,8 @@ actions.pipes=c=>{let d=s.d;if(c==='left')d.x=(d.x+4)%5;if(c==='right')d.x=(d.x+
 draws.pipes=()=>{let d=s.d;for(let y=0;y<5;y++)for(let x=0;x<5;x++){let i=y*5+x,cx=PX+(x+.5)*PZ,cy=PY+(y+.5)*PZ;box(PX+x*PZ,PY+y*PZ,PZ-4,PZ-4,'#1c4260',10);for(let v of pipeEnds(d,i)){let [dx,dy]=PD[v];line(cx,cy,cx+dx*35,cy+dy*35,'#21dcff',15);line(cx,cy,cx+dx*35,cy+dy*35,'#c6ffff',4)}ball(cx,cy,10,i===0?'#72ef80':i===24?'#ff5ac8':'#51ccea');if(i===0||i===24)label(i===0?'S':'E',cx,cy,14,'#08182c');if(d.x===x&&d.y===y){ctx.strokeStyle='#ffce3a';ctx.lineWidth=4;ctx.strokeRect(PX+x*PZ+1,PY+y*PZ+1,PZ-6,PZ-6)}}label(`A: TURN CLOCKWISE • B: COUNTERCLOCKWISE`,320,523,16,'#c7d8f5')};
 clicks.pipes=(x,y)=>{let a=Math.floor((x-PX)/PZ),b=Math.floor((y-PY)/PZ);if(a>=0&&a<5&&b>=0&&b<5){s.d.x=a;s.d.y=b;command('a')}};
 
+// Start only after every game initializer and renderer has been defined.
+const requested=new URL(location.href).searchParams.get('game');
+if(!mayPlay()){setExternalPause(true);notifyFrame('error','Switch to an adult viewer to play these games.')}
+else{if(games.some(g=>g.id===requested))openGame(requested);notifyFrame('playing',current?'Playing '+current.title+'.':'Choose a retro game.');}
+requestAnimationFrame(frame);
