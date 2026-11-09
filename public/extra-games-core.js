@@ -1,7 +1,9 @@
-export const EXTRA_GAMES_BUILD = 'release-1.2.8-party.1';
+export const EXTRA_GAMES_BUILD = 'release-1.2.15-retro.1';
 const ID = /^[a-z][a-z0-9_-]{0,79}$/;
 const BUNDLE = /^games-data\/[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}\.jsdos$/;
 const PAGE = /^games-web\/[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}\/index\.html$/;
+const RETRO_PAGE = 'games-web/retro-vault/index.html';
+const RETRO_MODES = new Set(['snake','breakout','pong','invaders','asteroids','flappy','frog','tron','dodge','highway','ski','catch','missiles','jetpack','blocks','merge','sokoban','lights','connect','reversi','peg','slider','flood','match','sudoku','pipes']);
 export const MINDMAZE_URL = 'https://gorjan.rocks/projects/mindmaze/';
 
 function text(value, maximum) { return typeof value === 'string' && value.trim() && value.length <= maximum ? value.trim() : null; }
@@ -20,6 +22,11 @@ export function cleanExtraGamesCatalog(raw) {
     const hosted = row.id === 'mindmaze-encarta' && row.platform === 'web' && row.hosted === MINDMAZE_URL && row.page === undefined && row.bundle === undefined && row.keys.length === 0 && source === MINDMAZE_URL;
     const path = row.platform === 'dos' ? row.bundle : row.page;
     if (!hosted && (row.hosted !== undefined || typeof path !== 'string' || !(row.platform === 'dos' ? BUNDLE : PAGE).test(path))) continue;
+    const isVault = row.platform === 'web' && path === RETRO_PAGE;
+    if (isVault) {
+      if (row.id !== 'retro-vault' && (typeof row.mode !== 'string' || !RETRO_MODES.has(row.mode) || row.id !== 'retro-' + row.mode)) continue;
+      if (row.id === 'retro-vault' && row.mode !== undefined) continue;
+    } else if (row.mode !== undefined) continue;
     const codes = new Set(), keys = []; let invalidKey = false;
     for (const key of row.keys) {
       const label = text(key?.label,32);
@@ -28,7 +35,7 @@ export function cleanExtraGamesCatalog(raw) {
     }
     if (invalidKey) continue;
     seen.add(row.id);
-    items.push({id:row.id,title,platform:row.platform,...(hosted ? {hosted:MINDMAZE_URL} : row.platform === 'dos' ? {bundle:path} : {page:path}),controls,keys,license,source});
+    items.push({id:row.id,title,platform:row.platform,...(hosted ? {hosted:MINDMAZE_URL} : row.platform === 'dos' ? {bundle:path} : {page:path}),...(isVault && row.mode ? {mode:row.mode} : {}),controls,keys,license,source});
   }
   return {version:1,items:items.sort((a,b) => a.title.localeCompare(b.title,undefined,{sensitivity:'base'}) || a.id.localeCompare(b.id))};
 }
@@ -37,7 +44,7 @@ export function extraPlayerUrl(item, build = EXTRA_GAMES_BUILD) {
   const valid = cleanExtraGamesCatalog({version:1,items:[item]}).items[0];
   if (!valid || typeof build !== 'string' || !/^[a-zA-Z0-9._-]{1,100}$/.test(build)) throw new Error('This extra game cannot open.');
   if (valid.hosted) return MINDMAZE_URL;
-  return valid.platform === 'dos' ? `./dos-player.html?game=${encodeURIComponent(valid.id)}&v=${build}` : `./${valid.page}?v=${build}`;
+  return valid.platform === 'dos' ? `./dos-player.html?game=${encodeURIComponent(valid.id)}&v=${build}` : `./${valid.page}?${valid.mode ? 'game='+encodeURIComponent(valid.mode)+'&' : ''}v=${build}`;
 }
 export function extraKeyCommand(key, pressed) {
   if (!Number.isInteger(key) || key < 32 || key > 348 || typeof pressed !== 'boolean') throw new Error('The game key is invalid.');

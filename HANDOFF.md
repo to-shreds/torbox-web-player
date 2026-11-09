@@ -1,3 +1,11 @@
+# Retro Vault: 26 classic-inspired browser games in GAMES (2026-11-09)
+
+Stremio/TorBox Games frontend integration uses `public/games-web/retro-vault/{index.html,style.css,game.js}`. Existing five extra game entries and existing NES catalog remain. The extra catalog contains 26 individually launchable `retro-<id>` games plus a `retro-vault` collection tile. Only this exact path and 26 known game IDs may receive the `mode` field from `extra-games-core.js`; all other extra catalog rows and MindMaze special handling retain the previous validation. Child pages communicate through the existing exact-origin/source `torbox-extra-command` and `torbox-extra-status` bridge plus a gated `torbox-extra-exit` event. The new frame is same-origin and requests Gamepad API permission. Parent Pause blocks child inputs/simulation; Resume, Restart and Close preserve per-viewer browser saves. User-visible exit returns to the GAMES tab, never the separate Arcade.
+
+No ROMs, third-party executables, new accounts, backend media relays, or network requests were added. HTML uses a strict self-only CSP, external JavaScript and CSS, and the server's explicit public file allowlist with SAMEORIGIN framing. GitHub Pages publishes identical root and `/key/` builds. The service worker caches the three new source files for offline use and maps query-specific retro game navigations to the cached common HTML. Existing backend version 1.2.11, Render deployment mirror, and separate Fire Stick APK are unchanged.
+
+Local isolated Chromium: 26 games opened and accepted input in each of four desktop/mobile viewports, with pause/menu and no page errors. GitHub CI, production Pages deployment and physical Bluetooth controller still require independent verification; record results before calling final READY. Existing audio, playback, watch-party, Sports, Games and other release tests remain the compatibility gate. See `docs/RETRO-VAULT-2026-11-09.md`. Do not assume that all original PC commercial games are redistributable.
+
 # TorBox Web Player handoff
 
 Read this first. The code repository controls implementation; `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md` controls readiness and the next action.

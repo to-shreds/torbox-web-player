@@ -2,8 +2,8 @@ import {ENGINE_ASSET_VERSION, MAX_ROM_BYTES, MAX_CATALOG_BYTES, cleanGamesCatalo
 import {getKidProfile} from './parental-controls.js?v=release-1.2.8-party.1';
 import {nesPointerPosition} from './games-pointer.js?v=release-1.2.8-party.1';
 import {emptyCheats, normalizeCheatSet, parseCheatLines, applyCheats, readCheats, writeCheats, importCheats, exportCheats} from './games-cheats.js?v=release-1.2.8-party.1';
-import {cleanExtraGamesCatalog} from './extra-games-core.js?v=release-1.2.8-party.1';
-import {playExtraGame, closeExtraGame} from './extra-games.js?v=release-1.2.8-party.1';
+import {cleanExtraGamesCatalog} from './extra-games-core.js?v=release-1.2.15-retro.1';
+import {playExtraGame, closeExtraGame} from './extra-games.js?v=release-1.2.15-retro.1';
 
 const $ = id => document.getElementById(id);
 const dialog = $('games-player');
@@ -382,7 +382,7 @@ function render() {
   const items = all.filter(item => (platform === 'all' || platform === item.platform) && item.title.toLocaleLowerCase().includes(query)).sort((a,b) => a.title.localeCompare(b.title,undefined,{sensitivity:'base'}) || a.id.localeCompare(b.id));
   $('games-grid').replaceChildren(...items.map(item => {
     const button = document.createElement('button'); button.type = 'button'; button.className = 'games-card'; button.dataset.gameId = item.id; button.dataset.gamePlatform = item.platform;
-    const badge = document.createElement('span'); badge.className = 'eyebrow'; badge.textContent = item.platform === 'web' ? 'BROWSER' : item.platform.toUpperCase();
+    const badge = document.createElement('span'); badge.className = 'eyebrow'; badge.textContent = item.id.startsWith('retro-') ? 'RETRO' : item.platform === 'web' ? 'BROWSER' : item.platform.toUpperCase();
     const title = document.createElement('strong'); title.textContent = item.title;
     button.append(badge,title); button.addEventListener('click',() => { if (item.platform === 'nes') void play(item); else { closeGame(); playExtraGame(item); } }); return button;
   }));
@@ -401,7 +401,7 @@ async function loadCatalog() {
       catalog = cleanGamesCatalog(JSON.parse(new TextDecoder().decode(bytes))); catalogError = false;
     } catch { catalogError = true; } finally { render(); } })());
     if (!extraCatalog) tasks.push((async () => { try {
-      const bytes = await fetchBytes('./extra-games-catalog.json?v=release-1.2.8-party.1',{maxBytes:MAX_CATALOG_BYTES,timeoutMs:10000});
+      const bytes = await fetchBytes('./extra-games-catalog.json?v=release-1.2.15-retro.1',{maxBytes:MAX_CATALOG_BYTES,timeoutMs:10000});
       extraCatalog = cleanExtraGamesCatalog(JSON.parse(new TextDecoder().decode(bytes))); extraCatalogError = false;
     } catch { extraCatalogError = true; } finally { render(); } })());
     await Promise.allSettled(tasks);

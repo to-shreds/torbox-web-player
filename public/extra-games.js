@@ -1,6 +1,7 @@
-import {extraPlayerUrl, extraKeyCommand, readExtraStatus} from './extra-games-core.js?v=release-1.2.8-party.1';
+import {extraPlayerUrl, extraKeyCommand, readExtraStatus} from './extra-games-core.js?v=release-1.2.15-retro.1';
 import {getKidProfile} from './parental-controls.js?v=release-1.2.8-party.1';
 
+const RETRO_PAGE = 'games-web/retro-vault/index.html';
 const $ = id => document.getElementById(id);
 const dialog = $('extra-game-player');
 const hostedLink = document.createElement('a');
@@ -95,7 +96,7 @@ function mount(item) {
   const current = generation;
   pauseSent = false;
   muteSent = null;
-  const nextFrame = document.createElement('iframe'); nextFrame.id = 'extra-game-frame'; nextFrame.title = item.title; nextFrame.allow = 'autoplay; fullscreen'; nextFrame.allowFullscreen = true;
+  const nextFrame = document.createElement('iframe'); nextFrame.id = 'extra-game-frame'; nextFrame.title = item.title; nextFrame.allow = 'autoplay; fullscreen; gamepad'; nextFrame.allowFullscreen = true;
   if (item.hosted) { nextFrame.setAttribute('sandbox','allow-scripts'); nextFrame.referrerPolicy = 'no-referrer'; }
   frame.replaceWith(nextFrame); frame = nextFrame;
   frame.addEventListener('error',() => { if (current === generation) fail(item.hosted ? 'The hosted game could not open. Try Open full page.' : 'The game could not open. Choose Restart to try again.'); });
@@ -120,7 +121,7 @@ export function playExtraGame(item) {
   $('extra-game-controls').textContent = item.controls; $('extra-game-license').textContent = item.license;
   $('extra-game-source').href = item.source;
   $('extra-game-source').textContent = item.hosted ? 'Recreation by Gorjan' : 'Source & license';
-  for (const id of ['extra-game-pause','extra-game-restart','extra-game-mute']) $(id).hidden = !!item.hosted;
+  for (const id of ['extra-game-pause','extra-game-restart','extra-game-mute']) $(id).hidden = !!item.hosted || (item.page === RETRO_PAGE && id === 'extra-game-mute');
   hostedLink.hidden = !item.hosted;
   if (item.hosted) hostedLink.href = url;
   $('extra-game-mute').textContent = muted ? 'Unmute' : 'Mute'; $('extra-game-mute').setAttribute('aria-pressed',String(muted));
@@ -131,6 +132,10 @@ export function playExtraGame(item) {
 }
 window.addEventListener('message',event => {
   if (!selection || hostedGame() || !dialog.open) return;
+  if (event.data?.type === 'torbox-extra-exit') {
+    if (selection.item.page === RETRO_PAGE && event.source === frame.contentWindow && event.origin === location.origin && checkViewer()) closeExtraGame();
+    return;
+  }
   const message = readExtraStatus(event,frame.contentWindow,location.origin);
   if (!message || !checkViewer()) return;
   if (dialog.dataset.state === 'error' && message.state !== 'error') return;
@@ -152,6 +157,7 @@ function resumeExtraGame() {
 }
 function restartExtraGame() {
   if (!checkViewer() || hostedGame()) return;
+  if (selection.item.page === RETRO_PAGE) { releaseKeys(); post('restart'); return; }
   const item = selection.item;
   releaseKeys(); post('close'); generation++;
   state('loading','Restarting game…'); dialog.dataset.frames = '0'; mount(item);
