@@ -20,7 +20,26 @@ async function openPage(t,viewport){
 const gameFrame=page=>page.frameLocator('#extra-game-frame');
 async function open(page,id){
  await page.locator(`[data-game-id="${id}"]`).click();
- await page.waitForFunction(()=>document.querySelector('#extra-game-player')?.dataset.state==='playing');
+ try {
+  await page.waitForFunction(()=>document.querySelector('#extra-game-player')?.dataset.state==='playing',null,{timeout:8000});
+ } catch (error) {
+  const detail=await page.evaluate(()=>{
+    const f=document.querySelector('#extra-game-frame'),d=f?.contentDocument;
+    return {
+      state:document.querySelector('#extra-game-player')?.dataset.state,
+      message:document.querySelector('#extra-game-message')?.textContent,
+      src:f?.getAttribute('src'),
+      frameURL:d?.URL,
+      readyState:d?.readyState,
+      childText:d?.body?.innerText?.slice(0,400),
+      childBoard:!!d?.querySelector('#board'),
+      childTitle:d?.title,
+      inlineCSP:d?.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content
+    };
+  });
+  console.error('RETRO_FRAME_DIAGNOSTIC',JSON.stringify(detail));
+  throw error;
+ }
  await gameFrame(page).locator('#play:not([hidden])').waitFor();
  return gameFrame(page);
 }
