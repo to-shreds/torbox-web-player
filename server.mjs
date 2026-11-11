@@ -25,6 +25,9 @@ const publicFiles = new Map([
   ['/trakt.js', ['trakt.js', 'text/javascript; charset=utf-8']],
   ['/trakt-vault.js', ['trakt-vault.js', 'text/javascript; charset=utf-8']],
   ['/trakt.css', ['trakt.css', 'text/css; charset=utf-8']],
+  ['/title-details.js', ['title-details.js', 'text/javascript; charset=utf-8']],
+  ['/title-ratings.js', ['title-ratings.js', 'text/javascript; charset=utf-8']],
+  ['/wikidata-ratings.js', ['wikidata-ratings.js', 'text/javascript; charset=utf-8']],
   ['/boot.js', ['boot.js', 'text/javascript; charset=utf-8']],
   ['/watch-party.js', ['watch-party.js', 'text/javascript; charset=utf-8']],
   ['/watch-party-core.js', ['watch-party-core.js', 'text/javascript; charset=utf-8']],
@@ -287,7 +290,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.2.11', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.2.12', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/relay/health') {
         if(!corsAllowed)throw new AppError('BAD_ORIGIN','This frontend is not allowed to use the TorBox bridge.',403);
         response.setHeader('X-TorBox-Bridge','render');
@@ -565,6 +568,9 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
           const target = { type: url.searchParams.get('type'), id: url.searchParams.get('id') };
           if (!guestAllows(target)) throw new AppError('GUEST_FORBIDDEN', 'This temporary link is limited to the shared title.', 403);
           result = { meta: await activeDiscovery.catalog.meta(target.type, target.id) };
+        } else if (path === '/api/discover/similar' && method === 'GET') {
+          if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'This temporary link is limited to the shared title.', 403);
+          result = await activeDiscovery.catalog.similar(url.searchParams.get('type'), url.searchParams.get('id'));
         } else if (path === '/api/discover/lookup' && method === 'GET') {
           const type = url.searchParams.get('type');
           const target = { type, id: url.searchParams.get('id'), ...(type === 'series' ? {
@@ -658,6 +664,6 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.2.11' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.2.12' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }

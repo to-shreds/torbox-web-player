@@ -1,13 +1,14 @@
 import {createWatchParty} from './watch-party.js?v=release-1.2.8-party.1';
-import { createDiscoveryUI, bindArtworkImage, MORE_AUDIO_RECOVERY_ATTEMPTS } from './discover.js?v=release-1.2.14-ui.1';
+import { createDiscoveryUI, bindArtworkImage, MORE_AUDIO_RECOVERY_ATTEMPTS } from './discover.js?v=release-1.2.16-details.1';
+import { getRatingsKey, setRatingsKey } from './title-ratings.js?v=release-1.2.16-details.1';
 import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.8-party.1';
-import { PlaybackAudioCheck } from './playback-lifecycle.js?v=release-1.2.14-ui.1';
+import { PlaybackAudioCheck } from './playback-lifecycle.js?v=release-1.2.16-details.1';
 import { apiUrl, mediaUrl, apiMode, getSessionToken, setSessionToken, clearSessionToken, credentialsMode } from './runtime.js?v=release-1.2.8-party.1';
 import { rememberApiKey, loadRememberedApiKey, forgetApiKey } from './vault.js?v=release-1.2.8-party.1';
 import { createEncryptedTransfer, decryptEncryptedTransfer, applyTransferredState, transferLookup, transferCodeFromHash, buildTransferLink } from './device-transfer.js?v=release-1.2.8-party.1';
 import { listRecent, continueWatchingItems, recordRecent, removeRecentTitle, recentForContext, resumePosition, formatResumeTime } from './history.js?v=release-1.2.8-party.1';
 import { getSettings, saveSettings, resetSettings } from './settings.js?v=release-1.2.8-party.1';
-import { TraktIntegration, mergeContinueWatching } from './trakt.js?v=release-1.2.14-ui.1';
+import { TraktIntegration, mergeContinueWatching } from './trakt.js?v=release-1.2.16-details.1';
 import { rememberSourceSuccess, setAudioFeedback, setSourceBad, clearSourceMemory, noteAudioDecodeFailure, resetNegativeAudioFeedback } from './source-memory.js?v=release-1.2.8-party.1';
 import { clearSearchHistory } from './search-history.js?v=release-1.2.8-party.1';
 import { hasParentPin, setParentPin, verifyParentPin, getKidProfile, updateKidProfile, resetKidAllowance, grantKidExtension, canStartKidPlayback, consumeKidPlayback, formatKidUsage } from './parental-controls.js?v=release-1.2.8-party.1';
@@ -1193,6 +1194,7 @@ function loadSettingsForm(){
   $('setting-long-press').checked=settings.longPressShortcuts;
   $('setting-playback-health').checked=settings.showPlaybackHealth;
   $('setting-auto-learn-sources').checked=settings.autoLearnSources;
+  $('setting-omdb-key').value=getRatingsKey();
   $('transfer-share').hidden=!navigator.share;$('transfer-key-wrap').hidden=true;$('transfer-api-key').value='';
   updateInstallButton();trakt.updateUI();text('settings-message','');text('transfer-message','');
 }
@@ -1203,6 +1205,7 @@ $('settings-form').addEventListener('submit',event=>{
   event.preventDefault();
   const enableKid=$('setting-kid-mode').checked;
   if(enableKid&&!hasParentPin()){text('settings-message','Set a Parent PIN before enabling Kid Mode.',true);return;}
+  try{if($('setting-omdb-key').value.trim()!==getRatingsKey())setRatingsKey($('setting-omdb-key').value);}catch(error){text('settings-message',error.message,true);return;}
   const timeValue=Math.max(0,Number($('setting-kid-time').value)||0),timeMinutes=$('setting-kid-time-unit').value==='hours'?Math.round(timeValue*60):Math.round(timeValue);
   updateKidProfile(viewer,{
     enabled:enableKid,timeLimitMinutes:timeMinutes,
