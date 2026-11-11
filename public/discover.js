@@ -1,4 +1,5 @@
-import { LatestPlaybackAction, PlaybackPreparationCache, supportsAudioDecodeCounter } from './playback-lifecycle.js?v=release-1.2.14-ui.1';
+import { LatestPlaybackAction, PlaybackPreparationCache, supportsAudioDecodeCounter } from './playback-lifecycle.js?v=release-1.2.16-details.1';
+import { createTrailerLink, addPosterRating, mountTitleExtras, refreshPosterRatings } from './title-details.js?v=release-1.2.16-details.1';
 import { loadPublicSources, browserContainerHints, sourceHints, preparedSourceCompatibility } from './source-client.js?v=release-1.2.8-party.1';
 import { getSettings, updateSettings } from './settings.js?v=release-1.2.8-party.1';
 import { listRecent, formatResumeTime } from './history.js?v=release-1.2.8-party.1';
@@ -350,10 +351,10 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   let closingTitleForPlayback=false;
   const cancelPlayback=()=>{playbackActions.cancel();resumeActivity?.hide?.();};
   let active=false, guestMode=false, catalogGeneration=0, titleGeneration=0, sourceGeneration=0, preparationGeneration=0, nextUpGeneration=0;
-  let catalogAbort,titleAbort,sourceAbort,searchTimer,pollTimer,metas=[],nextSkip=null,currentMeta;
+  let catalogAbort,titleAbort,sourceAbort,searchTimer,pollTimer,metas=[],nextSkip=null,currentMeta,titleExtrasCleanup;
 
   function cancelSource(){++preparationGeneration;++sourceGeneration;sourceAbort?.abort();clearTimeout(pollTimer);}
-  function cancelTitle(){++titleGeneration;titleAbort?.abort();preparations.cancelPending();cancelSource();}
+  function cancelTitle(){++titleGeneration;titleAbort?.abort();titleExtrasCleanup?.();titleExtrasCleanup=null;preparations.cancelPending();cancelSource();}
   function message(id,text,error=false){$(id).textContent=text;$(id).classList.toggle('error',error);}
   function savedResumeForTarget(target){
     if(!target)return null;
@@ -449,6 +450,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     const card=button('',()=>{if(longPressed){longPressed=false;return;}showTitle(meta)});card.className='poster-card';card.setAttribute('aria-label',`Open ${meta.name}`);
     const art=element('div','','poster-art');art.append(image(meta.poster,'','poster-image',meta.id));art.append(element('span',meta.name,'poster-fallback'));
     card.append(art,element('strong',meta.name),element('span',meta.year||(meta.type==='series'?'Show':'Movie'),'muted'));
+    addPosterRating(card,meta);
     const cancel=()=>{if(timer)clearTimeout(timer);timer=null;};
     card.addEventListener('pointerdown',event=>{if(!getSettings().longPressShortcuts||event.button>0)return;cancel();timer=setTimeout(()=>{longPressed=true;openQuickActions(meta);},550);});
     for(const name of ['pointerup','pointercancel','pointerleave'])card.addEventListener(name,cancel);
@@ -716,16 +718,30 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   }
 
   async function showTitle(meta,preferredSeason=null){
-    cancelPlayback();cancelTitle();currentMeta=null;const generation=titleGeneration;titleAbort=new AbortController();$('title-content').replaceChildren();$('episode-area').replaceChildren();clearPlaybackFallback();
+    cancelPlayback();cancelTitle();currentMeta=null;const generation=titleGeneration;titleAbort=new AbortController();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('title-similar').replaceChildren();$('title-similar').hidden=true;clearPlaybackFallback();
     $('detail-title').textContent=meta.name;$('toggle-watchlist').hidden=true;message('detail-message','Loading…');if(!$('title-dialog').open)$('title-dialog').showModal();
+    $('title-dialog').scrollTop=0;
     try{
       const data=await api(`/api/discover/meta?type=${meta.type}&id=${meta.id}`,{signal:AbortSignal.any([titleAbort.signal,AbortSignal.timeout(20000)])});
       if(generation!==titleGeneration||!$('title-dialog').open||!active)return;currentMeta=data.meta;updateWatchlistButton();
       const summary=element('div','','title-summary');summary.append(image(currentMeta.poster,currentMeta.name,'detail-poster',currentMeta.id));
       const copy=element('div','','title-copy');copy.append(element('p',[currentMeta.year,currentMeta.runtime,...currentMeta.genres].filter(Boolean).join(' · '),'muted'),element('p',currentMeta.description||'','title-description'));summary.append(copy);
+      const ratings=element('div','','title-ratings');ratings.id='title-ratings';ratings.setAttribute('aria-live','polite');copy.append(ratings);
       $('title-content').replaceChildren(summary);message('detail-message','');
       if(currentMeta.type==='movie')renderMovieActions(currentMeta);else renderEpisodes(currentMeta,preferredSeason);
+      renderTitleExtras();
     }catch(e){if(generation===titleGeneration&&active)message('detail-message',e.name==='AbortError'?'Cancelled.':e.message,true);}
+  }
+
+  function renderTitleExtras(){
+    titleExtrasCleanup?.();titleExtrasCleanup=null;
+    const ratings=$('title-ratings'),similar=$('title-similar'),meta=currentMeta,generation=titleGeneration;
+    if(!ratings||!similar||!meta)return;
+    if(guestMode){ratings.replaceChildren();similar.replaceChildren();similar.hidden=true;return;}
+    const restricted=document.body.classList.contains('kid-mode');
+    titleExtrasCleanup=mountTitleExtras(meta,{ratings,similar,api,posterCard,signal:titleAbort?.signal,
+      isCurrent:()=>active&&generation===titleGeneration&&currentMeta===meta&&$('title-dialog').open,
+      allowExternal:!restricted,showSimilar:!restricted});
   }
 
   function renderMovieActions(meta){
@@ -733,7 +749,9 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     const target={type:'movie',id:meta.id},actions=element('div','','row-actions');
     const playButton=button('Play',()=>quickPlay(meta,target,'',playButton),true);
     const shareButton=button('Share',()=>quickDriveShare(meta,target,'',shareButton));shareButton.hidden=guestMode||typeof driveTest!=='function';shareButton.classList.add('advanced-only');
-    const options=button('Options',()=>openOptions(meta,target));options.classList.add('advanced-only');actions.append(playButton,shareButton,options);bar.append(actions);$('episode-area').replaceChildren(bar);
+    const options=button('Options',()=>openOptions(meta,target));options.classList.add('advanced-only');actions.append(playButton);
+    if(!guestMode&&!document.body.classList.contains('kid-mode'))actions.append(createTrailerLink(meta));
+    actions.append(shareButton,options);bar.append(actions);$('episode-area').replaceChildren(bar);
     warmPlayback(target);
   }
 
@@ -933,7 +951,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     if(guestMode)return;++catalogGeneration;catalogAbort?.abort();browse();
   });
   $('search').addEventListener('focus',renderSearchHistory);
-  $('close-title').addEventListener('click',()=>$('title-dialog').close());$('title-dialog').addEventListener('close',()=>{++titleGeneration;titleAbort?.abort();preparations.cancelPending();if(closingTitleForPlayback)closingTitleForPlayback=false;else cancelPlayback();});
+  $('close-title').addEventListener('click',()=>$('title-dialog').close());$('title-dialog').addEventListener('close',()=>{++titleGeneration;titleAbort?.abort();titleExtrasCleanup?.();titleExtrasCleanup=null;preparations.cancelPending();if(closingTitleForPlayback)closingTitleForPlayback=false;else cancelPlayback();});
   $('close-source').addEventListener('click',()=>$('source-dialog').close());$('source-dialog').addEventListener('close',cancelSource);
   $('close-quick-actions').addEventListener('click',()=>$('quick-actions-dialog').close());
   $('toggle-watchlist').addEventListener('click',()=>{if(guestMode||!currentMeta)return;toggleWatchlist($('viewer').value,currentMeta);updateWatchlistButton();renderWatchlist();});
@@ -944,7 +962,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       guestMode=true;active=true;
       await showTitle({type:scope.type,id:scope.id,name:scope.name||'Shared title',poster:scope.poster||''});
     },
-    cancelPlayback,prepareNext,playPreparedNext,playNext,recoverPlayback,openHistoryTitle,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){preparations.clear();renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);}},
+    cancelPlayback,prepareNext,playPreparedNext,playNext,recoverPlayback,openHistoryTitle,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){preparations.clear();refreshPosterRatings();renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);renderTitleExtras();}},
     suspend(){preparations.clear();cancelPlayback();active=false;guestMode=false;document.body.classList.remove('search-mode');++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
   };
 }

@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current backend version: **1.2.11**. Frontend **release-1.2.14-ui.1** places **Options** in the player display toolbar beside Watch party, Full screen, and Picture in picture instead of on top of the video. Its expanded New version menu is also above the video, not overlapping the picture. The existing source-switching, resume and audio-verification behavior is preserved. Publication is recorded in HANDOFF.md.
+Current backend version: **1.2.12**. Frontend **release-1.2.16-details.1** shows full descriptions, trailer links, lazy similar titles, and cached Rotten Tomatoes scores with explicit source dates. Optional OMDb access is configured in Settings. Existing playback, audio, Options beside PiP, games, watch parties and native APK separation are preserved. Publication and test results are recorded in HANDOFF.md.
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
