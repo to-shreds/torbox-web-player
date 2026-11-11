@@ -1,6 +1,6 @@
 # Movie details, trailers, similar titles and ratings (2026-11-11)
 
-Implementation prepared for frontend **release-1.2.16-details.1** and backend **1.2.12**. Release verification and publication are pending. The code repository controls substance; `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md` controls readiness.
+**READY / published.** Frontend **release-1.2.16-details.1** and backend **1.2.12** are live. The code repository controls substance; `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md` controls readiness. Release details and live verification are in `docs/DETAILS-2026-11-11.md` and `docs/evidence/details-2026-11-11/publication.json`.
 
 The synopsis no longer has a two-line CSS clamp, and the title/dialog controls wrap at phone widths. Movie details offer a YouTube trailer link using Cinemeta's validated video ID, or an exact title/year trailer search when the catalog has no trailer. No YouTube player or video is loaded before the user follows the link.
 
@@ -10,7 +10,13 @@ Rotten Tomatoes critics scores use exact IMDb identity. The default Wikidata sou
 
 Preserve audio/source selection, cached-only automatic playback, saved progress and credentials, exact title/episode/file validation, direct CDN media, service worker scope isolation, Games/Retro Vault, Sports, watch parties, and Trakt. The independent Fire Stick APK is outside this website change. Do not create services, change plans, or relay video through Render. The existing `browser-key-clone` remains the tested backend mirror.
 
-Local syntax checks and Node tests passed. Real Cinemeta trailer/similar and Wikidata query/parser checks succeeded. Successful live OMDb access is not verified without a user key. Local Chromium launch is blocked by a system socket restriction; the existing GitHub release workflow remains the required real-browser gate. Do not mark this version published until its full gate and Pages/Render deployments succeed and the live assets/health are checked.
+Tested source `99f48c2f6f7f58860ade28888675ae2a2357c762` merged through PR #25 as `98b1a87aa8cad204876a69fdcc5881def19a2a3c`. Both use tree `043ec9dc9bcd9e5304b043665b415dd31f2f9a2a`. Full preflight `42965126513` and production Pages `42966211687` each passed syntax checks, 759 Node cases registered (753 passed, six optional skips), and all 185 Chromium browser cases (4 Trakt, 14 party, 16 audio, 151 core). Ten new browser cases cover full descriptions and long headings at 320 px, 412 px and desktop widths; trailers; related navigation; delayed, failed and stale responses; cached badges; key transfer exclusion; Kid Mode; dated snapshots; and missing data. Production deployed the same public tree to the root and `/key/`; the deploy job completed at 2026-11-11T05:41:19Z.
+
+Backend mirror `84eaddbf7c0fda71be8889febe436047d7d5e97c` uses the identical tested tree; mirror CI `42966237016` passed. Existing Render service `srv-damu91142hec73chb7qg`, deployment `dep-dbpvs1e7bikc73bjkhng`, became live at 2026-11-11T05:33:32.857114Z. Repeated checks found no automatic build after the mirror push, so one deployment was triggered, preserving the service and free plan. At 2026-11-11T05:42:26.206526Z, all 39 public asset comparisons across the root site, `/key/`, and backend matched byte for byte. Backend health reported ok=true/version=1.2.12; unauthenticated metadata and similar requests each returned 401.
+
+Real Cinemeta trailer/similar and Wikidata query/parser checks succeeded. Successful live OMDb access is not verified without a user key. Browser acceptance used the existing GitHub workflows because local Chromium could not launch under the environment's socket restriction. No physical Android device, Bluetooth output, or personal TorBox media was tested. These limits do not change the completed website publication. Next action is ordinary user acceptance of the published details page, with no outstanding implementation or deployment blocker.
+
+Rollback: `archive/web-before-details-2026-11-11` at `ca0daf3491a79a33eb0dbf2f32cf8b52cae80249`; `archive/backend-before-details-2026-11-11` at `611cf0a5d31f26af8a74225aa23c14a17f24cb75`. Restore archived source as new commits through the existing release gates, preserving history and user data.
 
 # Retro Vault: 26 classic-inspired browser games in GAMES (2026-11-09)
 

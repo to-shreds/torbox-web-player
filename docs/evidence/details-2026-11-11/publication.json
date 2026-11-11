@@ -1,0 +1,325 @@
+{
+  "checkedAt": "2026-11-11T05:42:26.206526+00:00",
+  "release": "release-1.2.16-details.1",
+  "assets": [
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/index.html?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "407c109a9473b54e8935a4a98e5d8845ff11a8637f8e224f7c57324dcc611d4b",
+      "bytes": 45289
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/boot.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "beae7fd366a85884e9b5bd820fe3bf35e69c7dacd7b59da53d51d21943d86b94",
+      "bytes": 3264
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/app.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "f0d0a6381c6afaf63a1badd59cedac2e48e22dcc85a94e7fb9317b7604614968",
+      "bytes": 96443
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/discover.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "483d8611b6c5f94de2cc882641823004df35e97b2ba92e0a689f0bedcad9e1ca",
+      "bytes": 86704
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/discover.css?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "f53f121aa1caf8a25ec9bb5a0dfac7756d1536fb5b83b7c4b9139a80331509c9",
+      "bytes": 29130
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/sw.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "54d9eaf6c2ec3e8c2e9815a01c8e9fa1fcdf7c2e80e31863f936d70d9566f9a4",
+      "bytes": 4672
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/title-details.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "234e5ff3f8ee156fbd7135464f217fc48cf9dad018ec773ebbd62fc2b9e52563",
+      "bytes": 8713
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/title-ratings.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "8f1c2f468bbd9332b47956fae293b4ebab3913bfacce67a2e5dd05aa5bd88ded",
+      "bytes": 12507
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/wikidata-ratings.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "202ceaac36668be62f02aed1aa5c6a82e5fa75d1cab9d7e5811e8a3b7cc2e12e",
+      "bytes": 14015
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/games-nav.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "915606f8a7e9f4fd9d32aa9d5ac0ee54994f6e6a96af35847c88fe1a075dc960",
+      "bytes": 2465
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/playback-lifecycle.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "31172ecd888d4bc37890d53d1e8a2793fa7b42e5383326222fdc20b7a8810c54",
+      "bytes": 4860
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/trakt.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "b0eab4c22c189df8ef40aa8c037676628fdee337058da4cf05e03420c609efd7",
+      "bytes": 23570
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/trakt-vault.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "665e3af4d6474ca7851ea3d71789977868fd1722d6db24d0afe2b2699142d039",
+      "bytes": 3839
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/index.html?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "407c109a9473b54e8935a4a98e5d8845ff11a8637f8e224f7c57324dcc611d4b",
+      "bytes": 45289
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/boot.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "beae7fd366a85884e9b5bd820fe3bf35e69c7dacd7b59da53d51d21943d86b94",
+      "bytes": 3264
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/app.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "f0d0a6381c6afaf63a1badd59cedac2e48e22dcc85a94e7fb9317b7604614968",
+      "bytes": 96443
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/discover.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "483d8611b6c5f94de2cc882641823004df35e97b2ba92e0a689f0bedcad9e1ca",
+      "bytes": 86704
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/discover.css?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "f53f121aa1caf8a25ec9bb5a0dfac7756d1536fb5b83b7c4b9139a80331509c9",
+      "bytes": 29130
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/sw.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "54d9eaf6c2ec3e8c2e9815a01c8e9fa1fcdf7c2e80e31863f936d70d9566f9a4",
+      "bytes": 4672
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/title-details.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "234e5ff3f8ee156fbd7135464f217fc48cf9dad018ec773ebbd62fc2b9e52563",
+      "bytes": 8713
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/title-ratings.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "8f1c2f468bbd9332b47956fae293b4ebab3913bfacce67a2e5dd05aa5bd88ded",
+      "bytes": 12507
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/wikidata-ratings.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "202ceaac36668be62f02aed1aa5c6a82e5fa75d1cab9d7e5811e8a3b7cc2e12e",
+      "bytes": 14015
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/games-nav.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "915606f8a7e9f4fd9d32aa9d5ac0ee54994f6e6a96af35847c88fe1a075dc960",
+      "bytes": 2465
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/playback-lifecycle.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "31172ecd888d4bc37890d53d1e8a2793fa7b42e5383326222fdc20b7a8810c54",
+      "bytes": 4860
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/trakt.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "b0eab4c22c189df8ef40aa8c037676628fdee337058da4cf05e03420c609efd7",
+      "bytes": 23570
+    },
+    {
+      "url": "https://to-shreds.github.io/torbox-web-player/key/trakt-vault.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "665e3af4d6474ca7851ea3d71789977868fd1722d6db24d0afe2b2699142d039",
+      "bytes": 3839
+    },
+    {
+      "url": "https://torbox-web-player-key.onrender.com/?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "407c109a9473b54e8935a4a98e5d8845ff11a8637f8e224f7c57324dcc611d4b",
+      "bytes": 45289
+    },
+    {
+      "url": "https://torbox-web-player-key.onrender.com/boot.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "beae7fd366a85884e9b5bd820fe3bf35e69c7dacd7b59da53d51d21943d86b94",
+      "bytes": 3264
+    },
+    {
+      "url": "https://torbox-web-player-key.onrender.com/app.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "f0d0a6381c6afaf63a1badd59cedac2e48e22dcc85a94e7fb9317b7604614968",
+      "bytes": 96443
+    },
+    {
+      "url": "https://torbox-web-player-key.onrender.com/discover.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "483d8611b6c5f94de2cc882641823004df35e97b2ba92e0a689f0bedcad9e1ca",
+      "bytes": 86704
+    },
+    {
+      "url": "https://torbox-web-player-key.onrender.com/discover.css?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "f53f121aa1caf8a25ec9bb5a0dfac7756d1536fb5b83b7c4b9139a80331509c9",
+      "bytes": 29130
+    },
+    {
+      "url": "https://torbox-web-player-key.onrender.com/sw.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "54d9eaf6c2ec3e8c2e9815a01c8e9fa1fcdf7c2e80e31863f936d70d9566f9a4",
+      "bytes": 4672
+    },
+    {
+      "url": "https://torbox-web-player-key.onrender.com/title-details.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "234e5ff3f8ee156fbd7135464f217fc48cf9dad018ec773ebbd62fc2b9e52563",
+      "bytes": 8713
+    },
+    {
+      "url": "https://torbox-web-player-key.onrender.com/title-ratings.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "8f1c2f468bbd9332b47956fae293b4ebab3913bfacce67a2e5dd05aa5bd88ded",
+      "bytes": 12507
+    },
+    {
+      "url": "https://torbox-web-player-key.onrender.com/wikidata-ratings.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "202ceaac36668be62f02aed1aa5c6a82e5fa75d1cab9d7e5811e8a3b7cc2e12e",
+      "bytes": 14015
+    },
+    {
+      "url": "https://torbox-web-player-key.onrender.com/games-nav.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "915606f8a7e9f4fd9d32aa9d5ac0ee54994f6e6a96af35847c88fe1a075dc960",
+      "bytes": 2465
+    },
+    {
+      "url": "https://torbox-web-player-key.onrender.com/playback-lifecycle.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "31172ecd888d4bc37890d53d1e8a2793fa7b42e5383326222fdc20b7a8810c54",
+      "bytes": 4860
+    },
+    {
+      "url": "https://torbox-web-player-key.onrender.com/trakt.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "b0eab4c22c189df8ef40aa8c037676628fdee337058da4cf05e03420c609efd7",
+      "bytes": 23570
+    },
+    {
+      "url": "https://torbox-web-player-key.onrender.com/trakt-vault.js?verify=release-1.2.16-details.1",
+      "status": 200,
+      "matches": true,
+      "sha256": "665e3af4d6474ca7851ea3d71789977868fd1722d6db24d0afe2b2699142d039",
+      "bytes": 3839
+    }
+  ],
+  "health": {
+    "url": "https://torbox-web-player-key.onrender.com/healthz",
+    "status": 200,
+    "data": {
+      "ok": true,
+      "version": "1.2.12",
+      "stage": "catalog-first-preview"
+    }
+  },
+  "unauthenticatedGuards": [
+    {
+      "path": "api/discover/meta?type=movie&id=tt0133093",
+      "status": 401
+    },
+    {
+      "path": "api/discover/similar?type=movie&id=tt0133093",
+      "status": 401
+    }
+  ],
+  "runtime": {
+    "source": "99f48c2f6f7f58860ade28888675ae2a2357c762",
+    "main": "98b1a87aa8cad204876a69fdcc5881def19a2a3c",
+    "backendMirror": "84eaddbf7c0fda71be8889febe436047d7d5e97c",
+    "tree": "043ec9dc9bcd9e5304b043665b415dd31f2f9a2a"
+  },
+  "verification": {
+    "preflightRun": 42965126513,
+    "productionRun": 42966211687,
+    "mirrorCIRun": 42966237016,
+    "nodeRegistered": 759,
+    "nodePassed": 753,
+    "nodeOptionalSkipped": 6,
+    "browserPassed": 185,
+    "failures": 0,
+    "browserSuites": {
+      "trakt": 4,
+      "party": 14,
+      "audio": 16,
+      "core": 151
+    }
+  },
+  "deployment": {
+    "pagesFinishedAt": "2026-11-11T05:41:19Z",
+    "renderDeploy": "dep-dbpvs1e7bikc73bjkhng",
+    "renderFinishedAt": "2026-11-11T05:33:32.857114Z"
+  }
+}
