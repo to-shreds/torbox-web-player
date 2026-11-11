@@ -2,7 +2,7 @@
 
 The browser-key player is the production codebase. `main` is authoritative. The existing Render service still watches `browser-key-clone`, so that branch is kept as a deployment mirror of the same code rather than as a separate product line.
 
-Current backend version: **1.2.11**. Frontend **release-1.2.14-ui.1** places **Options** in the player display toolbar beside Watch party, Full screen, and Picture in picture instead of on top of the video. Its expanded New version menu is also above the video, not overlapping the picture. The existing source-switching, resume and audio-verification behavior is preserved. Publication is recorded in HANDOFF.md.
+Current backend version: **1.2.12**. Frontend **release-1.2.16-details.1** shows full descriptions, trailer links, lazy similar titles, and cached Rotten Tomatoes scores with explicit source dates. Optional OMDb access is configured in Settings. Existing playback, audio, Options beside PiP, games, watch parties and native APK separation are preserved. Publication and test results are recorded in HANDOFF.md.
 
 Deployment evidence and current runtime identifiers are recorded in [HANDOFF.md](HANDOFF.md). Root and `/key/` use the same frontend source; the independent native APK is delivered separately. My Workspace remains the user's standing Render choice.
 
@@ -215,3 +215,7 @@ Physical-device acceptance is still required for touch feel, long-press behavior
 - The first real Drive export/deletion acceptance test is still outstanding.
 
 Implementation source on `main` is authoritative. Current readiness and next steps are tracked in `to-shreds/ProjectStatus/projects/torbox-web-player/STATUS.md`.
+
+### Retro Vault (November 2026)
+
+The GAMES tab now lists 26 independently launchable original browser games plus a Retro Vault collection entry. These are classic-inspired JavaScript implementations, not redistributed DOS/Windows executables or ROMs. Every game runs on desktop or mobile with keyboard and on-screen controls; compatible Bluetooth/USB controllers work through the Gamepad API with remappable action/menu buttons. Progress and scores are saved locally by viewer. The existing NES, DOS, SkiFree and MindMaze entries remain. The new pages contain no network fetches or provider API calls; TV playback and TorBox credentials are untouched. Details and test results: `docs/RETRO-VAULT-2026-11-09.md`.

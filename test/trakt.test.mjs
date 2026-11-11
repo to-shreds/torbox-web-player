@@ -66,7 +66,7 @@ test('Trakt cannot start without explicit user authorization, and stays outside 
   assert.ok(!trakt.includes('/api/trakt'));
   assert.ok(html.includes('id="trakt-scrobble-toggle"'));
   assert.ok(html.includes('id="trakt-connect"'));
-  assert.ok(html.includes('https://api.trakt.tv; media-src'));
+  assert.ok(html.match(/connect-src [^;]+;/)?.[0].split(/\s+/).includes('https://api.trakt.tv'));
   assert.ok(app.includes('trakt.playing(context)'));
   assert.ok(app.includes('trakt.stopped(context,true)'));
   assert.ok(sw.includes('trakt-vault.js?v='));

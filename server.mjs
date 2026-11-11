@@ -25,6 +25,9 @@ const publicFiles = new Map([
   ['/trakt.js', ['trakt.js', 'text/javascript; charset=utf-8']],
   ['/trakt-vault.js', ['trakt-vault.js', 'text/javascript; charset=utf-8']],
   ['/trakt.css', ['trakt.css', 'text/css; charset=utf-8']],
+  ['/title-details.js', ['title-details.js', 'text/javascript; charset=utf-8']],
+  ['/title-ratings.js', ['title-ratings.js', 'text/javascript; charset=utf-8']],
+  ['/wikidata-ratings.js', ['wikidata-ratings.js', 'text/javascript; charset=utf-8']],
   ['/boot.js', ['boot.js', 'text/javascript; charset=utf-8']],
   ['/watch-party.js', ['watch-party.js', 'text/javascript; charset=utf-8']],
   ['/watch-party-core.js', ['watch-party-core.js', 'text/javascript; charset=utf-8']],
@@ -59,6 +62,9 @@ const publicFiles = new Map([
   ['/games-data/sources/dosdefender-source-40e98d2.zip', ['games-data/sources/dosdefender-source-40e98d2.zip', 'application/zip']],
   ['/games-data/sources/zmiy-freedos-source-and-binary-0.85.2a.zip', ['games-data/sources/zmiy-freedos-source-and-binary-0.85.2a.zip', 'application/zip']],
   ['/games-web/skifree/index.html', ['games-web/skifree/index.html', 'text/html; charset=utf-8']],
+  ['/games-web/retro-vault/index.html', ['games-web/retro-vault/index.html', 'text/html; charset=utf-8']],
+  ['/games-web/retro-vault/game.js', ['games-web/retro-vault/game.js', 'text/javascript; charset=utf-8']],
+  ['/games-web/retro-vault/style.css', ['games-web/retro-vault/style.css', 'text/css; charset=utf-8']],
   ['/games-web/skifree/game.js', ['games-web/skifree/game.js', 'text/javascript; charset=utf-8']],
   ['/games-web/skifree/style.css', ['games-web/skifree/style.css', 'text/css; charset=utf-8']],
   ['/games-web/skifree/LICENSE', ['games-web/skifree/LICENSE', 'text/plain; charset=utf-8']],
@@ -284,7 +290,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
         if (!corsAllowed) throw new AppError('BAD_ORIGIN', 'This frontend is not allowed to use the private API.', 403);
         response.statusCode = 204; response.end(); return;
       }
-      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.2.11', stage: 'catalog-first-preview' });
+      if (method === 'GET' && path === '/healthz') return json(response, 200, { ok: true, version: '1.2.12', stage: 'catalog-first-preview' });
       if (method === 'GET' && path === '/relay/health') {
         if(!corsAllowed)throw new AppError('BAD_ORIGIN','This frontend is not allowed to use the TorBox bridge.',403);
         response.setHeader('X-TorBox-Bridge','render');
@@ -304,7 +310,7 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
       if (method === 'GET' && publicFiles.has(path)) {
         const [filename, type] = publicFiles.get(path);
         if(filename==='index.html'){const html=await readFile(join(root,'public',filename),'utf8');const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];if(csp)response.setHeader('Content-Security-Policy',csp+"; frame-ancestors 'none'");response.setHeader('Content-Type',type);return response.end(html);}
-        if(filename==='sports-player.html'||filename==='dos-player.html'||filename==='games-web/skifree/index.html'){
+        if(filename==='sports-player.html'||filename==='dos-player.html'||filename==='games-web/skifree/index.html'||filename==='games-web/retro-vault/index.html'){
           const html=await readFile(join(root,'public',filename),'utf8');
           const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];
           if(csp)response.setHeader('Content-Security-Policy',csp+"; frame-ancestors 'self'");
@@ -562,6 +568,9 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
           const target = { type: url.searchParams.get('type'), id: url.searchParams.get('id') };
           if (!guestAllows(target)) throw new AppError('GUEST_FORBIDDEN', 'This temporary link is limited to the shared title.', 403);
           result = { meta: await activeDiscovery.catalog.meta(target.type, target.id) };
+        } else if (path === '/api/discover/similar' && method === 'GET') {
+          if (session.guest) throw new AppError('GUEST_FORBIDDEN', 'This temporary link is limited to the shared title.', 403);
+          result = await activeDiscovery.catalog.similar(url.searchParams.get('type'), url.searchParams.get('id'));
         } else if (path === '/api/discover/lookup' && method === 'GET') {
           const type = url.searchParams.get('type');
           const target = { type, id: url.searchParams.get('id'), ...(type === 'series' ? {
@@ -655,6 +664,6 @@ export function createApp({ env = process.env, provider, providerFactory, mediaF
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { server } = createApp();
-  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.2.11' })));
+  server.listen(Number(process.env.PORT || 10000), '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', version: '1.2.12' })));
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }
