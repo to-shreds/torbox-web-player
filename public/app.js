@@ -1,5 +1,5 @@
 import {createWatchParty} from './watch-party.js?v=release-1.2.8-party.1';
-import { createDiscoveryUI, bindArtworkImage, MORE_AUDIO_RECOVERY_ATTEMPTS } from './discover.js?v=release-1.2.16-details.1';
+import { createDiscoveryUI, bindArtworkImage, MORE_AUDIO_RECOVERY_ATTEMPTS } from './discover.js?v=release-1.2.17-audio-sources.1';
 import { getRatingsKey, setRatingsKey } from './title-ratings.js?v=release-1.2.16-details.1';
 import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.8-party.1';
 import { PlaybackAudioCheck } from './playback-lifecycle.js?v=release-1.2.16-details.1';
@@ -509,7 +509,7 @@ async function bootstrap() {
   }
 }
 $('startup-retry').addEventListener('click',()=>{show('loading');void bootstrap();});
-{const more=$('player-more-versions');more.style.display='flex';more.style.margin='0 auto 1rem';more.addEventListener('click',()=>active?.checkMoreVersions?.());}
+{const more=$('player-more-versions');more.addEventListener('click',()=>active?.checkMoreVersions?.());}
 $('cancel-resume').addEventListener('click',()=>{discoveryUI?.cancelPlayback();void stopPlayback();if($('player').open)$('player').close();});
 $('login-form').addEventListener('submit', async event => {
   event.preventDefault(); const button = event.submitter; button.disabled = true; text('login-message', 'Checking TorBox…');
@@ -848,6 +848,7 @@ async function startPlayback(file, playbackContext = null) {
       const checking=Math.max(1,new Set(playbackContext?.recoveryTried||[]).size)+1;
       setPlaybackHealth('Recovering',reason==='audio'?'No audio decoded. Checking another version for sound…':reason==='buffer'?'Switching to a lower-resolution source…':'Finding another source…');
       text('player-message', reason==='audio'?`No sound from this version in this browser. Checking version ${checking} for sound…`:reason === 'buffer' ? 'Buffering · trying another source (maximum 3 total)…' : 'Stream failed · trying another source (maximum 3 total)…');
+      context.lastRecoveryReason=reason;
       if(playbackContext)playbackContext.recoveryError='';
       const moved = playbackContext ? await discoveryUI.recoverPlayback(playbackContext,{signal:context.eventAbort.signal}) : false;
       if (moved) return;
@@ -860,15 +861,23 @@ async function startPlayback(file, playbackContext = null) {
         // untried cached versions remain.
         let summary=attempts===1?'This version plays without sound in this browser.':`Checked ${attempts} versions; none had sound this browser can play.`;
         if(playbackContext?.recoveryError==='SLOW_DOWN')summary+=' TorBox preparation is limited to a few versions per minute. Wait a moment, then check more.';
-        summary+=remaining>0?` ${remaining} more cached version${remaining===1?' is':'s are'} available to check.`:' No other cached version is available to check.';
+        summary+=remaining>0?` ${remaining} more cached version${remaining===1?' is':'s are'} available to check.`:' No more cached versions remain. Find other versions to search beyond the cached copies.';
         setPlaybackHealth('No sound',summary);text('player-message',summary,true);
-        const more=$('player-more-versions');more.textContent=remaining>0?`Check more versions (${remaining})`:'Check more versions';more.hidden=remaining<=0;
+        const more=$('player-more-versions');more.textContent=remaining>0?`Check more versions (${remaining})`:'Find other versions';more.hidden=false;
         return;
       }
-      setPlaybackHealth('Could not play',diagnosis?.message||'Automatic recovery could not find a working alternative.'); text('player-message', `${diagnosis?.message||'Playback failed.'} Automatic recovery stopped after ${attempts} source${attempts===1?'':'s'}.`, true);
+      setPlaybackHealth('Could not play',diagnosis?.message||'Automatic recovery could not find a working alternative.'); text('player-message', `${diagnosis?.message||'Playback failed.'} Automatic recovery stopped after ${attempts} source${attempts===1?'':'s'}. Find other versions to see more choices.`, true);
+      const more=$('player-more-versions');more.textContent='Find other versions';more.hidden=false;
+    };
+    context.browseAllVersions = () => {
+      if(active!==context||context.recovering||!playbackContext?.current||watchParty?.isActive())return;
+      if(!Number.isFinite(playbackContext.audioRecoveryOrigin)&&Number.isFinite(video.currentTime))
+        playbackContext.recoveryPosition=Math.max(0,video.currentTime);
+      void discoveryUI.openPlaybackAlternatives(playbackContext);
     };
     context.checkMoreVersions = () => {
       if(active!==context||context.recovering||!playbackContext)return;
+      if(context.lastRecoveryReason!=='audio'||!(playbackContext.recoveryRemaining>0)){context.browseAllVersions();return;}
       playbackContext.recoveryAllowance=Math.max(1,new Set(playbackContext.recoveryTried||[]).size)+MORE_AUDIO_RECOVERY_ATTEMPTS;
       void recover('audio');
     };
@@ -1011,6 +1020,7 @@ async function changePlayerVersion(){
   if(wasPlaying)context.video.play().catch(()=>text('player-message',notice+' Tap play to continue.',true));
 }
 $('player-new-version').addEventListener('click',()=>{void changePlayerVersion();});
+$('player-browse-versions').addEventListener('click',()=>{closePlayerVersionMenu();active?.browseAllVersions?.();});
 $('keep-watching').addEventListener('click',()=>{
   if(!active)return;
   const block=canStartKidPlayback(viewer,active.playbackContext);if(!block.allowed){hideStillWatchingPrompt();showKidLimit(block);return;}
