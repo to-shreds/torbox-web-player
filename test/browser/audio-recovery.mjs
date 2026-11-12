@@ -201,7 +201,7 @@ test('audio exhaustion pauses silent video and leaves a visible recovery action 
   assert.equal(await page.locator('#player-more-versions').textContent(), 'Find other versions');
   await page.locator('#player-more-versions').click();
   await page.locator('#source-dialog').waitFor({state:'visible'});
-  assert.equal(await page.getByRole('button',{name:'Refresh results'}).isVisible(),true);
+  await page.getByRole('button',{name:'Refresh results'}).waitFor({state:'visible'});
   await page.locator('#close-source').click();
   const failed = await state(page); observations.push({ failed });
   assert.equal(fixture.control.playbackCalls, 1); assert.equal(failed.audioBytes, 0);
