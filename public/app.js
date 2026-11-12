@@ -1,5 +1,5 @@
 import {createWatchParty} from './watch-party.js?v=release-1.2.8-party.1';
-import { createDiscoveryUI, bindArtworkImage, MORE_AUDIO_RECOVERY_ATTEMPTS } from './discover.js?v=release-1.2.17-audio-sources.1';
+import { createDiscoveryUI, bindArtworkImage, MORE_AUDIO_RECOVERY_ATTEMPTS } from './discover.js?v=release-1.2.18-next-torrent.1';
 import { getRatingsKey, setRatingsKey } from './title-ratings.js?v=release-1.2.16-details.1';
 import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.8-party.1';
 import { PlaybackAudioCheck } from './playback-lifecycle.js?v=release-1.2.16-details.1';
@@ -614,12 +614,20 @@ function renderUpNextCard(context,{ended=false}={}){
   }
   $('up-next-card').hidden=false;return true;
 }
+function verifiedCurrentTorrentHash(context){
+  const current=context?.playbackContext?.current,next=queuedNext(context);
+  if(context?.partyGuest||!context?.started||context?.recovering||context?.audioFailureHandled||
+    !next||current?.type!=='series'||current.id!==next.id||
+    !(context.audioConfirmed===true||context.audioCheck?.state==='decoded'))return '';
+  const hash=String(context.playbackContext.sourceInfo?.hash||'').toLowerCase();
+  return /^[a-f0-9]{40}$/.test(hash)?hash:'';
+}
 function ensureNextPrepared(context){
   if(!context||!queuedNext(context))return Promise.resolve(null);
   if(context.nextPrepared)return Promise.resolve(context.nextPrepared);
   if(context.nextPreparePromise)return context.nextPreparePromise;
   const controller=new AbortController();context.nextPrepareAbort=controller;
-  const promise=discoveryUI.prepareNext(context.playbackContext,{signal:controller.signal}).then(prepared=>{
+  const promise=discoveryUI.prepareNext(context.playbackContext,{signal:controller.signal,preferredTorrentHash:verifiedCurrentTorrentHash(context)}).then(prepared=>{
     if(prepared&&active===context)context.nextPrepared=prepared;
     return prepared||null;
   }).catch(error=>{
