@@ -19,11 +19,11 @@ async function setup(t, versions) {
   const fixture = await startFixture(Number(process.env.SOUND_TEST_PORT) || 4235);
   const context = await browser.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, serviceWorkers: 'block' });
   const page = await context.newPage(), errors = [], prepares = [], slowDowns = [], played = [];
-  const items = versions.map(([filename, kind], index) => ({ id: index + 1, kind, hash: (index + 1).toString(16).padStart(40, 'c'), name: 'Fixture Show', download_finished: true, download_present: true, files: [{ id: 0, short_name: filename, mimetype: media[kind].mime, size: media[kind].bytes.length }] }));
-  fixture.sourceLookup.lookup = async () => ({ complete: true, sources: items.map(item => ({ hash: item.hash, title: item.files[0].short_name, filename: item.files[0].short_name, resolution: /1080p/.test(item.files[0].short_name) ? '1080p' : '720p', videoCodec: 'H264', audioCodecs: [], size: item.files[0].size, provider: 'Synthetic real-name sound regression' })) });
+  const items = versions.map(([filename, kind, cached = true], index) => ({ id: index + 1, kind, cached, hash: (index + 1).toString(16).padStart(40, 'c'), name: 'Fixture Show', download_finished: true, download_present: true, files: [{ id: 0, short_name: filename, mimetype: media[kind].mime, size: media[kind].bytes.length }] }));
+  fixture.sourceLookup.lookup = async () => ({ complete: true, sources: items.map(item => ({ hash: item.hash, title: item.files[0].short_name, filename: item.files[0].short_name, resolution: /1080p/.test(item.files[0].short_name) ? '1080p' : '720p', videoCodec: 'H264', audioCodecs: item.cached===false&&item.kind==='aac'?['AAC']:[], size: item.files[0].size, provider: 'Synthetic real-name sound regression' })) });
   fixture.discovery.gateway.cached = async hashes => Object.fromEntries(hashes.map(hash => {
     const item = items.find(row => row.hash === hash);
-    return [hash, { cached: Boolean(item), files: item ? [{ name: item.files[0].short_name, size: item.files[0].size, mime: item.files[0].mimetype }] : [] }];
+    return [hash, { cached: item?.cached===true, files: item?.cached===true ? [{ name: item.files[0].short_name, size: item.files[0].size, mime: item.files[0].mimetype }] : [] }];
   }));
   fixture.provider.request = async (_path, params) => params?.id ? items.find(item => item.id === Number(params.id)) : items;
   fixture.provider.resolveForRelay = async id => {
@@ -83,7 +83,7 @@ test('three silent untagged versions are checked by sound until a version with a
 });
 
 test('when every cached version is silent, the player reports what it checked and offers the rest instead of claiming none exist', async t => {
-  const silent = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF', 'GGG'].map(group => [`Fixture.Show.S01E01.One.WEBRip.x264-${group}.mp4`, 'eac3']);
+  const silent = [...['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF', 'GGG'].map(group => [`Fixture.Show.S01E01.One.WEBRip.x264-${group}.mp4`, 'eac3']),['Fixture.Show.S01E01.One.720p.H264.AAC-HHH.mkv','aac',false]];
   const { page, fixture } = await setup(t, silent);
   await page.waitForFunction(() => !document.querySelector('#player-more-versions').hidden, null, { timeout: 120000 });
   const first = await videoState(page);
@@ -94,9 +94,19 @@ test('when every cached version is silent, the player reports what it checked an
   await page.locator('#player-more-versions').click();
   await page.waitForFunction(() => /Checked 7 versions/.test(document.querySelector('#player-message').textContent), null, { timeout: 90000 });
   const done = await videoState(page);
-  assert.match(done.message, /Checked 7 versions; none had sound this browser can play\. No other cached version is available to check\./);
-  assert.equal(done.more, false);
+  assert.match(done.message, /Checked 7 versions; none had sound this browser can play\. No more cached versions remain\./);
+  assert.equal(done.more, true);
+  assert.equal(done.moreText, 'Find other versions');
   assert.equal(fixture.control.playbackCalls, 7);
+  assert.equal(fixture.control.creates,0,'automatic audio recovery must never add torrents');
+  await page.locator('#player-more-versions').click();
+  await page.locator('#source-dialog').waitFor({state:'visible'});
+  assert.match(await page.locator('#source-options').textContent(),/AAC-HHH/);
+  assert.equal(await page.locator('#source-options .recommended button').first().textContent(),'Prepare');
+  assert.equal(await page.getByRole('button',{name:'Refresh results'}).isVisible(),true);
+  assert.equal(fixture.control.creates,0,'an uncached file must not prepare before explicit selection');
+  await page.locator('#close-source').click();
+  assert.equal(await page.locator('#player').evaluate(dialog=>dialog.open),true);
 });
 
 
