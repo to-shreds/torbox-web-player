@@ -783,26 +783,48 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     void resolveQuickTarget(meta).then(resolved=>{if(active&&currentMeta===meta&&$('title-dialog').open)warmPlayback(resolved.target);}).catch(()=>{});
   }
 
-  async function openOptions(meta,target,episodeName=''){
+  async function openOptions(meta,target,episodeName='',options={}) {
     currentMeta=meta;if(!$('source-dialog').open)$('source-dialog').showModal();$('source-title').textContent=episodeName?`${meta.name} · S${target.season}E${target.episode}`:meta.name;
-    await findSources(meta,target,episodeName);
+    await findSources(meta,target,episodeName,options);
   }
 
-  function renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution,page=0){
+  async function openPlaybackAlternatives(context){
+    if(!active||guestMode||!context?.current||!['movie','series'].includes(context.current.type))return false;
+    const current=context.current,target={type:current.type,id:current.id};
+    if(current.type==='series'){target.season=current.season;target.episode=current.episode;}
+    const meta={id:target.id,type:target.type,name:context.title||'Current title',poster:context.poster||'',episodes:[]};
+    await openOptions(meta,target,context.episodeName||'',{recoveryContext:context,complete:true,refresh:true});
+    return true;
+  }
+
+  function selectedPlaybackContext(meta,target,episodeName,resolution,source,recoveryContext){
+    const next=buildContext(meta,target,episodeName,resolution,source);
+    if(!recoveryContext)return next;
+    const attempted=new Set(Array.isArray(recoveryContext.recoveryTried)?recoveryContext.recoveryTried:[]);
+    const position=Number.isFinite(recoveryContext.recoveryPosition)?Math.max(0,recoveryContext.recoveryPosition):0;
+    return {...next,recoveryPosition:position,audioRecoveryOrigin:position,recoveryTried:[...attempted],
+      recoverySkipped:[...(recoveryContext.recoverySkipped||[])],recoveryAllowance:attempted.size+MAX_AUDIO_RECOVERY_ATTEMPTS,
+      queue:recoveryContext.queue||next.queue,forceStartOver:false,rewindOnResumeSeconds:0,resumeIntent:true};
+  }
+
+  function renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution,page=0,recoveryContext=null){
     area.replaceChildren(status);
-    const controls=element('div','','source-controls'),label=element('label','Resolution'),select=createResolutionSelect(resolution);label.append(select);controls.append(label);area.append(controls);
+    const controls=element('div','','source-controls'),label=element('label','Resolution'),select=createResolutionSelect(resolution);label.append(select);controls.append(label);
+    if(recoveryContext)controls.append(button('Refresh results',()=>findSources(meta,target,episodeName,{recoveryContext,complete:true,refresh:true})));
+    area.append(controls);
     const visible=filterSourcesByResolution(list,resolution);
     if(!visible.length){
       area.append(element('p','No sources match this resolution.','source-note'));
-      select.addEventListener('change',()=>renderSourceTable(meta,list,target,episodeName,generation,area,status,select.value,0));
+      select.addEventListener('change',()=>renderSourceTable(meta,list,target,episodeName,generation,area,status,select.value,0,recoveryContext));
       return;
     }
-    const best=recommendSource(visible,target.type,resolution),context=best?buildContext(meta,target,episodeName,resolution,best):null;
+    const choices=recoveryContext?visible.filter(source=>!source.audioRisk&&!source.videoRisk&&source.memoryBad!==true&&source.memoryAudio!=='bad'):visible;
+    const best=recommendSource(choices,target.type,resolution),context=best?selectedPlaybackContext(meta,target,episodeName,resolution,best,recoveryContext):null;
     if(best){
       const box=element('section','','recommended'),copy=element('div','','recommended-copy');
       copy.append(element('div','Recommended','recommended-kicker'),element('div',best.title,'recommended-title'),element('p',[best.cached?'Cached':'Not cached',qualityText(best),formatBytes(best.size),Number.isSafeInteger(best.seeders)?best.seeders+' seeders':''].filter(Boolean).join(' · '),'recommended-meta'));
       const recommendedActions=element('div','','recommended-actions');
-      recommendedActions.append(button(best.cached?'Play':'Prepare',async()=>{try{await ensureService();const result=await readyFile(best,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();closeTitleForPlayback();await play(result.file,buildContext(meta,target,episodeName,resolution,best));}catch(e){status.textContent=e.message;status.classList.add('error');}},true));
+      recommendedActions.append(button(best.cached?'Play':'Prepare',async()=>{try{await ensureService();const result=await readyFile(best,{signal:AbortSignal.any([sourceAbort.signal,AbortSignal.timeout(330000)]),unattended:!!recoveryContext});$('source-dialog').close();closeTitleForPlayback();await play(result.file,selectedPlaybackContext(meta,target,episodeName,resolution,best,recoveryContext));}catch(e){status.textContent=e.message;status.classList.add('error');}},true));
       if(!guestMode&&typeof driveTest==='function')recommendedActions.append(button('Share',async()=>{try{await ensureService();const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});$('source-dialog').close();if($('title-dialog').open)$('title-dialog').close();await driveTest(result.file,context);}catch(e){status.textContent=e.message;status.classList.add('error');}}));
       box.append(copy,recommendedActions);area.append(box);
     }
@@ -822,24 +844,24 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
           row.classList.add('source-blocked');const unsupported=button('Not playable',()=>{});unsupported.disabled=true;unsupported.title=source.hint||'This container cannot play in Android Chrome';action.append(unsupported);
         }else if(source.memoryBad||source.memoryAudio==='bad'){
           row.classList.add('source-blocked');const allow=button('Allow',()=>{setSourceBad(target,source,false);setAudioFeedback(target,source,'unknown');findSources(meta,target,episodeName);});allow.title='Remove this source from the local bad-source list';action.append(allow);
-        }else action.append(button(source.cached?'Play':'Prepare',async()=>{try{await ensureService();const result=await readyFile(source,{signal:AbortSignal.timeout(330000)});$('source-dialog').close();closeTitleForPlayback();await play(result.file,buildContext(meta,target,episodeName,resolution,source));}catch(e){status.textContent=e.message;status.classList.add('error');}}));
+        }else action.append(button(source.cached?'Play':'Prepare',async()=>{try{await ensureService();const result=await readyFile(source,{signal:AbortSignal.any([sourceAbort.signal,AbortSignal.timeout(330000)]),unattended:!!recoveryContext});$('source-dialog').close();closeTitleForPlayback();await play(result.file,selectedPlaybackContext(meta,target,episodeName,resolution,source,recoveryContext));}catch(e){status.textContent=e.message;status.classList.add('error');}}));
         row.append(action);body.append(row);
       }
       table.append(body);wrap.append(table);area.append(wrap);
       if(pages>1){
-        const pager=element('nav','','source-pager'),prev=button('‹',()=>renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution,safePage-1)),next=button('›',()=>renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution,safePage+1));
+        const pager=element('nav','','source-pager'),prev=button('‹',()=>renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution,safePage-1,recoveryContext)),next=button('›',()=>renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution,safePage+1,recoveryContext));
         prev.disabled=safePage===0;next.disabled=safePage===pages-1;pager.append(prev,element('span',`${safePage+1} / ${pages}`),next);area.append(pager);
       }
     }
-    select.addEventListener('change',()=>{setResolution(select.value);renderSourceTable(meta,list,target,episodeName,generation,area,status,select.value,0);});
+    select.addEventListener('change',()=>{setResolution(select.value);renderSourceTable(meta,list,target,episodeName,generation,area,status,select.value,0,recoveryContext);});
   }
 
-  async function findSources(meta,target,episodeName=''){
+  async function findSources(meta,target,episodeName='',{recoveryContext=null,complete=false,refresh=false}={}){
     cancelSource();const generation=sourceGeneration;sourceAbort=new AbortController();const area=$('source-options'),status=element('p','Finding sources…','status subtle-status');area.replaceChildren(status);
     const alive=()=>active&&generation===sourceGeneration&&$('source-dialog').open;
     try{
-      const result=await registeredSources(target,sourceAbort.signal);if(!alive())return;status.textContent=result.warning||'';renderSourceTable(meta,result.sources,target,episodeName,generation,area,status,getResolution(target));
-    }catch(e){if(alive()){status.textContent=e.message;status.classList.add('error');area.append(button('Retry',()=>findSources(meta,target,episodeName)));}}
+      const result=await registeredSources(target,sourceAbort.signal,{complete:complete||!!recoveryContext,refresh});if(!alive())return;status.textContent=result.warning||'';renderSourceTable(meta,result.sources,target,episodeName,generation,area,status,recoveryContext?'auto':getResolution(target),0,recoveryContext);
+    }catch(e){if(alive()){status.textContent=e.message;status.classList.add('error');area.append(button('Retry',()=>findSources(meta,target,episodeName,{recoveryContext,complete,refresh:true})));}}
   }
 
   async function prepareNext(context,{signal}={}){
@@ -962,7 +984,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       guestMode=true;active=true;
       await showTitle({type:scope.type,id:scope.id,name:scope.name||'Shared title',poster:scope.poster||''});
     },
-    cancelPlayback,prepareNext,playPreparedNext,playNext,recoverPlayback,openHistoryTitle,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){preparations.clear();refreshPosterRatings();renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);renderTitleExtras();}},
+    cancelPlayback,prepareNext,playPreparedNext,playNext,recoverPlayback,openPlaybackAlternatives,openHistoryTitle,resumeRecent,startOverRecent:entry=>resumeRecent(entry,true),historyChanged(){renderNextUp();},settingsChanged(){preparations.clear();refreshPosterRatings();renderWatchlist();renderSearchHistory();renderNextUp();if(currentMeta&&$('title-dialog').open){updateWatchlistButton();if(currentMeta.type==='series')renderEpisodes(currentMeta);else renderMovieActions(currentMeta);renderTitleExtras();}},
     suspend(){preparations.clear();cancelPlayback();active=false;guestMode=false;document.body.classList.remove('search-mode');++catalogGeneration;catalogAbort?.abort();cancelTitle();clearTimeout(searchTimer);metas=[];nextSkip=null;currentMeta=null;$('catalog-grid').replaceChildren();$('title-content').replaceChildren();$('episode-area').replaceChildren();$('source-options').replaceChildren();if($('title-dialog').open)$('title-dialog').close();if($('source-dialog').open)$('source-dialog').close();}
   };
 }
