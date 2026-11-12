@@ -262,9 +262,23 @@ async function withinAutomaticBudget(action,signal){
     Promise.resolve().then(action).then(value=>{if(settled)return;settled=true;signal.removeEventListener('abort',stop);resolve(value);},error=>{if(settled)return;settled=true;signal.removeEventListener('abort',stop);reject(error);});
   });
 }
-export async function resolveAutomaticCachedSource(list,target,resolution,{prepare,onCandidate,onRejected,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,sizeProfile='balanced',totalTimeoutMs=AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS,requireCompatibleAudio=false,unknownProbes=STRICT_AUDIO_UNKNOWN_PROBES}={}){
+// Give a confirmed working season pack first refusal for the next episode,
+// without treating one episode's decoded audio as proof about another file.
+// Only apply the preference to safe, cached candidates for that exact target.
+export function preferSameTorrent(ordered,preferredTorrentHash,requireCompatibleAudio=false){
+  const rows=Array.isArray(ordered)?ordered:[];
+  const hash=typeof preferredTorrentHash==='string'?preferredTorrentHash.toLowerCase():'';
+  if(!/^[a-f0-9]{40}$/.test(hash))return rows;
+  const index=rows.findIndex(source=>source?.hash?.toLowerCase()===hash&&source.cached!==false&&
+    source.cachedBrowserPlayable!==false&&source.browserUnsupported!==true&&source.audioRisk!==true&&
+    source.videoRisk!==true&&source.memoryBad!==true&&source.memoryAudio!=='bad'&&
+    sourceLanguagePreference(source)>0&&(!requireCompatibleAudio||sourceAudioConfidence(source)>=2));
+  return index>0?[rows[index],...rows.slice(0,index),...rows.slice(index+1)]:rows;
+}
+export async function resolveAutomaticCachedSource(list,target,resolution,{prepare,onCandidate,onRejected,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,sizeProfile='balanced',totalTimeoutMs=AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS,requireCompatibleAudio=false,unknownProbes=STRICT_AUDIO_UNKNOWN_PROBES,preferredTorrentHash=''}={}){
   if(typeof prepare!=='function')throw new TypeError('Automatic source preparation is not configured.');
-  const candidates=strictAudioCandidates(automaticCachedSourceOrder(list,target?.type||'movie',resolution,sizeProfile),requireCompatibleAudio,unknownProbes).slice(0,Math.max(0,maxCandidates));
+  const ordered=automaticCachedSourceOrder(list,target?.type||'movie',resolution,sizeProfile);
+  const candidates=strictAudioCandidates(preferSameTorrent(ordered,target?.type==='series'?preferredTorrentHash:'',requireCompatibleAudio),requireCompatibleAudio,unknownProbes).slice(0,Math.max(0,maxCandidates));
   if(!candidates.length){const error=new Error(NO_CACHED_BROWSER_SOURCE_MESSAGE);error.code='NO_CACHED_BROWSER_SOURCE';throw error;}
   const budgetSignal=Number.isFinite(totalTimeoutMs)&&totalTimeoutMs>0?AbortSignal.timeout(totalTimeoutMs):null;
   for(const source of candidates){
@@ -544,15 +558,17 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     throw new Error('TorBox is still preparing this source. Try again shortly.');
   }
 
-  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,cacheErrorCode,requireCompatibleAudio=!audioDecodeObservable,unknownProbes=STRICT_AUDIO_UNKNOWN_PROBES}={}){
+  async function readyBrowserSource(sources,target,resolution,{signal,onCandidate,maxCandidates=AUTOMATIC_SOURCE_CANDIDATES,cacheErrorCode,requireCompatibleAudio=!audioDecodeObservable,unknownProbes=STRICT_AUDIO_UNKNOWN_PROBES,preferredTorrentHash=''}={}){
     if(blockedCacheChecks.has(cacheErrorCode)){const error=new Error(cacheErrorCode==='TORBOX_RATE_LIMITED'?'TorBox is temporarily limiting requests. Wait a moment, then check again.':cacheErrorCode==='TORBOX_ACCESS_DENIED'?'TorBox could not authorize the availability check. Check your account sign-in, then retry.':cacheErrorCode==='TORBOX_NOT_CONFIGURED'?'The TorBox connection is not configured. Check your account connection.':cacheErrorCode==='TORBOX_PLAN_RESTRICTED'?'TorBox reported an account restriction while checking availability.':'TorBox returned an unreadable availability response. Check again shortly.');error.code=cacheErrorCode;throw error;}
     // A policy rejection belongs to this bounded attempt, not permanent user
     // feedback. Browser support can change independently of the source itself.
-    return resolveAutomaticCachedSource(sourcesForAudioRequirement(sources,requireCompatibleAudio),target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,requireCompatibleAudio,unknownProbes,prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false,onlyCached:true,requireCompatibleAudio})});
+    return resolveAutomaticCachedSource(sourcesForAudioRequirement(sources,requireCompatibleAudio),target,resolution,{maxCandidates,sizeProfile:getSettings().sourceSizeProfile,onCandidate,requireCompatibleAudio,unknownProbes,preferredTorrentHash,prepare:(source,{signal:budgetSignal})=>readyFile(source,{signal:signal&&budgetSignal?AbortSignal.any([signal,budgetSignal]):signal||budgetSignal,unattended:true,waitForPreparation:false,onlyCached:true,requireCompatibleAudio})});
   }
 
-  async function preparedPlayback(target,resolution,{signal,onCandidate,refresh=false}={}){
-    const key=JSON.stringify([target.type,target.id,target.season??null,target.episode??null,resolution,getSettings().sourceSizeProfile,$('viewer').value]);
+  async function preparedPlayback(target,resolution,{signal,onCandidate,refresh=false,preferredTorrentHash=''}={}){
+    const previousHash=target?.type==='series'&&/^[a-f0-9]{40}$/i.test(preferredTorrentHash)?preferredTorrentHash.toLowerCase():'';
+    // The ordinary warm-cache entry must not mask a same-pack candidate.
+    const key=JSON.stringify([target.type,target.id,target.season??null,target.episode??null,resolution,getSettings().sourceSizeProfile,$('viewer').value,previousHash]);
     if(refresh)preparations.delete(key);
     const notify=source=>{if(!signal?.aborted)onCandidate?.(source);};
     const prepared=await preparations.get(key,async backgroundSignal=>{
@@ -560,7 +576,18 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       let registered;
       try{
         registered=await registeredSources(target,bounded,{fast:true,refresh});
-        try{return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify,cacheErrorCode:registered.cacheErrorCode,requireCompatibleAudio:registered.complete===false||!audioDecodeObservable,
+        // The short initial index may omit a season-pack torrent. Search the
+        // complete results before choosing a different copy unless the fast
+        // batch already proves this hash has a cached, compatible candidate.
+        if(previousHash&&registered.complete===false&&!registered.sources.some(source=>
+          source.hash?.toLowerCase()===previousHash&&source.cached===true&&
+          source.cachedBrowserPlayable!==false&&source.audioRisk!==true&&source.videoRisk!==true&&
+          source.browserUnsupported!==true&&source.memoryBad!==true&&source.memoryAudio!=='bad'&&
+          sourceAudioConfidence(source)>=2)){
+          try{registered=await registeredSources(target,bounded,{complete:true});}
+          catch(error){if(bounded.aborted||error?.name==='AbortError'||blockedCacheChecks.has(error?.code))throw error;}
+        }
+        try{return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify,cacheErrorCode:registered.cacheErrorCode,preferredTorrentHash:previousHash,requireCompatibleAudio:registered.complete===false||!audioDecodeObservable,
           // An incomplete first batch is followed by the complete search, which
           // performs any unknown-audio probe; do not prepare the same probe twice.
           unknownProbes:registered.complete===false?0:STRICT_AUDIO_UNKNOWN_PROBES}),registered};}
@@ -571,12 +598,12 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       // before falling back to audio the browser must check during playback.
       try{
         registered=await registeredSources(target,bounded,{complete:true});
-        return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify,cacheErrorCode:registered.cacheErrorCode}),registered};
+        return{...await readyBrowserSource(registered.sources,target,resolution,{signal:bounded,onCandidate:notify,cacheErrorCode:registered.cacheErrorCode,preferredTorrentHash:previousHash}),registered};
       }catch(error){error.registered=registered?.sources?.length?registered:error.registered||registered;throw error;}
     },{signal});
     const remembered=applySourceMemory(target,[prepared.source])[0];
     if(remembered.memoryBad||remembered.memoryAudio==='bad'){
-      preparations.delete(key);return preparedPlayback(target,resolution,{signal,onCandidate});
+      preparations.delete(key);return preparedPlayback(target,resolution,{signal,onCandidate,preferredTorrentHash:previousHash});
     }
     return prepared;
   }
@@ -864,12 +891,12 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     }catch(e){if(alive()){status.textContent=e.message;status.classList.add('error');area.append(button('Retry',()=>findSources(meta,target,episodeName,{recoveryContext,complete,refresh:true})));}}
   }
 
-  async function prepareNext(context,{signal}={}){
+  async function prepareNext(context,{signal,preferredTorrentHash=''}={}){
     if(!active||!context?.queue?.length)return null;const next=context.queue[0],rest=context.queue.slice(1);
     const bounded=signal?AbortSignal.any([signal,AbortSignal.timeout(20000)]):AbortSignal.timeout(20000);
     try{
       const meta=await api(`/api/discover/meta?type=series&id=${next.id}`,{signal:bounded});
-      const {source:best,result}=await preparedPlayback(next,context.resolution||'auto',{signal:bounded});if(best.audioRisk)return null;
+      const {source:best,result}=await preparedPlayback(next,context.resolution||'auto',{signal:bounded,preferredTorrentHash});if(best.audioRisk)return null;
       return{file:result.file,context:{...buildContext(meta.meta,next,next.name||'',context.resolution||getResolution(next),best),poster:meta.meta.poster||context.poster,queue:rest}};
     }catch(error){
       if(error?.name==='AbortError'||error?.name==='TimeoutError')throw error;

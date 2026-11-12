@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const BUILD='release-1.2.17-audio-sources.1';
+const BUILD='release-1.2.18-next-torrent.1';
 const EXISTING_MODULE_BUILD='release-1.2.16-details.1';
 const STATIC_BUILD='release-1.2.8-party.1';
 

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { sourceHints } from '../public/source-client.js';
-import { automaticCachedSourceOrder, browserPreparationOptions, resolveAutomaticCachedSource, AUTOMATIC_SOURCE_CANDIDATES } from '../public/discover.js';
+import { automaticCachedSourceOrder, browserPreparationOptions, resolveAutomaticCachedSource, preferSameTorrent, AUTOMATIC_SOURCE_CANDIDATES } from '../public/discover.js';
 
 function source(id, { resolution = '720p', audio = '', ...extra } = {}) {
   const filename = `Fixture.Show.S01E01.${resolution}.H264${audio ? '.' + audio : ''}.${audio === 'AAC' ? 'mp4' : 'mkv'}`;
@@ -96,4 +96,54 @@ test('cross-quality ordering still deduplicates the same source recovery key', (
     assert.deepEqual(choices.map(row => row.id), [other.id, compatibleSameKey.id]);
     assert.equal(choices.find(row => row.id === compatibleSameKey.id).filename, compatibleSameKey.filename);
   }
+});
+
+test('the next episode prefers the same cached torrent over an otherwise higher-ranked compatible copy',async()=>{
+  const other=source(1,{resolution:'720p',audio:'AAC',size:350000000});
+  const pack=source(2,{resolution:'1080p',audio:'AAC',size:2500000000});
+  const normally=automaticCachedSourceOrder([other,pack],'series','720p');
+  assert.equal(normally[0].hash,other.hash,'ordinary choice still prefers the normal source');
+  assert.equal(preferSameTorrent(normally,pack.hash)[0].hash,pack.hash);
+  const attempted=[];
+  const chosen=await resolveAutomaticCachedSource([other,pack],{type:'series'},'720p',{
+    preferredTorrentHash:pack.hash,prepare:async candidate=>{
+      attempted.push(candidate.hash);return{state:'ready',file:{id:'exact-episode-file'}};
+    }
+  });
+  assert.equal(chosen.source.hash,pack.hash);assert.deepEqual(attempted,[pack.hash]);
+  const movie=await resolveAutomaticCachedSource([other,pack],{type:'movie'},'720p',{
+    preferredTorrentHash:pack.hash,prepare:async candidate=>({state:'ready',file:{id:candidate.id}})
+  });
+  assert.equal(movie.source.hash,other.hash,'same-torrent preference must not affect movies or ordinary playback');
+});
+
+test('same-torrent preference never overrides known audio, container, language or cache hazards',()=>{
+  const safe=source(1,{audio:'AAC'}),hash=source(2,{audio:'AAC'}).hash;
+  for(const unsafe of [
+    source(2,{audio:'DDP5.1'}),
+    {...source(2,{audio:'AAC'}),cached:false},
+    {...source(2,{audio:'AAC'}),cachedBrowserPlayable:false},
+    {...source(2,{audio:'AAC'}),memoryBad:true},
+    {...source(2,{audio:'AAC'}),memoryAudio:'bad'},
+    {...source(2,{audio:'AAC'}),browserUnsupported:true},
+    {...source(2,{audio:'AAC'}),videoRisk:true},
+    {...source(2,{audio:'AAC'}),languages:['ru']}
+  ])assert.deepEqual(preferSameTorrent([safe,unsafe],hash).map(x=>x.id),[safe.id,unsafe.id]);
+  assert.equal(preferSameTorrent([safe,source(2)],hash,true)[0].id,safe.id,
+    'a browser without decoder telemetry must not promote unknown-audio files');
+  assert.equal(preferSameTorrent([safe,source(2,{audio:'AAC'})],hash,true)[0].id,'2');
+  assert.equal(preferSameTorrent([safe,source(2,{audio:'AAC'})],'not-a-hash')[0].id,safe.id);
+});
+
+test('a preferred season-pack failure still checks a compatible alternative without uncached writes',async()=>{
+  const pack=source(2,{resolution:'1080p',audio:'AAC'}),other=source(1,{audio:'AAC'});
+  const attempted=[];
+  const chosen=await resolveAutomaticCachedSource([other,pack],{type:'series'},'720p',{
+    preferredTorrentHash:pack.hash,prepare:async candidate=>{
+      attempted.push(candidate.hash);
+      if(candidate.hash===pack.hash){const error=new Error('Next episode file not present in this pack');error.code='PREPARED_ITEM_MISSING';throw error;}
+      return{state:'ready',file:{id:'the-correct-episode'}};
+    }
+  });
+  assert.equal(chosen.source.hash,other.hash);assert.deepEqual(attempted,[pack.hash,other.hash]);
 });

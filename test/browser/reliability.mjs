@@ -234,3 +234,62 @@ test('startup errors show a working Try again button',async t=>{
   fail=false;await page.locator('#startup-retry').click();await page.waitForSelector('#workspace:not([hidden])');
   assert.ok(await page.locator('#loading').isHidden());
 });
+
+test('auto-next reuses the current decoded-audio season pack after verifying the next exact episode',async t=>{
+  const prior={lookup:fixture.sourceLookup.lookup,request:fixture.provider.request,
+    resolveForRelay:fixture.provider.resolveForRelay,cached:fixture.discovery.gateway.cached};
+  t.after(()=>{
+    fixture.sourceLookup.lookup=prior.lookup;fixture.provider.request=prior.request;
+    fixture.provider.resolveForRelay=prior.resolveForRelay;fixture.discovery.gateway.cached=prior.cached;
+  });
+  const pack={id:1,hash:'a'.repeat(40),name:'Fixture Show',download_finished:true,download_present:true,files:[
+    {id:0,short_name:'Fixture.Show.S01E01.One.1080p.H264.AAC.mp4',mimetype:'video/mp4',size:2500000},
+    {id:1,short_name:'Fixture.Show.S01E02.Two.1080p.H264.AAC.mp4',mimetype:'video/mp4',size:2500000}
+  ]};
+  const alternative={id:2,hash:'b'.repeat(40),name:'Fixture Show',download_finished:true,download_present:true,files:[
+    {id:0,short_name:'Fixture.Show.S01E02.Two.720p.H264.AAC.mp4',mimetype:'video/mp4',size:1000000}
+  ]};
+  const items=[pack,alternative],lookups=[],played=[];
+  const row=(item,file=0)=>({hash:item.hash,title:item.files[file].short_name,
+    filename:item.files[file].short_name,resolution:item===pack?'1080p':'720p',
+    videoCodec:'H264',audioCodecs:['AAC'],size:item===pack?2500000000:250000000,provider:'Season pack test'});
+  fixture.sourceLookup.lookup=async(query,options={})=>{
+    fixture.control.lookupCalls++;lookups.push({episode:query.episode,fast:options.fast===true,complete:options.complete===true});
+    if(query.episode===1)return{complete:true,sources:[row(pack,0)]};
+    const full=options.complete===true;
+    return{complete:full,sources:full?[row(alternative),row(pack,1)]:[row(alternative)]};
+  };
+  fixture.discovery.gateway.cached=async hashes=>Object.fromEntries(hashes.map(hash=>{
+    const item=items.find(x=>x.hash===hash);
+    return[hash,{cached:!!item,files:item?item.files.map(f=>({name:f.short_name,size:f.size,mime:f.mimetype})):[]}];
+  }));
+  fixture.provider.request=async (_path,params)=>params?.id?items.find(x=>x.id===Number(params.id)):items;
+  fixture.provider.resolveForRelay=async id=>{
+    const [kind,itemId,fileId]=String(id).split(':');
+    const item=items.find(x=>x.id===Number(itemId)),file=item?.files.find(f=>f.id===Number(fileId));
+    assert.equal(kind,'torrents');assert.ok(file,'the backend must select the exact episode file');
+    played.push({torrent:item.id,file:file.id,title:file.short_name});
+    return{file:{id,title:file.short_name,mime:'video/mp4',state:'Ready to watch'},
+      upstreamUrl:'https://store.tb-cdn.io/fixture.mp4?token=fixture-master-key'};
+  };
+  const {page}=await pageFor(t);await home(page);await playEpisode(page);
+  await page.waitForFunction(()=>document.querySelector('#video-slot video')?.webkitAudioDecodedByteCount>0,
+    null,{timeout:15000});
+  assert.deepEqual(played.map(x=>[x.torrent,x.file]),[[1,0]]);
+  const warmed=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/discover/prepare'&&response.status()===200);
+  await page.locator('#video-slot video').evaluate(video=>{video.currentTime=32;});
+  const warmResult=await (await warmed).json();
+  assert.equal(warmResult.file?.title,pack.files[1].short_name);
+  assert.ok(lookups.some(x=>x.episode===2&&x.fast),'auto-next starts with the standard fast lookup');
+  assert.ok(lookups.some(x=>x.episode===2&&x.complete),
+    'preloader must expand an incomplete lookup before giving up on the current torrent');
+  await page.locator('#video-slot video').evaluate(video=>{video.currentTime=112;});
+  await page.locator('#play-next-now').waitFor({state:'visible'});
+  await page.locator('#play-next-now').click();
+  await page.waitForFunction(()=>document.querySelector('#playing-title').textContent.includes('S01E02')&&
+    document.querySelector('#video-slot video')?.currentTime>0);
+  assert.deepEqual(played.map(x=>[x.torrent,x.file]),[[1,0],[1,1]],
+    'episode two must use the same hash but a different validated video-file ID');
+  assert.equal(fixture.control.creates,0,'next episode must remain cached-only');
+  assert.equal(fixture.control.mediaFetches,0,'all media continues directly from the CDN');
+});
