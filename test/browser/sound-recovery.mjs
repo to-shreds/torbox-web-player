@@ -101,6 +101,7 @@ test('when every cached version is silent, the player reports what it checked an
   assert.equal(fixture.control.creates,0,'automatic audio recovery must never add torrents');
   await page.locator('#player-more-versions').click();
   await page.locator('#source-dialog').waitFor({state:'visible'});
+  await page.waitForFunction(() => /AAC-HHH/.test(document.querySelector('#source-options').textContent), null, {timeout:30000});
   assert.match(await page.locator('#source-options').textContent(),/AAC-HHH/);
   assert.equal(await page.locator('#source-options .recommended button').first().textContent(),'Prepare');
   assert.equal(await page.getByRole('button',{name:'Refresh results'}).isVisible(),true);
