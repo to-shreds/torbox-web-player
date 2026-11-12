@@ -111,7 +111,12 @@ test('automatic playback stays bounded and never opens the technical source pick
   assert.ok(source.includes('AbortSignal.timeout(waitForPreparation?preparationTimeoutMs:initialTimeoutMs)'));
   assert.ok(source.includes('unattended?selectAutomaticVideoFile(result.files,source.deviceVideoSupport):result.files[0]'));
   assert.ok(!source.includes("if(e?.code==='NO_CACHED_BROWSER_SOURCE')await openOptions(meta,target,episodeName)"));
-  assert.ok(!source.includes('await openOptions('));
+  const automatic=source.split('  async function quickPlay(')[1]?.split('  async function ')[0];
+  const recovery=source.split('  async function recoverPlayback(')[1]?.split('  async function ')[0];
+  assert.ok(automatic&&!automatic.includes('openOptions('),'initial automatic playback must never open the source picker');
+  assert.ok(recovery&&!recovery.includes('openOptions('),'automatic recovery must never open the source picker');
+  assert.ok(source.includes("await openOptions(meta,target,context.episodeName||'',{recoveryContext:context,complete:true,refresh:true})"),
+    'the complete source picker is available only through the explicit recovery action');
   assert.equal(AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS,5000);
   assert.equal(AUTOMATIC_SOURCE_TOTAL_TIMEOUT_MS,18000);
   assert.equal(AUTOMATIC_SOURCE_CANDIDATES,8);

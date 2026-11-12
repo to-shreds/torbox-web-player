@@ -1,6 +1,6 @@
 const CACHE_PREFIX='torbox-player:'+self.registration.scope+':';
-const CACHE=CACHE_PREFIX+'release-1.2.16-details.1';
-const BUILD='release-1.2.16-details.1';
+const CACHE=CACHE_PREFIX+'release-1.2.17-audio-sources.1';
+const BUILD='release-1.2.17-audio-sources.1';
 const STATIC_BUILD='release-1.2.8-party.1';
 const RETRO_BUILD='release-1.2.15-retro.1';
 const SHELL=[

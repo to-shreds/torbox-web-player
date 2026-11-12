@@ -203,3 +203,6 @@ main{max-width:1160px;padding:1rem clamp(.8rem,3vw,2rem) 3rem}.workspace-bar{dis
 .poster-rating{font-size:.65rem;line-height:1.35;color:#b9d7b5;overflow-wrap:anywhere}
 .kid-mode .title-external-link,.guest-mode .title-external-link{display:none!important}
 @media(max-width:620px){.similar-grid{grid-auto-columns:98px;gap:.5rem}.title-rating-badge{font-size:.7rem}.title-rating-source{font-size:.6rem}.poster-rating{font-size:.59rem}.trailer-link{font-size:.76rem}.detail-poster{width:64px;height:96px}}
+
+#player-more-versions:not([hidden]){display:flex;margin:0 auto 1rem}
+#player-more-versions[hidden]{display:none!important}

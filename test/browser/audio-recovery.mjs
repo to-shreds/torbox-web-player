@@ -196,8 +196,13 @@ test('cross-origin EAC3 video automatically recovers to cached AAC decoding and 
 
 test('audio exhaustion pauses silent video and leaves a visible recovery action without a retry loop', async t => {
   const { page, fixture, observations } = await setup(t, { alternative: false });
-  await page.waitForFunction(() => { const video = document.querySelector('#video-slot video'); return video?.paused && /This version plays without sound in this browser\. No other cached version is available to check\./.test(document.querySelector('#player-message').textContent); });
-  assert.equal(await page.locator('#player-more-versions').isVisible(), false, 'no further versions are offered when none exist');
+  await page.waitForFunction(() => { const video = document.querySelector('#video-slot video'); return video?.paused && /This version plays without sound in this browser\. No more cached versions remain\./.test(document.querySelector('#player-message').textContent); });
+  assert.equal(await page.locator('#player-more-versions').isVisible(), true, 'exhaustion must offer a path beyond cached copies');
+  assert.equal(await page.locator('#player-more-versions').textContent(), 'Find other versions');
+  await page.locator('#player-more-versions').click();
+  await page.locator('#source-dialog').waitFor({state:'visible'});
+  await page.getByRole('button',{name:'Refresh results'}).waitFor({state:'visible'});
+  await page.locator('#close-source').click();
   const failed = await state(page); observations.push({ failed });
   assert.equal(fixture.control.playbackCalls, 1); assert.equal(failed.audioBytes, 0);
   assert.equal(await page.getByRole('button', { name: /^No sound$/ }).count(), 0);
