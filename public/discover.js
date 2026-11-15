@@ -887,7 +887,9 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
         if(!alive())return;
         const selectedSignal=AbortSignal.any([sourceAbort.signal,AbortSignal.timeout(330000)]);
         const result=await readyFile(source,{
-          signal:selectedSignal,unattended:!!recoveryContext,
+          signal:selectedSignal,unattended:false,
+          // A deliberate manual choice must not be rejected by the automatic
+          // sound/codec heuristics; the browser still checks actual playback.
           onProgress:message=>{stage=message;report();}
         });
         if(!alive())return;
@@ -925,7 +927,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
 
     const alternates=visible.filter(source=>source.id!==best?.id);
     if(alternates.length){
-      const mobile=typeof matchMedia==='function'&&matchMedia('(max-width: 620px)').matches,pageSize=mobile?3:6,pages=Math.max(1,Math.ceil(alternates.length/pageSize)),safePage=Math.min(Math.max(0,page),pages-1);
+      const compact=typeof matchMedia==='function'&&(matchMedia('(max-width: 620px)').matches||matchMedia('(max-height: 700px)').matches),pageSize=compact?3:6,pages=Math.max(1,Math.ceil(alternates.length/pageSize)),safePage=Math.min(Math.max(0,page),pages-1);
       const rows=alternates.slice(safePage*pageSize,(safePage+1)*pageSize);
       const wrap=element('div','','source-table-wrap'),table=element('table','','source-table'),head=document.createElement('thead'),hr=document.createElement('tr');
       for(const title of ['Filename','Size','Seeders','Quality','TorBox',''])hr.append(element('th',title));head.append(hr);table.append(head);const body=document.createElement('tbody');
