@@ -231,11 +231,13 @@ test('Browse all versions selects the clicked alternative, shows elapsed progres
   await page.waitForFunction(() => /· [01]s/.test(document.querySelector('#source-options > .source-working')?.textContent||''));
   assert.equal(await selected.isDisabled(),true,'a pending selection cannot be clicked again');
   assert.equal(fixture.control.playbackCalls,1,'old video continues while chosen source is prepared');
+  // The title changes before the /api/playback handoff completes, so wait
+  // for the chooser to close before asserting that the selected file loaded.
+  await page.locator('#source-dialog').waitFor({state:'hidden',timeout:45000});
   await page.waitForFunction(() => {
     const video=document.querySelector('#video-slot video');
     return /AAC-CCC/.test(document.querySelector('#playing-title')?.textContent||'')&&video?.readyState>=1&&!video.seeking;
   },null,{timeout:45000});
-  assert.equal(await page.locator('#source-dialog').isHidden(),true);
   const resumed=await page.locator('#video-slot video').evaluate(video=>({time:video.currentTime,duration:video.duration}));
   assert.ok(resumed.time>=Math.min(position,Math.max(0,resumed.duration-.25))-.5,'clicked version resumes at original position');
   assert.equal(fixture.control.playbackCalls,2);
