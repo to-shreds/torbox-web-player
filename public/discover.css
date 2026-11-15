@@ -206,3 +206,11 @@ main{max-width:1160px;padding:1rem clamp(.8rem,3vw,2rem) 3rem}.workspace-bar{dis
 
 #player-more-versions:not([hidden]){display:flex;margin:0 auto 1rem}
 #player-more-versions[hidden]{display:none!important}
+
+/* The manual chooser reports activity even when TorBox takes time to prepare media. */
+#source-options>.source-working{padding:.52rem .7rem;color:#cce8e7;background:#14232b;border:1px solid #33545b;border-radius:8px;line-height:1.45}
+#source-options>.source-working::before{content:"";display:inline-block;width:.7rem;height:.7rem;margin-right:.5rem;vertical-align:-.04rem;border:2px solid #9bd6ce;border-right-color:transparent;border-radius:50%;animation:source-working-spin .8s linear infinite}
+#source-options>.source-feedback{font-size:.78rem;color:#acbfce;padding:.35rem .1rem}
+#source-options .source-current{opacity:.7}
+@keyframes source-working-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){#source-options>.source-working::before{animation:none}}
