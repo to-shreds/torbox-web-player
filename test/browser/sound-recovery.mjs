@@ -287,3 +287,27 @@ test('closing the manual chooser cancels a pending selection instead of switchin
   assert.deepEqual(played.map(name=>name.match(/AAC-(AAA|BBB|CCC)/)?.[1]),['AAA']);
   assert.equal(fixture.control.creates,0);
 });
+
+
+test('manual source chooser remains usable in a short phone landscape viewport',async t=>{
+  const releases=['AAA','BBB','CCC','DDD'].map(group=>['Fixture.Show.S01E01.One.720p.H264.AAC-'+group+'.mkv','aac']);
+  const {page,fixture,played}=await setup(t,releases);
+  await page.waitForFunction(()=>document.querySelector('#video-slot video')?.currentTime>0.5);
+  await page.setViewportSize({width:832,height:384});
+  await page.locator('#player-version-toggle').click();
+  await page.locator('#player-browse-versions').click();
+  await page.waitForFunction(()=>/AAC-DDD/.test(document.querySelector('#source-options')?.textContent||''));
+  const sizes=await page.evaluate(()=>{
+    const dialog=document.querySelector('#source-dialog'),options=document.querySelector('#source-options');
+    return{dialogOverflow:getComputedStyle(dialog).overflowY,scrollHeight:dialog.scrollHeight,clientHeight:dialog.clientHeight,
+      pager:options.querySelector('.source-pager')?.textContent||''};
+  });
+  assert.equal(sizes.dialogOverflow,'auto','short landscape source chooser must permit scrolling');
+  assert.ok(sizes.clientHeight<=384,'source chooser stays within landscape viewport');
+  const chosen=page.locator('#source-options .source-table tr').filter({hasText:'AAC-DDD'}).getByRole('button',{name:'Play'});
+  await chosen.click();
+  await page.waitForFunction(()=>/AAC-DDD/.test(document.querySelector('#playing-title')?.textContent||'')&&!document.querySelector('#source-dialog').open,null,{timeout:45000});
+  assert.deepEqual(played.map(name=>name.match(/AAC-(AAA|BBB|CCC|DDD)/)?.[1]),['AAA','DDD']);
+  assert.equal(fixture.control.playbackCalls,2);
+  assert.equal(fixture.control.creates,0);
+});
