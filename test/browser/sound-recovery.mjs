@@ -204,3 +204,86 @@ test('Options sits beside PiP, never covers the picture, and opening the menu do
   assert.equal(await page.locator('#video-slot video').evaluate(video=>video.paused),false);
   assert.ok(await page.locator('#video-slot video').evaluate(video=>video.currentTime)>=position-.35);
 });
+
+
+test('Browse all versions selects the clicked alternative, shows elapsed progress, and preserves the episode position', async t => {
+  const releases=['AAA','BBB','CCC'].map(group => ['Fixture.Show.S01E01.One.720p.H264.AAC-'+group+'.mkv','aac']);
+  const { page, fixture, played, prepares } = await setup(t, releases);
+  await page.waitForFunction(() => document.querySelector('#video-slot video')?.currentTime > 0.5);
+  await page.locator('#player-version-toggle').click();
+  await page.locator('#player-browse-versions').click();
+  await page.locator('#source-dialog').waitFor({state:'visible'});
+  await page.waitForFunction(() => /AAC-CCC/.test(document.querySelector('#source-options')?.textContent||''));
+  assert.match(await page.locator('#source-options .recommended').textContent(), /AAC-BBB/, 'a different copy, not the currently playing one, must be recommended');
+  const current=page.locator('#source-options .source-current');
+  assert.equal(await current.count(),1);
+  assert.match(await current.textContent(), /AAC-AAA/);
+  assert.equal(await current.getByRole('button',{name:'Playing now'}).isDisabled(),true);
+  const position=await page.locator('#video-slot video').evaluate(video=>video.currentTime);
+  let held=0;
+  await page.route('**/api/discover/prepare',async route=>{
+    held++;
+    await new Promise(resolve=>setTimeout(resolve,1300));
+    try{await route.continue();}catch{}
+  });
+  const selected=page.locator('#source-options .source-table tr').filter({hasText:'AAC-CCC'}).getByRole('button',{name:'Play'});
+  await selected.click();
+  await page.waitForFunction(() => /· [01]s/.test(document.querySelector('#source-options > .source-working')?.textContent||''));
+  assert.equal(await selected.isDisabled(),true,'a pending selection cannot be clicked again');
+  assert.equal(fixture.control.playbackCalls,1,'old video continues while chosen source is prepared');
+  await page.waitForFunction(() => {
+    const video=document.querySelector('#video-slot video');
+    return /AAC-CCC/.test(document.querySelector('#playing-title')?.textContent||'')&&video?.readyState>=1&&!video.seeking;
+  },null,{timeout:45000});
+  assert.equal(await page.locator('#source-dialog').isHidden(),true);
+  const resumed=await page.locator('#video-slot video').evaluate(video=>({time:video.currentTime,duration:video.duration}));
+  assert.ok(resumed.time>=Math.min(position,Math.max(0,resumed.duration-.25))-.5,'clicked version resumes at original position');
+  assert.equal(fixture.control.playbackCalls,2);
+  assert.deepEqual(played.map(name=>name.match(/AAC-(AAA|BBB|CCC)/)?.[1]),['AAA','CCC'],'the exact chosen alternative is played, not the recommended alternative');
+  assert.ok(held>=1);
+  assert.ok(prepares.every(body=>body.onlyCached===true),'cached-only manual switch never adds a new torrent');
+  assert.equal(fixture.control.creates,0);
+});
+
+test('manual source preparation failure stays visible and allows trying another version',async t=>{
+  const releases=['AAA','BBB','CCC'].map(group=>['Fixture.Show.S01E01.One.720p.H264.AAC-'+group+'.mkv','aac']);
+  const {page,fixture,played}=await setup(t,releases);
+  await page.waitForFunction(()=>document.querySelector('#video-slot video')?.currentTime>0.5);
+  await page.locator('#player-version-toggle').click();
+  await page.locator('#player-browse-versions').click();
+  await page.waitForFunction(()=>/AAC-CCC/.test(document.querySelector('#source-options')?.textContent||''));
+  await page.route('**/api/discover/prepare',async route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({code:'TORBOX_UNAVAILABLE',message:'Provider temporarily unavailable.'})}));
+  const recommended=page.locator('#source-options .recommended').getByRole('button',{name:'Play'});
+  await recommended.click();
+  await page.waitForFunction(()=>/Could not open that version:/.test(document.querySelector('#source-options > p')?.textContent||''));
+  assert.equal(await page.locator('#source-dialog').isVisible(),true,'a failed preparation must not close the chooser');
+  assert.equal(await recommended.isEnabled(),true,'the failed selection must be retryable');
+  assert.equal(fixture.control.playbackCalls,1,'failed preparation cannot replace the original video');
+  assert.deepEqual(played.map(name=>name.match(/AAC-(AAA|BBB|CCC)/)?.[1]),['AAA']);
+  await page.unroute('**/api/discover/prepare');
+  await page.locator('#source-options .source-table tr').filter({hasText:'AAC-CCC'}).getByRole('button',{name:'Play'}).click();
+  await page.waitForFunction(()=>/AAC-CCC/.test(document.querySelector('#playing-title')?.textContent||'')&&!document.querySelector('#source-dialog').open,null,{timeout:45000});
+  assert.equal(fixture.control.playbackCalls,2,'another version can be selected without restarting the app');
+  assert.equal(fixture.control.creates,0);
+});
+
+test('closing the manual chooser cancels a pending selection instead of switching later',async t=>{
+  const releases=['AAA','BBB','CCC'].map(group=>['Fixture.Show.S01E01.One.720p.H264.AAC-'+group+'.mkv','aac']);
+  const {page,fixture,played}=await setup(t,releases);
+  await page.waitForFunction(()=>document.querySelector('#video-slot video')?.currentTime>0.5);
+  await page.locator('#player-version-toggle').click();
+  await page.locator('#player-browse-versions').click();
+  await page.waitForFunction(()=>/AAC-CCC/.test(document.querySelector('#source-options')?.textContent||''));
+  await page.route('**/api/discover/prepare',async route=>{
+    await new Promise(resolve=>setTimeout(resolve,1700));
+    try{await route.continue();}catch{}
+  });
+  await page.locator('#source-options .recommended button').first().click();
+  await page.waitForFunction(()=>/· \d+s/.test(document.querySelector('#source-options > .source-working')?.textContent||''));
+  await page.locator('#close-source').click();
+  await page.waitForTimeout(2100);
+  assert.equal(await page.locator('#source-dialog').isHidden(),true);
+  assert.equal(fixture.control.playbackCalls,1,'an abandoned selection may not start playback later');
+  assert.deepEqual(played.map(name=>name.match(/AAC-(AAA|BBB|CCC)/)?.[1]),['AAA']);
+  assert.equal(fixture.control.creates,0);
+});
