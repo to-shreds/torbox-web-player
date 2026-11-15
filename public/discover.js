@@ -317,8 +317,10 @@ export function isCurrentPlaybackSource(source, current) {
   if(source.id&&current.id&&source.id===current.id)return true;
   const hash=String(source.hash||'').trim().toLowerCase();
   const playingHash=String(current.hash||'').trim().toLowerCase();
-  const filename=String(source.filename||'').trim().toLowerCase();
-  const playingFilename=String(current.filename||'').trim().toLowerCase();
+  const filename=String(source.filename||source.title||'').trim().toLowerCase();
+  // The actual episode file can differ from a containing season-pack title.
+  // Compare the original indexed source descriptor, not the prepared file.
+  const playingFilename=String(current.sourceFilename||current.filename||current.title||'').trim().toLowerCase();
   return !!hash&&hash===playingHash&&!!filename&&filename===playingFilename;
 }
 export const MAX_AUTOMATIC_SOURCE_ATTEMPTS = 3;
@@ -523,7 +525,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   }
 
   function buildContext(meta,target,episodeName,resolution,source){
-    return {title:meta?.name||'',poster:meta?.poster||'',episodeName:episodeName||'',resolution,current:{...target,name:episodeName||''},sourceResolution:source?.resolution||source?.quality||'',sourceInfo:source?{id:source.id||'',hash:source.hash||'',filename:source.playbackFilename||source.filename||'',title:source.title||'',provider:source.provider||'',resolution:source.resolution||source.quality||'',container:source.container||'',containerStatus:source.containerStatus||'',browserContainer:source.browserContainer===true,browserUnsupported:source.browserUnsupported===true,audioRisk:source.audioRisk===true,videoRisk:source.videoRisk===true,audioCompatible:source.audioCompatible===true,memoryAudio:source.memoryAudio||'unknown',videoCodec:source.videoCodec||'',audioCodecs:Array.isArray(source.audioCodecs)?source.audioCodecs.slice(0,6):[]}:null,queue:target.type==='series'?episodeQueue(meta,target):[]};
+    return {title:meta?.name||'',poster:meta?.poster||'',episodeName:episodeName||'',resolution,current:{...target,name:episodeName||''},sourceResolution:source?.resolution||source?.quality||'',sourceInfo:source?{id:source.id||'',hash:source.hash||'',filename:source.playbackFilename||source.filename||'',sourceFilename:source.filename||source.title||'',title:source.title||'',provider:source.provider||'',resolution:source.resolution||source.quality||'',container:source.container||'',containerStatus:source.containerStatus||'',browserContainer:source.browserContainer===true,browserUnsupported:source.browserUnsupported===true,audioRisk:source.audioRisk===true,videoRisk:source.videoRisk===true,audioCompatible:source.audioCompatible===true,memoryAudio:source.memoryAudio||'unknown',videoCodec:source.videoCodec||'',audioCodecs:Array.isArray(source.audioCodecs)?source.audioCodecs.slice(0,6):[]}:null,queue:target.type==='series'?episodeQueue(meta,target):[]};
   }
   const closeTitleForPlayback = () => { if (!guestMode && $('title-dialog').open) {closingTitleForPlayback=true;$('title-dialog').close();} };
 
