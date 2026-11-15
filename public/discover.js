@@ -310,6 +310,19 @@ export function sourceRecoveryKey(source) {
   const fallback=[source?.provider,source?.filename||source?.title,source?.resolution||source?.quality].map(value=>String(value||'').trim().toLowerCase()).filter(Boolean).join('|');
   return fallback?`source:${fallback}`:'';
 }
+// Never recommend the copy already playing as a replacement. A refreshed
+// search may issue a new selection token, but hash + exact filename survive.
+export function isCurrentPlaybackSource(source, current) {
+  if(!source||!current)return false;
+  if(source.id&&current.id&&source.id===current.id)return true;
+  const hash=String(source.hash||'').trim().toLowerCase();
+  const playingHash=String(current.hash||'').trim().toLowerCase();
+  const filename=String(source.filename||source.title||'').trim().toLowerCase();
+  // The actual episode file can differ from a containing season-pack title.
+  // Compare the original indexed source descriptor, not the prepared file.
+  const playingFilename=String(current.sourceFilename||current.filename||current.title||'').trim().toLowerCase();
+  return !!hash&&hash===playingHash&&!!filename&&filename===playingFilename;
+}
 export const MAX_AUTOMATIC_SOURCE_ATTEMPTS = 3;
 // When this browser can observe decoded audio, each switched version is
 // verified by sound, not by its name. Allow enough versions to get past the
@@ -512,7 +525,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   }
 
   function buildContext(meta,target,episodeName,resolution,source){
-    return {title:meta?.name||'',poster:meta?.poster||'',episodeName:episodeName||'',resolution,current:{...target,name:episodeName||''},sourceResolution:source?.resolution||source?.quality||'',sourceInfo:source?{id:source.id||'',hash:source.hash||'',filename:source.playbackFilename||source.filename||'',title:source.title||'',provider:source.provider||'',resolution:source.resolution||source.quality||'',container:source.container||'',containerStatus:source.containerStatus||'',browserContainer:source.browserContainer===true,browserUnsupported:source.browserUnsupported===true,audioRisk:source.audioRisk===true,videoRisk:source.videoRisk===true,audioCompatible:source.audioCompatible===true,memoryAudio:source.memoryAudio||'unknown',videoCodec:source.videoCodec||'',audioCodecs:Array.isArray(source.audioCodecs)?source.audioCodecs.slice(0,6):[]}:null,queue:target.type==='series'?episodeQueue(meta,target):[]};
+    return {title:meta?.name||'',poster:meta?.poster||'',episodeName:episodeName||'',resolution,current:{...target,name:episodeName||''},sourceResolution:source?.resolution||source?.quality||'',sourceInfo:source?{id:source.id||'',hash:source.hash||'',filename:source.playbackFilename||source.filename||'',sourceFilename:source.filename||source.title||'',title:source.title||'',provider:source.provider||'',resolution:source.resolution||source.quality||'',container:source.container||'',containerStatus:source.containerStatus||'',browserContainer:source.browserContainer===true,browserUnsupported:source.browserUnsupported===true,audioRisk:source.audioRisk===true,videoRisk:source.videoRisk===true,audioCompatible:source.audioCompatible===true,memoryAudio:source.memoryAudio||'unknown',videoCodec:source.videoCodec||'',audioCodecs:Array.isArray(source.audioCodecs)?source.audioCodecs.slice(0,6):[]}:null,queue:target.type==='series'?episodeQueue(meta,target):[]};
   }
   const closeTitleForPlayback = () => { if (!guestMode && $('title-dialog').open) {closingTitleForPlayback=true;$('title-dialog').close();} };
 
@@ -524,15 +537,17 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     if(!result.sources?.length){const error=new Error('No supported source found.');error.code='NO_CACHED_BROWSER_SOURCE';error.complete=lookup.complete;throw error;}return {...result,complete:lookup.complete,sources:applyDeviceVideoSupport(applySourceMemory(target,result.sources),hevcSupport)};
   }
 
-  async function readyFile(source, { signal, unattended=false, allowBrowserUnsupported=false, requireCompatibleAudio=unattended&&!audioDecodeObservable, waitForPreparation=true, onlyCached=source.cached===true, preparationTimeoutMs=300000, initialTimeoutMs=waitForPreparation?60000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS } = {}){
+  async function readyFile(source, { signal, unattended=false, allowBrowserUnsupported=false, requireCompatibleAudio=unattended&&!audioDecodeObservable, waitForPreparation=true, onlyCached=source.cached===true, preparationTimeoutMs=300000, initialTimeoutMs=waitForPreparation?60000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS, onProgress } = {}){
     const deadline=Date.now()+(waitForPreparation?preparationTimeoutMs:initialTimeoutMs);
     const preparationSignal=AbortSignal.timeout(waitForPreparation?preparationTimeoutMs:initialTimeoutMs);
     const boundedSignal=signal?AbortSignal.any([signal,preparationSignal]):preparationSignal;
     const request=async(path,options,timeoutMs)=>{const timeout=AbortSignal.timeout(Math.max(1,Math.min(timeoutMs,deadline-Date.now())));try{return await api(path,{...options,signal:AbortSignal.any([boundedSignal,timeout])});}catch(error){if((!waitForPreparation||onlyCached)&&(timeout.aborted||preparationSignal.aborted)&&!signal?.aborted)throw automaticBudgetError();throw error;}};
+    onProgress?.(onlyCached?'Checking the cached copy in TorBox…':'Sending your selected torrent to TorBox…');
     let result=await request('/api/discover/prepare',{method:'POST',data:{source:source.id,onlyCached}},initialTimeoutMs);
     while(Date.now()<deadline){
       if(boundedSignal.aborted){if(preparationSignal.aborted&&!signal?.aborted)throw automaticBudgetError();throw boundedSignal.reason;}
       if(result.state==='ready'){
+        onProgress?.('Version ready. Opening the selected video…');
         const compatibility=validatePreparedSource(source,result,{unattended,requireCompatibleAudio,allowBrowserUnsupported});
         Object.assign(source,compatibility,{playbackFilename:result.file?.filename||result.file?.title||source.filename});
         return {...result,compatibility};
@@ -542,12 +557,14 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
         const error=new Error(result.message||'This source uses a file format Android Chrome cannot play.');error.code='BROWSER_CONTAINER_UNSUPPORTED';throw error;
       }
       if(result.state==='choose_file'){
+        onProgress?.('Verifying the exact video file for this episode…');
         if(!result.files?.length)throw new Error('No matching video file was found.');
         const selected=unattended?selectAutomaticVideoFile(result.files,source.deviceVideoSupport):result.files[0];
         if(!selected){const error=new Error('This cached source contains only file formats Android Chrome cannot play.');error.code='BROWSER_CONTAINER_UNSUPPORTED';throw error;}
         result=await request('/api/discover/status?'+new URLSearchParams({source:source.id,file:selected.id}),{},waitForPreparation?30000:AUTOMATIC_SOURCE_PREPARE_TIMEOUT_MS);continue;
       }
       if(result.state!=='preparing'){const error=new Error(result.message||'This source is unavailable.');if(!waitForPreparation)error.code='CACHED_SOURCE_NOT_READY';throw error;}
+      onProgress?.(onlyCached?'Waiting for the cached file to become ready…':'TorBox is preparing this torrent. This can take several minutes…');
       // Cached additions can take a moment to appear in mylist. Poll inside the
       // same candidate budget instead of discarding a ready copy immediately.
       try{await abortableDelay(Math.min(waitForPreparation?3500:400,Math.max(1,deadline-Date.now())),boundedSignal);}
@@ -834,6 +851,9 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
       queue:recoveryContext.queue||next.queue,forceStartOver:false,rewindOnResumeSeconds:0,resumeIntent:true};
   }
 
+
+  const currentPlaybackSource=(source, recoveryContext)=>isCurrentPlaybackSource(source,recoveryContext?.sourceInfo);
+
   function renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution,page=0,recoveryContext=null){
     area.replaceChildren(status);
     const controls=element('div','','source-controls'),label=element('label','Resolution'),select=createResolutionSelect(resolution);label.append(select);controls.append(label);
@@ -841,24 +861,75 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
     area.append(controls);
     const visible=filterSourcesByResolution(list,resolution);
     if(!visible.length){
-      area.append(element('p','No sources match this resolution.','source-note'));
+      area.append(element('p','No sources match this resolution. Change the resolution filter to see other copies.','source-feedback'));
       select.addEventListener('change',()=>renderSourceTable(meta,list,target,episodeName,generation,area,status,select.value,0,recoveryContext));
       return;
     }
-    const choices=recoveryContext?visible.filter(source=>!source.audioRisk&&!source.videoRisk&&source.memoryBad!==true&&source.memoryAudio!=='bad'):visible;
-    const best=recommendSource(choices,target.type,resolution),context=best?selectedPlaybackContext(meta,target,episodeName,resolution,best,recoveryContext):null;
+    const choices=recoveryContext?visible.filter(source=>!currentPlaybackSource(source,recoveryContext)&&!source.audioRisk&&!source.videoRisk&&source.browserUnsupported!==true&&source.memoryBad!==true&&source.memoryAudio!=='bad'):visible;
+    const best=recommendSource(choices,target.type,resolution);
+    let selecting=false;
+
+    async function selectSource(source){
+      if(selecting||!active||generation!==sourceGeneration||!$('source-dialog').open)return;
+      if(currentPlaybackSource(source,recoveryContext))return;
+      selecting=true;
+      const started=Date.now(),originalControls=[...area.querySelectorAll('button,select')].map(node=>[node,node.disabled]);
+      originalControls.forEach(([node])=>{node.disabled=true;});
+      let stage='Checking TorBox connection…',timer;
+      const alive=()=>active&&generation===sourceGeneration&&$('source-dialog').open;
+      const report=()=>{
+        if(!alive())return;
+        status.classList.remove('error');
+        status.classList.add('source-working');
+        status.textContent=stage+' · '+Math.floor((Date.now()-started)/1000)+'s';
+      };
+      report();timer=setInterval(report,1000);
+      try{
+        await ensureService();
+        if(!alive())return;
+        const selectedSignal=AbortSignal.any([sourceAbort.signal,AbortSignal.timeout(330000)]);
+        const result=await readyFile(source,{
+          signal:selectedSignal,unattended:false,
+          // A deliberate manual choice must not be rejected by the automatic
+          // sound/codec heuristics; the browser still checks actual playback.
+          onProgress:message=>{stage=message;report();}
+        });
+        if(!alive())return;
+        stage='Opening your selected copy…';report();
+        const switched=await play(result.file,selectedPlaybackContext(meta,target,episodeName,resolution,source,recoveryContext));
+        if(!alive())return;
+        if(!switched)throw new Error('The selected copy could not start. Choose a different version or try again.');
+        $('source-dialog').close();
+        closeTitleForPlayback();
+      }catch(error){
+        if(!alive())return;
+        status.classList.remove('source-working');
+        status.textContent='Could not open that version: '+(error?.name==='TimeoutError'?'TorBox took too long to respond. Try again.':error?.message||'Unknown error. Try another version.');
+        status.classList.add('error');
+      }finally{
+        clearInterval(timer);
+        if(alive()){
+          status.classList.remove('source-working');
+          selecting=false;
+          originalControls.forEach(([node,disabled])=>{node.disabled=disabled;});
+        }
+      }
+    }
+
     if(best){
       const box=element('section','','recommended'),copy=element('div','','recommended-copy');
-      copy.append(element('div','Recommended','recommended-kicker'),element('div',best.title,'recommended-title'),element('p',[best.cached?'Cached':'Not cached',qualityText(best),formatBytes(best.size),Number.isSafeInteger(best.seeders)?best.seeders+' seeders':''].filter(Boolean).join(' · '),'recommended-meta'));
+      copy.append(element('div',recoveryContext?'Suggested alternative':'Recommended','recommended-kicker'),element('div',best.title,'recommended-title'),element('p',[best.cached?'Cached':'Not cached',qualityText(best),formatBytes(best.size),Number.isSafeInteger(best.seeders)?best.seeders+' seeders':''].filter(Boolean).join(' · '),'recommended-meta'));
       const recommendedActions=element('div','','recommended-actions');
-      recommendedActions.append(button(best.cached?'Play':'Prepare',async()=>{try{await ensureService();const result=await readyFile(best,{signal:AbortSignal.any([sourceAbort.signal,AbortSignal.timeout(330000)]),unattended:!!recoveryContext});$('source-dialog').close();closeTitleForPlayback();await play(result.file,selectedPlaybackContext(meta,target,episodeName,resolution,best,recoveryContext));}catch(e){status.textContent=e.message;status.classList.add('error');}},true));
-      if(!guestMode&&typeof driveTest==='function')recommendedActions.append(button('Share',async()=>{try{await ensureService();const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});$('source-dialog').close();if($('title-dialog').open)$('title-dialog').close();await driveTest(result.file,context);}catch(e){status.textContent=e.message;status.classList.add('error');}}));
+      recommendedActions.append(button(best.cached?'Play':'Prepare',()=>void selectSource(best),true));
+      if(!guestMode&&typeof driveTest==='function')recommendedActions.append(button('Share',async()=>{try{await ensureService();const result=await readyFile(best,{signal:AbortSignal.timeout(330000),unattended:true});$('source-dialog').close();if($('title-dialog').open)$('title-dialog').close();await driveTest(result.file,selectedPlaybackContext(meta,target,episodeName,resolution,best,recoveryContext));}catch(e){status.textContent=e.message;status.classList.add('error');}}));
       box.append(copy,recommendedActions);area.append(box);
+    }else if(recoveryContext){
+      area.append(element('p','No other compatible versions are recommended. You can try another listed copy or refresh the search.','source-feedback'));
     }
 
     const alternates=visible.filter(source=>source.id!==best?.id);
     if(alternates.length){
-      const mobile=typeof matchMedia==='function'&&matchMedia('(max-width: 620px)').matches,pageSize=mobile?3:6,pages=Math.max(1,Math.ceil(alternates.length/pageSize)),safePage=Math.min(Math.max(0,page),pages-1);
+      const compact=typeof matchMedia==='function'&&(matchMedia('(max-width: 620px)').matches||matchMedia('(max-height: 700px)').matches),pageSize=compact?3:6,pages=Math.max(1,Math.ceil(alternates.length/pageSize)),safePage=Math.min(Math.max(0,page),pages-1);
       const rows=alternates.slice(safePage*pageSize,(safePage+1)*pageSize);
       const wrap=element('div','','source-table-wrap'),table=element('table','','source-table'),head=document.createElement('thead'),hr=document.createElement('tr');
       for(const title of ['Filename','Size','Seeders','Quality','TorBox',''])hr.append(element('th',title));head.append(hr);table.append(head);const body=document.createElement('tbody');
@@ -867,28 +938,30 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
         nameCell.append(element('span',source.title,'source-title-cell'),element('small',[formatBytes(source.size),Number.isSafeInteger(source.seeders)?source.seeders+' seeders':'seeders —',qualityText(source),source.cached?'Cached':source.cached===false?'Not cached':'Cache ?'].join(' · '),'source-mobile-meta'));
         row.append(nameCell,element('td',formatBytes(source.size)),element('td',Number.isSafeInteger(source.seeders)?String(source.seeders):'—'),element('td',qualityText(source)),element('td',source.cached?'Cached':source.cached===false?'Not cached':'Unknown',source.cached?'cache-yes':'cache-no'));
         const action=document.createElement('td');
-        if(source.browserUnsupported){
+        if(currentPlaybackSource(source,recoveryContext)){
+          row.classList.add('source-current');const current=button('Playing now',()=>{});current.disabled=true;current.title='This is the copy currently playing';action.append(current);
+        }else if(source.browserUnsupported){
           row.classList.add('source-blocked');const unsupported=button('Not playable',()=>{});unsupported.disabled=true;unsupported.title=source.hint||'This container cannot play in Android Chrome';action.append(unsupported);
         }else if(source.memoryBad||source.memoryAudio==='bad'){
-          row.classList.add('source-blocked');const allow=button('Allow',()=>{setSourceBad(target,source,false);setAudioFeedback(target,source,'unknown');findSources(meta,target,episodeName);});allow.title='Remove this source from the local bad-source list';action.append(allow);
-        }else action.append(button(source.cached?'Play':'Prepare',async()=>{try{await ensureService();const result=await readyFile(source,{signal:AbortSignal.any([sourceAbort.signal,AbortSignal.timeout(330000)]),unattended:!!recoveryContext});$('source-dialog').close();closeTitleForPlayback();await play(result.file,selectedPlaybackContext(meta,target,episodeName,resolution,source,recoveryContext));}catch(e){status.textContent=e.message;status.classList.add('error');}}));
+          row.classList.add('source-blocked');const allow=button('Allow',()=>{setSourceBad(target,source,false);setAudioFeedback(target,source,'unknown');findSources(meta,target,episodeName,{recoveryContext,complete:!!recoveryContext});});allow.title='Remove this source from the local bad-source list';action.append(allow);
+        }else action.append(button(source.cached?'Play':'Prepare',()=>void selectSource(source)));
         row.append(action);body.append(row);
       }
       table.append(body);wrap.append(table);area.append(wrap);
       if(pages>1){
         const pager=element('nav','','source-pager'),prev=button('‹',()=>renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution,safePage-1,recoveryContext)),next=button('›',()=>renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution,safePage+1,recoveryContext));
-        prev.disabled=safePage===0;next.disabled=safePage===pages-1;pager.append(prev,element('span',`${safePage+1} / ${pages}`),next);area.append(pager);
+        prev.disabled=safePage===0;next.disabled=safePage===pages-1;pager.append(prev,element('span',(safePage+1)+' / '+pages),next);area.append(pager);
       }
     }
     select.addEventListener('change',()=>{setResolution(select.value);renderSourceTable(meta,list,target,episodeName,generation,area,status,select.value,0,recoveryContext);});
   }
 
   async function findSources(meta,target,episodeName='',{recoveryContext=null,complete=false,refresh=false}={}){
-    cancelSource();const generation=sourceGeneration;sourceAbort=new AbortController();const area=$('source-options'),status=element('p','Finding sources…','status subtle-status');area.replaceChildren(status);
+    cancelSource();const generation=sourceGeneration;sourceAbort=new AbortController();const area=$('source-options'),status=element('p','Searching for versions…','status subtle-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.classList.add('source-working');area.replaceChildren(status);
     const alive=()=>active&&generation===sourceGeneration&&$('source-dialog').open;
     try{
-      const result=await registeredSources(target,sourceAbort.signal,{complete:complete||!!recoveryContext,refresh});if(!alive())return;status.textContent=result.warning||'';renderSourceTable(meta,result.sources,target,episodeName,generation,area,status,recoveryContext?'auto':getResolution(target),0,recoveryContext);
-    }catch(e){if(alive()){status.textContent=e.message;status.classList.add('error');area.append(button('Retry',()=>findSources(meta,target,episodeName,{recoveryContext,complete,refresh:true})));}}
+      const result=await registeredSources(target,sourceAbort.signal,{complete:complete||!!recoveryContext,refresh});if(!alive())return;status.classList.remove('source-working');status.textContent=result.warning||(recoveryContext?'Found '+result.sources.length+' versions. Select another copy below; the current video can keep playing while TorBox prepares it.':'Found '+result.sources.length+' versions. Choose a copy to start.');renderSourceTable(meta,result.sources,target,episodeName,generation,area,status,recoveryContext?'auto':getResolution(target),0,recoveryContext);
+    }catch(e){if(alive()){status.classList.remove('source-working');status.textContent=e.message;status.classList.add('error');area.append(button('Retry',()=>findSources(meta,target,episodeName,{recoveryContext,complete,refresh:true})));}}
   }
 
   async function prepareNext(context,{signal,preferredTorrentHash=''}={}){

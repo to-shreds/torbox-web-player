@@ -1,5 +1,5 @@
 import {createWatchParty} from './watch-party.js?v=release-1.2.8-party.1';
-import { createDiscoveryUI, bindArtworkImage, MORE_AUDIO_RECOVERY_ATTEMPTS } from './discover.js?v=release-1.2.18-next-torrent.1';
+import { createDiscoveryUI, bindArtworkImage, MORE_AUDIO_RECOVERY_ATTEMPTS } from './discover.js?v=release-1.2.19-manual-chooser.1';
 import { getRatingsKey, setRatingsKey } from './title-ratings.js?v=release-1.2.16-details.1';
 import { diagnosePlaybackFailure } from './playback-errors.js?v=release-1.2.8-party.1';
 import { PlaybackAudioCheck } from './playback-lifecycle.js?v=release-1.2.16-details.1';
