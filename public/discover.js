@@ -310,6 +310,17 @@ export function sourceRecoveryKey(source) {
   const fallback=[source?.provider,source?.filename||source?.title,source?.resolution||source?.quality].map(value=>String(value||'').trim().toLowerCase()).filter(Boolean).join('|');
   return fallback?`source:${fallback}`:'';
 }
+// Never recommend the copy already playing as a replacement. A refreshed
+// search may issue a new selection token, but hash + exact filename survive.
+export function isCurrentPlaybackSource(source, current) {
+  if(!source||!current)return false;
+  if(source.id&&current.id&&source.id===current.id)return true;
+  const hash=String(source.hash||'').trim().toLowerCase();
+  const playingHash=String(current.hash||'').trim().toLowerCase();
+  const filename=String(source.filename||'').trim().toLowerCase();
+  const playingFilename=String(current.filename||'').trim().toLowerCase();
+  return !!hash&&hash===playingHash&&!!filename&&filename===playingFilename;
+}
 export const MAX_AUTOMATIC_SOURCE_ATTEMPTS = 3;
 // When this browser can observe decoded audio, each switched version is
 // verified by sound, not by its name. Allow enough versions to get past the
@@ -839,18 +850,7 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   }
 
 
-  // Re-registering a torrent can produce a new selection token. Match the
-  // actual file identity before calling a source "already playing".
-  function currentPlaybackSource(source, recoveryContext) {
-    const current=recoveryContext?.sourceInfo;
-    if(!source||!current)return false;
-    if(source.id&&current.id&&source.id===current.id)return true;
-    const hash=String(source.hash||'').trim().toLowerCase();
-    const playingHash=String(current.hash||'').trim().toLowerCase();
-    const filename=String(source.filename||'').trim().toLowerCase();
-    const playingFilename=String(current.filename||'').trim().toLowerCase();
-    return !!hash&&hash===playingHash&&!!filename&&filename===playingFilename;
-  }
+  const currentPlaybackSource=(source, recoveryContext)=>isCurrentPlaybackSource(source,recoveryContext?.sourceInfo);
 
   function renderSourceTable(meta,list,target,episodeName,generation,area,status,resolution,page=0,recoveryContext=null){
     area.replaceChildren(status);
@@ -953,11 +953,11 @@ export function createDiscoveryUI({ api, play, driveTest, guard, resumeActivity 
   }
 
   async function findSources(meta,target,episodeName='',{recoveryContext=null,complete=false,refresh=false}={}){
-    cancelSource();const generation=sourceGeneration;sourceAbort=new AbortController();const area=$('source-options'),status=element('p','Searching for versions…','status subtle-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');area.replaceChildren(status);
+    cancelSource();const generation=sourceGeneration;sourceAbort=new AbortController();const area=$('source-options'),status=element('p','Searching for versions…','status subtle-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.classList.add('source-working');area.replaceChildren(status);
     const alive=()=>active&&generation===sourceGeneration&&$('source-dialog').open;
     try{
-      const result=await registeredSources(target,sourceAbort.signal,{complete:complete||!!recoveryContext,refresh});if(!alive())return;status.textContent=result.warning||(recoveryContext?'Found '+result.sources.length+' versions. Select another copy below; the current video can keep playing while TorBox prepares it.':'Found '+result.sources.length+' versions. Choose a copy to start.');renderSourceTable(meta,result.sources,target,episodeName,generation,area,status,recoveryContext?'auto':getResolution(target),0,recoveryContext);
-    }catch(e){if(alive()){status.textContent=e.message;status.classList.add('error');area.append(button('Retry',()=>findSources(meta,target,episodeName,{recoveryContext,complete,refresh:true})));}}
+      const result=await registeredSources(target,sourceAbort.signal,{complete:complete||!!recoveryContext,refresh});if(!alive())return;status.classList.remove('source-working');status.textContent=result.warning||(recoveryContext?'Found '+result.sources.length+' versions. Select another copy below; the current video can keep playing while TorBox prepares it.':'Found '+result.sources.length+' versions. Choose a copy to start.');renderSourceTable(meta,result.sources,target,episodeName,generation,area,status,recoveryContext?'auto':getResolution(target),0,recoveryContext);
+    }catch(e){if(alive()){status.classList.remove('source-working');status.textContent=e.message;status.classList.add('error');area.append(button('Retry',()=>findSources(meta,target,episodeName,{recoveryContext,complete,refresh:true})));}}
   }
 
   async function prepareNext(context,{signal,preferredTorrentHash=''}={}){
