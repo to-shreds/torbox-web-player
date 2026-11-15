@@ -214,3 +214,9 @@ main{max-width:1160px;padding:1rem clamp(.8rem,3vw,2rem) 3rem}.workspace-bar{dis
 #source-options .source-current{opacity:.7}
 @keyframes source-working-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){#source-options>.source-working::before{animation:none}}
+
+/* Short phone and landscape viewports must be able to reach every choice. */
+@media(max-height:700px){
+  #source-dialog{overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
+  #source-options{overflow:visible}
+}
