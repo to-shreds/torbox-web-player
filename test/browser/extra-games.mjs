@@ -89,6 +89,31 @@ test('extra player fits portrait and landscape without horizontal overflow',asyn
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   }
 });
+test('DOS D-pad is large and slides directly between directions in landscape',async t=>{
+  const directions={...dos,keys:[
+    {label:'↑',code:265},{label:'←',code:263},{label:'↓',code:264},
+    {label:'→',code:262},{label:'Pause',code:257},{label:'Esc',code:256}
+  ]};
+  const {page}=await pageFor(t,{mobile:true,extras:{version:1,items:[directions]}});
+  await openExtra(page,'dos-extra');
+  for(const viewport of [{width:412,height:915},{width:915,height:412}]){
+    await page.setViewportSize(viewport);
+    const up=await page.locator('.extra-game-dpad [data-direction="up"]').boundingBox();
+    const left=await page.locator('.extra-game-dpad [data-direction="left"]').boundingBox();
+    const frame=await page.locator('#extra-game-frame').boundingBox();
+    assert.ok(up.width>=50&&up.height>=50&&left.width>=50&&left.height>=50,'direction buttons must be large');
+    assert.ok(up.x>=0&&up.y>=0&&up.x+up.width<=viewport.width+1&&up.y+up.height<=viewport.height+1,'controls must remain visible');
+    if(viewport.width>viewport.height)assert.ok(frame.x+frame.width<=left.x+2,'landscape controls must sit beside the game');
+  }
+  const left=await page.locator('[data-extra-key="263"]').boundingBox();
+  const right=await page.locator('[data-extra-key="262"]').boundingBox();
+  await page.mouse.move(left.x+left.width/2,left.y+left.height/2);
+  await page.mouse.down();
+  await page.mouse.move(right.x+right.width/2,right.y+right.height/2,{steps:12});
+  await page.mouse.up();
+  await page.waitForFunction(()=>Number(document.querySelector('#extra-game-frame').contentDocument?.querySelector('#keys')?.textContent)>=2);
+  assert.equal(await page.frameLocator('#extra-game-frame').locator('#keys').textContent(),'2','slide must release left and press right once');
+});
 test('focus lost before the child listener is ready preserves pause until explicit Resume',async t=>{
   const {page,context}=await pageFor(t);
   let markStarted, release;
