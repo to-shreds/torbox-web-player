@@ -53,3 +53,44 @@
   .games-dpad{grid-template-columns:repeat(3,50px);grid-template-rows:repeat(3,50px)}
   .games-action-controls button{width:58px;height:58px}
 }
+
+
+/* DOS and browser-game controls match the larger NES touch targets. */
+.extra-game-touch{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+.extra-game-key{min-width:74px;min-height:68px;padding:8px 12px;border:2px solid #58738d;border-radius:11px;background:#182e44;font-size:23px;font-weight:750;touch-action:none}
+.extra-game-dpad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:3px;flex:none}
+.extra-game-dpad button{min-width:0;min-height:0;padding:0;font-size:30px}
+.extra-game-dpad [data-direction="up"]{grid-column:2;grid-row:1}
+.extra-game-dpad [data-direction="left"]{grid-column:1;grid-row:2}
+.extra-game-dpad [data-direction="right"]{grid-column:3;grid-row:2}
+.extra-game-dpad [data-direction="down"]{grid-column:2;grid-row:3}
+.extra-game-buttons{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap}
+@media(max-width:600px){
+  .extra-game-touch{gap:8px}
+  .extra-game-key{min-width:60px;min-height:60px;font-size:20px}
+  .extra-game-dpad{grid-template-columns:repeat(3,54px);grid-template-rows:repeat(3,54px);gap:2px}
+  .extra-game-dpad button{font-size:27px}
+}
+@media(orientation:landscape) and (max-height:620px){
+  .extra-game-player:has(> .extra-game-touch:not([hidden])){
+    width:98vw;height:98dvh;max-height:98dvh;max-width:none;display:grid;
+    grid-template-columns:minmax(160px,1fr) minmax(300px,44%);
+    grid-template-rows:auto minmax(0,1fr) auto auto;
+    gap:4px 10px;align-items:stretch;overflow:hidden;
+  }
+  .extra-game-player:has(> .extra-game-touch:not([hidden]))>.games-player-heading{grid-column:1/-1;grid-row:1}
+  .extra-game-player:has(> .extra-game-touch:not([hidden]))>iframe{grid-column:1;grid-row:2;min-height:0;max-height:none;height:100%;width:100%;flex:initial}
+  .extra-game-player:has(> .extra-game-touch:not([hidden]))>.extra-game-touch{grid-column:2;grid-row:2;height:100%;min-height:0;display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-around;gap:8px;margin:0;padding:0 2px}
+  .extra-game-player:has(> .extra-game-touch:not([hidden]))>.games-player-actions{grid-column:1/-1;grid-row:3}
+  .extra-game-player:has(> .extra-game-touch:not([hidden]))>p{grid-column:1/-1;grid-row:4}
+  .extra-game-dpad{grid-template-columns:repeat(3,clamp(50px,6.4vw,70px));grid-template-rows:repeat(3,clamp(50px,6.4vw,70px));gap:2px}
+  .extra-game-buttons{flex-direction:column;flex-wrap:nowrap;gap:6px}
+  .extra-game-key{min-width:60px;min-height:clamp(54px,6.2vw,72px);padding:6px 8px;font-size:20px}
+  .extra-game-dpad button{min-height:0;min-width:0}
+  :is(.extra-game-player:fullscreen, .extra-game-fullscreen .extra-game-player[open]):has(> .extra-game-touch:not([hidden])){display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;justify-content:stretch}
+}
+@media(orientation:landscape) and (max-height:620px) and (max-width:620px){
+  .extra-game-player:has(> .extra-game-touch:not([hidden])){grid-template-columns:minmax(130px,1fr) minmax(270px,48%)}
+  .extra-game-dpad{grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px)}
+  .extra-game-key{min-height:52px;min-width:54px}
+}
