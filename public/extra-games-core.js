@@ -44,7 +44,7 @@ export function extraPlayerUrl(item, build = EXTRA_GAMES_BUILD) {
   const valid = cleanExtraGamesCatalog({version:1,items:[item]}).items[0];
   if (!valid || typeof build !== 'string' || !/^[a-zA-Z0-9._-]{1,100}$/.test(build)) throw new Error('This extra game cannot open.');
   if (valid.hosted) return MINDMAZE_URL;
-  return valid.platform === 'dos' ? `./dos-player.html?game=${encodeURIComponent(valid.id)}&v=${build}` : `./${valid.page}?${valid.mode ? 'game='+encodeURIComponent(valid.mode)+'&' : ''}v=${valid.page === RETRO_PAGE ? 'release-1.2.15-retro.1' : build}`;
+  return valid.platform === 'dos' ? `./dos-player.html?game=${encodeURIComponent(valid.id)}&v=${build}` : `./${valid.page}?${valid.mode ? 'game='+encodeURIComponent(valid.mode)+'&' : ''}v=${valid.page === RETRO_PAGE ? 'release-1.2.20-touch-controls.1' : build}`;
 }
 export function extraKeyCommand(key, pressed) {
   if (!Number.isInteger(key) || key < 32 || key > 348 || typeof pressed !== 'boolean') throw new Error('The game key is invalid.');
