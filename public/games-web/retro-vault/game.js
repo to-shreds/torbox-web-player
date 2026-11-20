@@ -14,11 +14,11 @@ function notifyFrame(state,message){
 function setExternalPause(value){
   if(frameClosed)return;
   framePaused=!!value;
-  keySet.clear();touchHeld.clear();last=0;
+  keySet.clear();touchHeld.clear();touchPointerControls.clear();last=0;
   if(framePaused)saveGame();
   notifyFrame(framePaused?'paused':'playing',framePaused?'Paused. Press Resume to continue.':current?'Playing '+current.title+'.':'Choose a retro game.');
 }
-function endSession(){if(frameClosed)return;saveGame();framePaused=true;frameClosed=true;keySet.clear();touchHeld.clear();if(raf)cancelAnimationFrame(raf);raf=0;}
+function endSession(){if(frameClosed)return;saveGame();framePaused=true;frameClosed=true;keySet.clear();touchHeld.clear();touchPointerControls.clear();if(raf)cancelAnimationFrame(raf);raf=0;}
 function exitToGames(){
   saveGame();
   if(parent!==window){try{parent.postMessage({type:'torbox-extra-exit'},location.origin);return}catch{}}
@@ -53,7 +53,7 @@ const games=[
 ['sudoku','Sudoku','🧠','Puzzle','Fill all nine rows and columns.','Choose a cell and number'],
 ['pipes','Pipe Circuit','🔧','Puzzle','Rotate pipes to connect the ends.','Select a pipe; A rotates']
 ].map(([id,title,icon,genre,desc,hint])=>({id,title,icon,genre,desc,hint}));
-let current=null,s=null,raf=0,last=0,accum=0,lastPersist=0,paused=false,menuFromVault=false,filter='All',keySet=new Set(),pressStamp=new Map(),touchHeld=new Set(),gamepad=null,lastPad=[],lastAxis='',waitingMap=null,padCfg={a:0,b:1,menu:9},scores={};
+let current=null,s=null,raf=0,last=0,accum=0,lastPersist=0,paused=false,menuFromVault=false,filter='All',keySet=new Set(),pressStamp=new Map(),touchHeld=new Set(),touchPointerControls=new Map(),gamepad=null,lastPad=[],lastAxis='',waitingMap=null,padCfg={a:0,b:1,menu:9},scores={};
 try{scores=JSON.parse(localStorage.getItem(STORAGE_PREFIX+'scores.v1')||'{}')||{};}catch(e){}
 try{padCfg=Object.assign(padCfg,JSON.parse(localStorage.getItem(STORAGE_PREFIX+'pad.v1')||'{}'));}catch(e){}
 const write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
@@ -70,8 +70,8 @@ function saveGame(){if(!s||!current)return;const snapshot={version:1,mode:curren
 function loadGame(id){try{let a=JSON.parse(localStorage.getItem(STORAGE_PREFIX+'save.'+id)||'null');return a?.version===1&&a.mode===id&&a.s&&!a.s.over?a.s:null;}catch(e){return null}}
 function goArcade(){exitToGames()}
 function renderVault(){const q=$('search').value.toLowerCase().trim();$('cards').replaceChildren();for(const g of games){if(filter!=='All'&&g.genre!==filter)continue;if(q&&!`${g.title} ${g.desc}`.toLowerCase().includes(q))continue;const b=document.createElement('button');b.className='tile';b.dataset.game=g.id;const ico=document.createElement('span');ico.className='emoji';ico.textContent=g.icon;const tit=document.createElement('span');tit.className='tit';tit.textContent=g.title;const detail=document.createElement('small');detail.textContent=g.desc;const best=document.createElement('span');best.className='best';best.textContent=(scores[g.id]?'BEST '+scores[g.id]:'PLAY NOW')+(loadGame(g.id)?' · CONTINUE':'');b.append(ico,tit,detail,best);b.addEventListener('click',()=>openGame(g.id));$('cards').append(b)}$('total').textContent=games.length}
-function showVault(){if(frameClosed)return;saveGame();current=null;s=null;paused=false;$('result').hidden=true;$('menu').hidden=true;$('play').hidden=true;$('vault').hidden=false;keySet.clear();touchHeld.clear();renderVault();if(location.hash){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){location.hash=''}}notifyFrame(framePaused?'paused':'playing','Choose a retro game.')}
-function openGame(id,fresh=false){if(!mayPlay()||framePaused||frameClosed)return;const g=games.find(v=>v.id===id);if(!g)return;saveGame();current=g;paused=false;$('result').hidden=true;$('menu').hidden=true;$('vault').hidden=true;$('play').hidden=false;$('gameTitle').textContent=g.icon+' '+g.title;$('hint').textContent=g.hint;$('subhint').textContent=g.desc;$('actA').textContent='Action';$('actB').textContent='Alt';$('extra').hidden=true;$('extra').replaceChildren();s=fresh?null:loadGame(id);if(!s){s={score:0,level:1,over:false,t:0,d:{}};setup(id)}else{$('subhint').textContent='Saved game resumed';if(id==='sudoku'||id==='flood')buildExtras(id);}$('score').textContent=s.score;$('best').textContent=scores[id]||0;$('level').textContent='LEVEL '+s.level;keySet.clear();touchHeld.clear();try{history.replaceState(null,'','#'+id)}catch(e){location.hash=id}C.focus({preventScroll:true});draw();saveGame();notifyFrame('playing','Playing '+g.title+'.')}
+function showVault(){if(frameClosed)return;saveGame();current=null;s=null;paused=false;$('result').hidden=true;$('menu').hidden=true;$('play').hidden=true;$('vault').hidden=false;keySet.clear();touchHeld.clear();touchPointerControls.clear();renderVault();if(location.hash){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){location.hash=''}}notifyFrame(framePaused?'paused':'playing','Choose a retro game.')}
+function openGame(id,fresh=false){if(!mayPlay()||framePaused||frameClosed)return;const g=games.find(v=>v.id===id);if(!g)return;saveGame();current=g;paused=false;$('result').hidden=true;$('menu').hidden=true;$('vault').hidden=true;$('play').hidden=false;$('gameTitle').textContent=g.icon+' '+g.title;$('hint').textContent=g.hint;$('subhint').textContent=g.desc;$('actA').textContent='Action';$('actB').textContent='Alt';$('extra').hidden=true;$('extra').replaceChildren();s=fresh?null:loadGame(id);if(!s){s={score:0,level:1,over:false,t:0,d:{}};setup(id)}else{$('subhint').textContent='Saved game resumed';if(id==='sudoku'||id==='flood')buildExtras(id);}$('score').textContent=s.score;$('best').textContent=scores[id]||0;$('level').textContent='LEVEL '+s.level;keySet.clear();touchHeld.clear();touchPointerControls.clear();try{history.replaceState(null,'','#'+id)}catch(e){location.hash=id}C.focus({preventScroll:true});draw();saveGame();notifyFrame('playing','Playing '+g.title+'.')}
 function newGame(){if(current)openGame(current.id,true)}
 function menu(open=true){if(framePaused||frameClosed||(!current&&open))return;paused=open;$('menu').hidden=!open;$('menuDesc').textContent=current?current.desc+' '+current.hint+'.':' ';if(!open){last=performance.now();C.focus({preventScroll:true})}saveGame();notifyFrame(open?'paused':'playing',open?'Game paused. Press Resume to continue.':'Playing '+current.title+'.')}
 function pointerBoard(event){if(!current||paused||s.over||framePaused||frameClosed)return;let r=C.getBoundingClientRect(),x=(event.clientX-r.left)/r.width*W,y=(event.clientY-r.top)/r.height*H;return clickGame(x,y)}
@@ -80,10 +80,42 @@ C.addEventListener('pointermove',e=>{if(e.buttons&&['breakout','catch','dodge','
 C.addEventListener('pointerup',e=>{touchHeld.delete('a');if(swipeStart){let dx=e.clientX-swipeStart.x,dy=e.clientY-swipeStart.y,threshold=18;if(Math.max(Math.abs(dx),Math.abs(dy))>threshold){command(Math.abs(dx)>Math.abs(dy)?dx<0?'left':'right':dy<0?'up':'down')}else{pointerBoard(e)}swipeStart=null}});C.addEventListener('pointercancel',()=>{touchHeld.delete('a');swipeStart=null});
 function command(cmd){if(!s||s.over||paused||framePaused||frameClosed||!mayPlay())return;actionGame(cmd);if(['merge','sokoban','lights','connect','reversi','peg','slider','flood','match','sudoku','pipes'].includes(current.id))saveGame()}
 function controlHeld(c){return touchHeld.has(c)||keySet.has(c)}
-function bindControls(){document.querySelectorAll('[data-control]').forEach(b=>{let c=b.dataset.control;b.addEventListener('pointerdown',e=>{if(!s||s.over||paused||framePaused||frameClosed)return;e.preventDefault();b.setPointerCapture?.(e.pointerId);touchHeld.add(c);if(!pressStamp.has(c)){command(c);pressStamp.set(c,performance.now()+240)}});for(let evt of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(evt,()=>{touchHeld.delete(c);pressStamp.delete(c)})})}
+function bindControls(){
+  function releasePointer(id,finish=false){
+    if(!touchPointerControls.has(id))return;
+    const previous=touchPointerControls.get(id);
+    if(finish)touchPointerControls.delete(id);else touchPointerControls.set(id,null);
+    if(previous&&![...touchPointerControls.values()].includes(previous)){touchHeld.delete(previous);pressStamp.delete(previous)}
+  }
+  function changePointer(id,next){
+    if(touchPointerControls.get(id)===next)return;
+    releasePointer(id);
+    touchPointerControls.set(id,next);
+    if(next){
+      touchHeld.add(next);
+      if(!pressStamp.has(next)){command(next);pressStamp.set(next,performance.now()+240)}
+    }
+  }
+  document.querySelectorAll('[data-control]').forEach(button=>{
+    const control=button.dataset.control;
+    button.addEventListener('pointerdown',event=>{
+      if(!s||s.over||paused||framePaused||frameClosed)return;
+      event.preventDefault();
+      button.setPointerCapture?.(event.pointerId);
+      touchPointerControls.set(event.pointerId,null);
+      changePointer(event.pointerId,control);
+    });
+    button.addEventListener('pointermove',event=>{
+      if(!touchPointerControls.has(event.pointerId)||!button.closest('.dpad'))return;
+      const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('.dpad [data-control]');
+      changePointer(event.pointerId,target?.dataset.control||null);
+    });
+    for(const type of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(type,event=>releasePointer(event.pointerId,true));
+  });
+}
 const keys={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right',' ':'a',Enter:'a',z:'a',x:'b',Backspace:'b',Escape:'menu',p:'menu'};
 document.addEventListener('keydown',e=>{if(framePaused||frameClosed||!mayPlay()||e.target.matches('input'))return;const cmd=keys[e.key];if(!cmd)return;if(s&&$('menu').hidden){e.preventDefault();if(cmd==='menu'){if(!e.repeat)menu();return}if(!keySet.has(cmd)){keySet.add(cmd);command(cmd);pressStamp.set(cmd,performance.now()+220)}}else if(cmd==='menu'&&$('menu').hidden===false){menu(false)}});
-document.addEventListener('keyup',e=>{let c=keys[e.key];if(c){keySet.delete(c);pressStamp.delete(c)}});window.addEventListener('blur',()=>{keySet.clear();touchHeld.clear();last=0});document.addEventListener('visibilitychange',()=>{last=0;if(document.hidden&&s&&!s.over){saveGame()}});
+document.addEventListener('keyup',e=>{let c=keys[e.key];if(c){keySet.delete(c);pressStamp.delete(c)}});window.addEventListener('blur',()=>{keySet.clear();touchHeld.clear();touchPointerControls.clear();last=0});document.addEventListener('visibilitychange',()=>{last=0;if(document.hidden&&s&&!s.over){saveGame()}});
 function readPad(now){if(framePaused||frameClosed||!mayPlay())return;let arr=[];try{arr=[...(navigator.getGamepads?.()||[])].filter(Boolean)}catch(e){}let p=arr[0]||null;gamepad=p;const connected=!!p;$('padStatus').textContent=connected?'🎮 '+p.id.slice(0,45):'Controller: press a button to connect';$('padDot').className='dot'+(connected?' on':'');$('controllerName').textContent=connected?p.id:'Press any gamepad button to connect';if(!p){if(s){s.d.padDir='';s.d.padFire=false}lastPad=[];lastAxis='';$('padReadout').textContent='Sticks: idle. Buttons: none.';return}let bs=p.buttons.map((b,i)=>b.pressed||b.value>.6?i:-1).filter(n=>n>=0),axis=p.axes||[];let left=axis[0]||0,up=axis[1]||0;let dir= Math.abs(left)>Math.abs(up)?(left>0.33?'right':left<-.33?'left':''):(up>0.33?'down':up<-.33?'up':'');if(p.buttons[12]?.pressed)dir='up';if(p.buttons[13]?.pressed)dir='down';if(p.buttons[14]?.pressed)dir='left';if(p.buttons[15]?.pressed)dir='right';$('padReadout').textContent=`Stick: ${left.toFixed(2)}, ${up.toFixed(2)}. Buttons: ${bs.join(', ')||'none'}`;
 if(!s&&$('vault').hidden===false&&$('controllerPanel').hidden){if(dir){if(dir!==lastAxis||now-(pressStamp.get('gamepad-dir')||0)>180){let tiles=[...$('cards').querySelectorAll('button.tile')];if(tiles.length){let focused=tiles.indexOf(document.activeElement);if(focused<0)focused=0;else if(dir==='up')focused=Math.max(0,focused-3);else if(dir==='down')focused=Math.min(tiles.length-1,focused+3);else if(dir==='left')focused=Math.max(0,focused-1);else focused=Math.min(tiles.length-1,focused+1);tiles[focused].focus({preventScroll:false})}pressStamp.set('gamepad-dir',now)}}if(bs.includes(padCfg.a)&&!lastPad.includes(padCfg.a)){const selected=$('cards').contains(document.activeElement)?document.activeElement:$('cards').querySelector('button.tile');selected?.click()}lastAxis=dir;lastPad=bs;return}if(waitingMap!==null){const fresh=bs.find(b=>!lastPad.includes(b));if(fresh!==undefined){padCfg[waitingMap]=fresh;write(STORAGE_PREFIX+'pad.v1',padCfg);$('mappingMessage').textContent='Assigned button '+fresh+'.';waitingMap=null;showMappings()}}if(s&&!paused&&!s.over){if(dir){if(dir!==lastAxis||now-(pressStamp.get('gamepad-dir')||0)>125){command(dir);pressStamp.set('gamepad-dir',now)}}lastAxis=dir;for(const c of ['a','b','menu']){const n=padCfg[c];if(bs.includes(n)&&!lastPad.includes(n)){if(c==='menu')menu(true);else command(c)}}if(['invaders','asteroids','jetpack'].includes(current.id))s.d.padFire=bs.includes(padCfg.a);else s.d.padFire=false;s.d.padDir=dir}else if($('menu').hidden===false&&bs.includes(padCfg.menu)&&!lastPad.includes(padCfg.menu))menu(false);lastPad=bs}
 function showMappings(){for(let id of ['a','b','menu'])$('map'+id.charAt(0).toUpperCase()+id.slice(1)).textContent='Button '+padCfg[id]}
