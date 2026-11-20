@@ -87,10 +87,15 @@
   .extra-game-buttons{flex-direction:column;flex-wrap:nowrap;gap:6px}
   .extra-game-key{min-width:60px;min-height:clamp(54px,6.2vw,72px);padding:6px 8px;font-size:20px}
   .extra-game-dpad button{min-height:0;min-width:0}
-  :is(.extra-game-player:fullscreen, .extra-game-fullscreen .extra-game-player[open]):has(> .extra-game-touch:not([hidden])){display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;justify-content:stretch}
+  :is(.extra-game-player:fullscreen, .extra-game-fullscreen .extra-game-player[open]):has(> .extra-game-touch:not([hidden])){display:grid;width:100vw;height:100dvh;max-height:none;max-width:none;grid-template-rows:auto minmax(0,1fr) auto auto;justify-content:stretch}
 }
 @media(orientation:landscape) and (max-height:620px) and (max-width:620px){
   .extra-game-player:has(> .extra-game-touch:not([hidden])){grid-template-columns:minmax(130px,1fr) minmax(270px,48%)}
   .extra-game-dpad{grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px)}
   .extra-game-key{min-height:52px;min-width:54px}
+}
+
+@media(orientation:portrait) and (max-width:600px){
+  /* Retro Vault draws its own controls inside the frame, so give it more playfield height. */
+  .extra-game-player:has(> .extra-game-touch[hidden])>iframe{height:min(72dvh,620px)}
 }
