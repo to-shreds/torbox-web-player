@@ -12,6 +12,7 @@ let selection = null, tabOpen = false, generation = 0, deadline = null, viewerTi
 let pauseIntent = false, pauseSent = false;
 let extraFullscreenOwned = false;
 const held = new Map();
+const activeTouchKeys = new Map();
 function viewer() {
   try { const value = localStorage.getItem('tw-viewer') || sessionStorage.getItem('tw-viewer'); return ['viewer-1','viewer-2'].includes(value) ? value : 'viewer-1'; }
   catch { return 'viewer-1'; }
@@ -36,8 +37,8 @@ function muteChild() {
 }
 function releaseKeys() {
   for (const key of held.keys()) post('key',{key,pressed:false});
-  held.clear();
-  for (const button of $('extra-game-touch').children) button.classList.remove('is-pressed');
+  held.clear(); activeTouchKeys.clear();
+  for (const button of $('extra-game-touch').querySelectorAll('.extra-game-key')) button.classList.remove('is-pressed');
 }
 function keySource(code, source, pressed) {
   if (pressed) {
@@ -76,21 +77,74 @@ export function closeExtraGame() {
   if (ownedFullscreen && document.fullscreenElement === document.documentElement) void document.exitFullscreen().catch(() => {});
   state('closed',''); dialog.dataset.frames = '0';
 }
+function changeTouchKey(pointerId,next){
+  if(!activeTouchKeys.has(pointerId))return;
+  const previous=activeTouchKeys.get(pointerId);
+  if(previous===next)return;
+  const source='pointer:'+pointerId;
+  if(previous){
+    const code=Number(previous.dataset.extraKey);
+    keySource(code,source,false);
+    previous.classList.toggle('is-pressed',held.has(code));
+  }
+  activeTouchKeys.set(pointerId,next);
+  if(next){
+    const code=Number(next.dataset.extraKey);
+    keySource(code,source,true);
+    next.classList.toggle('is-pressed',held.has(code));
+  }
+}
 function renderKeys(item) {
-  $('extra-game-touch').replaceChildren(...item.keys.map(binding => {
-    const button = document.createElement('button'); button.type = 'button'; button.className = 'extra-game-key'; button.textContent = binding.label; button.dataset.extraKey = String(binding.code);
-    button.addEventListener('pointerdown',event => {
-      if (!checkViewer() || dialog.dataset.state !== 'playing') return;
-      event.preventDefault(); button.setPointerCapture(event.pointerId); button.classList.add('is-pressed'); keySource(binding.code,'pointer:'+event.pointerId,true);
+  const touch=$('extra-game-touch');
+  const directionLabels={'↑':'up','↓':'down','←':'left','→':'right'};
+  const buttons=item.keys.map(binding=>{
+    const button=document.createElement('button');
+    button.type='button';button.className='extra-game-key';button.textContent=binding.label;
+    button.dataset.extraKey=String(binding.code);
+    if(directionLabels[binding.label]){
+      button.dataset.direction=directionLabels[binding.label];
+      button.setAttribute('aria-label',directionLabels[binding.label]);
+    }
+    button.addEventListener('pointerdown',event=>{
+      if(!checkViewer()||dialog.dataset.state!=='playing')return;
+      event.preventDefault();button.setPointerCapture(event.pointerId);
+      activeTouchKeys.set(event.pointerId,null);
+      changeTouchKey(event.pointerId,button);
     });
-    for (const type of ['pointerup','pointercancel','lostpointercapture']) button.addEventListener(type,event => { keySource(binding.code,'pointer:'+event.pointerId,false); if (!held.has(binding.code)) button.classList.remove('is-pressed'); });
-    button.addEventListener('keydown',event => { if (!['Enter',' '].includes(event.key) || event.repeat) return; event.preventDefault(); keySource(binding.code,'button:'+binding.code,true); button.classList.toggle('is-pressed',held.has(binding.code)); });
-    button.addEventListener('keyup',event => { if (!['Enter',' '].includes(event.key)) return; event.preventDefault(); keySource(binding.code,'button:'+binding.code,false); button.classList.toggle('is-pressed',held.has(binding.code)); });
-    button.addEventListener('blur',() => { keySource(binding.code,'button:'+binding.code,false); if (!held.has(binding.code)) button.classList.remove('is-pressed'); });
-    button.addEventListener('contextmenu',event => event.preventDefault());
+    button.addEventListener('pointermove',event=>{
+      if(!activeTouchKeys.has(event.pointerId))return;
+      const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('.extra-game-key');
+      changeTouchKey(event.pointerId,target&&touch.contains(target)?target:null);
+    });
+    for(const type of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(type,event=>{
+      changeTouchKey(event.pointerId,null);activeTouchKeys.delete(event.pointerId);
+    });
+    button.addEventListener('keydown',event=>{
+      if(!['Enter',' '].includes(event.key)||event.repeat)return;
+      event.preventDefault();keySource(binding.code,'button:'+binding.code,true);
+      button.classList.toggle('is-pressed',held.has(binding.code));
+    });
+    button.addEventListener('keyup',event=>{
+      if(!['Enter',' '].includes(event.key))return;
+      event.preventDefault();keySource(binding.code,'button:'+binding.code,false);
+      button.classList.toggle('is-pressed',held.has(binding.code));
+    });
+    button.addEventListener('blur',()=>{
+      keySource(binding.code,'button:'+binding.code,false);
+      button.classList.toggle('is-pressed',held.has(binding.code));
+    });
+    button.addEventListener('contextmenu',event=>event.preventDefault());
     return button;
-  }));
-  $('extra-game-touch').hidden = !item.keys.length;
+  });
+  const directions=buttons.filter(button=>button.dataset.direction);
+  if(directions.length>=2){
+    const pad=document.createElement('div');pad.className='extra-game-dpad';
+    pad.setAttribute('aria-label','Direction controls');pad.append(...directions);
+    const actions=document.createElement('div');actions.className='extra-game-buttons';
+    actions.append(...buttons.filter(button=>!button.dataset.direction));
+    touch.replaceChildren(pad,actions);
+  }else touch.replaceChildren(...buttons);
+  touch.hidden=!buttons.length;
 }
 function mount(item) {
   const current = generation;

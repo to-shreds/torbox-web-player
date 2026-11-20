@@ -15,3 +15,87 @@
 @media(orientation:landscape) and (max-height:620px){.extra-game-player{padding:5px 10px;max-height:98dvh}.extra-game-player .games-player-heading{margin-bottom:4px}.extra-game-player .games-player-heading h2{font-size:14px}.extra-game-player .games-player-heading button{min-height:28px}.extra-game-player>iframe{height:calc(100dvh - 142px)}.extra-game-player .games-player-actions{margin-top:5px}.extra-game-player p{margin:3px 0;font-size:10px}.extra-game-touch{margin-top:4px}.extra-game-key{min-height:28px;padding:3px 10px;font-size:11px}.extra-game-help{display:none}:is(.extra-game-player:fullscreen, .extra-game-fullscreen .extra-game-player[open])>iframe{height:auto}}
 
 :is(.nes-game-fullscreen .games-player[open],.extra-game-fullscreen .extra-game-player[open]){position:fixed;inset:0;margin:0}
+
+
+/* Thumb-sized touch controls. Retain large hit areas, even in landscape. */
+.games-touch{
+  display:grid;grid-template-columns:max-content max-content;justify-content:space-between;
+  align-items:center;column-gap:12px;row-gap:10px;padding:12px 4px 4px;
+}
+.games-dpad{grid-column:1;grid-row:1;grid-template-columns:repeat(3,68px);grid-template-rows:repeat(3,68px);gap:3px}
+.games-touch-key{border:2px solid #58738d;background:#182e44;border-radius:11px;font-size:30px;box-shadow:inset 0 2px 0 #ffffff12}
+.games-dpad button[data-buttons*=',']{font-size:23px}
+.games-dpad-center{background:#243d54;border:2px solid #4c617a;border-radius:11px}
+.games-center-controls{grid-column:1/-1;grid-row:2;align-self:center;justify-content:center;flex-direction:row;gap:16px;padding:0}
+.games-center-controls button{min-width:92px;min-height:44px;padding:8px 14px;font-size:12px}
+.games-action-controls{grid-column:2;grid-row:1;gap:12px}
+.games-action-controls button{width:82px;height:82px;font-size:27px;border-width:2px}
+.games-action-controls .games-a{margin-bottom:0}
+@media(max-width:600px){
+  .games-touch{column-gap:8px;row-gap:7px;padding-top:10px}
+  .games-dpad{grid-template-columns:repeat(3,clamp(50px,15vw,66px));grid-template-rows:repeat(3,clamp(50px,15vw,66px));gap:2px}
+  .games-action-controls{gap:8px}
+  .games-action-controls button{width:clamp(62px,17vw,76px);height:clamp(62px,17vw,76px)}
+  .games-center-controls{flex-direction:row;gap:14px;align-self:center}
+  .games-center-controls button{min-height:44px;min-width:85px;font-size:12px}
+}
+@media(orientation:landscape) and (max-height:620px){
+  .games-stage{grid-template-columns:minmax(160px,1fr) minmax(316px,50%);gap:8px}
+  .games-touch{display:grid;grid-template-columns:max-content max-content;justify-content:space-between;align-items:center;gap:7px 8px;padding:0 2px}
+  .games-dpad{grid-template-columns:repeat(3,clamp(54px,7.4vw,74px));grid-template-rows:repeat(3,clamp(54px,7.4vw,74px));gap:2px}
+  .games-action-controls{gap:8px}
+  .games-action-controls button{width:clamp(64px,7.9vw,84px);height:clamp(64px,7.9vw,84px)}
+  .games-center-controls{grid-column:1/-1;grid-row:2;order:initial;align-self:center;justify-content:center;width:auto;gap:12px}
+  .games-center-controls button{min-height:38px;min-width:80px;padding:5px 10px}
+}
+@media(orientation:landscape) and (max-height:620px) and (max-width:580px){
+  .games-stage{grid-template-columns:minmax(135px,1fr) minmax(290px,55%)}
+  .games-dpad{grid-template-columns:repeat(3,50px);grid-template-rows:repeat(3,50px)}
+  .games-action-controls button{width:58px;height:58px}
+}
+
+
+/* DOS and browser-game controls match the larger NES touch targets. */
+.extra-game-touch{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+.extra-game-key{min-width:74px;min-height:68px;padding:8px 12px;border:2px solid #58738d;border-radius:11px;background:#182e44;font-size:23px;font-weight:750;touch-action:none}
+.extra-game-dpad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:3px;flex:none}
+.extra-game-dpad button{min-width:0;min-height:0;padding:0;font-size:30px}
+.extra-game-dpad [data-direction="up"]{grid-column:2;grid-row:1}
+.extra-game-dpad [data-direction="left"]{grid-column:1;grid-row:2}
+.extra-game-dpad [data-direction="right"]{grid-column:3;grid-row:2}
+.extra-game-dpad [data-direction="down"]{grid-column:2;grid-row:3}
+.extra-game-buttons{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap}
+@media(max-width:600px){
+  .extra-game-touch{gap:8px}
+  .extra-game-key{min-width:60px;min-height:60px;font-size:20px}
+  .extra-game-dpad{grid-template-columns:repeat(3,54px);grid-template-rows:repeat(3,54px);gap:2px}
+  .extra-game-dpad button{font-size:27px}
+}
+@media(orientation:landscape) and (max-height:620px){
+  .extra-game-player:has(> .extra-game-touch:not([hidden])){
+    width:98vw;height:98dvh;max-height:98dvh;max-width:none;display:grid;
+    grid-template-columns:minmax(160px,1fr) minmax(300px,44%);
+    grid-template-rows:auto minmax(0,1fr) auto auto;
+    gap:4px 10px;align-items:stretch;overflow:hidden;
+  }
+  .extra-game-player:has(> .extra-game-touch:not([hidden]))>.games-player-heading{grid-column:1/-1;grid-row:1}
+  .extra-game-player:has(> .extra-game-touch:not([hidden]))>iframe{grid-column:1;grid-row:2;min-height:0;max-height:none;height:100%;width:100%;flex:initial}
+  .extra-game-player:has(> .extra-game-touch:not([hidden]))>.extra-game-touch{grid-column:2;grid-row:2;height:100%;min-height:0;display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-around;gap:8px;margin:0;padding:0 2px}
+  .extra-game-player:has(> .extra-game-touch:not([hidden]))>.games-player-actions{grid-column:1/-1;grid-row:3}
+  .extra-game-player:has(> .extra-game-touch:not([hidden]))>p{grid-column:1/-1;grid-row:4}
+  .extra-game-dpad{grid-template-columns:repeat(3,clamp(50px,6.4vw,70px));grid-template-rows:repeat(3,clamp(50px,6.4vw,70px));gap:2px}
+  .extra-game-buttons{flex-direction:column;flex-wrap:nowrap;gap:6px}
+  .extra-game-key{min-width:60px;min-height:clamp(54px,6.2vw,72px);padding:6px 8px;font-size:20px}
+  .extra-game-dpad button{min-height:0;min-width:0}
+  :is(.extra-game-player:fullscreen, .extra-game-fullscreen .extra-game-player[open]):has(> .extra-game-touch:not([hidden])){display:grid;width:100vw;height:100dvh;max-height:none;max-width:none;grid-template-rows:auto minmax(0,1fr) auto auto;justify-content:stretch}
+}
+@media(orientation:landscape) and (max-height:620px) and (max-width:620px){
+  .extra-game-player:has(> .extra-game-touch:not([hidden])){grid-template-columns:minmax(130px,1fr) minmax(270px,48%)}
+  .extra-game-dpad{grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px)}
+  .extra-game-key{min-height:52px;min-width:54px}
+}
+
+@media(orientation:portrait) and (max-width:600px){
+  /* Retro Vault draws its own controls inside the frame, so give it more playfield height. */
+  .extra-game-player:has(> .extra-game-touch[hidden])>iframe{height:min(72dvh,620px)}
+}

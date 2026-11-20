@@ -273,6 +273,14 @@ test('mobile portrait and landscape keep the emulator and touch controls inside 
     await page.setViewportSize(viewport);await page.waitForTimeout(80);
     const bounds=await page.locator('#games-player').boundingBox();assert.ok(bounds.x>=0&&bounds.y>=0);assert.ok(bounds.x+bounds.width<=viewport.width+1);assert.ok(bounds.y+bounds.height<=viewport.height+1);
     const screen=await page.locator('#games-canvas').boundingBox();assert.ok(screen.width>150&&screen.height>140);
+    for(const direction of ['UP','LEFT','RIGHT','DOWN']){
+      const key=await page.locator('[data-nes-button="'+direction+'"]').boundingBox();
+      const minimum=viewport.width>viewport.height?54:50;
+      assert.ok(key.width>=minimum&&key.height>=minimum,direction+' must offer a full thumb-sized hit area');
+      assert.ok(key.x>=0&&key.y>=0&&key.x+key.width<=viewport.width+1&&key.y+key.height<=viewport.height+1,direction+' must remain on-screen');
+    }
+    const action=await page.locator('[data-nes-button="A"]').boundingBox();
+    assert.ok(action.width>=62&&action.height>=62,'A must be large enough for a thumb');
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'the mobile page must not overflow horizontally');
     await mkdir('docs/evidence/nes-games',{recursive:true});await page.screenshot({path:`docs/evidence/nes-games/${viewport.width<viewport.height?'portrait':'landscape'}.png`});
   }

@@ -51,6 +51,12 @@ for(const viewport of [{width:1440,height:900},{width:390,height:844},{width:320
    const child=await open(page,'retro-'+id);
    assert(await child.locator('#gameTitle').isVisible(),id);
    assert(await child.locator('#board').isVisible(),id);
+   if(id==='snake'){
+    const up=await child.locator('#up').boundingBox(),right=await child.locator('#right').boundingBox();
+    assert.ok(up.width>=50&&up.height>=50,'Retro directions must remain thumb-sized on '+viewport.width+'px');
+    assert.ok(right.width>=50&&right.height>=50,'Retro D-pad must not shrink to fingertip buttons');
+    assert.equal(await child.locator('body').evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'enlarged pad must not create side scrolling');
+   }
    await child.locator('#board').press('ArrowLeft');
    await child.locator('#toVault').click();
    assert(await child.locator('#cards button.tile').count()===26,id+' can return to vault');

@@ -3,7 +3,7 @@ import {getKidProfile} from './parental-controls.js?v=release-1.2.8-party.1';
 import {nesPointerPosition} from './games-pointer.js?v=release-1.2.8-party.1';
 import {emptyCheats, normalizeCheatSet, parseCheatLines, applyCheats, readCheats, writeCheats, importCheats, exportCheats} from './games-cheats.js?v=release-1.2.8-party.1';
 import {cleanExtraGamesCatalog} from './extra-games-core.js?v=release-1.2.15-retro.1';
-import {playExtraGame, closeExtraGame} from './extra-games.js?v=release-1.2.15-retro.1';
+import {playExtraGame, closeExtraGame} from './extra-games.js?v=release-1.2.20-touch-controls.1';
 
 const $ = id => document.getElementById(id);
 const dialog = $('games-player');
